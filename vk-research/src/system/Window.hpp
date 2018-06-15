@@ -5,19 +5,20 @@
 
 #include <Windows.h>
 
+#include "..\class_features\NonCopyable.hpp"
+
 class WindowClass
+    : public NonCopyable
 {
 public:
     using WinProcHandler = LRESULT (*)(HWND handle, UINT message, WPARAM wparam, LPARAM lparam);
 
 public:
+    WindowClass();
     WindowClass(HINSTANCE instance, char const* name, WinProcHandler handler);
 
     WindowClass(WindowClass&& rhs);
-    WindowClass(WindowClass const& rhs) = delete;
-
     WindowClass& operator=(WindowClass&& rhs);
-    WindowClass& operator=(WindowClass const& rhs) = delete;
 
     operator bool() const;
 
@@ -35,18 +36,18 @@ private:
 
 
 class Window
+    : public NonCopyable
 {
 public:
     using NativeWindowHandle = HWND;
 
 public:
+    Window();
     Window(HINSTANCE instance, char const* title, std::uint32_t width, std::uint32_t height, char const* className, WindowClass::WinProcHandler procHandler, void* userData);
     
     Window(Window&& rhs);
-    Window(Window const& rhs) = delete;
 
     Window& operator=(Window&& rhs);
-    Window& operator=(Window const& rhs) = delete;
 
     ~Window();
 

@@ -1,10 +1,15 @@
 #pragma once 
 
+#include "..\class_features\NonCopyable.hpp"
+
 class Application final
+    : public NonCopyable
 {
 public:
     class ApplicationDelegate
+        : public NonCopyable
     {
+    public:
         virtual void start() = 0;
         virtual void update() = 0;
         virtual void shutdown() = 0;
@@ -17,10 +22,7 @@ public:
     Application(ApplicationDelegate* delegate);
 
     Application(Application&& rhs);
-    Application(Application const& rhs) = delete;
-
     Application& operator=(Application&& rhs);
-    Application& operator=(Application const& rhs) = delete;
 
     ~Application();
 

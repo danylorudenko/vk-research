@@ -1,5 +1,11 @@
 #include "Window.hpp"
 
+WindowClass::WindowClass()
+    : name_{}
+    , registered_{ false }
+{ 
+}
+
 WindowClass::WindowClass(HINSTANCE instance, char const* name, WinProcHandler handler)
     : name_{ name }
     , registered_{ false }
@@ -53,6 +59,16 @@ WindowClass::operator bool() const
 
 
 //////////////////////////////////////////
+Window::Window()
+    : windowClass_{}
+    , handle_{ NULL }
+    , title_{}
+    , width_{ 0 }
+    , height_{ 0 }
+    , userData_{ nullptr }
+{ 
+}
+
 Window::Window(HINSTANCE instance, char const* title, std::uint32_t width, std::uint32_t height, char const* className, WindowClass::WinProcHandler procHandler, void* userData)
     : windowClass_{ instance, className, procHandler }
     , handle_{ NULL }
