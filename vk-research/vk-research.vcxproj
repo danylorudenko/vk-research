@@ -158,6 +158,7 @@
     <ClInclude Include="src\class_features\NonMovable.hpp" />
     <ClInclude Include="src\system\DynamicLibrary.hpp" />
     <ClInclude Include="src\system\Window.hpp" />
+    <ClInclude Include="src\vk_interface\Instance.hpp" />
     <ClInclude Include="src\vk_interface\VulkanImportTable.hpp" />
     <ClInclude Include="src\vk_interface\VulkanLoader.hpp" />
   </ItemGroup>
