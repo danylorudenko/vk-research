@@ -3,6 +3,11 @@
 #include <cassert>
 #include <utility>
 
+DynamicLibrary::DynamicLibrary()
+    : handle_{ NULL }
+{
+}
+
 DynamicLibrary::DynamicLibrary(char const* name)
     : handle_{ NULL }
 {

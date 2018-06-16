@@ -1,13 +1,16 @@
-#include "system\DynamicLibrary.hpp"
+#include "application\VulkanApplicationDelegate.hpp"
 
 int main()
 {
-    auto vlib = DynamicLibrary{ "vulkan-1.dll" };
+    HINSTANCE instance = GetModuleHandle(nullptr);
+    
+    auto* appDelegate = new VulkanApplicationDelegate{ instance, "Vulkan Application", 800, 600 };
+    auto* application = new Application{ appDelegate };
 
-    int i = 0;
-    i++;
+    application->run();
 
-
+    delete application;
+    delete appDelegate;
 
     return 0;
 }

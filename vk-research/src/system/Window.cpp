@@ -81,7 +81,7 @@ Window::Window(HINSTANCE instance, char const* title, std::uint32_t width, std::
         handle_ = ::CreateWindow(windowClass_.Name().c_str(), title_.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width_, height_, nullptr, nullptr, instance, nullptr);
 
         if (handle_) {
-            ::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+            ::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(userData_));
 
             ::ShowWindow(handle_, SW_SHOWDEFAULT);
             ::UpdateWindow(handle_);
@@ -97,6 +97,11 @@ Window::Window(Window&& rhs)
     , height_{ std::move(rhs.height_) }
     , userData_{ std::move(rhs.userData_) }
 {
+    rhs.handle_ = NULL;
+    rhs.width_ = 0;
+    rhs.height_ = 0;
+    rhs.userData_ = nullptr;
+
     ::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 }
 
@@ -108,8 +113,8 @@ Window& Window::operator=(Window&& rhs)
     width_ = std::move(rhs.width_); rhs.width_ = 0;
     height_ = std::move(rhs.height_); rhs.height_ = 0;
     userData_ = std::move(rhs.userData_); rhs.userData_ = nullptr;
-    
-    ::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+
+    return *this;
 }
 
 Window::~Window()

@@ -116,6 +116,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\application\Application.cpp" />
+    <ClCompile Include="src\application\VulkanApplicationDelegate.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\system\DynamicLibrary.cpp" />
     <ClCompile Include="src\system\Window.cpp" />

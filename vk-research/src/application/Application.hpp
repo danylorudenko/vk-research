@@ -26,6 +26,8 @@ public:
 
     ~Application();
 
+    void run();
+
 private:
     ApplicationDelegate* delegate_;
 };

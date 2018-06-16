@@ -12,3 +12,39 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     , vulkanLibrary_{ "vulkan-1.dll" }
 {
 }
+
+VulkanApplicationDelegate::~VulkanApplicationDelegate()
+{
+
+}
+
+LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wparam, LPARAM lparam)
+{
+    auto* appDelegate = reinterpret_cast<VulkanApplicationDelegate*>(::GetWindowLongPtr(handle, GWLP_USERDATA));
+    
+    switch (message)
+    {
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
+    default:
+        break;
+    }
+    
+    return ::DefWindowProc(handle, message, wparam, lparam);
+}
+
+void VulkanApplicationDelegate::start()
+{
+
+}
+
+void VulkanApplicationDelegate::update()
+{
+
+}
+
+void VulkanApplicationDelegate::shutdown()
+{
+
+}
