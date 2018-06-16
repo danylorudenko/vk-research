@@ -1,9 +1,12 @@
 #pragma once
 
 #include "Application.hpp"
+#include "..\class_features\NonMovable.hpp"
+
 #include "..\system\Window.hpp"
 #include "..\system\DynamicLibrary.hpp"
-#include "..\class_features\NonMovable.hpp"
+
+#include "..\vk_interface\VulkanLoader.hpp"
 
 class VulkanApplicationDelegate
     : public Application::ApplicationDelegate
@@ -22,5 +25,5 @@ public:
 
 private:
     Window mainWindow_;
-    DynamicLibrary vulkanLibrary_;
+    VulkanLoader vulkanLoader_;
 };

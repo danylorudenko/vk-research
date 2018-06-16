@@ -9,7 +9,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
         "VulkanRenderWindow",
         VulkanApplicationDelegate::WinProc,
         this }
-    , vulkanLibrary_{ "vulkan-1.dll" }
+    , vulkanLoader_{}
 {
 }
 

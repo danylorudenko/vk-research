@@ -18,10 +18,10 @@ public:
     operator bool() const;
 
     template<typename TProc>
-    TProc* GetProcAddress(char const* procName)
+    TProc GetProcAddress(char const* procName)
     {
         assert(handle_ != NULL);
-        return reinterpret_cast<TProc*>(::GetProcAddress(handle_, procName));
+        return reinterpret_cast<TProc>(::GetProcAddress(handle_, procName));
     }
 
     ~DynamicLibrary();
