@@ -17,6 +17,10 @@ public:
     PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = nullptr;
     PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr = nullptr;
 
+
+
+
+    // WROOOOOOOOOOOOOOOOOOOOOONG
     PFN_vkCreateInstance vkCreateInstance = nullptr;
     PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties = nullptr;
     PFN_vkEnumerateInstanceExtensionProperties vkEnumerateInstanceExtensionProperties = nullptr;

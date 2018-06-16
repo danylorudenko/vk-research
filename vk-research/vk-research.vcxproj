@@ -136,6 +136,7 @@
     <ClCompile Include="src\system\DynamicLibrary.cpp" />
     <ClCompile Include="src\system\Window.cpp" />
     <ClCompile Include="src\vk_interface\VulkanImportTable.cpp" />
+    <ClCompile Include="src\vk_interface\VulkanLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\vulkan\vk_platform.h" />
@@ -158,6 +159,7 @@
     <ClInclude Include="src\system\DynamicLibrary.hpp" />
     <ClInclude Include="src\system\Window.hpp" />
     <ClInclude Include="src\vk_interface\VulkanImportTable.hpp" />
+    <ClInclude Include="src\vk_interface\VulkanLoader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
