@@ -13,6 +13,10 @@ public:
     VulkanImportTable();
     VulkanImportTable(DynamicLibrary& vulkanLibrary);
 
+    void GetInstanceProcAddresses(VkInstance instance);
+    void GetDeviceProcAddresses(VkDevice device);
+
+
 public:
     PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = nullptr;
     PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr = nullptr;
