@@ -25,5 +25,5 @@ public:
 
 private:
     Window mainWindow_;
-    VulkanLoader vulkanLoader_;
+    VKW::VulkanLoader vulkanLoader_;
 };

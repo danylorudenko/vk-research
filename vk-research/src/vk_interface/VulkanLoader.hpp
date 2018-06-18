@@ -8,14 +8,14 @@
 namespace VKW
 {
 
-class VulkanLoader
+class VulkanLoader final
     : public NonCopyable
 {
 public:
     VulkanLoader();
 
-    VulkanLoader(VulkanLoader&& rhs);
-    VulkanLoader& operator=(VulkanLoader&& rhs);
+    VulkanLoader(VulkanLoader&& rhs) = default;
+    VulkanLoader& operator=(VulkanLoader&& rhs) = default;
 
     ~VulkanLoader();
 

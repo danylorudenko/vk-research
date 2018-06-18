@@ -9,10 +9,6 @@ VulkanLoader::VulkanLoader()
 {
 }
 
-VulkanLoader::VulkanLoader(VulkanLoader&& rhs) = default;
-
-VulkanLoader& VulkanLoader::operator=(VulkanLoader&& rhs) = default;
-
 VulkanLoader::~VulkanLoader() = default;
 
 VulkanImportTable const& VulkanLoader::Table() const

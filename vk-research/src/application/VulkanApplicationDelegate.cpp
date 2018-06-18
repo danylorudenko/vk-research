@@ -9,7 +9,6 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
         "VulkanRenderWindow",
         VulkanApplicationDelegate::WinProc,
         this }
-    , vulkanLoader_{}
 {
 }
 
