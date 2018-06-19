@@ -23,7 +23,10 @@ public:
 
 private:
     DynamicLibrary vulkanLibrary_;
-    VulkanImportTable vulkanTable_;
+    VulkanImportTable table_;
+
+    VkInstance instance_;
+    VkDevice device_;
 
 };
 
