@@ -14,6 +14,13 @@ class Device
     : public NonCopyable
 {
 public:
+    static std::uint32_t constexpr VENDOR_ID_NVIDIA = 0x10DE;
+    static std::uint32_t constexpr VENDOR_ID_AMD = 0x1002;
+    static std::uint32_t constexpr VENDOR_ID_INTEL = 0x8086;
+    static std::uint32_t constexpr VENDOR_ID_ARM = 0x13B5;
+
+
+public:
     Device();
     Device(VulkanImportTable* table, Instance& instance, std::vector<std::string> const& requiredExtensions);
 

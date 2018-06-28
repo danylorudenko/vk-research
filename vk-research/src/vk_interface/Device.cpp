@@ -23,17 +23,30 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
     }
     
     {
+        VkPhysicalDevice primaryDevice = VK_NULL_HANDLE;
+
         auto* properties = new VkPhysicalDeviceProperties{ 0 };
+        auto* memoryProperties = new VkPhysicalDeviceMemoryProperties{ 0 };
+
         for (auto i = 0; i < physicalDeviceCount; ++i) {
             
             table_->vkGetPhysicalDeviceProperties(physicalDevices[i], properties);
             std::cout 
                 << "PHYSICAL DEVICE: " << i << std::endl 
                 << "Name: " << properties->deviceName << std::endl;
-            
+
+            // priority to Nvidia devices.
+            if (properties->vendorID == VENDOR_ID_NVIDIA) {
+                primaryDevice = physicalDevices[i];
+            }
+
+            table_->vkGetPhysicalDeviceMemoryProperties(physicalDevices[i], memoryProperties);
+
             *properties = VkPhysicalDeviceProperties{ 0 };
+            *memoryProperties = VkPhysicalDeviceMemoryProperties{ 0 };
         }
         delete properties;
+        delete memoryProperties;
     }
 
 }
@@ -56,6 +69,11 @@ Device& Device::operator=(Device&& rhs)
 VkDevice Device::Handle() const
 {
     return device_;
+}
+
+Device::operator bool() const
+{
+    return device_ != VK_NULL_HANDLE;
 }
 
 }
