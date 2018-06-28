@@ -3,7 +3,9 @@
 #include "..\class_features\NonCopyable.hpp"
 #include "..\system\DynamicLibrary.hpp"
 
+
 #include "VulkanImportTable.hpp"
+#include "Instance.hpp"
 
 namespace VKW
 {
@@ -25,7 +27,7 @@ private:
     DynamicLibrary vulkanLibrary_;
     VulkanImportTable table_;
 
-    VkInstance instance_;
+    Instance instance_;
     VkDevice device_;
 
 };
