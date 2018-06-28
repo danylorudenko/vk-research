@@ -135,6 +135,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\system\DynamicLibrary.cpp" />
     <ClCompile Include="src\system\Window.cpp" />
+    <ClCompile Include="src\vk_interface\Device.cpp" />
     <ClCompile Include="src\vk_interface\Instance.cpp" />
     <ClCompile Include="src\vk_interface\VulkanImportTable.cpp" />
     <ClCompile Include="src\vk_interface\VulkanLoader.cpp" />
@@ -159,7 +160,9 @@
     <ClInclude Include="src\class_features\NonMovable.hpp" />
     <ClInclude Include="src\system\DynamicLibrary.hpp" />
     <ClInclude Include="src\system\Window.hpp" />
+    <ClInclude Include="src\vk_interface\Device.hpp" />
     <ClInclude Include="src\vk_interface\Instance.hpp" />
+    <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\VulkanImportTable.hpp" />
     <ClInclude Include="src\vk_interface\VulkanLoader.hpp" />
   </ItemGroup>

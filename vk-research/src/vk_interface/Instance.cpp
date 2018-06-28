@@ -1,18 +1,22 @@
-#include "Instance.hpp"
 #include <utility>
 #include <algorithm>
+
+#include "Instance.hpp"
+#include "Tools.hpp"
 
 namespace VKW
 {
 
 Instance::Instance()
-    : instance_{ nullptr }
+    : instance_{ VK_NULL_HANDLE }
+    , table_{ nullptr }
 {
-    instance_ = nullptr;
+    
 }
 
-Instance::Instance(VulkanImportTable& importTable, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers)
-    : instance_{ nullptr }
+Instance::Instance(VulkanImportTable* importTable, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers)
+    : instance_{ VK_NULL_HANDLE }
+    , table_{ importTable }
 {
     std::uint32_t layerPropertiesCount = 0;
     std::vector<VkLayerProperties> instanceLayerProperties;
@@ -22,9 +26,9 @@ Instance::Instance(VulkanImportTable& importTable, std::vector<std::string> cons
 
 
     {
-        importTable.vkEnumerateInstanceLayerProperties(&layerPropertiesCount, nullptr);
+        VK_ASSERT(importTable->vkEnumerateInstanceLayerProperties(&layerPropertiesCount, nullptr));
         instanceLayerProperties.resize(layerPropertiesCount);
-        importTable.vkEnumerateInstanceLayerProperties(&layerPropertiesCount, instanceLayerProperties.data());
+        VK_ASSERT(importTable->vkEnumerateInstanceLayerProperties(&layerPropertiesCount, instanceLayerProperties.data()));
 
         for (auto const& requiredLayer : requiredInstanceLayers) {
             auto const result = std::find_if(instanceLayerProperties.begin(), instanceLayerProperties.end(), [&requiredLayer](auto const& layer)
@@ -38,9 +42,9 @@ Instance::Instance(VulkanImportTable& importTable, std::vector<std::string> cons
 
 
     {
-        importTable.vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, nullptr);
+        VK_ASSERT(importTable->vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, nullptr));
         extensionProperties.resize(extensionPropertiesCount);
-        importTable.vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, extensionProperties.data());
+        VK_ASSERT(importTable->vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, extensionProperties.data()));
 
         for (auto const& requiredExtension : requiredInstanceExtensions) {
             auto const result = std::find_if(extensionProperties.begin(), extensionProperties.end(), [&requiredExtension](auto const& extensionProp)
@@ -81,12 +85,14 @@ Instance::Instance(VulkanImportTable& importTable, std::vector<std::string> cons
     instanceCreateInfo.pNext = nullptr;
     instanceCreateInfo.pApplicationInfo = &applicationInfo;
     instanceCreateInfo.flags = 0;
-    instanceCreateInfo.enabledLayerCount = enabledLayers.size();
+    instanceCreateInfo.enabledLayerCount = static_cast<std::uint32_t>(enabledLayers.size());
     instanceCreateInfo.ppEnabledLayerNames = enabledLayers.data();
-    instanceCreateInfo.enabledExtensionCount = enabledExtensions.size();
+    instanceCreateInfo.enabledExtensionCount = static_cast<std::uint32_t>(enabledExtensions.size());
     instanceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
 
-    importTable.vkCreateInstance(&instanceCreateInfo, nullptr, &instance_);
+    VK_ASSERT(importTable->vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
+
+    importTable->GetInstanceProcAddresses(instance_);
 }
 
 Instance::Instance(Instance&& rhs)
@@ -96,19 +102,28 @@ Instance::Instance(Instance&& rhs)
 
 Instance& Instance::operator=(Instance&& rhs)
 {
-    auto instanceTemp = rhs.instance_;
-    rhs.instance_ = instance_;
-    instance_ = instanceTemp;
+    std::swap(rhs.instance_, instance_);
+    std::swap(rhs.table_, table_);
+
+    return *this;
 }
 
 Instance::operator bool() const
 {
-    return instance_ != nullptr;
+    return instance_ != VK_NULL_HANDLE;
+}
+
+VkInstance Instance::Handle() const
+{
+    return instance_;
 }
 
 Instance::~Instance()
 {
+    if (*this)
+        table_->vkDestroyInstance(instance_, nullptr);
 
+    instance_ = VK_NULL_HANDLE;
 }
 
 }

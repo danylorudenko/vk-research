@@ -15,10 +15,12 @@ class Instance
 {
 public:
     Instance();
-    Instance(VulkanImportTable& table, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers);
+    Instance(VulkanImportTable* table, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers);
 
     Instance(Instance&& rhs);
     Instance& operator=(Instance&& rhs);
+    
+    VkInstance Handle() const;
 
     operator bool() const;
 

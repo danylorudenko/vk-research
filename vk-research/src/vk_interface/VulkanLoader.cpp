@@ -1,4 +1,5 @@
 #include "VulkanLoader.hpp"
+#include <iostream>
 
 
 namespace VKW
@@ -11,17 +12,14 @@ VulkanLoader::VulkanLoader()
     std::vector<std::string> const requiredInstanceLayers{ "VK_LAYER_LUNARG_standard_validation" };
     std::vector<std::string> const requiredInstanceExtensions{ VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
 
-    instance_ = VKW::Instance{ table_, requiredInstanceExtensions, requiredInstanceLayers };
-    
+    instance_ = VKW::Instance{ &table_, requiredInstanceExtensions, requiredInstanceLayers };
+
     //"VK_KHR_swapchain" - for device
 }
 
 VulkanLoader::~VulkanLoader()
 {
-    if(instance_)
-        table_.vkDestroyInstance(instance_, nullptr);
-
-    instance_ = nullptr;
+    
 }
 
 VulkanImportTable const& VulkanLoader::Table() const
