@@ -12,3 +12,5 @@
         assert(r == VK_SUCCESS);                    \
     }                                               \
 }
+
+#define STRING_LITERAL(value) #value

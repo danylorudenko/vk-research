@@ -14,6 +14,7 @@ VulkanLoader::VulkanLoader()
 
     instance_ = VKW::Instance{ &table_, requiredInstanceExtensions, requiredInstanceLayers };
 
+    device_ = VKW::Device{ &table_, instance_, {} };
     //"VK_KHR_swapchain" - for device
 }
 

@@ -6,6 +6,7 @@
 
 #include "VulkanImportTable.hpp"
 #include "Instance.hpp"
+#include "Device.hpp"
 
 namespace VKW
 {
@@ -28,7 +29,7 @@ private:
     VulkanImportTable table_;
 
     Instance instance_;
-    VkDevice device_;
+    Device device_;
 
 };
 
