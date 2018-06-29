@@ -35,11 +35,22 @@ private:
     static void PrintPhysicalDeviceData(
         VkPhysicalDeviceProperties const& properties, 
         VkPhysicalDeviceMemoryProperties const& memoryProperties,
+        std::uint32_t queuePropertiesCount,
+        VkQueueFamilyProperties* queueFamilyProperties,
         VkPhysicalDeviceFeatures const& features);
 
 private:
     VkDevice device_;
     VulkanImportTable* table_;
+
+    VkPhysicalDevice physicalDevice_;
+    VkPhysicalDeviceProperties physicalDeviceProperties_;
+
+    VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties_;
+    std::vector<VkQueueFamilyProperties> queueFamilyProperties_;
+
+    VkPhysicalDeviceFeatures physicalDeviceFeatures_;
+
 };
 
 }

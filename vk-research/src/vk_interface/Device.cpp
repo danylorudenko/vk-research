@@ -9,6 +9,11 @@ namespace VKW
 Device::Device()
     : device_{ VK_NULL_HANDLE }
     , table_{ nullptr }
+    , physicalDevice_{ VK_NULL_HANDLE }
+    , physicalDeviceProperties_{ 0 }
+    , physicalDeviceMemoryProperties_{ 0 }
+    , queueFamilyProperties_{ 0 }
+    , physicalDeviceFeatures_{ 0 }
 {
 }
 
@@ -25,14 +30,16 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
     }
     
     {
-        VkPhysicalDevice primaryDevice = VK_NULL_HANDLE;
-
         auto* properties = new VkPhysicalDeviceProperties{ 0 };
+
         auto* memoryProperties = new VkPhysicalDeviceMemoryProperties{ 0 };
+        auto queuePropertiesVec = std::vector<VkQueueFamilyProperties>{};
+
         auto* features = new VkPhysicalDeviceFeatures{ 0 };
 
         if (physicalDeviceCount == 0) {
             std::cerr << "FATAL: Vulkan instance couldn't find any valid physical device!" << std::endl;
+            assert(physicalDeviceCount != 0);
         }
 
         for (auto i = 0u; i < physicalDeviceCount; ++i) {
@@ -41,19 +48,61 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
             table_->vkGetPhysicalDeviceMemoryProperties(physicalDevices[i], memoryProperties);
             table_->vkGetPhysicalDeviceFeatures(physicalDevices[i], features);
 
-            PrintPhysicalDeviceData(*properties, *memoryProperties, *features);
-            // priority to Nvidia devices.
-            if (properties->vendorID == VENDOR_ID_NVIDIA) {
-                primaryDevice = physicalDevices[i];
+            auto queuePropsCount = 0u;
+            table_->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[i], &queuePropsCount, nullptr);
+            queuePropertiesVec.resize(queuePropsCount);
+            table_->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[i], &queuePropsCount, queuePropertiesVec.data());
+
+            PrintPhysicalDeviceData(*properties, *memoryProperties, queuePropsCount, queuePropertiesVec.data(), *features);
+
+            if (properties->deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+                std::cout << "CHOSEN DEVICE: " << properties->deviceName << std::endl;
+                physicalDevice_ = physicalDevices[i];
+                physicalDeviceProperties_ = *properties;
+                physicalDeviceMemoryProperties_ = *memoryProperties;
+                queueFamilyProperties_ = queuePropertiesVec;
+                physicalDeviceFeatures_ = *features;
             }
 
             *properties = VkPhysicalDeviceProperties{ 0 };
             *memoryProperties = VkPhysicalDeviceMemoryProperties{ 0 };
             *features = VkPhysicalDeviceFeatures{ 0 };
         }
+
+        if (physicalDevice_ == VK_NULL_HANDLE) {
+            std::cout << "CHOSEN DEVICE: " << properties->deviceName << std::endl;
+            physicalDevice_ = physicalDevices[0];
+
+            table_->vkGetPhysicalDeviceProperties(physicalDevice_, properties);
+            table_->vkGetPhysicalDeviceMemoryProperties(physicalDevice_, memoryProperties);
+            table_->vkGetPhysicalDeviceFeatures(physicalDevice_, features);
+
+            auto queuePropsCount = 0u;
+            table_->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice_, &queuePropsCount, nullptr);
+            queuePropertiesVec.resize(queuePropsCount);
+            table_->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice_, &queuePropsCount, queuePropertiesVec.data());
+        }
+
         delete properties;
         delete memoryProperties;
         delete features;
+    }
+
+    {
+        VkDeviceQueueCreateInfo queueCreateInfo;
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.pNext = VK_FLAGS_NONE;
+        queueCreateInfo.queueCount = 1;
+        queueCreateInfo.queueFamilyIndex = FUCK;
+        queueCreateInfo.pQueuePriorities = nullptr;
+        
+        VkDeviceCreateInfo createInfo;
+        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        createInfo.pNext = nullptr;
+        createInfo.flags = VK_FLAGS_NONE;
+        createInfo.pEnabledFeatures = &physicalDeviceFeatures_;
+        createInfo.queueCreateInfoCount = 1;
+        //createInfo.que
     }
 
 }
@@ -87,6 +136,8 @@ Device::operator bool() const
 void Device::PrintPhysicalDeviceData(
     VkPhysicalDeviceProperties const& properties,
     VkPhysicalDeviceMemoryProperties const& memoryProperties,
+    std::uint32_t queuePropertiesCount,
+    VkQueueFamilyProperties* queueFamilyProperties,
     VkPhysicalDeviceFeatures const& features)
 {
 
@@ -233,6 +284,17 @@ void Device::PrintPhysicalDeviceData(
         std::cout << "\t\t\t\tVK_MEMORY_PROPERTY_HOST_CACHED_BIT: " << static_cast<bool>(memoryProperties.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) << std::endl;
         std::cout << "\t\t\t\tVK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT: " << static_cast<bool>(memoryProperties.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) << std::endl;
         std::cout << "\t\t\t\tVK_MEMORY_PROPERTY_PROTECTED_BIT: " << static_cast<bool>(memoryProperties.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_PROTECTED_BIT) << std::endl << std::endl;
+    }
+
+    std::cout << "\tQueue Family Properties: " << std::endl;
+    for (auto i = 0u; i < queuePropertiesCount; ++i) {
+        std::cout << "\t\tqueue properties " << i << ": " << std::endl;
+        std::cout << "\t\t\tqueueCount: " << queueFamilyProperties[i].queueCount << std::endl;
+        std::cout << "\t\t\tVK_QUEUE_GRAPHICS_BIT: " << static_cast<bool>(queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) << std::endl;
+        std::cout << "\t\t\tVK_QUEUE_COMPUTE_BIT: " << static_cast<bool>(queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) << std::endl;
+        std::cout << "\t\t\tVK_QUEUE_TRANSFER_BIT: " << static_cast<bool>(queueFamilyProperties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) << std::endl;
+        std::cout << "\t\t\tVK_QUEUE_SPARSE_BINDING_BIT: " << static_cast<bool>(queueFamilyProperties[i].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) << std::endl;
+        std::cout << "\t\t\tVK_QUEUE_PROTECTED_BIT: " << static_cast<bool>(queueFamilyProperties[i].queueFlags & VK_QUEUE_PROTECTED_BIT) << std::endl << std::endl;
     }
 
     std::cout << "\tDevice Features:" << std::endl;

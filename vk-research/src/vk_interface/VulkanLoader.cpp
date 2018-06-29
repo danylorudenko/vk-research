@@ -9,13 +9,18 @@ VulkanLoader::VulkanLoader()
     : vulkanLibrary_{ "vulkan-1.dll" }
     , table_{ vulkanLibrary_ }
 {
-    std::vector<std::string> const requiredInstanceLayers{ "VK_LAYER_LUNARG_standard_validation" };
-    std::vector<std::string> const requiredInstanceExtensions{ VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
 
-    instance_ = VKW::Instance{ &table_, requiredInstanceExtensions, requiredInstanceLayers };
+    instance_ = VKW::Instance{ 
+        &table_, 
+        { VK_KHR_WIN32_SURFACE_EXTENSION_NAME }, 
+        { "VK_LAYER_LUNARG_standard_validation" } 
+    };
 
-    device_ = VKW::Device{ &table_, instance_, {} };
-    //"VK_KHR_swapchain" - for device
+    device_ = VKW::Device{ 
+        &table_, 
+        instance_, 
+        { "VK_KHR_swapchain" } 
+    };
 }
 
 VulkanLoader::~VulkanLoader()
