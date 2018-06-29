@@ -35,7 +35,7 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
             std::cerr << "FATAL: Vulkan instance couldn't find any valid physical device!" << std::endl;
         }
 
-        for (auto i = 0; i < physicalDeviceCount; ++i) {
+        for (auto i = 0u; i < physicalDeviceCount; ++i) {
             
             table_->vkGetPhysicalDeviceProperties(physicalDevices[i], properties);
             table_->vkGetPhysicalDeviceMemoryProperties(physicalDevices[i], memoryProperties);
