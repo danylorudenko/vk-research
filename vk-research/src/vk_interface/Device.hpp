@@ -32,6 +32,12 @@ public:
     VkDevice Handle() const;
 
 private:
+    static void PrintPhysicalDeviceData(
+        VkPhysicalDeviceProperties const& properties, 
+        VkPhysicalDeviceMemoryProperties const& memoryProperties,
+        VkPhysicalDeviceFeatures const& features);
+
+private:
     VkDevice device_;
     VulkanImportTable* table_;
 };
