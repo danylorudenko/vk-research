@@ -19,7 +19,7 @@ VulkanLoader::VulkanLoader()
     device_ = VKW::Device{ 
         &table_, 
         instance_, 
-        { "VK_KHR_swapchain", "VK_KHR_surface" } 
+        { "VK_KHR_swapchain" } 
     };
 }
 

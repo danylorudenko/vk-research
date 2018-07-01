@@ -19,6 +19,8 @@ Device::Device()
 Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::string> const& requiredExtensions)
     : device_{ VK_NULL_HANDLE }
     , table_{ table }
+    , physicalDevice_{ VK_NULL_HANDLE }
+    , physicalDeviceProperties_{}
 {
     std::uint32_t physicalDeviceCount = 0;
     std::vector<VkPhysicalDevice> physicalDevices;
@@ -91,6 +93,12 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
 
     // Create logical device
     {
+        std::uint32_t queueFamilyIndex = 0;
+        {
+            auto& properties = physicalDeviceProperties_;
+        }
+
+
         VkDeviceQueueCreateInfo queueCreateInfo;
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queueCreateInfo.pNext = VK_FLAGS_NONE;
