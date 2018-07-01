@@ -19,6 +19,16 @@ public:
     static std::uint32_t constexpr VENDOR_ID_INTEL = 0x8086;
     static std::uint32_t constexpr VENDOR_ID_ARM = 0x13B5;
 
+public:
+    class PhysicalDeviceProperties
+    {
+    public:
+        VkPhysicalDeviceProperties properties;
+        VkPhysicalDeviceMemoryProperties memoryProperties;
+        std::vector<VkQueueFamilyProperties> queueFamilyProperties;
+        std::vector<VkExtensionProperties> extensionProperties;
+        VkPhysicalDeviceFeatures features;
+    };
 
 public:
     Device();
@@ -33,29 +43,16 @@ public:
 
 private:
     static void PrintPhysicalDeviceData(
-        VkPhysicalDeviceProperties const& properties, 
-        VkPhysicalDeviceMemoryProperties const& memoryProperties,
-        std::vector<VkQueueFamilyProperties> const& queueFamilyProperties,
-        std::vector<VkExtensionProperties> const& extensionProperties,
-        VkPhysicalDeviceFeatures const& features);
+        VKW::Device::PhysicalDeviceProperties const& deviceProperties);
 
     static bool IsPhysicalDeviceValid(
-        VkPhysicalDeviceProperties const& properties,
-        VkPhysicalDeviceMemoryProperties const& memoryProperties,
-        std::vector<VkQueueFamilyProperties> const& queueFamilyProperties,
-        VkPhysicalDeviceFeatures const& features,
-        std::vector<VkExtensionProperties> const& supportedExtensions,
+        VKW::Device::PhysicalDeviceProperties const& deviceProperties,
         std::vector<std::string> const& requiredExtensions
     );
 
-    static void RequestDeviceData(
-        VulkanImportTable const& importTable,
+    void RequestDeviceProperties(
         VkPhysicalDevice targetDevice,
-        VkPhysicalDeviceProperties& properties,
-        VkPhysicalDeviceMemoryProperties& propeties,
-        VkPhysicalDeviceFeatures& features,
-        std::vector<VkQueueFamilyProperties>& queuesProperties,
-        std::vector<VkExtensionProperties>& extensions
+        VKW::Device::PhysicalDeviceProperties& deviceProperties
     );
 
 private:
@@ -63,12 +60,7 @@ private:
     VulkanImportTable* table_;
 
     VkPhysicalDevice physicalDevice_;
-    VkPhysicalDeviceProperties physicalDeviceProperties_;
-
-    VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties_;
-    std::vector<VkQueueFamilyProperties> queueFamilyProperties_;
-
-    VkPhysicalDeviceFeatures physicalDeviceFeatures_;
+    VKW::Device::PhysicalDeviceProperties physicalDeviceProperties_;
 
 };
 
