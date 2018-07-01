@@ -35,9 +35,28 @@ private:
     static void PrintPhysicalDeviceData(
         VkPhysicalDeviceProperties const& properties, 
         VkPhysicalDeviceMemoryProperties const& memoryProperties,
-        std::uint32_t queuePropertiesCount,
-        VkQueueFamilyProperties* queueFamilyProperties,
+        std::vector<VkQueueFamilyProperties> const& queueFamilyProperties,
+        std::vector<VkExtensionProperties> const& extensionProperties,
         VkPhysicalDeviceFeatures const& features);
+
+    static bool IsPhysicalDeviceValid(
+        VkPhysicalDeviceProperties const& properties,
+        VkPhysicalDeviceMemoryProperties const& memoryProperties,
+        std::vector<VkQueueFamilyProperties> const& queueFamilyProperties,
+        VkPhysicalDeviceFeatures const& features,
+        std::vector<VkExtensionProperties> const& supportedExtensions,
+        std::vector<std::string> const& requiredExtensions
+    );
+
+    static void RequestDeviceData(
+        VulkanImportTable const& importTable,
+        VkPhysicalDevice targetDevice,
+        VkPhysicalDeviceProperties& properties,
+        VkPhysicalDeviceMemoryProperties& propeties,
+        VkPhysicalDeviceFeatures& features,
+        std::vector<VkQueueFamilyProperties>& queuesProperties,
+        std::vector<VkExtensionProperties>& extensions
+    );
 
 private:
     VkDevice device_;

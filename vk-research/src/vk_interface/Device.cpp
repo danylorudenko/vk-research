@@ -2,6 +2,7 @@
 #include "Tools.hpp"
 
 #include <iomanip>
+#include <algorithm>
 
 namespace VKW
 {
@@ -30,38 +31,51 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
     }
     
     {
-        auto* properties = new VkPhysicalDeviceProperties{ 0 };
-
-        auto* memoryProperties = new VkPhysicalDeviceMemoryProperties{ 0 };
-        auto queuePropertiesVec = std::vector<VkQueueFamilyProperties>{};
-
-        auto* features = new VkPhysicalDeviceFeatures{ 0 };
-
         if (physicalDeviceCount == 0) {
             std::cerr << "FATAL: Vulkan instance couldn't find any valid physical device!" << std::endl;
             assert(physicalDeviceCount != 0);
         }
 
+
+        std::vector<VkPhysicalDevice> validPhysicalDevices;
+
+        auto* properties = new VkPhysicalDeviceProperties{ 0 };
+        auto* memoryProperties = new VkPhysicalDeviceMemoryProperties{ 0 };
+        auto* features = new VkPhysicalDeviceFeatures{ 0 };
+        auto queuePropertiesVec = std::vector<VkQueueFamilyProperties>{};
+        auto extensionPropertiesVec = std::vector<VkExtensionProperties>{};
+
+
         for (auto i = 0u; i < physicalDeviceCount; ++i) {
             
-            table_->vkGetPhysicalDeviceProperties(physicalDevices[i], properties);
-            table_->vkGetPhysicalDeviceMemoryProperties(physicalDevices[i], memoryProperties);
-            table_->vkGetPhysicalDeviceFeatures(physicalDevices[i], features);
+            RequestDeviceData(
+                *table_,
+                physicalDevices[i],
+                *properties,
+                *memoryProperties,
+                *features,
+                queuePropertiesVec,
+                extensionPropertiesVec
+            );
+            
+            PrintPhysicalDeviceData(
+                *properties, 
+                *memoryProperties,
+                queuePropertiesVec, 
+                extensionPropertiesVec, 
+                *features);
 
-            auto queuePropsCount = 0u;
-            table_->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[i], &queuePropsCount, nullptr);
-            queuePropertiesVec.resize(queuePropsCount);
-            table_->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[i], &queuePropsCount, queuePropertiesVec.data());
+            auto deviceValid = IsPhysicalDeviceValid(
+                *properties,
+                *memoryProperties,
+                queuePropertiesVec,
+                *features,
+                extensionPropertiesVec,
+                requiredExtensions
+            );
 
-            PrintPhysicalDeviceData(*properties, *memoryProperties, queuePropsCount, queuePropertiesVec.data(), *features);
-
-            if (properties->deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-                std::cout << "CHOSEN DEVICE: " << properties->deviceName << std::endl;
-                physicalDevice_ = physicalDevices[i];
-                physicalDeviceProperties_ = *properties;
-                physicalDeviceMemoryProperties_ = *memoryProperties;
-                queueFamilyProperties_ = queuePropertiesVec;
-                physicalDeviceFeatures_ = *features;
+            if (deviceValid) {
+                validPhysicalDevices.emplace_back(physicalDevices[i]);
             }
 
             *properties = VkPhysicalDeviceProperties{ 0 };
@@ -69,19 +83,33 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
             *features = VkPhysicalDeviceFeatures{ 0 };
         }
 
-        if (physicalDevice_ == VK_NULL_HANDLE) {
+        if(validPhysicalDevices.size() == 1) {
             std::cout << "CHOSEN DEVICE: " << properties->deviceName << std::endl;
             physicalDevice_ = physicalDevices[0];
 
-            table_->vkGetPhysicalDeviceProperties(physicalDevice_, properties);
-            table_->vkGetPhysicalDeviceMemoryProperties(physicalDevice_, memoryProperties);
-            table_->vkGetPhysicalDeviceFeatures(physicalDevice_, features);
-
-            auto queuePropsCount = 0u;
-            table_->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice_, &queuePropsCount, nullptr);
-            queuePropertiesVec.resize(queuePropsCount);
-            table_->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice_, &queuePropsCount, queuePropertiesVec.data());
         }
+        else if (validPhysicalDevices.size() > 1) {
+            // WHAAAAAAAAAAAAAAAAT
+            std::cout << "CHOSEN DEVICE: " << physicalDeviceProperties_.deviceName << std::endl;
+        }
+
+        if (physicalDevice_ != VK_NULL_HANDLE) {
+            RequestDeviceData(
+                *table_,
+                physicalDevice_,
+                *properties,
+                *memoryProperties,
+                *features,
+                queuePropertiesVec,
+                extensionPropertiesVec);
+
+            std::cout << "CHOSEN DEVICE: " << properties->deviceName << std::endl;
+        }
+
+        physicalDeviceProperties_ = *properties;
+        physicalDeviceMemoryProperties_ = *memoryProperties;
+        queueFamilyProperties_ = queuePropertiesVec;
+        physicalDeviceFeatures_ = *features;
 
         delete properties;
         delete memoryProperties;
@@ -93,7 +121,7 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queueCreateInfo.pNext = VK_FLAGS_NONE;
         queueCreateInfo.queueCount = 1;
-        queueCreateInfo.queueFamilyIndex = FUCK;
+        //queueCreateInfo.queueFamilyIndex = FUCK;
         queueCreateInfo.pQueuePriorities = nullptr;
         
         VkDeviceCreateInfo createInfo;
@@ -132,12 +160,68 @@ Device::operator bool() const
     return device_ != VK_NULL_HANDLE;
 }
 
+bool Device::IsPhysicalDeviceValid(
+    VkPhysicalDeviceProperties const& properties,
+    VkPhysicalDeviceMemoryProperties const& memoryProperties,
+    std::vector<VkQueueFamilyProperties> const& queueFamilyProperties,
+    VkPhysicalDeviceFeatures const& features,
+    std::vector<VkExtensionProperties> const& supportedExtensions,
+    std::vector<std::string> const& requiredExtensions)
+{    
+    bool supportsGraphics = false;
+    bool supportsExtensions = true;
+
+    for (auto i = 0u; i < queueFamilyProperties.size(); ++i) {
+        auto& queueProps = queueFamilyProperties[i];
+        if (queueProps.queueFlags & VK_QUEUE_GRAPHICS_BIT &&
+            queueProps.queueCount > 0)
+            supportsGraphics = true;
+    }
+
+    for (auto i = 0u; i < requiredExtensions.size(); ++i) {
+        const auto& extName = requiredExtensions[i];
+        auto result = std::find_if(supportedExtensions.begin(), supportedExtensions.end(),
+        [&extName](auto const& extensionProperties) {
+            return extName == extensionProperties.extensionName;
+        });
+
+        if (result == supportedExtensions.end()) {
+            supportsExtensions = false;
+        }
+    }
+
+    return supportsGraphics && supportsExtensions;
+}
+
+void Device::RequestDeviceData(
+    VulkanImportTable const& table,
+    VkPhysicalDevice targetDevice,
+    VkPhysicalDeviceProperties& properties,
+    VkPhysicalDeviceMemoryProperties& memoryProperties,
+    VkPhysicalDeviceFeatures& features,
+    std::vector<VkQueueFamilyProperties>& queuesProperties,
+    std::vector<VkExtensionProperties>& extensions)
+{
+    table.vkGetPhysicalDeviceProperties(targetDevice, &properties);
+    table.vkGetPhysicalDeviceMemoryProperties(targetDevice, &memoryProperties);
+    table.vkGetPhysicalDeviceFeatures(targetDevice, &features);
+
+    auto queuePropsCount = 0u;
+    table.vkGetPhysicalDeviceQueueFamilyProperties(targetDevice, &queuePropsCount, nullptr);
+    queuesProperties.resize(queuePropsCount);
+    table.vkGetPhysicalDeviceQueueFamilyProperties(targetDevice, &queuePropsCount, queuesProperties.data());
+
+    auto extensionPropsCount = 0u;
+    VK_ASSERT(table.vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, nullptr));
+    extensions.resize(extensionPropsCount);
+    VK_ASSERT(table.vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, extensions.data()));
+}
 
 void Device::PrintPhysicalDeviceData(
     VkPhysicalDeviceProperties const& properties,
     VkPhysicalDeviceMemoryProperties const& memoryProperties,
-    std::uint32_t queuePropertiesCount,
-    VkQueueFamilyProperties* queueFamilyProperties,
+    std::vector<VkQueueFamilyProperties> const& queueFamilyProperties,
+    std::vector<VkExtensionProperties> const& extensionProperties,
     VkPhysicalDeviceFeatures const& features)
 {
 
@@ -287,7 +371,7 @@ void Device::PrintPhysicalDeviceData(
     }
 
     std::cout << "\tQueue Family Properties: " << std::endl;
-    for (auto i = 0u; i < queuePropertiesCount; ++i) {
+    for (auto i = 0u; i < queueFamilyProperties.size(); ++i) {
         std::cout << "\t\tqueue properties " << i << ": " << std::endl;
         std::cout << "\t\t\tqueueCount: " << queueFamilyProperties[i].queueCount << std::endl;
         std::cout << "\t\t\tVK_QUEUE_GRAPHICS_BIT: " << static_cast<bool>(queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) << std::endl;
@@ -295,6 +379,14 @@ void Device::PrintPhysicalDeviceData(
         std::cout << "\t\t\tVK_QUEUE_TRANSFER_BIT: " << static_cast<bool>(queueFamilyProperties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) << std::endl;
         std::cout << "\t\t\tVK_QUEUE_SPARSE_BINDING_BIT: " << static_cast<bool>(queueFamilyProperties[i].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) << std::endl;
         std::cout << "\t\t\tVK_QUEUE_PROTECTED_BIT: " << static_cast<bool>(queueFamilyProperties[i].queueFlags & VK_QUEUE_PROTECTED_BIT) << std::endl << std::endl;
+    }
+
+    std::cout << "\tDevice Extension Properties: " << std::endl;
+    for (auto i = 0u; i < extensionProperties.size(); ++i) {
+        std::cout << "\t\textensionProperties " << i << ": " << std::endl;
+        std::cout << "\t\t\textensionName: " << extensionProperties[i].extensionName << std::endl;
+        std::cout << "\t\t\tspecVersion: " << extensionProperties[i].specVersion << std::endl << std::endl;
+        
     }
 
     std::cout << "\tDevice Features:" << std::endl;

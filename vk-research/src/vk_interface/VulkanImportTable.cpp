@@ -23,6 +23,7 @@ VulkanImportTable::VulkanImportTable(DynamicLibrary& vulkanLibrary)
     vkGetPhysicalDeviceMemoryProperties = vulkanLibrary.GetProcAddress<PFN_vkGetPhysicalDeviceMemoryProperties>("vkGetPhysicalDeviceMemoryProperties");
     vkGetPhysicalDeviceQueueFamilyProperties = vulkanLibrary.GetProcAddress<PFN_vkGetPhysicalDeviceQueueFamilyProperties>("vkGetPhysicalDeviceQueueFamilyProperties");
     
+    vkEnumerateDeviceExtensionProperties = vulkanLibrary.GetProcAddress<PFN_vkEnumerateDeviceExtensionProperties>("vkEnumerateDeviceExtensionProperties");
     vkCreateDevice = vulkanLibrary.GetProcAddress<PFN_vkCreateDevice>("vkCreateDevice");
 }
 
