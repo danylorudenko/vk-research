@@ -95,6 +95,23 @@ Instance::Instance(VulkanImportTable* importTable, std::vector<std::string> cons
     VK_ASSERT(importTable->vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
 
     importTable->GetInstanceProcAddresses(instance_);
+
+    // Debug callbacks setup
+    {
+        VkDebugReportCallbackCreateInfoEXT debugCallbackCreateInfo;
+        debugCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+        debugCallbackCreateInfo.pNext = nullptr;
+        debugCallbackCreateInfo.pfnCallback = &Instance::DebugCallback;
+        debugCallbackCreateInfo.flags = 
+            VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
+            VK_DEBUG_REPORT_WARNING_BIT_EXT |
+            VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT |
+            VK_DEBUG_REPORT_ERROR_BIT_EXT/* |
+            VK_DEBUG_REPORT_DEBUG_BIT_EXT*/;
+        debugCallbackCreateInfo.pUserData = nullptr;
+
+        VK_ASSERT(importTable->vkCreateDebugReportCallbackEXT(instance_, &debugCallbackCreateInfo, nullptr, &debugCallback_));
+    }
 }
 
 Instance::Instance(Instance&& rhs)
@@ -141,6 +158,149 @@ VkBool32 Instance::DebugCallback(
     char const* msg,
     void* userData)
 {
+    char const* typeStr = nullptr;
+    switch (flags) {
+    case VK_DEBUG_REPORT_INFORMATION_BIT_EXT:
+        typeStr = "INFORMATION";
+        break;
+    case VK_DEBUG_REPORT_WARNING_BIT_EXT:
+        typeStr = "WARNING";
+        break;
+    case VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT:
+        typeStr = "PERFORMANCE_WARNING";
+        break;
+    case VK_DEBUG_REPORT_ERROR_BIT_EXT:
+        typeStr = "ERROR";
+        break;
+    case VK_DEBUG_REPORT_DEBUG_BIT_EXT:
+        typeStr = "DEBUG";
+        break;
+    default:
+        typeStr = "UNKNOWN_COMBINED";
+        break;
+    }
+
+    char const* objTypeStr = nullptr;
+    switch (type) {
+    case VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_PHYSICAL_DEVICE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_PHYSICAL_DEVICE_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_MEMORY_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_MEMORY_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_EVENT_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_EVENT_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_QUERY_POOL_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_QUERY_POOL_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_CACHE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_CACHE_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_LAYOUT_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_LAYOUT_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_CALLBACK_EXT_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_CALLBACK_EXT_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_KHR_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_KHR_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_MODE_KHR_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_MODE_KHR_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_OBJECT_TABLE_NVX_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_OBJECT_TABLE_NVX_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_INDIRECT_COMMANDS_LAYOUT_NVX_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_INDIRECT_COMMANDS_LAYOUT_NVX_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_VALIDATION_CACHE_EXT_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_VALIDATION_CACHE_EXT_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_EXT";
+        break;
+    case VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_EXT:
+        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_EXT";
+        break;
+    default:
+        objTypeStr = "UNKNOWN";
+        break;
+    }
+
+    std::cerr 
+        << "DEBUG_LAYER::" << layerPrefix
+        << "::" << typeStr
+        << "::" << msg << std::endl
+        << "OBJ_TYPE: " << objTypeStr << std::endl;
+
     return VK_FALSE;
 }
 
