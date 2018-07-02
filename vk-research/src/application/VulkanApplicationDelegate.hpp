@@ -13,7 +13,7 @@ class VulkanApplicationDelegate
     , public NonMovable
 {
 public:
-    VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight);
+    VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug);
     
     virtual void start() override;
     virtual void update() override;

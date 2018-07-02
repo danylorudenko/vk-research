@@ -15,7 +15,7 @@ class VulkanLoader final
     : public NonCopyable
 {
 public:
-    VulkanLoader();
+    VulkanLoader(bool debug = false);
 
     VulkanLoader(VulkanLoader&& rhs) = default;
     VulkanLoader& operator=(VulkanLoader&& rhs) = default;

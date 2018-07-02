@@ -15,7 +15,7 @@ Instance::Instance()
     
 }
 
-Instance::Instance(VulkanImportTable* importTable, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers)
+Instance::Instance(VulkanImportTable* importTable, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers, bool debug)
     : instance_{ VK_NULL_HANDLE }
     , table_{ importTable }
     , debugCallback_{ VK_NULL_HANDLE }
@@ -97,7 +97,7 @@ Instance::Instance(VulkanImportTable* importTable, std::vector<std::string> cons
     importTable->GetInstanceProcAddresses(instance_);
 
     // Debug callbacks setup
-    {
+    if (debug) {
         VkDebugReportCallbackCreateInfoEXT debugCallbackCreateInfo;
         debugCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
         debugCallbackCreateInfo.pNext = nullptr;
@@ -296,10 +296,11 @@ VkBool32 Instance::DebugCallback(
     }
 
     std::cerr 
-        << "DEBUG_LAYER::" << layerPrefix
+        << "DEBUG_LAYER" 
         << "::" << typeStr
+        << "::" << layerPrefix
         << "::" << msg << std::endl
-        << "OBJ_TYPE: " << objTypeStr << std::endl;
+        << objTypeStr << ": " << object << std::endl << std::endl;
 
     return VK_FALSE;
 }

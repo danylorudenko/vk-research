@@ -15,7 +15,7 @@ class Instance
 {
 public:
     Instance();
-    Instance(VulkanImportTable* table, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers);
+    Instance(VulkanImportTable* table, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers, bool debug);
 
     Instance(Instance&& rhs);
     Instance& operator=(Instance&& rhs);
