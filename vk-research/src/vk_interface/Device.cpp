@@ -116,10 +116,9 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
         
 
         std::vector<char const*> requiredExtensionsC_str{};
-        requiredExtensionsC_str.resize(requiredExtensions.size());
         std::transform(
             requiredExtensions.begin(), requiredExtensions.end(), 
-            requiredExtensionsC_str.begin(), 
+            std::back_inserter(requiredExtensionsC_str), 
             [](auto const& string){ return string.c_str(); });
 
         VkDeviceCreateInfo createInfo;
@@ -464,7 +463,7 @@ void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const
     std::cout << "\t\t" << "sparseResidency16Samples: " << features.sparseResidency16Samples << std::endl;
     std::cout << "\t\t" << "sparseResidencyAliased: " << features.sparseResidencyAliased << std::endl;
     std::cout << "\t\t" << "variableMultisampleRate: " << features.variableMultisampleRate << std::endl;
-    std::cout << "\t\t" << "inheritedQueries: " << features.inheritedQueries << std::endl;
+    std::cout << "\t\t" << "inheritedQueries: " << features.inheritedQueries << std::endl << std::endl;
 }
 
 }

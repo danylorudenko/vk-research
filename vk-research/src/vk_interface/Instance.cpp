@@ -72,13 +72,11 @@ Instance::Instance(VulkanImportTable* importTable, std::vector<std::string> cons
     std::vector<char const*> enabledLayers;
     std::vector<char const*> enabledExtensions;
 
-    enabledLayers.resize(requiredInstanceLayers.size());
-    std::transform(requiredInstanceLayers.begin(), requiredInstanceLayers.end(), enabledLayers.begin(), [](auto const& layer) {
+    std::transform(requiredInstanceLayers.begin(), requiredInstanceLayers.end(), std::back_inserter(enabledLayers), [](auto const& layer) {
         return layer.c_str();
     });
 
-    enabledExtensions.resize(requiredInstanceExtensions.size());
-    std::transform(requiredInstanceExtensions.begin(), requiredInstanceExtensions.end(), enabledExtensions.begin(), [](auto const& extension) {
+    std::transform(requiredInstanceExtensions.begin(), requiredInstanceExtensions.end(), std::back_inserter(enabledExtensions), [](auto const& extension) {
         return extension.c_str();
     });
 
@@ -103,7 +101,7 @@ Instance::Instance(VulkanImportTable* importTable, std::vector<std::string> cons
         debugCallbackCreateInfo.pNext = nullptr;
         debugCallbackCreateInfo.pfnCallback = &Instance::DebugCallback;
         debugCallbackCreateInfo.flags = 
-            VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
+            /*VK_DEBUG_REPORT_INFORMATION_BIT_EXT |*/
             VK_DEBUG_REPORT_WARNING_BIT_EXT |
             VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT |
             VK_DEBUG_REPORT_ERROR_BIT_EXT/* |
