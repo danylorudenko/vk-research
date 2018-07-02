@@ -37,6 +37,8 @@ public:
     Device(Device&& rhs);
     Device& operator=(Device&& rhs);
 
+    ~Device();
+
     operator bool() const;
 
     VkDevice Handle() const;

@@ -10,6 +10,7 @@ namespace VKW
 Instance::Instance()
     : instance_{ VK_NULL_HANDLE }
     , table_{ nullptr }
+    , debugCallback_{ VK_NULL_HANDLE }
 {
     
 }
@@ -17,6 +18,7 @@ Instance::Instance()
 Instance::Instance(VulkanImportTable* importTable, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers)
     : instance_{ VK_NULL_HANDLE }
     , table_{ importTable }
+    , debugCallback_{ VK_NULL_HANDLE }
 {
     std::uint32_t layerPropertiesCount = 0;
     std::vector<VkLayerProperties> instanceLayerProperties;
@@ -96,6 +98,9 @@ Instance::Instance(VulkanImportTable* importTable, std::vector<std::string> cons
 }
 
 Instance::Instance(Instance&& rhs)
+    : instance_{ VK_NULL_HANDLE }
+    , table_{ nullptr }
+    , debugCallback_{ VK_NULL_HANDLE }
 {
     operator=(std::move(rhs));
 }
@@ -124,6 +129,19 @@ Instance::~Instance()
         table_->vkDestroyInstance(instance_, nullptr);
 
     instance_ = VK_NULL_HANDLE;
+}
+
+VkBool32 Instance::DebugCallback(
+    VkDebugReportFlagsEXT flags,
+    VkDebugReportObjectTypeEXT type,
+    std::uint64_t object,
+    std::size_t location,
+    std::int32_t code,
+    char const* layerPrefix,
+    char const* msg,
+    void* userData)
+{
+    return VK_FALSE;
 }
 
 }

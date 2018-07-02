@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <memory>
+#include <limits>
 
 namespace VKW
 {
@@ -63,13 +64,15 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
         }
         else if (validPhysicalDevices.size() > 1) {
             for (auto i = 0u; i < validPhysicalDevices.size(); ++i) {
+
                 RequestDeviceProperties(validPhysicalDevices[i], *deviceProperties);
-
-                if (deviceProperties->properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-                    physicalDevice_ = validPhysicalDevices[i];
-                }
-
+                auto const isGPU = deviceProperties->properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
                 *deviceProperties = PhysicalDeviceProperties{};
+                
+                if (isGPU) {
+                    physicalDevice_ = validPhysicalDevices[i];
+                    break;
+                }
             }
 
             // if no discrete GPUs, choose any first
@@ -82,7 +85,7 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
 
         if (physicalDevice_ != VK_NULL_HANDLE) {
             RequestDeviceProperties(physicalDevice_, physicalDeviceProperties_);
-            std::cout << "CHOSEN DEVICE: " << deviceProperties->properties.deviceName << std::endl;
+            std::cout << "CHOSEN DEVICE: " << physicalDeviceProperties_.properties.deviceName << std::endl;
         }
         else {
             std::cout << "FATAL: Error initializing VKW::Device (cannot find valid VkPhysicalDevice)" << std::endl;
@@ -93,26 +96,47 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
 
     // Create logical device
     {
-        std::uint32_t queueFamilyIndex = 0;
+        auto queueFamilyIndex = std::numeric_limits<std::uint32_t>::max();
         {
             auto& properties = physicalDeviceProperties_;
+            for (auto i = 0u; i < properties.queueFamilyProperties.size(); ++i) {
+                if (properties.queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+                    queueFamilyIndex = i;
+                }
+            }
         }
-
 
         VkDeviceQueueCreateInfo queueCreateInfo;
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.pNext = VK_FLAGS_NONE;
+        queueCreateInfo.pNext = nullptr;
+        queueCreateInfo.queueFamilyIndex = queueFamilyIndex;
         queueCreateInfo.queueCount = 1;
-        //queueCreateInfo.queueFamilyIndex = FUCK;
+        queueCreateInfo.flags = VK_FLAGS_NONE;
         queueCreateInfo.pQueuePriorities = nullptr;
         
+
+        std::vector<char const*> requiredExtensionsC_str{};
+        requiredExtensionsC_str.resize(requiredExtensions.size());
+        std::transform(
+            requiredExtensions.begin(), requiredExtensions.end(), 
+            requiredExtensionsC_str.begin(), 
+            [](auto const& string){ return string.c_str(); });
+
         VkDeviceCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = VK_FLAGS_NONE;
         createInfo.pEnabledFeatures = &physicalDeviceProperties_.features;
         createInfo.queueCreateInfoCount = 1;
-        //createInfo.que
+        createInfo.pQueueCreateInfos = &queueCreateInfo;
+        createInfo.enabledLayerCount = 0;
+        createInfo.ppEnabledLayerNames = nullptr;
+        createInfo.enabledExtensionCount = static_cast<std::uint32_t>(requiredExtensionsC_str.size());
+        createInfo.ppEnabledExtensionNames = requiredExtensionsC_str.data();
+
+        VK_ASSERT(table_->vkCreateDevice(physicalDevice_, &createInfo, nullptr, &device_));
+
+        table_->GetDeviceProcAddresses(device_);
     }
 
 }
@@ -120,6 +144,8 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
 Device::Device(Device&& rhs)
     : device_{ VK_NULL_HANDLE }
     , table_{ nullptr }
+    , physicalDevice_{ VK_NULL_HANDLE }
+    , physicalDeviceProperties_{}
 {
     operator=(std::move(rhs));
 }
@@ -128,6 +154,8 @@ Device& Device::operator=(Device&& rhs)
 {
     std::swap(device_, rhs.device_);
     std::swap(table_, rhs.table_);
+    std::swap(physicalDevice_, rhs.physicalDevice_);
+    std::swap(physicalDeviceProperties_, rhs.physicalDeviceProperties_);
 
     return *this;
 }
@@ -140,6 +168,15 @@ VkDevice Device::Handle() const
 Device::operator bool() const
 {
     return device_ != VK_NULL_HANDLE;
+}
+
+Device::~Device()
+{
+    if (*this) {
+        VK_ASSERT(table_->vkDeviceWaitIdle(device_));
+        table_->vkDestroyDevice(device_, nullptr);
+        device_ = VK_NULL_HANDLE;
+    }
 }
 
 bool Device::IsPhysicalDeviceValid(

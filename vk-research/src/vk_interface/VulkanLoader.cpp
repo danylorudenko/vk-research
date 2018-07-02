@@ -12,7 +12,7 @@ VulkanLoader::VulkanLoader()
 
     instance_ = VKW::Instance{ 
         &table_, 
-        { "VK_KHR_surface", VK_KHR_WIN32_SURFACE_EXTENSION_NAME }, 
+        { "VK_KHR_surface", VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_EXT_DEBUG_REPORT_EXTENSION_NAME },
         { "VK_LAYER_LUNARG_standard_validation" } 
     };
 

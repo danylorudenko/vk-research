@@ -36,6 +36,8 @@ public:
     PFN_vkEnumerateDeviceExtensionProperties vkEnumerateDeviceExtensionProperties = nullptr;
 
     PFN_vkCreateDevice vkCreateDevice = nullptr;
+    PFN_vkDeviceWaitIdle vkDeviceWaitIdle = nullptr;
+    PFN_vkDestroyDevice vkDestroyDevice = nullptr;
 };
 
 }
