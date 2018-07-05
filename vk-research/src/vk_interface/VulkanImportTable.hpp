@@ -43,10 +43,17 @@ public:
     PFN_vkDestroyDevice vkDestroyDevice = nullptr;
 
     PFN_vkCreateBuffer vkCreateBuffer = nullptr;
+    PFN_vkDestroyBuffer vkDestroyBuffer = nullptr;
     PFN_vkCreateImage vkCreateImage = nullptr;
+    PFN_vkDestroyImage vkDestroyImage = nullptr;
+
+    PFN_vkGetPhysicalDeviceFormatProperties vkGetPhysicalDeviceFormatProperties = nullptr;
+    PFN_vkGetPhysicalDeviceImageFormatProperties vkGetPhysicalDeviceImageFormatProperties = nullptr;
 
     PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements = nullptr;
     PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements = nullptr;
+
+    PFN_vkGetImageSubresourceLayout vkGetImageSubresourceLayout = nullptr;
 };
 
 }
