@@ -39,9 +39,10 @@ public:
 
     ~Device();
 
-    operator bool() const;
+    Device::PhysicalDeviceProperties const& Properties() const;
 
     VkDevice Handle() const;
+    operator bool() const;
 
 private:
     static void PrintPhysicalDeviceData(

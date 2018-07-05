@@ -41,6 +41,12 @@ public:
     PFN_vkCreateDevice vkCreateDevice = nullptr;
     PFN_vkDeviceWaitIdle vkDeviceWaitIdle = nullptr;
     PFN_vkDestroyDevice vkDestroyDevice = nullptr;
+
+    PFN_vkCreateBuffer vkCreateBuffer = nullptr;
+    PFN_vkCreateImage vkCreateImage = nullptr;
+
+    PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements = nullptr;
+    PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements = nullptr;
 };
 
 }

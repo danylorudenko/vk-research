@@ -169,6 +169,11 @@ Device::operator bool() const
     return device_ != VK_NULL_HANDLE;
 }
 
+Device::PhysicalDeviceProperties const& Device::Properties() const
+{
+    return physicalDeviceProperties_;
+}
+
 Device::~Device()
 {
     if (*this) {
