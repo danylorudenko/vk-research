@@ -54,6 +54,14 @@ public:
     PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements = nullptr;
 
     PFN_vkGetImageSubresourceLayout vkGetImageSubresourceLayout = nullptr;
+
+    PFN_vkCreateBufferView vkCreateBufferView = nullptr;
+    PFN_vkDestroyBufferView vkDestroyBufferView = nullptr;
+    PFN_vkCreateImageView vkCreateImageView = nullptr;
+    PFN_vkDestroyImageView vkDestroyImageView = nullptr;
+
+    PFN_vkAllocateMemory vkAllocateMemory = nullptr;
+    PFN_vkFreeMemory vkFreeMemory = nullptr;
 };
 
 }
