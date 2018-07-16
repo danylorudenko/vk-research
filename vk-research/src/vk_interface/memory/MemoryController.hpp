@@ -5,11 +5,12 @@
 namespace VKW
 {
 
-enum class MemoryAccess
+enum MemoryAccess
 {
-    GPU_ONLY,
-    CPU_READBACK,
-    CPU_WRITE
+    GPU_ONLY = 1,
+    CPU_READBACK = 2,
+    CPU_WRITE = 4,
+    CPU_COHERENT = 8,
 };
 
 
