@@ -42,11 +42,24 @@ public:
     PFN_vkDeviceWaitIdle vkDeviceWaitIdle = nullptr;
     PFN_vkDestroyDevice vkDestroyDevice = nullptr;
 
+    PFN_vkAllocateMemory vkAllocateMemory = nullptr;
+    PFN_vkFreeMemory vkFreeMemory = nullptr;
+    PFN_vkGetDeviceMemoryCommitment vkGetDeviceMemoryCommitment = nullptr;
+
+    PFN_vkMapMemory vkMapMemory = nullptr;
+    PFN_vkUnmapMemory vkUnmapMemory = nullptr;
+
+    PFN_vkFlushMappedMemoryRanges vkFlushMappedMemoryRanges = nullptr;
+    PFN_vkInvalidateMappedMemoryRanges vkInvalidateMappedMemoryRanges = nullptr;
+
     PFN_vkCreateBuffer vkCreateBuffer = nullptr;
     PFN_vkCreateImage vkCreateImage = nullptr;
 
     PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements = nullptr;
     PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements = nullptr;
+
+    PFN_vkBindBufferMemory vkBindBufferMemory = nullptr;
+    PFN_vkBindImageMemory vkBindImageMemory = nullptr;
 };
 
 }
