@@ -13,7 +13,12 @@ enum MemoryAccess
     CPU_COHERENT = 8,
 };
 
-
+struct Memory
+{
+    VkDeviceMemory deviceMemory_;
+    VkDeviceSize size_;
+    VkDeviceSize freeOffset_;
+};
 
 class MemoryController
     : public NonCopyable
@@ -27,14 +32,14 @@ public:
 
     ~MemoryController();
 
-private:
-    VkDeviceMemory AllocMemory(MemoryAccess access, std::uint64_t size);
+public:
+    Memory& AllocMemory(MemoryAccess access, std::uint64_t size);
 
 private:
     VulkanImportTable* table_;
     Device* device_;
 
-    std::vector<VkDeviceMemory> allocations_;
+    std::vector<Memory> allocations_;
 };
 
 }

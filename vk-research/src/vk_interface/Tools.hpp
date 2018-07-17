@@ -14,3 +14,9 @@
 }
 
 #define STRING_LITERAL(value) #value
+
+template<typename T, typename U>
+inline T RoundToMultipleOfPOT(T value, U pot)
+{
+    return (value + static_cast<T>(pot - 1)) & ~(static_cast<T>(pot - 1));
+}
