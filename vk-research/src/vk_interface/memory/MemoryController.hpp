@@ -13,12 +13,26 @@ enum MemoryAccess
     CPU_COHERENT = 8,
 };
 
-struct Memory
+
+struct MemoryPage
 {
     VkDeviceMemory deviceMemory_;
     VkDeviceSize size_;
-    VkDeviceSize freeOffset_;
+    VkMemoryPropertyFlags propertyFlags_;
+    MemoryAccess accessFlags_;
+
+    std::uint32_t bindCount_;
+    VkDeviceSize nextFreeOffset_;
 };
+
+struct MemoryPageRegion
+{
+    MemoryPage* page_;
+    std::size_t offset_;
+    std::size_t size_;
+};
+
+
 
 class MemoryController
     : public NonCopyable
@@ -33,13 +47,17 @@ public:
     ~MemoryController();
 
 public:
-    Memory& AllocMemory(MemoryAccess access, std::uint64_t size);
+    void ProvideMemoryPageRegion(std::size_t size, std::size_t alignment, MemoryAccess access, MemoryPageRegion& region);
+
+private:
+    MemoryPage& AllocPage(MemoryAccess access, std::uint64_t size);
+    void FreePage(std::size_t pageIndex);
 
 private:
     VulkanImportTable* table_;
     Device* device_;
 
-    std::vector<Memory> allocations_;
+    std::vector<MemoryPage> allocations_;
 };
 
 }

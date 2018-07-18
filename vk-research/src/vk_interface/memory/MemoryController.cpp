@@ -38,20 +38,25 @@ MemoryController::~MemoryController()
     }
 }
 
-Memory& MemoryController::AllocMemory(MemoryAccess access, std::uint64_t size)
+void MemoryController::ProvideMemoryPageRegion(std::size_t size, std::size_t alignment, MemoryAccess access, MemoryPageRegion& region)
+{
+
+}
+
+MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, std::uint64_t size)
 {    
     VkMemoryPropertyFlags memoryFlags = VK_FLAGS_NONE;
 
-    if (access & MemoryAccess::CPU_COHERENT)
+    if (accessFlags & MemoryAccess::CPU_COHERENT)
         memoryFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
-    if (access & MemoryAccess::GPU_ONLY)
+    if (accessFlags & MemoryAccess::GPU_ONLY)
         memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-    if (access & MemoryAccess::CPU_WRITE)
+    if (accessFlags & MemoryAccess::CPU_WRITE)
         memoryFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
     
-    if (access & MemoryAccess::CPU_READBACK)
+    if (accessFlags & MemoryAccess::CPU_READBACK)
         memoryFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
     
     auto const propertiesCount = device_->Properties().memoryProperties.memoryTypeCount;
@@ -75,10 +80,15 @@ Memory& MemoryController::AllocMemory(MemoryAccess access, std::uint64_t size)
     VkDeviceMemory deviceMemory = VK_NULL_HANDLE;
     VK_ASSERT(table_->vkAllocateMemory(device_->Handle(), &info, nullptr, &deviceMemory));
 
-    Memory memory;
+    MemoryPage memory;
     memory.deviceMemory_ = deviceMemory;
     memory.size_ = info.allocationSize;
-    memory.freeOffset_ = 0;
+    memory.propertyFlags_ = properties[typeIndex].propertyFlags;
+    memory.accessFlags_ = accessFlags;
+    
+    memory.bindCount_ = 0;
+    memory.nextFreeOffset_ = 0;
+
     allocations_.emplace_back(memory);
 
     return allocations_[allocations_.size() - 1];
