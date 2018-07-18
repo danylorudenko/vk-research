@@ -1,6 +1,8 @@
 #include "MemoryController.hpp"
 #include "../Tools.hpp"
 
+#include <algorithm>
+
 namespace VKW
 {
 
@@ -38,19 +40,64 @@ MemoryController::~MemoryController()
     }
 }
 
-void MemoryController::ProvideMemoryPageRegion(std::size_t size, std::size_t alignment, MemoryAccess access, MemoryPageRegion& region)
+void MemoryController::ProvideMemoryPageRegion(MemoryPageRegionDesc desc, MemoryPageRegion& region)
 {
+    MemoryAccess accessFlags = MemoryAccess::NONE;
 
+    switch (desc.usage_)
+    {
+    case MemoryUsage::VERTEX_INDEX:
+        accessFlags = BitwiseEnumOR32(MemoryAccess::GPU_LOCAL, accessFlags);
+        break;
+    case MemoryUsage::UNIFORM:
+        accessFlags = BitwiseEnumOR32(MemoryAccess::CPU_WRITE, accessFlags);
+        break;
+    case MemoryUsage::SAMPLE_TEXTURE:
+        accessFlags = BitwiseEnumOR32(MemoryAccess::GPU_LOCAL, accessFlags);
+        break;
+    case MemoryUsage::UPLOAD_BUFFER:
+        accessFlags = BitwiseEnumOR32(MemoryAccess::CPU_WRITE, accessFlags);
+        break;
+    }
+
+    auto validPage = std::find_if(allocations_.begin(), allocations_.end(),
+        [&desc, accessFlags](MemoryPage const& page)
+        {
+            auto const usageValid = (page.accessFlags_ & accessFlags) == accessFlags;
+            auto const sizeValid = desc.size_ >= (page.size_ - page.nextFreeOffset_);
+
+            return usageValid && sizeValid;
+        });
+
+    if (validPage != allocations_.end()) {
+        GetNextFreePageRegion(*validPage, desc, region);
+    }
+    else {
+        auto const pageSize = defaultPageSizes_[desc.usage_];
+        auto newPage = AllocPage(accessFlags, desc.usage_, pageSize);
+        GetNextFreePageRegion(newPage, desc, region);
+    }
 }
 
-MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, std::uint64_t size)
+void MemoryController::GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryPageRegion& region)
+{
+    auto const alignedSize = RoundToMultipleOfPOT(desc.size_, desc.alignment_);
+
+    region.page_ = &page;
+    region.offset_ = page.nextFreeOffset_;
+    region.size_ = alignedSize;
+
+    page.nextFreeOffset_ += alignedSize;
+}
+
+MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage usage, std::size_t size)
 {    
     VkMemoryPropertyFlags memoryFlags = VK_FLAGS_NONE;
 
     if (accessFlags & MemoryAccess::CPU_COHERENT)
         memoryFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
-    if (accessFlags & MemoryAccess::GPU_ONLY)
+    if (accessFlags & MemoryAccess::GPU_LOCAL)
         memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
     if (accessFlags & MemoryAccess::CPU_WRITE)
@@ -85,6 +132,7 @@ MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, std::uint64_t 
     memory.size_ = info.allocationSize;
     memory.propertyFlags_ = properties[typeIndex].propertyFlags;
     memory.accessFlags_ = accessFlags;
+    memory.usage_ = usage;
     
     memory.bindCount_ = 0;
     memory.nextFreeOffset_ = 0;
@@ -92,6 +140,13 @@ MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, std::uint64_t 
     allocations_.emplace_back(memory);
 
     return allocations_[allocations_.size() - 1];
+}
+
+void MemoryController::FreePage(std::size_t pageIndex)
+{
+    auto& page = allocations_[pageIndex];
+    table_->vkFreeMemory(device_->Handle(), page.deviceMemory_, nullptr);
+    allocations_.erase(allocations_.begin() + pageIndex);
 }
 
 }
