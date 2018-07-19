@@ -98,7 +98,7 @@ void MemoryController::GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionD
     page.nextFreeOffset_ += size;
 }
 
-MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage usage, std::size_t size)
+MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage usage, std::uint64_t size)
 {    
     VkMemoryPropertyFlags memoryFlags = VK_FLAGS_NONE;
 
@@ -150,7 +150,7 @@ MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage us
     return allocations_[allocations_.size() - 1];
 }
 
-void MemoryController::FreePage(std::size_t pageIndex)
+void MemoryController::FreePage(std::uint64_t pageIndex)
 {
     auto& page = allocations_[pageIndex];
     table_->vkFreeMemory(device_->Handle(), page.deviceMemory_, nullptr);

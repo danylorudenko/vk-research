@@ -2,6 +2,8 @@
 
 #include "../Device.hpp"
 
+#include <cstdint>
+
 namespace VKW
 {
 
@@ -46,14 +48,14 @@ struct MemoryPage
 struct MemoryPageRegion
 {
     MemoryPage* page_;
-    std::size_t offset_;
-    std::size_t size_;
+    std::uint64_t offset_;
+    std::uint64_t size_;
 };
 
 struct MemoryPageRegionDesc
 {
-    std::size_t size_;
-    std::size_t alignment_;
+    std::uint64_t size_;
+    std::uint64_t alignment_;
     MemoryUsage usage_;
 };
 
@@ -76,8 +78,8 @@ public:
     void ProvideMemoryPageRegion(MemoryPageRegionDesc desc, MemoryPageRegion& regionOut);
 
 private:
-    MemoryPage& AllocPage(MemoryAccess access, MemoryUsage usage, std::size_t size);
-    void FreePage(std::size_t pageIndex);
+    MemoryPage& AllocPage(MemoryAccess access, MemoryUsage usage, std::uint64_t size);
+    void FreePage(std::uint64_t pageIndex);
 
     void GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryPageRegion& regionOut);
 

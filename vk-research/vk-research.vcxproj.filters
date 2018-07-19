@@ -125,5 +125,8 @@
     <ClInclude Include="src\vk_interface\resources\ResourcesController.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_interface\resources\Buffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

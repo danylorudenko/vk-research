@@ -164,6 +164,7 @@
     <ClInclude Include="src\vk_interface\Device.hpp" />
     <ClInclude Include="src\vk_interface\Instance.hpp" />
     <ClInclude Include="src\vk_interface\memory\MemoryController.hpp" />
+    <ClInclude Include="src\vk_interface\resources\Buffer.hpp" />
     <ClInclude Include="src\vk_interface\resources\ResourcesController.hpp" />
     <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\VulkanImportTable.hpp" />

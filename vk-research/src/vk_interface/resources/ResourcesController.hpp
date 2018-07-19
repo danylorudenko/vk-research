@@ -2,6 +2,18 @@
 
 #include "..\..\class_features\NonCopyable.hpp"
 
+#include <vulkan/vulkan.h>
+
+
+class Image
+{
+    VkImage handle_;
+};
+
+class ImageHandle
+{
+
+};
 
 
 
