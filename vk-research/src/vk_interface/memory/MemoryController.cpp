@@ -16,7 +16,11 @@ MemoryController::MemoryController(VulkanImportTable* table, Device* device)
     : table_{ table }
     , device_{ device }
 {
-
+    defaultPageSizes_[VERTEX_INDEX] = 1024 * 1024;
+    defaultPageSizes_[UPLOAD_BUFFER] = 1024 * 1024 * 5;
+    defaultPageSizes_[UNIFORM] = 1024 * 512;
+    defaultPageSizes_[SAMPLE_TEXTURE] = 1024 * 1024 * 64;
+    defaultPageSizes_[COLOR_ATTACHMENT] = 1024 * 1024 * 64;
 }
 
 MemoryController::MemoryController(MemoryController&& rhs)
@@ -40,7 +44,7 @@ MemoryController::~MemoryController()
     }
 }
 
-void MemoryController::ProvideMemoryPageRegion(MemoryPageRegionDesc desc, MemoryPageRegion& region)
+void MemoryController::ProvideMemoryPageRegion(MemoryPageRegionDesc desc, MemoryPageRegion& regionOut)
 {
     MemoryAccess accessFlags = MemoryAccess::NONE;
 
@@ -63,31 +67,35 @@ void MemoryController::ProvideMemoryPageRegion(MemoryPageRegionDesc desc, Memory
     auto validPage = std::find_if(allocations_.begin(), allocations_.end(),
         [&desc, accessFlags](MemoryPage const& page)
         {
-            auto const usageValid = (page.accessFlags_ & accessFlags) == accessFlags;
+            auto const accessValid = (page.accessFlags_ & accessFlags) == accessFlags;
             auto const sizeValid = desc.size_ >= (page.size_ - page.nextFreeOffset_);
+            auto const usageValid = desc.usage_ == page.usage_;
 
-            return usageValid && sizeValid;
+            return accessValid && sizeValid && usageValid;
         });
 
     if (validPage != allocations_.end()) {
-        GetNextFreePageRegion(*validPage, desc, region);
+        GetNextFreePageRegion(*validPage, desc, regionOut);
     }
     else {
-        auto const pageSize = defaultPageSizes_[desc.usage_];
+        auto const defaultPageSize = defaultPageSizes_[desc.usage_];
+        auto const requestedSize = desc.size_ + desc.alignment_;
+        auto const pageSize = requestedSize > defaultPageSize ? requestedSize : defaultPageSize;
+
         auto newPage = AllocPage(accessFlags, desc.usage_, pageSize);
-        GetNextFreePageRegion(newPage, desc, region);
+        GetNextFreePageRegion(newPage, desc, regionOut);
     }
 }
 
-void MemoryController::GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryPageRegion& region)
+void MemoryController::GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryPageRegion& regionOut)
 {
-    auto const alignedSize = RoundToMultipleOfPOT(desc.size_, desc.alignment_);
+    auto const size = desc.size_ + desc.alignment_;
 
-    region.page_ = &page;
-    region.offset_ = page.nextFreeOffset_;
-    region.size_ = alignedSize;
+    regionOut.page_ = &page;
+    regionOut.offset_ = RoundToMultipleOfPOT(page.nextFreeOffset_, desc.alignment_);
+    regionOut.size_ = size;
 
-    page.nextFreeOffset_ += alignedSize;
+    page.nextFreeOffset_ += size;
 }
 
 MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage usage, std::size_t size)
@@ -121,7 +129,7 @@ MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage us
     VkMemoryAllocateInfo info;
     info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     info.pNext = nullptr;
-    info.allocationSize = RoundToMultipleOfPOT(size, 256);
+    info.allocationSize = size;
     info.memoryTypeIndex = typeIndex;
 
     VkDeviceMemory deviceMemory = VK_NULL_HANDLE;

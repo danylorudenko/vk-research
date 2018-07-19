@@ -73,13 +73,13 @@ public:
     ~MemoryController();
 
 public:
-    void ProvideMemoryPageRegion(MemoryPageRegionDesc desc, MemoryPageRegion& region);
+    void ProvideMemoryPageRegion(MemoryPageRegionDesc desc, MemoryPageRegion& regionOut);
 
 private:
     MemoryPage& AllocPage(MemoryAccess access, MemoryUsage usage, std::size_t size);
     void FreePage(std::size_t pageIndex);
 
-    void GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryPageRegion& region);
+    void GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryPageRegion& regionOut);
 
 private:
     VulkanImportTable* table_;
