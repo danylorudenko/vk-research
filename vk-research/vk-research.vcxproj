@@ -138,6 +138,8 @@
     <ClCompile Include="src\vk_interface\Device.cpp" />
     <ClCompile Include="src\vk_interface\Instance.cpp" />
     <ClCompile Include="src\vk_interface\memory\MemoryController.cpp" />
+    <ClCompile Include="src\vk_interface\resources\BufferLoader.cpp" />
+    <ClCompile Include="src\vk_interface\resources\ResourcesController.cpp" />
     <ClCompile Include="src\vk_interface\VulkanImportTable.cpp" />
     <ClCompile Include="src\vk_interface\VulkanLoader.cpp" />
   </ItemGroup>
@@ -165,6 +167,7 @@
     <ClInclude Include="src\vk_interface\Instance.hpp" />
     <ClInclude Include="src\vk_interface\memory\MemoryController.hpp" />
     <ClInclude Include="src\vk_interface\resources\Buffer.hpp" />
+    <ClInclude Include="src\vk_interface\resources\BufferLoader.hpp" />
     <ClInclude Include="src\vk_interface\resources\ResourcesController.hpp" />
     <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\VulkanImportTable.hpp" />

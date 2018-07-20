@@ -1,5 +1,6 @@
 #include "MemoryController.hpp"
-#include "../Tools.hpp"
+#include "..\Device.hpp"
+#include "..\Tools.hpp"
 
 #include <algorithm>
 

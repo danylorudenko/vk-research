@@ -1,8 +1,10 @@
 #pragma once
 
-#include "../Device.hpp"
-
 #include <cstdint>
+#include <vector>
+#include <vulkan/vulkan.h>
+#include "..\..\class_features\NonCopyable.hpp"
+#include "..\VulkanImportTable.hpp"
 
 namespace VKW
 {
@@ -10,14 +12,13 @@ namespace VKW
 
 enum MemoryUsage
 {
-    BEGIN = VERTEX_INDEX,
-
     VERTEX_INDEX = 0,
     UPLOAD_BUFFER,
     UNIFORM,
     SAMPLE_TEXTURE,
     COLOR_ATTACHMENT,
 
+    BEGIN = VERTEX_INDEX,
     END = COLOR_ATTACHMENT + 1,
     MAX = END
 };
@@ -61,6 +62,7 @@ struct MemoryPageRegionDesc
 
 
 
+class Device;
 
 class MemoryController
     : public NonCopyable

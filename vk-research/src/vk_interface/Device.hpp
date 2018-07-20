@@ -7,6 +7,8 @@
 #include "VulkanImportTable.hpp"
 #include "Instance.hpp"
 
+#include "memory/MemoryController.hpp"
+
 namespace VKW
 {
 
@@ -39,7 +41,8 @@ public:
 
     ~Device();
 
-    Device::PhysicalDeviceProperties const& Properties() const;
+    inline VKW::Device::PhysicalDeviceProperties const& Properties() const;
+    inline VKW::MemoryController& MemoryController();
 
     VkDevice Handle() const;
     operator bool() const;
@@ -64,6 +67,8 @@ private:
 
     VkPhysicalDevice physicalDevice_;
     VKW::Device::PhysicalDeviceProperties physicalDeviceProperties_;
+
+    VKW::MemoryController memoryController_;
 
 };
 

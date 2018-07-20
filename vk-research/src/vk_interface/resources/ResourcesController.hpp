@@ -4,6 +4,8 @@
 
 #include <vulkan/vulkan.h>
 
+namespace VKW
+{
 
 class Image
 {
@@ -30,3 +32,6 @@ public:
 private:
 
 };
+
+
+}

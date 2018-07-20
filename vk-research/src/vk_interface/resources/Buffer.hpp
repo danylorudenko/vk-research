@@ -10,14 +10,9 @@ enum BufferUsage
     UPLOAD_BUFFER
 };
 
-class Buffer
+struct Buffer
 {
     VkBuffer handle_;
-};
-
-class BufferHandle
-{
-
 };
 
 struct BufferCreateInfo

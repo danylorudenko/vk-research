@@ -169,9 +169,14 @@ Device::operator bool() const
     return device_ != VK_NULL_HANDLE;
 }
 
-Device::PhysicalDeviceProperties const& Device::Properties() const
+VKW::Device::PhysicalDeviceProperties const& Device::Properties() const
 {
     return physicalDeviceProperties_;
+}
+
+VKW::MemoryController& Device::MemoryController()
+{
+    return memoryController_;
 }
 
 Device::~Device()
