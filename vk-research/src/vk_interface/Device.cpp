@@ -138,6 +138,8 @@ Device::Device(VulkanImportTable* table, Instance& instance, std::vector<std::st
         table_->GetDeviceProcAddresses(device_);
     }
 
+    memoryController_ = VKW::MemoryController{ table_, this };
+    bufferLoader_ = VKW::BufferLoader{ table_, this };
 }
 
 Device::Device(Device&& rhs)
@@ -155,6 +157,8 @@ Device& Device::operator=(Device&& rhs)
     std::swap(table_, rhs.table_);
     std::swap(physicalDevice_, rhs.physicalDevice_);
     std::swap(physicalDeviceProperties_, rhs.physicalDeviceProperties_);
+    std::swap(memoryController_, rhs.memoryController_);
+    std::swap(bufferLoader_, rhs.bufferLoader_);
 
     return *this;
 }
@@ -177,6 +181,11 @@ VKW::Device::PhysicalDeviceProperties const& Device::Properties() const
 VKW::MemoryController& Device::MemoryController()
 {
     return memoryController_;
+}
+
+VKW::BufferLoader& Device::BufferLoader()
+{
+    return bufferLoader_;
 }
 
 Device::~Device()

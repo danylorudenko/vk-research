@@ -6,8 +6,8 @@ namespace VKW
 {
 
 VulkanLoader::VulkanLoader(bool debug)
-    : vulkanLibrary_{ "vulkan-1.dll" }
-    , table_{ vulkanLibrary_ }
+    : vulkanLibrary_{ std::make_unique<DynamicLibrary>("vulkan-1.dll") }
+    , table_{ std::make_unique<VulkanImportTable>(*vulkanLibrary_) }
 {
 
     auto instanceExtensions = std::vector<std::string>{ "VK_KHR_surface", VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
@@ -19,18 +19,18 @@ VulkanLoader::VulkanLoader(bool debug)
         instanceLayers.emplace_back("VK_LAYER_LUNARG_standard_validation");
 
 
-    instance_ = VKW::Instance{ 
-        &table_, 
+    instance_ = std::make_unique<VKW::Instance>( 
+        table_.get(), 
         instanceExtensions,
         instanceLayers,
         debug
-    };
+    );
 
-    device_ = VKW::Device{ 
-        &table_, 
-        instance_, 
-        { "VK_KHR_swapchain" } 
-    };
+    device_ = std::make_unique<VKW::Device>( 
+        table_.get(), 
+        *instance_, 
+        std::vector<std::string>{ "VK_KHR_swapchain" } 
+    );
 }
 
 VulkanLoader::~VulkanLoader()
@@ -40,7 +40,12 @@ VulkanLoader::~VulkanLoader()
 
 VulkanImportTable const& VulkanLoader::Table() const
 {
-    return table_;
+    return *table_;
+}
+
+Device& VulkanLoader::Device()
+{
+    return *device_;
 }
 
 }

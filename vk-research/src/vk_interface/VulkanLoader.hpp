@@ -1,8 +1,9 @@
 #pragma once
 
+#include <memory>
+
 #include "..\class_features\NonCopyable.hpp"
 #include "..\system\DynamicLibrary.hpp"
-
 
 #include "VulkanImportTable.hpp"
 #include "Instance.hpp"
@@ -22,14 +23,15 @@ public:
 
     ~VulkanLoader();
 
-    VulkanImportTable const& Table() const;
+    VKW::VulkanImportTable const& Table() const;
+    VKW::Device& Device();
 
 private:
-    DynamicLibrary vulkanLibrary_;
-    VulkanImportTable table_;
+    std::unique_ptr<DynamicLibrary> vulkanLibrary_;
+    std::unique_ptr<VKW::VulkanImportTable> table_;
 
-    Instance instance_;
-    Device device_;
+    std::unique_ptr<VKW::Instance> instance_;
+    std::unique_ptr<VKW::Device> device_;
 
 };
 

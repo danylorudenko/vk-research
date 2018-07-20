@@ -36,7 +36,18 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
 
 void VulkanApplicationDelegate::start()
 {
+    auto& device = vulkanLoader_.Device();
 
+    BufferCreateInfo buffInfo;
+    buffInfo.size_ = 256;
+    buffInfo.alignment_ = 4;
+    buffInfo.usage_ = BufferUsage::VERTEX_INDEX;
+
+    Buffer buffer = device.BufferLoader().LoadBuffer(buffInfo);
+
+    ///////
+
+    device.BufferLoader().UnloadBuffer(buffer);
 }
 
 void VulkanApplicationDelegate::update()

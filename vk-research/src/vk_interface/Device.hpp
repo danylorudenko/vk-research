@@ -8,6 +8,7 @@
 #include "Instance.hpp"
 
 #include "memory/MemoryController.hpp"
+#include "resources/BufferLoader.hpp"
 
 namespace VKW
 {
@@ -41,8 +42,9 @@ public:
 
     ~Device();
 
-    inline VKW::Device::PhysicalDeviceProperties const& Properties() const;
-    inline VKW::MemoryController& MemoryController();
+    VKW::Device::PhysicalDeviceProperties const& Properties() const;
+    VKW::MemoryController& MemoryController();
+    VKW::BufferLoader& BufferLoader();
 
     VkDevice Handle() const;
     operator bool() const;
@@ -69,6 +71,7 @@ private:
     VKW::Device::PhysicalDeviceProperties physicalDeviceProperties_;
 
     VKW::MemoryController memoryController_;
+    VKW::BufferLoader bufferLoader_;
 
 };
 
