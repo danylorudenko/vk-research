@@ -1,11 +1,11 @@
-#include "VulkanImportTable.hpp"
+#include "ImportTable.hpp"
 
 namespace VKW
 {
 
-VulkanImportTable::VulkanImportTable() = default;
+ImportTable::ImportTable() = default;
 
-VulkanImportTable::VulkanImportTable(DynamicLibrary& vulkanLibrary)
+ImportTable::ImportTable(DynamicLibrary& vulkanLibrary)
 {
     assert(vulkanLibrary);
     
@@ -19,7 +19,7 @@ VulkanImportTable::VulkanImportTable(DynamicLibrary& vulkanLibrary)
     vkEnumerateInstanceExtensionProperties = vulkanLibrary.GetProcAddress<PFN_vkEnumerateInstanceExtensionProperties>("vkEnumerateInstanceExtensionProperties");
 }
 
-void VulkanImportTable::GetInstanceProcAddresses(VkInstance instance)
+void ImportTable::GetInstanceProcAddresses(VkInstance instance)
 {
     vkEnumeratePhysicalDevices = reinterpret_cast<PFN_vkEnumeratePhysicalDevices>(vkGetInstanceProcAddr(instance, "vkEnumeratePhysicalDevices"));
     vkEnumerateDeviceExtensionProperties = reinterpret_cast<PFN_vkEnumerateDeviceExtensionProperties>(vkGetInstanceProcAddr(instance, "vkEnumerateDeviceExtensionProperties"));
@@ -37,7 +37,7 @@ void VulkanImportTable::GetInstanceProcAddresses(VkInstance instance)
     vkDestroyDevice = reinterpret_cast<PFN_vkDestroyDevice>(vkGetInstanceProcAddr(instance, "vkDestroyDevice"));
 }
 
-void VulkanImportTable::GetDeviceProcAddresses(VkDevice device)
+void ImportTable::GetDeviceProcAddresses(VkDevice device)
 {
     vkAllocateMemory = reinterpret_cast<PFN_vkAllocateMemory>(vkGetDeviceProcAddr(device, "vkAllocateMemory"));
     vkFreeMemory = reinterpret_cast<PFN_vkFreeMemory>(vkGetDeviceProcAddr(device, "vkFreeMemory"));

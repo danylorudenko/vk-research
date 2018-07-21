@@ -11,9 +11,10 @@ BufferLoader::BufferLoader()
 {
 }
 
-BufferLoader::BufferLoader(VulkanImportTable* table, Device* device)
+BufferLoader::BufferLoader(ImportTable* table, Device* device, MemoryController* memoryController)
     : table_{ table }
     , device_{ device }
+    , memoryController_{ memoryController }
 {
 }
 
@@ -28,6 +29,7 @@ BufferLoader& BufferLoader::operator=(BufferLoader&& rhs)
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
+    std::swap(memoryController_, rhs.memoryController_);
 
     return *this;
 }
@@ -73,7 +75,7 @@ Buffer BufferLoader::LoadBuffer(BufferCreateInfo const& desc)
     memoryRegion.size_ = 0;
     memoryRegion.offset_ = 0;
 
-    device_->MemoryController().ProvideMemoryPageRegion(regionDesc, memoryRegion);
+    memoryController_->ProvideMemoryPageRegion(regionDesc, memoryRegion);
     assert(memoryRegion.page_ != nullptr && "Couldn't provide memory region for the buffer.");
 
     VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));

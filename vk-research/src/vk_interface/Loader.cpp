@@ -1,13 +1,13 @@
-#include "VulkanLoader.hpp"
+#include "Loader.hpp"
 #include <iostream>
 
 
 namespace VKW
 {
 
-VulkanLoader::VulkanLoader(bool debug)
+Loader::Loader(bool debug)
     : vulkanLibrary_{ std::make_unique<DynamicLibrary>("vulkan-1.dll") }
-    , table_{ std::make_unique<VulkanImportTable>(*vulkanLibrary_) }
+    , table_{ std::make_unique<ImportTable>(*vulkanLibrary_) }
 {
 
     auto instanceExtensions = std::vector<std::string>{ "VK_KHR_surface", VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
@@ -31,21 +31,44 @@ VulkanLoader::VulkanLoader(bool debug)
         *instance_, 
         std::vector<std::string>{ "VK_KHR_swapchain" } 
     );
+
+    memoryController_ = std::make_unique<VKW::MemoryController>(
+        table_.get(),
+        device_.get()
+    );
+
+    bufferLoader_ = std::make_unique<VKW::BufferLoader>(
+        table_.get(),
+        device_.get(),
+        memoryController_.get()
+    );
 }
 
-VulkanLoader::~VulkanLoader()
+Loader::~Loader()
 {
     
 }
 
-VulkanImportTable const& VulkanLoader::Table() const
+ImportTable const& Loader::Table() const
 {
     return *table_;
 }
 
-Device& VulkanLoader::Device()
+Device& Loader::Device()
 {
     return *device_;
 }
+
+
+VKW::MemoryController& Loader::MemoryController()
+{
+    return *memoryController_;
+}
+
+VKW::BufferLoader& Loader::BufferLoader()
+{
+    return *bufferLoader_;
+}
+
 
 }

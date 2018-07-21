@@ -1,8 +1,9 @@
 #pragma once
 
 #include "..\..\class_features\NonCopyable.hpp"
+#include "..\ImportTable.hpp"
 #include "Buffer.hpp"
-#include "..\VulkanImportTable.hpp"
+#include "..\memory\MemoryController.hpp"
 
 namespace VKW
 {
@@ -14,7 +15,7 @@ class BufferLoader
 {
 public:
     BufferLoader();
-    BufferLoader(VulkanImportTable* table, Device* device);
+    BufferLoader(ImportTable* table, Device* device, MemoryController* memoryController);
 
     BufferLoader(BufferLoader&& rhs);
     BufferLoader& operator=(BufferLoader&& rhs);
@@ -25,8 +26,9 @@ public:
     ~BufferLoader();
 
 private:
-    VulkanImportTable* table_;
+    ImportTable* table_;
     Device* device_;
+    MemoryController* memoryController_;
 };
 
 }

@@ -140,8 +140,8 @@
     <ClCompile Include="src\vk_interface\memory\MemoryController.cpp" />
     <ClCompile Include="src\vk_interface\resources\BufferLoader.cpp" />
     <ClCompile Include="src\vk_interface\resources\ResourcesController.cpp" />
-    <ClCompile Include="src\vk_interface\VulkanImportTable.cpp" />
-    <ClCompile Include="src\vk_interface\VulkanLoader.cpp" />
+    <ClCompile Include="src\vk_interface\ImportTable.cpp" />
+    <ClCompile Include="src\vk_interface\Loader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\vulkan\vk_platform.h" />
@@ -170,8 +170,8 @@
     <ClInclude Include="src\vk_interface\resources\BufferLoader.hpp" />
     <ClInclude Include="src\vk_interface\resources\ResourcesController.hpp" />
     <ClInclude Include="src\vk_interface\Tools.hpp" />
-    <ClInclude Include="src\vk_interface\VulkanImportTable.hpp" />
-    <ClInclude Include="src\vk_interface\VulkanLoader.hpp" />
+    <ClInclude Include="src\vk_interface\ImportTable.hpp" />
+    <ClInclude Include="src\vk_interface\Loader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,7 +15,7 @@ Instance::Instance()
     
 }
 
-Instance::Instance(VulkanImportTable* importTable, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers, bool debug)
+Instance::Instance(ImportTable* importTable, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers, bool debug)
     : instance_{ VK_NULL_HANDLE }
     , table_{ importTable }
     , debugCallback_{ VK_NULL_HANDLE }

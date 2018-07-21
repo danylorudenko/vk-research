@@ -13,7 +13,7 @@ MemoryController::MemoryController()
 { 
 }
 
-MemoryController::MemoryController(VulkanImportTable* table, Device* device)
+MemoryController::MemoryController(ImportTable* table, Device* device)
     : table_{ table }
     , device_{ device }
 {

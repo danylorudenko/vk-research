@@ -3,7 +3,10 @@
 #include <vulkan/vulkan.h>
 #include <cstdint>
 
-enum BufferUsage
+namespace VKW
+{
+
+enum class BufferUsage
 {
     VERTEX_INDEX,
     UNIFORM,
@@ -21,3 +24,5 @@ struct BufferCreateInfo
     std::uint64_t alignment_;
     BufferUsage usage_;
 };
+
+}

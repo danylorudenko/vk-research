@@ -5,7 +5,7 @@
 
 #include "..\class_features\NonCopyable.hpp"
 
-#include "VulkanImportTable.hpp"
+#include "ImportTable.hpp"
 
 namespace VKW
 {
@@ -15,7 +15,7 @@ class Instance
 {
 public:
     Instance();
-    Instance(VulkanImportTable* table, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers, bool debug);
+    Instance(ImportTable* table, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers, bool debug);
 
     Instance(Instance&& rhs);
     Instance& operator=(Instance&& rhs);
@@ -39,7 +39,7 @@ public:
 
 
 private:
-    VKW::VulkanImportTable* table_;
+    VKW::ImportTable* table_;
     VkInstance instance_;
     VkDebugReportCallbackEXT debugCallback_;
 };

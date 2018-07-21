@@ -4,7 +4,7 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 #include "..\..\class_features\NonCopyable.hpp"
-#include "..\VulkanImportTable.hpp"
+#include "..\ImportTable.hpp"
 
 namespace VKW
 {
@@ -69,7 +69,7 @@ class MemoryController
 {
 public:
     MemoryController();
-    MemoryController(VulkanImportTable* table, Device* device);
+    MemoryController(ImportTable* table, Device* device);
 
     MemoryController(MemoryController&& rhs);
     MemoryController& operator=(MemoryController&& rhs);
@@ -86,7 +86,7 @@ private:
     void GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryPageRegion& regionOut);
 
 private:
-    VulkanImportTable* table_;
+    ImportTable* table_;
     Device* device_;
 
     VkDeviceSize defaultPageSizes_[MemoryUsage::MAX];

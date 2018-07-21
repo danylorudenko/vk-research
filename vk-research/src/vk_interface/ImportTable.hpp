@@ -7,11 +7,11 @@
 namespace VKW
 {
 
-class VulkanImportTable
+class ImportTable
 {
 public:
-    VulkanImportTable();
-    VulkanImportTable(DynamicLibrary& vulkanLibrary);
+    ImportTable();
+    ImportTable(DynamicLibrary& vulkanLibrary);
 
     void GetInstanceProcAddresses(VkInstance instance);
     void GetDeviceProcAddresses(VkDevice device);

@@ -4,11 +4,8 @@
 
 #include "..\class_features\NonCopyable.hpp"
 
-#include "VulkanImportTable.hpp"
+#include "ImportTable.hpp"
 #include "Instance.hpp"
-
-#include "memory/MemoryController.hpp"
-#include "resources/BufferLoader.hpp"
 
 namespace VKW
 {
@@ -35,7 +32,7 @@ public:
 
 public:
     Device();
-    Device(VulkanImportTable* table, Instance& instance, std::vector<std::string> const& requiredExtensions);
+    Device(ImportTable* table, Instance& instance, std::vector<std::string> const& requiredExtensions);
 
     Device(Device&& rhs);
     Device& operator=(Device&& rhs);
@@ -43,8 +40,6 @@ public:
     ~Device();
 
     VKW::Device::PhysicalDeviceProperties const& Properties() const;
-    VKW::MemoryController& MemoryController();
-    VKW::BufferLoader& BufferLoader();
 
     VkDevice Handle() const;
     operator bool() const;
@@ -65,14 +60,10 @@ private:
 
 private:
     VkDevice device_;
-    VulkanImportTable* table_;
+    ImportTable* table_;
 
     VkPhysicalDevice physicalDevice_;
     VKW::Device::PhysicalDeviceProperties physicalDeviceProperties_;
-
-    VKW::MemoryController memoryController_;
-    VKW::BufferLoader bufferLoader_;
-
 };
 
 }

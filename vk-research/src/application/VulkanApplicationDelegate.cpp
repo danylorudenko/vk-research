@@ -1,4 +1,5 @@
 #include "VulkanApplicationDelegate.hpp"
+#include "..\vk_interface\resources\BufferLoader.hpp"
 
 VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug)
     : mainWindow_ {
@@ -38,16 +39,16 @@ void VulkanApplicationDelegate::start()
 {
     auto& device = vulkanLoader_.Device();
 
-    BufferCreateInfo buffInfo;
+    VKW::BufferCreateInfo buffInfo;
     buffInfo.size_ = 256;
     buffInfo.alignment_ = 4;
-    buffInfo.usage_ = BufferUsage::VERTEX_INDEX;
+    buffInfo.usage_ = VKW::BufferUsage::VERTEX_INDEX;
 
-    Buffer buffer = device.BufferLoader().LoadBuffer(buffInfo);
+    VKW::Buffer buffer = vulkanLoader_.BufferLoader().LoadBuffer(buffInfo);
 
     ///////
 
-    device.BufferLoader().UnloadBuffer(buffer);
+    vulkanLoader_.BufferLoader().UnloadBuffer(buffer);
 }
 
 void VulkanApplicationDelegate::update()
