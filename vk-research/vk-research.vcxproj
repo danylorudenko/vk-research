@@ -142,6 +142,8 @@
     <ClCompile Include="src\vk_interface\resources\ResourcesController.cpp" />
     <ClCompile Include="src\vk_interface\ImportTable.cpp" />
     <ClCompile Include="src\vk_interface\Loader.cpp" />
+    <ClCompile Include="src\vk_interface\worker\Worker.cpp" />
+    <ClCompile Include="src\vk_interface\worker\WorkersControlSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\vulkan\vk_platform.h" />
@@ -166,12 +168,13 @@
     <ClInclude Include="src\vk_interface\Device.hpp" />
     <ClInclude Include="src\vk_interface\Instance.hpp" />
     <ClInclude Include="src\vk_interface\memory\MemoryController.hpp" />
-    <ClInclude Include="src\vk_interface\resources\Buffer.hpp" />
     <ClInclude Include="src\vk_interface\resources\BufferLoader.hpp" />
     <ClInclude Include="src\vk_interface\resources\ResourcesController.hpp" />
     <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\ImportTable.hpp" />
     <ClInclude Include="src\vk_interface\Loader.hpp" />
+    <ClInclude Include="src\vk_interface\worker\Worker.hpp" />
+    <ClInclude Include="src\vk_interface\worker\WorkersControlSystem.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

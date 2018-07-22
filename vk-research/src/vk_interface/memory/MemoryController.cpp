@@ -13,9 +13,9 @@ MemoryController::MemoryController()
 { 
 }
 
-MemoryController::MemoryController(ImportTable* table, Device* device)
-    : table_{ table }
-    , device_{ device }
+MemoryController::MemoryController(MemoryControllerDesc const& desc)
+    : table_{ desc.table_ }
+    , device_{ desc.device_ }
 {
     defaultPageSizes_[VERTEX_INDEX] = 1024 * 1024;
     defaultPageSizes_[UPLOAD_BUFFER] = 1024 * 1024 * 5;

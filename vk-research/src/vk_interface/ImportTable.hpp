@@ -71,6 +71,16 @@ public:
     PFN_vkDestroyBufferView vkDestroyBufferView = nullptr;
     PFN_vkCreateImageView vkCreateImageView = nullptr;
     PFN_vkDestroyImageView vkDestroyImageView = nullptr;
+
+    PFN_vkGetDeviceQueue vkGetDeviceQueue = nullptr;
+
+    PFN_vkCreateCommandPool vkCreateCommandPool = nullptr;
+    PFN_vkResetCommandPool vkResetCommandPool = nullptr;
+    PFN_vkDestroyCommandPool vkDestroyCommandPool = nullptr;
+    
+    PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers = nullptr;
+    PFN_vkResetCommandBuffer vkResetCommandBuffer = nullptr;
+    PFN_vkFreeCommandBuffers vkFreeCommandBuffers = nullptr;
 };
 
 }

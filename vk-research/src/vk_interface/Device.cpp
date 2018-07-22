@@ -17,18 +17,18 @@ Device::Device()
 {
 }
 
-Device::Device(ImportTable* table, Instance& instance, std::vector<std::string> const& requiredExtensions)
+Device::Device(DeviceDesc const& desc)
     : device_{ VK_NULL_HANDLE }
-    , table_{ table }
+    , table_{ desc.table_ }
     , physicalDevice_{ VK_NULL_HANDLE }
     , physicalDeviceProperties_{}
 {
     std::uint32_t physicalDeviceCount = 0;
     std::vector<VkPhysicalDevice> physicalDevices;
     {
-        VK_ASSERT(table_->vkEnumeratePhysicalDevices(instance.Handle(), &physicalDeviceCount, nullptr));
+        VK_ASSERT(table_->vkEnumeratePhysicalDevices(desc.instance_->Handle(), &physicalDeviceCount, nullptr));
         physicalDevices.resize(physicalDeviceCount);
-        VK_ASSERT(table_->vkEnumeratePhysicalDevices(instance.Handle(), &physicalDeviceCount, physicalDevices.data()));
+        VK_ASSERT(table_->vkEnumeratePhysicalDevices(desc.instance_->Handle(), &physicalDeviceCount, physicalDevices.data()));
     }
     
 
@@ -48,7 +48,7 @@ Device::Device(ImportTable* table, Instance& instance, std::vector<std::string> 
             
             RequestDeviceProperties(physicalDevices[i], *deviceProperties);
 
-            auto deviceValid = IsPhysicalDeviceValid(*deviceProperties, requiredExtensions);
+            auto deviceValid = IsPhysicalDeviceValid(*deviceProperties, desc.requiredExtensions_);
             if (deviceValid) {
                 validPhysicalDevices.emplace_back(physicalDevices[i]);
             }
@@ -117,7 +117,7 @@ Device::Device(ImportTable* table, Instance& instance, std::vector<std::string> 
 
         std::vector<char const*> requiredExtensionsC_str{};
         std::transform(
-            requiredExtensions.begin(), requiredExtensions.end(), 
+            desc.requiredExtensions_.begin(), desc.requiredExtensions_.end(), 
             std::back_inserter(requiredExtensionsC_str), 
             [](auto const& string){ return string.c_str(); });
 

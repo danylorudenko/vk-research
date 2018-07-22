@@ -10,6 +10,13 @@
 namespace VKW
 {
 
+struct DeviceDesc
+{
+    ImportTable* table_; 
+    Instance* instance_; 
+    std::vector<std::string> requiredExtensions_;
+};
+
 class Device
     : public NonCopyable
 {
@@ -32,7 +39,7 @@ public:
 
 public:
     Device();
-    Device(ImportTable* table, Instance& instance, std::vector<std::string> const& requiredExtensions);
+    Device(DeviceDesc const& rhs);
 
     Device(Device&& rhs);
     Device& operator=(Device&& rhs);

@@ -10,12 +10,20 @@
 namespace VKW
 {
 
+struct InstanceDesc
+{
+    ImportTable* table_;
+    std::vector<std::string> requiredInstanceExtensions_;
+    std::vector<std::string> requiredInstanceLayers_;
+    bool debug_;
+};
+
 class Instance
     : public NonCopyable
 {
 public:
     Instance();
-    Instance(ImportTable* table, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers, bool debug);
+    Instance(InstanceDesc const& decs);
 
     Instance(Instance&& rhs);
     Instance& operator=(Instance&& rhs);

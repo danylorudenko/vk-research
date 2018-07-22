@@ -11,10 +11,10 @@ BufferLoader::BufferLoader()
 {
 }
 
-BufferLoader::BufferLoader(ImportTable* table, Device* device, MemoryController* memoryController)
-    : table_{ table }
-    , device_{ device }
-    , memoryController_{ memoryController }
+BufferLoader::BufferLoader(BufferLoaderDesc const& desc)
+    : table_{ desc.table_ }
+    , device_{ desc.device_ }
+    , memoryController_{ desc.memoryController_ }
 {
 }
 

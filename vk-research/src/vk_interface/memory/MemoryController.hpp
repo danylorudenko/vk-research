@@ -64,12 +64,18 @@ struct MemoryPageRegionDesc
 
 class Device;
 
+struct MemoryControllerDesc
+{
+    ImportTable* table_;
+    Device* device_;
+};
+
 class MemoryController
     : public NonCopyable
 {
 public:
     MemoryController();
-    MemoryController(ImportTable* table, Device* device);
+    MemoryController(MemoryControllerDesc const& desc);
 
     MemoryController(MemoryController&& rhs);
     MemoryController& operator=(MemoryController&& rhs);

@@ -18,30 +18,39 @@ Loader::Loader(bool debug)
     if (debug)
         instanceLayers.emplace_back("VK_LAYER_LUNARG_standard_validation");
 
+    VKW::InstanceDesc instanceDesc;
+    instanceDesc.table_ = table_.get();
+    instanceDesc.requiredInstanceExtensions_ = instanceExtensions;
+    instanceDesc.requiredInstanceLayers_ = instanceLayers;
+    instanceDesc.debug_ = debug;
 
-    instance_ = std::make_unique<VKW::Instance>( 
-        table_.get(), 
-        instanceExtensions,
-        instanceLayers,
-        debug
-    );
+    instance_ = std::make_unique<VKW::Instance>(instanceDesc);
 
-    device_ = std::make_unique<VKW::Device>( 
-        table_.get(), 
-        *instance_, 
-        std::vector<std::string>{ "VK_KHR_swapchain" } 
-    );
 
-    memoryController_ = std::make_unique<VKW::MemoryController>(
-        table_.get(),
-        device_.get()
-    );
 
-    bufferLoader_ = std::make_unique<VKW::BufferLoader>(
-        table_.get(),
-        device_.get(),
-        memoryController_.get()
-    );
+    VKW::DeviceDesc deviceDesc;
+    deviceDesc.table_ = table_.get();
+    deviceDesc.instance_ = instance_.get();
+    deviceDesc.requiredExtensions_ = { "VK_KHR_swapchain" };
+
+    device_ = std::make_unique<VKW::Device>(deviceDesc);
+    
+
+
+    VKW::MemoryControllerDesc memoryControllerDesc;
+    memoryControllerDesc.table_ = table_.get();
+    memoryControllerDesc.device_ = device_.get();
+
+    memoryController_ = std::make_unique<VKW::MemoryController>(memoryControllerDesc);
+
+
+
+    VKW::BufferLoaderDesc bufferLoaderDesc;
+    bufferLoaderDesc.table_ = table_.get();
+    bufferLoaderDesc.device_ = device_.get();
+    bufferLoaderDesc.memoryController_ = memoryController_.get();
+
+    bufferLoader_ = std::make_unique<VKW::BufferLoader>(bufferLoaderDesc);
 }
 
 Loader::~Loader()

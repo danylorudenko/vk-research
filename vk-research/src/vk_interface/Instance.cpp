@@ -15,9 +15,9 @@ Instance::Instance()
     
 }
 
-Instance::Instance(ImportTable* importTable, std::vector<std::string> const& requiredInstanceExtensions, std::vector<std::string> const& requiredInstanceLayers, bool debug)
+Instance::Instance(InstanceDesc const& desc)
     : instance_{ VK_NULL_HANDLE }
-    , table_{ importTable }
+    , table_{ desc.table_ }
     , debugCallback_{ VK_NULL_HANDLE }
 {
     std::uint32_t layerPropertiesCount = 0;
@@ -28,11 +28,11 @@ Instance::Instance(ImportTable* importTable, std::vector<std::string> const& req
 
 
     {
-        VK_ASSERT(importTable->vkEnumerateInstanceLayerProperties(&layerPropertiesCount, nullptr));
+        VK_ASSERT(table_->vkEnumerateInstanceLayerProperties(&layerPropertiesCount, nullptr));
         instanceLayerProperties.resize(layerPropertiesCount);
-        VK_ASSERT(importTable->vkEnumerateInstanceLayerProperties(&layerPropertiesCount, instanceLayerProperties.data()));
+        VK_ASSERT(table_->vkEnumerateInstanceLayerProperties(&layerPropertiesCount, instanceLayerProperties.data()));
 
-        for (auto const& requiredLayer : requiredInstanceLayers) {
+        for (auto const& requiredLayer : desc.requiredInstanceLayers_) {
             auto const result = std::find_if(instanceLayerProperties.begin(), instanceLayerProperties.end(), [&requiredLayer](auto const& layer)
             {
                 return requiredLayer == layer.layerName;
@@ -44,11 +44,11 @@ Instance::Instance(ImportTable* importTable, std::vector<std::string> const& req
 
 
     {
-        VK_ASSERT(importTable->vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, nullptr));
+        VK_ASSERT(table_->vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, nullptr));
         extensionProperties.resize(extensionPropertiesCount);
-        VK_ASSERT(importTable->vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, extensionProperties.data()));
+        VK_ASSERT(table_->vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, extensionProperties.data()));
 
-        for (auto const& requiredExtension : requiredInstanceExtensions) {
+        for (auto const& requiredExtension : desc.requiredInstanceExtensions_) {
             auto const result = std::find_if(extensionProperties.begin(), extensionProperties.end(), [&requiredExtension](auto const& extensionProp)
             {
                 return requiredExtension == extensionProp.extensionName;
@@ -72,11 +72,14 @@ Instance::Instance(ImportTable* importTable, std::vector<std::string> const& req
     std::vector<char const*> enabledLayers;
     std::vector<char const*> enabledExtensions;
 
-    std::transform(requiredInstanceLayers.begin(), requiredInstanceLayers.end(), std::back_inserter(enabledLayers), [](auto const& layer) {
+    std::transform(
+        desc.requiredInstanceLayers_.begin(), desc.requiredInstanceLayers_.end(), 
+        std::back_inserter(enabledLayers), [](auto const& layer) {
         return layer.c_str();
     });
 
-    std::transform(requiredInstanceExtensions.begin(), requiredInstanceExtensions.end(), std::back_inserter(enabledExtensions), [](auto const& extension) {
+    std::transform(desc.requiredInstanceExtensions_.begin(), desc.requiredInstanceExtensions_.end(), 
+        std::back_inserter(enabledExtensions), [](auto const& extension) {
         return extension.c_str();
     });
 
@@ -90,12 +93,12 @@ Instance::Instance(ImportTable* importTable, std::vector<std::string> const& req
     instanceCreateInfo.enabledExtensionCount = static_cast<std::uint32_t>(enabledExtensions.size());
     instanceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
 
-    VK_ASSERT(importTable->vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
+    VK_ASSERT(table_->vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
 
-    importTable->GetInstanceProcAddresses(instance_);
+    table_->GetInstanceProcAddresses(instance_);
 
     // Debug callbacks setup
-    if (debug) {
+    if (desc.debug_) {
         VkDebugReportCallbackCreateInfoEXT debugCallbackCreateInfo;
         debugCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
         debugCallbackCreateInfo.pNext = nullptr;
@@ -108,7 +111,7 @@ Instance::Instance(ImportTable* importTable, std::vector<std::string> const& req
             VK_DEBUG_REPORT_DEBUG_BIT_EXT*/;
         debugCallbackCreateInfo.pUserData = nullptr;
 
-        VK_ASSERT(importTable->vkCreateDebugReportCallbackEXT(instance_, &debugCallbackCreateInfo, nullptr, &debugCallback_));
+        VK_ASSERT(table_->vkCreateDebugReportCallbackEXT(instance_, &debugCallbackCreateInfo, nullptr, &debugCallback_));
     }
 }
 
