@@ -34,6 +34,9 @@ Loader::Loader(bool debug)
     deviceDesc.table_ = table_.get();
     deviceDesc.instance_ = instance_.get();
     deviceDesc.requiredExtensions_ = { "VK_KHR_swapchain" };
+    deviceDesc.graphicsQueueCount_ = 1;
+    deviceDesc.computeQueueCount_ = 0;
+    deviceDesc.transferQueueCount_ = 0;
 
     device_ = std::make_unique<VKW::Device>(deviceDesc);
     

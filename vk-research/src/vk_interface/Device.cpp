@@ -97,13 +97,13 @@ Device::Device(DeviceDesc const& desc)
     // Create logical device
     {
         auto constexpr QUEUE_TYPE_COUNT = 3;
-        VkFlags QUEUE_TYPE_FLAGS[QUEUE_TYPE_COUNT] = {
+        VkFlags constexpr QUEUE_TYPE_FLAGS[QUEUE_TYPE_COUNT] = {
             VK_QUEUE_GRAPHICS_BIT,
             VK_QUEUE_COMPUTE_BIT,
             VK_QUEUE_TRANSFER_BIT
         };
 
-        std::uint32_t QUEUE_COUNTS[QUEUE_TYPE_COUNT] = {
+        std::uint32_t const QUEUE_COUNTS[QUEUE_TYPE_COUNT] = {
             desc.graphicsQueueCount_,
             desc.computeQueueCount_,
             desc.transferQueueCount_
@@ -115,18 +115,31 @@ Device::Device(DeviceDesc const& desc)
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfoVec;
         
         for(auto i = 0u; i < QUEUE_TYPE_COUNT; ++i) {
-            for (auto j = 0u; j < queueFamilyProperties.size(); ++i) {
-                if ((queueFamilyProperties[i].queueFlags & QUEUE_TYPE_FLAGS[i]) && (queueFamilyProperties[i].queueCount >= QUEUE_COUNTS[i])) {
+            if (QUEUE_COUNTS[i] == 0)
+                continue;
+
+            std::uint32_t chosenQueueFamily = INVALID_QUEUE_INDEX;
+            for (auto j = 0u; j < queueFamilyProperties.size(); ++j) {
+                if ((queueFamilyProperties[j].queueFlags & QUEUE_TYPE_FLAGS[i]) && (queueFamilyProperties[j].queueCount >= QUEUE_COUNTS[i])) {
                     VkDeviceQueueCreateInfo queueCreateInfo;
                     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
                     queueCreateInfo.pNext = nullptr;
-                    queueCreateInfo.queueFamilyIndex = j;
-                    queueCreateInfo.queueCount = desc.graphicsQueueCount_;
+                    queueCreateInfo.queueFamilyIndex = chosenQueueFamily = j;
+                    queueCreateInfo.queueCount = QUEUE_COUNTS[i];
                     queueCreateInfo.flags = VK_FLAGS_NONE;
                     queueCreateInfo.pQueuePriorities = nullptr;
 
                     queueCreateInfoVec.emplace_back(queueCreateInfo);
+
+                    DeviceQueueInfo queueInfo;
+                    queueInfo.type_ = 
+
+                    break;
                 }
+            }
+
+            if (QUEUE_COUNTS[i] > 0) {
+                assert(chosenQueueFamily != INVALID_QUEUE_INDEX && "Couldn't create all required queues");
             }
         }
 

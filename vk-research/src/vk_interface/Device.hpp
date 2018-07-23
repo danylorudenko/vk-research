@@ -10,6 +10,20 @@
 namespace VKW
 {
 
+enum class DeviceQueueType
+{
+    GRAPHICS,
+    COMPUTE,
+    TRANSFER
+};
+
+struct DeviceQueueInfo
+{
+    DeviceQueueType type_;
+    std::uint32_t familyIndex_;
+    std::uint32_t count_;
+};
+
 struct DeviceDesc
 {
     ImportTable* table_; 
@@ -74,6 +88,8 @@ private:
 
     VkPhysicalDevice physicalDevice_;
     VKW::Device::PhysicalDeviceProperties physicalDeviceProperties_;
+
+    std::vector<DeviceQueueInfo> queueInfo_;
 };
 
 }
