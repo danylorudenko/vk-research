@@ -13,6 +13,7 @@ namespace VKW
 
 enum class WorkerType
 {
+    NONE,
     GRAPHICS,
     COMPUTE,
     TRANSFER
@@ -23,8 +24,9 @@ struct WorkerDesc
 {
     ImportTable* table_;
     Device* device_;
-    VkQueue queue_;
     WorkerType type_;
+    std::uint32_t queueFamilyIndex_;
+    std::uint32_t queueIndex_;
     std::uint32_t bufferingCount_;
 };
 

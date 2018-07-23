@@ -57,6 +57,9 @@
     <ClCompile Include="src\vk_interface\worker\WorkersControlSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\vk_interface\worker\WorkerGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\system\DynamicLibrary.hpp">
@@ -144,6 +147,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\worker\WorkersControlSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\worker\WorkerGroup.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

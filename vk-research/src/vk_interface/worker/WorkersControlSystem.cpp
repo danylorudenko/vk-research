@@ -27,7 +27,7 @@ WorkersControlSystem::WorkersControlSystem(WorkersControlSystemDesc const& desc)
         workerDesc.type_ = WorkerType::GRAPHICS;
         workerDesc.bufferingCount_ = 1;
         
-        graphicsWorkers_.emplace_back(workerDesc);
+        //graphicsWorkers_.emplace_back(workerDesc);
     }
 }
 
@@ -41,9 +41,9 @@ WorkersControlSystem& WorkersControlSystem::operator=(WorkersControlSystem&& rhs
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
     
-    std::swap(graphicsWorkers_, rhs.graphicsWorkers_);
-    std::swap(computeWorkers_, rhs.computeWorkers_);
-    std::swap(transferWorkers_, rhs.transferWorkers_);
+    std::swap(graphicsGroup_, rhs.graphicsGroup_);
+    std::swap(computeGroup_, rhs.computeGroup_);
+    std::swap(transferGroup_, rhs.transferGroup_);
 
     return *this;
 }

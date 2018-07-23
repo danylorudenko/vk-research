@@ -132,7 +132,18 @@ Device::Device(DeviceDesc const& desc)
                     queueCreateInfoVec.emplace_back(queueCreateInfo);
 
                     DeviceQueueInfo queueInfo;
-                    queueInfo.type_ = 
+                    queueInfo.familyIndex_ = chosenQueueFamily;
+                    queueInfo.count_ = QUEUE_COUNTS[i];
+                    if (QUEUE_TYPE_FLAGS[i] & VK_QUEUE_GRAPHICS_BIT) {
+                        queueInfo.type_ = DeviceQueueType::GRAPHICS;
+                    }
+                    else if (QUEUE_TYPE_FLAGS[i] & VK_QUEUE_COMPUTE_BIT) {
+                        queueInfo.type_ = DeviceQueueType::COMPUTE;
+                    }
+                    else if (QUEUE_TYPE_FLAGS[i] & VK_QUEUE_TRANSFER_BIT) {
+                        queueInfo.type_ = DeviceQueueType::TRANSFER;
+                    }
+                    queueInfo_.emplace_back(queueInfo);
 
                     break;
                 }

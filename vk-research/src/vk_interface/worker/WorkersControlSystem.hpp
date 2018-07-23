@@ -2,8 +2,7 @@
 
 #include "..\..\class_features\NonCopyable.hpp"
 
-#include "Worker.hpp"
-//#include "..\ImportTable.hpp"
+#include "WorkerGroup.hpp"
 #include "..\Device.hpp"
 
 namespace VKW
@@ -42,9 +41,9 @@ private:
     ImportTable* table_;
     Device* device_;
 
-    std::vector<Worker> graphicsWorkers_;
-    std::vector<Worker> computeWorkers_;
-    std::vector<Worker> transferWorkers_;
+    WorkerGroup graphicsGroup_;
+    WorkerGroup computeGroup_;
+    WorkerGroup transferGroup_;
 };
 
 }
