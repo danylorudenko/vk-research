@@ -15,6 +15,10 @@ struct DeviceDesc
     ImportTable* table_; 
     Instance* instance_; 
     std::vector<std::string> requiredExtensions_;
+
+    std::uint32_t graphicsQueueCount_;
+    std::uint32_t computeQueueCount_;
+    std::uint32_t transferQueueCount_;
 };
 
 class Device
@@ -27,9 +31,8 @@ public:
     static std::uint32_t constexpr VENDOR_ID_ARM = 0x13B5;
 
 public:
-    class PhysicalDeviceProperties
+    struct PhysicalDeviceProperties
     {
-    public:
         VkPhysicalDeviceProperties properties;
         VkPhysicalDeviceMemoryProperties memoryProperties;
         std::vector<VkQueueFamilyProperties> queueFamilyProperties;

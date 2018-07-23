@@ -13,8 +13,14 @@ struct WorkersControlSystemDesc
 {
     ImportTable* table_;
     Device* device_;
+
+    std::uint32_t graphicsQueueIndex_;
     std::uint32_t graphicsQueueCount_;
+
+    std::uint32_t computeQueueIndex_;
     std::uint32_t computeQueueCount_;
+
+    std::uint32_t transferQueueIndex_;
     std::uint32_t transferQueueCount_;
 };
 

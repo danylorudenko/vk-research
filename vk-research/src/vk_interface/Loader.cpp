@@ -18,6 +18,8 @@ Loader::Loader(bool debug)
     if (debug)
         instanceLayers.emplace_back("VK_LAYER_LUNARG_standard_validation");
 
+
+
     VKW::InstanceDesc instanceDesc;
     instanceDesc.table_ = table_.get();
     instanceDesc.requiredInstanceExtensions_ = instanceExtensions;

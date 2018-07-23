@@ -96,24 +96,39 @@ Device::Device(DeviceDesc const& desc)
 
     // Create logical device
     {
-        auto queueFamilyIndex = std::numeric_limits<std::uint32_t>::max();
-        {
-            auto& properties = physicalDeviceProperties_;
-            for (auto i = 0u; i < properties.queueFamilyProperties.size(); ++i) {
-                if (properties.queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-                    queueFamilyIndex = i;
+        auto constexpr QUEUE_TYPE_COUNT = 3;
+        VkFlags QUEUE_TYPE_FLAGS[QUEUE_TYPE_COUNT] = {
+            VK_QUEUE_GRAPHICS_BIT,
+            VK_QUEUE_COMPUTE_BIT,
+            VK_QUEUE_TRANSFER_BIT
+        };
+
+        std::uint32_t QUEUE_COUNTS[QUEUE_TYPE_COUNT] = {
+            desc.graphicsQueueCount_,
+            desc.computeQueueCount_,
+            desc.transferQueueCount_
+        };
+        
+        auto constexpr INVALID_QUEUE_INDEX = std::numeric_limits<std::uint32_t>::max();
+        auto const& queueFamilyProperties = physicalDeviceProperties_.queueFamilyProperties;
+
+        std::vector<VkDeviceQueueCreateInfo> queueCreateInfoVec;
+        
+        for(auto i = 0u; i < QUEUE_TYPE_COUNT; ++i) {
+            for (auto j = 0u; j < queueFamilyProperties.size(); ++i) {
+                if ((queueFamilyProperties[i].queueFlags & QUEUE_TYPE_FLAGS[i]) && (queueFamilyProperties[i].queueCount >= QUEUE_COUNTS[i])) {
+                    VkDeviceQueueCreateInfo queueCreateInfo;
+                    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+                    queueCreateInfo.pNext = nullptr;
+                    queueCreateInfo.queueFamilyIndex = j;
+                    queueCreateInfo.queueCount = desc.graphicsQueueCount_;
+                    queueCreateInfo.flags = VK_FLAGS_NONE;
+                    queueCreateInfo.pQueuePriorities = nullptr;
+
+                    queueCreateInfoVec.emplace_back(queueCreateInfo);
                 }
             }
         }
-
-        VkDeviceQueueCreateInfo queueCreateInfo;
-        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.pNext = nullptr;
-        queueCreateInfo.queueFamilyIndex = queueFamilyIndex;
-        queueCreateInfo.queueCount = 1;
-        queueCreateInfo.flags = VK_FLAGS_NONE;
-        queueCreateInfo.pQueuePriorities = nullptr;
-        
 
         std::vector<char const*> requiredExtensionsC_str{};
         std::transform(
@@ -126,8 +141,8 @@ Device::Device(DeviceDesc const& desc)
         createInfo.pNext = nullptr;
         createInfo.flags = VK_FLAGS_NONE;
         createInfo.pEnabledFeatures = &physicalDeviceProperties_.features;
-        createInfo.queueCreateInfoCount = 1;
-        createInfo.pQueueCreateInfos = &queueCreateInfo;
+        createInfo.queueCreateInfoCount = static_cast<std::uint32_t>(queueCreateInfoVec.size());
+        createInfo.pQueueCreateInfos = queueCreateInfoVec.data();
         createInfo.enabledLayerCount = 0;
         createInfo.ppEnabledLayerNames = nullptr;
         createInfo.enabledExtensionCount = static_cast<std::uint32_t>(requiredExtensionsC_str.size());
