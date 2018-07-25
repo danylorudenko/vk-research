@@ -23,6 +23,7 @@ WorkerGroup::WorkerGroup(WorkerGroupDesc const& desc)
     , type_{ desc.type_ }
     , commandPool_{ VK_NULL_HANDLE }
 {
+   
     VkCommandPoolCreateInfo commandPoolInfo;
     commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     commandPoolInfo.pNext = nullptr;
@@ -64,6 +65,11 @@ WorkerGroup& WorkerGroup::operator=(WorkerGroup&& rhs)
     std::swap(workers_, rhs.workers_);
 
     return *this;
+}
+
+WorkerGroup::~WorkerGroup()
+{
+
 }
 
 }

@@ -13,7 +13,7 @@ Worker::Worker(WorkerDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
     , type_{ desc.type_ }
-    , queue_{ desc.queue_ }
+    , queue_{ VK_NULL_HANDLE }
 {
 }
 
