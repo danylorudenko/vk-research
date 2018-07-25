@@ -14,20 +14,42 @@ WorkersControlSystem::WorkersControlSystem(WorkersControlSystemDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
 {
-    auto const& familyProperties = device_->Properties().queueFamilyProperties;
-    for (auto i = 0u; i < desc.graphicsQueueCount_; ++i) {
-        VkQueue queueHandle = VK_NULL_HANDLE;
-        table_->vkGetDeviceQueue(device_->Handle(), desc.graphicsQueueIndex_, i, &queueHandle);
-        assert(queueHandle != VK_NULL_HANDLE && "Can't get device queue.");
-        
-        WorkerDesc workerDesc;
-        workerDesc.table_ = desc.table_;
-        workerDesc.device_ = desc.device_;
-        workerDesc.queue_ = queueHandle;
-        workerDesc.type_ = WorkerType::GRAPHICS;
-        workerDesc.bufferingCount_ = 1;
-        
-        //graphicsWorkers_.emplace_back(workerDesc);
+    std::uint32_t constexpr QUEUE_TYPES_SIZE = 3;
+
+    std::uint32_t const queueIndecies[QUEUE_TYPES_SIZE] = {
+        desc.graphicsQueueIndex_,
+        desc.computeQueueIndex_,
+        desc.transferQueueIndex_
+    };
+    
+    std::uint32_t const queueCounts[QUEUE_TYPES_SIZE] = {
+        desc.graphicsQueueCount_,
+        desc.computeQueueCount_,
+        desc.transferQueueCount_
+    };
+
+    WorkerType workerGroupTypes[QUEUE_TYPES_SIZE] = {
+        WorkerType::GRAPHICS,
+        WorkerType::COMPUTE,
+        WorkerType::TRANSFER
+    };
+
+    VKW::WorkerGroup* workerGroups[QUEUE_TYPES_SIZE] = {
+        &graphicsGroup_,
+        &computeGroup_,
+        &transferGroup_
+    };
+
+
+    for (auto i = 0u; i < QUEUE_TYPES_SIZE; ++i) {
+        WorkerGroupDesc workerGroupDesc;
+        workerGroupDesc.table_ = desc.table_;
+        workerGroupDesc.device_ = desc.device_;
+        workerGroupDesc.type_ = workerGroupTypes[i];
+        workerGroupDesc.familyIndex_ = queueIndecies[i];
+        workerGroupDesc.workersCount_ = queueCounts[i];
+
+        *workerGroups[i] = VKW::WorkerGroup{ workerGroupDesc };
     }
 }
 
