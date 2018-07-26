@@ -28,6 +28,12 @@ public:
     WorkerGroup(WorkerGroup&& rhs);
     WorkerGroup& operator=(WorkerGroup&& rhs);
 
+    std::uint32_t WorkersCount() const;
+    Worker* GetWorker(std::uint32_t index);
+
+    void AllocCommandBuffers(std::uint32_t count, VkCommandBuffer* results);
+    void FreeCommandBuffers(std::uint32_t count, VkCommandBuffer* buffers);
+
     ~WorkerGroup();
 
 private:

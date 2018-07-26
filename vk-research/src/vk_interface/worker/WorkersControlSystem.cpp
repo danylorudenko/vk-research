@@ -16,12 +16,14 @@ WorkersControlSystem::WorkersControlSystem(WorkersControlSystemDesc const& desc)
 {
     std::uint32_t constexpr QUEUE_TYPES_SIZE = 3;
 
-    std::uint32_t const queueIndecies[QUEUE_TYPES_SIZE] = {
-        desc.graphicsQueueIndex_,
-        desc.computeQueueIndex_,
-        desc.transferQueueIndex_
-    };
     
+    
+    std::uint32_t queueIndecies[QUEUE_TYPES_SIZE] = {
+        FindFamilyIndex(device_, DeviceQueueType::GRAPHICS, desc.graphicsQueueCount_),
+        FindFamilyIndex(device_, DeviceQueueType::COMPUTE, desc.computeQueueCount_),
+        FindFamilyIndex(device_, DeviceQueueType::TRANSFER, desc.transferQueueCount_)
+    };
+
     std::uint32_t const queueCounts[QUEUE_TYPES_SIZE] = {
         desc.graphicsQueueCount_,
         desc.computeQueueCount_,
@@ -78,6 +80,28 @@ WorkersControlSystem::~WorkersControlSystem()
 Worker* WorkersControlSystem::GetWorker(WorkerType type)
 {
     return nullptr;
+}
+
+std::uint32_t WorkersControlSystem::FindFamilyIndex(Device const* device, DeviceQueueType type, std::uint32_t requiredCount)
+{
+    std::uint32_t result = std::numeric_limits<std::uint32_t>::max();
+
+    if (requiredCount == 0) {
+        return result;
+    }
+
+    auto const familyCount = device->QueueFamilyCount();
+    for (auto i = 0u; i < familyCount; ++i) {
+        auto const& familyDesc = device->GetQueueFamily(i);
+        if (familyDesc.type_ == type && familyDesc.count_ >= requiredCount) {
+            result = familyDesc.familyIndex_;
+            break;
+        }
+    }
+
+    assert(result != std::numeric_limits<std::uint32_t>::max() && "Couldn't find queue family index for WorkerGroup");
+
+    return result;
 }
 
 

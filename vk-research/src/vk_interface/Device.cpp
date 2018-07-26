@@ -131,7 +131,7 @@ Device::Device(DeviceDesc const& desc)
 
                     queueCreateInfoVec.emplace_back(queueCreateInfo);
 
-                    DeviceQueueInfo queueInfo;
+                    DeviceQueueFamilyInfo queueInfo;
                     queueInfo.familyIndex_ = chosenQueueFamily;
                     queueInfo.count_ = QUEUE_COUNTS[i];
                     if (QUEUE_TYPE_FLAGS[i] & VK_QUEUE_GRAPHICS_BIT) {
@@ -211,6 +211,16 @@ Device::operator bool() const
 VKW::Device::PhysicalDeviceProperties const& Device::Properties() const
 {
     return physicalDeviceProperties_;
+}
+
+std::uint32_t Device::QueueFamilyCount() const
+{
+    return static_cast<std::uint32_t>(queueInfo_.size());
+}
+
+VKW::DeviceQueueFamilyInfo const& Device::GetQueueFamily(std::uint32_t index) const
+{
+    return queueInfo_[index];
 }
 
 Device::~Device()

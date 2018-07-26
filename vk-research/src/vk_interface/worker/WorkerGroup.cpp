@@ -69,7 +69,37 @@ WorkerGroup& WorkerGroup::operator=(WorkerGroup&& rhs)
 
 WorkerGroup::~WorkerGroup()
 {
+    table_->vkDestroyCommandPool(device_->Handle(), commandPool_, nullptr);
+}
 
+std::uint32_t WorkerGroup::WorkersCount() const
+{
+    return static_cast<std::uint32_t>(workers_.size());
+}
+
+Worker* WorkerGroup::GetWorker(std::uint32_t index)
+{
+    return &workers_[index];
+}
+
+void WorkerGroup::AllocCommandBuffers(std::uint32_t count, VkCommandBuffer* results)
+{
+    VkCommandBufferAllocateInfo allocInfo;
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.pNext = nullptr;
+    allocInfo.commandPool = commandPool_;
+    allocInfo.commandBufferCount = count;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+
+    VK_ASSERT(table_->vkAllocateCommandBuffers(device_->Handle(), &allocInfo, results));
+}
+
+void WorkerGroup::FreeCommandBuffers(std::uint32_t count, VkCommandBuffer* buffers)
+{
+    if (commandPool_ != VK_NULL_HANDLE) {
+        table_->vkFreeCommandBuffers(device_->Handle(), commandPool_, count, buffers);
+    }
+    
 }
 
 }

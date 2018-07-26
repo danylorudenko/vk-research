@@ -56,6 +56,17 @@ Loader::Loader(bool debug)
     bufferLoaderDesc.memoryController_ = memoryController_.get();
 
     bufferLoader_ = std::make_unique<VKW::BufferLoader>(bufferLoaderDesc);
+
+
+
+    VKW::WorkersControlSystemDesc wcsDesc;
+    wcsDesc.table_ = table_.get();
+    wcsDesc.device_ = device_.get();
+    wcsDesc.graphicsQueueCount_ = 1;
+    wcsDesc.computeQueueCount_ = 0;
+    wcsDesc.transferQueueCount_ = 0;
+
+    workersControlSystem_ = std::make_unique<VKW::WorkersControlSystem>(wcsDesc);
 }
 
 Loader::~Loader()

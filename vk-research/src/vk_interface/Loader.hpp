@@ -10,6 +10,7 @@
 #include "Device.hpp"
 #include "memory/MemoryController.hpp"
 #include "resources/BufferLoader.hpp"
+#include "worker/WorkersControlSystem.hpp"
 
 namespace VKW
 {
@@ -42,6 +43,7 @@ private:
     std::unique_ptr<VKW::MemoryController> memoryController_;
     std::unique_ptr<VKW::BufferLoader> bufferLoader_;
 
+    std::unique_ptr<VKW::WorkersControlSystem> workersControlSystem_;
 };
 
 }

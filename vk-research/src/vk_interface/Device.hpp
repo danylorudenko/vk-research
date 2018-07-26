@@ -17,7 +17,7 @@ enum class DeviceQueueType
     TRANSFER
 };
 
-struct DeviceQueueInfo
+struct DeviceQueueFamilyInfo
 {
     DeviceQueueType type_;
     std::uint32_t familyIndex_;
@@ -64,6 +64,9 @@ public:
     ~Device();
 
     VKW::Device::PhysicalDeviceProperties const& Properties() const;
+    
+    std::uint32_t QueueFamilyCount() const;
+    VKW::DeviceQueueFamilyInfo const& GetQueueFamily(std::uint32_t index) const;
 
     VkDevice Handle() const;
     operator bool() const;
@@ -89,7 +92,7 @@ private:
     VkPhysicalDevice physicalDevice_;
     VKW::Device::PhysicalDeviceProperties physicalDeviceProperties_;
 
-    std::vector<DeviceQueueInfo> queueInfo_;
+    std::vector<DeviceQueueFamilyInfo> queueInfo_;
 };
 
 }

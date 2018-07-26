@@ -1,4 +1,5 @@
 #include "Worker.hpp"
+#include "WorkerGroup.hpp"
 
 #include <utility>
 
@@ -12,6 +13,7 @@ Worker::Worker()
 Worker::Worker(WorkerDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
+    , parentGroup_{ desc.parentGroup_ }
     , type_{ desc.type_ }
     , queue_{ VK_NULL_HANDLE }
 {
@@ -19,9 +21,7 @@ Worker::Worker(WorkerDesc const& desc)
     assert(queue_ != VK_NULL_HANDLE && "Can't get device queue.");
 
     commandBuffers_.resize(desc.bufferingCount_);
-    for (auto i = 0u; i < desc.bufferingCount_; ++i) {
-        commandBuffers_[i] = VK_NULL_HANDLE;
-    }
+    parentGroup_->AllocCommandBuffers(desc.bufferingCount_, commandBuffers_.data());
 }
 
 Worker::Worker(Worker&& rhs)

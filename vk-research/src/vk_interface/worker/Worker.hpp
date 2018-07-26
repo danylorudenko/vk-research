@@ -11,6 +11,10 @@
 namespace VKW
 {
 
+
+class WorkerGroup;
+
+
 enum class WorkerType
 {
     NONE,
@@ -24,9 +28,13 @@ struct WorkerDesc
 {
     ImportTable* table_;
     Device* device_;
+    WorkerGroup* parentGroup_;
+
+
     WorkerType type_;
     std::uint32_t queueFamilyIndex_;
     std::uint32_t queueIndex_;
+
     std::uint32_t bufferingCount_;
 };
 
@@ -45,6 +53,7 @@ public:
 private:
     ImportTable* table_;
     Device* device_;
+    WorkerGroup* parentGroup_;
     
     WorkerType type_;
     VkQueue queue_;
