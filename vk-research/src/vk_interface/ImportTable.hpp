@@ -81,6 +81,15 @@ public:
     PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers = nullptr;
     PFN_vkResetCommandBuffer vkResetCommandBuffer = nullptr;
     PFN_vkFreeCommandBuffers vkFreeCommandBuffers = nullptr;
+    PFN_vkBeginCommandBuffer vkBeginCommandBuffer = nullptr;
+    PFN_vkEndCommandBuffer vkEndCommandBuffer = nullptr;
+
+    PFN_vkCreateFence vkCreateFence = nullptr;
+    PFN_vkResetFences vkResetFences = nullptr;
+    PFN_vkGetFenceStatus vkGetFenceStatus = nullptr;
+    PFN_vkWaitForFences vkWaitForFences = nullptr;
+    PFN_vkDestroyFence vkDestroyFence = nullptr;
+
 };
 
 }

@@ -143,6 +143,7 @@
     <ClCompile Include="src\vk_interface\ImportTable.cpp" />
     <ClCompile Include="src\vk_interface\Loader.cpp" />
     <ClCompile Include="src\vk_interface\worker\Worker.cpp" />
+    <ClCompile Include="src\vk_interface\worker\WorkerFrame.cpp" />
     <ClCompile Include="src\vk_interface\worker\WorkerGroup.cpp" />
     <ClCompile Include="src\vk_interface\worker\WorkersControlSystem.cpp" />
   </ItemGroup>
@@ -175,6 +176,7 @@
     <ClInclude Include="src\vk_interface\ImportTable.hpp" />
     <ClInclude Include="src\vk_interface\Loader.hpp" />
     <ClInclude Include="src\vk_interface\worker\Worker.hpp" />
+    <ClInclude Include="src\vk_interface\worker\WorkerFrame.h" />
     <ClInclude Include="src\vk_interface\worker\WorkerGroup.hpp" />
     <ClInclude Include="src\vk_interface\worker\WorkersControlSystem.hpp" />
   </ItemGroup>

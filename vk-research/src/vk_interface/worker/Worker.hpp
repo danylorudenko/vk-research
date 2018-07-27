@@ -7,6 +7,7 @@
 #include "..\..\class_features\NonCopyable.hpp"
 
 #include "..\Device.hpp"
+#include "WorkerFrame.h"
 
 namespace VKW
 {
@@ -38,6 +39,8 @@ struct WorkerDesc
     std::uint32_t bufferingCount_;
 };
 
+
+
 class Worker
     : public NonCopyable
 {
@@ -58,7 +61,7 @@ private:
     WorkerType type_;
     VkQueue queue_;
 
-    std::vector<VkCommandBuffer> commandBuffers_;
+    std::vector<WorkerFrame> executionFrames_;
 
 };
 

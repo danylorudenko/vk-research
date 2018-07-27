@@ -20,8 +20,8 @@ Worker::Worker(WorkerDesc const& desc)
     table_->vkGetDeviceQueue(device_->Handle(), desc.queueFamilyIndex_, desc.queueIndex_, &queue_);
     assert(queue_ != VK_NULL_HANDLE && "Can't get device queue.");
 
-    commandBuffers_.resize(desc.bufferingCount_);
-    parentGroup_->AllocCommandBuffers(desc.bufferingCount_, commandBuffers_.data());
+    //commandBuffers_.resize(desc.bufferingCount_);
+    //parentGroup_->AllocCommandBuffers(desc.bufferingCount_, commandBuffers_.data());
 }
 
 Worker::Worker(Worker&& rhs)
