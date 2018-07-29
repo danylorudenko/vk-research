@@ -84,7 +84,7 @@ void MemoryController::ProvideMemoryPageRegion(MemoryPageRegionDesc desc, Memory
         auto const requestedSize = desc.size_ + desc.alignment_;
         auto const pageSize = requestedSize > defaultPageSize ? requestedSize : defaultPageSize;
 
-        auto newPage = AllocPage(accessFlags, desc.usage_, pageSize);
+        auto& newPage = AllocPage(accessFlags, desc.usage_, pageSize);
         GetNextFreePageRegion(newPage, desc, regionOut);
     }
 }
@@ -116,13 +116,13 @@ MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage us
     if (accessFlags & MemoryAccess::CPU_READBACK)
         memoryFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
     
-    auto const propertiesCount = device_->Properties().memoryProperties.memoryTypeCount;
-    auto const* properties = device_->Properties().memoryProperties.memoryTypes;
+    auto const memoryTypesCount = device_->Properties().memoryProperties.memoryTypeCount;
+    auto const* memoryTypes = device_->Properties().memoryProperties.memoryTypes;
 
     std::uint32_t typeIndex = VK_MAX_MEMORY_TYPES;
-    for (auto i = 0u; i < propertiesCount; ++i) {
+    for (auto i = 0u; i < memoryTypesCount; ++i) {
         // first fit
-        if ((properties[i].propertyFlags & memoryFlags) == memoryFlags) {
+        if ((memoryTypes[i].propertyFlags & memoryFlags) == memoryFlags) {
             typeIndex = i;
             break;
         }
@@ -143,7 +143,7 @@ MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage us
     memory.deviceMemory_ = deviceMemory;
     memory.size_ = info.allocationSize;
     memory.memoryTypeId_ = typeIndex;
-    memory.propertyFlags_ = properties[typeIndex].propertyFlags;
+    memory.propertyFlags_ = memoryTypes[typeIndex].propertyFlags;
     memory.accessFlags_ = accessFlags;
     memory.usage_ = usage;
     

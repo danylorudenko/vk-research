@@ -42,7 +42,7 @@ Buffer BufferLoader::LoadBuffer(BufferCreateInfo const& desc)
     vkBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     vkBufferCreateInfo.size = desc.size_;
     vkBufferCreateInfo.flags = VK_FLAGS_NONE;
-    vkBufferCreateInfo.usage = VK_FLAGS_NONE;
+    vkBufferCreateInfo.usage = VK_FLAGS_NONE; // temp
 
     
     MemoryPageRegionDesc regionDesc;
