@@ -73,6 +73,7 @@ public:
     PFN_vkDestroyImageView vkDestroyImageView = nullptr;
 
     PFN_vkGetDeviceQueue vkGetDeviceQueue = nullptr;
+    PFN_vkQueueSubmit vkQueueSubmit = nullptr;
 
     PFN_vkCreateCommandPool vkCreateCommandPool = nullptr;
     PFN_vkResetCommandPool vkResetCommandPool = nullptr;

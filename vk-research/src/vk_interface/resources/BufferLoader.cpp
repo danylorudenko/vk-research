@@ -36,8 +36,6 @@ BufferLoader& BufferLoader::operator=(BufferLoader&& rhs)
 
 Buffer BufferLoader::LoadBuffer(BufferCreateInfo const& desc)
 {
-    assert(IsPowerOf2(desc.alignment_) && "Alignemnt is not power of 2!");
-
     VkBufferCreateInfo vkBufferCreateInfo;
     vkBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     vkBufferCreateInfo.pNext = nullptr;
@@ -46,9 +44,8 @@ Buffer BufferLoader::LoadBuffer(BufferCreateInfo const& desc)
     vkBufferCreateInfo.flags = VK_FLAGS_NONE;
     vkBufferCreateInfo.usage = VK_FLAGS_NONE;
 
+    
     MemoryPageRegionDesc regionDesc;
-    regionDesc.size_ = desc.size_;
-    regionDesc.alignment_ = desc.alignment_;
 
     switch (desc.usage_)
     {
@@ -66,9 +63,20 @@ Buffer BufferLoader::LoadBuffer(BufferCreateInfo const& desc)
         break;
     }
 
+
     VkBuffer vkBuffer = VK_NULL_HANDLE;
     VK_ASSERT(table_->vkCreateBuffer(device_->Handle(), &vkBufferCreateInfo, nullptr, &vkBuffer));
 
+    Buffer buffer;
+    buffer.handle_ = vkBuffer;
+
+    VkMemoryRequirements memoryRequirements;
+    table_->vkGetBufferMemoryRequirements(device_->Handle(), vkBuffer, &memoryRequirements);
+
+    regionDesc.size_ = memoryRequirements.size;
+    regionDesc.alignment_ = memoryRequirements.alignment;
+
+    assert(IsPowerOf2(regionDesc.alignment_) && "Alignemnt is not power of 2!");
 
     MemoryPageRegion memoryRegion;
     memoryRegion.page_ = nullptr;
@@ -76,15 +84,18 @@ Buffer BufferLoader::LoadBuffer(BufferCreateInfo const& desc)
     memoryRegion.offset_ = 0;
 
     memoryController_->ProvideMemoryPageRegion(regionDesc, memoryRegion);
+    VkDeviceMemory deviceMemory = memoryRegion.page_->deviceMemory_;
+
+    VkDeviceSize commitmentTest = 0;
+    table_->vkGetDeviceMemoryCommitment(device_->Handle(), deviceMemory, &commitmentTest);
+
     assert(memoryRegion.page_ != nullptr && "Couldn't provide memory region for the buffer.");
+    assert(memoryRequirements.memoryTypeBits & (1 << memoryRegion.page_->memoryTypeId_) && "MemoryPageRegion has invalid memoryType");
+    
+    
+    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, deviceMemory, memoryRegion.offset_));
 
-    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));
-
-
-    Buffer result;
-    result.handle_ = vkBuffer;
-
-    return result;
+    return buffer;
 }
 
 void BufferLoader::UnloadBuffer(Buffer& buffer)

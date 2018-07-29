@@ -113,6 +113,7 @@ Device::Device(DeviceDesc const& desc)
         auto const& queueFamilyProperties = physicalDeviceProperties_.queueFamilyProperties;
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfoVec;
+        std::vector<float*> queuePrioritiesVec;
         
         for(auto i = 0u; i < QUEUE_TYPE_COUNT; ++i) {
             if (QUEUE_COUNTS[i] == 0)
@@ -127,8 +128,12 @@ Device::Device(DeviceDesc const& desc)
                     queueCreateInfo.queueFamilyIndex = chosenQueueFamily = j;
                     queueCreateInfo.queueCount = QUEUE_COUNTS[i];
                     queueCreateInfo.flags = VK_FLAGS_NONE;
-                    queueCreateInfo.pQueuePriorities = nullptr;
+                    float* queuePriorities = new float[QUEUE_COUNTS[i]];
+                    for (auto k = 0u; k < QUEUE_COUNTS[i]; ++k)
+                        queuePriorities[k] = 1.0f;
+                    queueCreateInfo.pQueuePriorities = queuePriorities;
 
+                    queuePrioritiesVec.emplace_back(queuePriorities);
                     queueCreateInfoVec.emplace_back(queueCreateInfo);
 
                     DeviceQueueFamilyInfo queueInfo;
@@ -173,6 +178,10 @@ Device::Device(DeviceDesc const& desc)
         createInfo.ppEnabledExtensionNames = requiredExtensionsC_str.data();
 
         VK_ASSERT(table_->vkCreateDevice(physicalDevice_, &createInfo, nullptr, &device_));
+
+        for (auto const arr : queuePrioritiesVec) {
+            delete[] arr;
+        }
 
         table_->GetDeviceProcAddresses(device_);
     }

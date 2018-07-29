@@ -29,9 +29,7 @@ public:
     ~WorkerFrame();
 
     VkCommandBuffer CommandBuffer() const;
-    
-    void BeginFrame();
-    void EndFrame();
+    VkFence Fence() const;
 
     void WaitAndResetFence();
     void WaitForFence();

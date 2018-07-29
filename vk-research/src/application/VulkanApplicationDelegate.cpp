@@ -41,7 +41,7 @@ void VulkanApplicationDelegate::start()
 
     VKW::BufferCreateInfo buffInfo;
     buffInfo.size_ = 256;
-    buffInfo.alignment_ = 4;
+    //buffInfo.alignment_ = 4;
     buffInfo.usage_ = VKW::BufferUsage::VERTEX_INDEX;
 
     VKW::Buffer buffer = vulkanLoader_.BufferLoader().LoadBuffer(buffInfo);

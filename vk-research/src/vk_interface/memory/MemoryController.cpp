@@ -1,6 +1,7 @@
 #include "MemoryController.hpp"
 #include "..\Device.hpp"
 #include "..\Tools.hpp"
+#include "..\resources\BufferLoader.hpp"
 
 #include <algorithm>
 
@@ -121,8 +122,10 @@ MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage us
     std::uint32_t typeIndex = VK_MAX_MEMORY_TYPES;
     for (auto i = 0u; i < propertiesCount; ++i) {
         // first fit
-        if((properties[i].propertyFlags & memoryFlags) == memoryFlags)
-            typeIndex = properties[i].heapIndex;
+        if ((properties[i].propertyFlags & memoryFlags) == memoryFlags) {
+            typeIndex = i;
+            break;
+        }
     }
 
     assert(typeIndex != VK_MAX_MEMORY_TYPES && "Could'nt find memory type for allocation.");
@@ -139,6 +142,7 @@ MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage us
     MemoryPage memory;
     memory.deviceMemory_ = deviceMemory;
     memory.size_ = info.allocationSize;
+    memory.memoryTypeId_ = typeIndex;
     memory.propertyFlags_ = properties[typeIndex].propertyFlags;
     memory.accessFlags_ = accessFlags;
     memory.usage_ = usage;

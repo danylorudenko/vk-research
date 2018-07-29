@@ -38,6 +38,7 @@ struct MemoryPage
 {
     VkDeviceMemory deviceMemory_;
     VkDeviceSize size_;
+    std::uint32_t memoryTypeId_;
     VkMemoryPropertyFlags propertyFlags_;
     MemoryAccess accessFlags_;
     MemoryUsage usage_;

@@ -24,7 +24,6 @@ struct Buffer
 struct BufferCreateInfo
 {
     std::uint64_t size_;
-    std::uint64_t alignment_;
     BufferUsage usage_;
 };
 

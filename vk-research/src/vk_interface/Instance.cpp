@@ -1,5 +1,6 @@
 #include <utility>
 #include <algorithm>
+#include <string>
 
 #include "Instance.hpp"
 #include "Tools.hpp"
@@ -159,27 +160,19 @@ VkBool32 Instance::DebugCallback(
     char const* msg,
     void* userData)
 {
-    char const* typeStr = nullptr;
-    switch (flags) {
-    case VK_DEBUG_REPORT_INFORMATION_BIT_EXT:
-        typeStr = "INFORMATION";
-        break;
-    case VK_DEBUG_REPORT_WARNING_BIT_EXT:
-        typeStr = "WARNING";
-        break;
-    case VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT:
-        typeStr = "PERFORMANCE_WARNING";
-        break;
-    case VK_DEBUG_REPORT_ERROR_BIT_EXT:
-        typeStr = "ERROR";
-        break;
-    case VK_DEBUG_REPORT_DEBUG_BIT_EXT:
-        typeStr = "DEBUG";
-        break;
-    default:
-        typeStr = "UNKNOWN_COMBINED";
-        break;
-    }
+    std::string flagsString;
+    
+    if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT)
+        flagsString += "INFORMATION|";
+    if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
+        flagsString += "WARNING|";
+    if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT)
+        flagsString += "PERFORMANCE_WARNING|";
+    if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
+        flagsString += "ERROR|";
+    if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT)
+        flagsString += "DEBUG|";
+    
 
     char const* objTypeStr = nullptr;
     switch (type) {
@@ -296,12 +289,12 @@ VkBool32 Instance::DebugCallback(
         break;
     }
 
-    std::cerr 
-        << "DEBUG_LAYER" 
-        << "::" << typeStr
-        << "::" << layerPrefix
-        << "::" << msg << std::endl
-        << objTypeStr << ": " << object << std::endl << std::endl;
+    std::cout 
+        << std::endl << "DEBUG_LAYER"
+        << std::endl << "Message type: " << flagsString
+        << std::endl << "Layer prefix: " << layerPrefix
+        << std::endl << "Message: " << msg
+        << std::endl << "Object type: " << objTypeStr << ", id: (" << object << ")" << std::endl << std::endl;
 
     return VK_FALSE;
 }

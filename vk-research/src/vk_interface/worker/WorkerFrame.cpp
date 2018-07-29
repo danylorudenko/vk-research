@@ -52,13 +52,25 @@ VkCommandBuffer WorkerFrame::CommandBuffer() const
     return commandBuffer_;
 }
 
-void WorkerFrame::BeginFrame()
+VkFence WorkerFrame::Fence() const
 {
-    VkCommandBufferBeginInfo beginInfo;
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.pNext = nullptr;
-    //beginInfo.pInheritanceInfo.
-    //table_->vkBeginCommandBuffer()
+    return fence_;
+}
+
+void WorkerFrame::WaitForFence()
+{
+    table_->vkWaitForFences(device_->Handle(), 1, &fence_, false, std::numeric_limits<std::uint64_t>::max());
+}
+
+void WorkerFrame::ResetFence()
+{
+    table_->vkResetFences(device_->Handle(), 1, &fence_);
+}
+
+void WorkerFrame::WaitAndResetFence()
+{
+    WaitForFence();
+    ResetFence();
 }
 
 WorkerFrame::~WorkerFrame()

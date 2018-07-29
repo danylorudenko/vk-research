@@ -31,7 +31,6 @@ struct WorkerDesc
     Device* device_;
     WorkerGroup* parentGroup_;
 
-
     WorkerType type_;
     std::uint32_t queueFamilyIndex_;
     std::uint32_t queueIndex_;
@@ -51,6 +50,9 @@ public:
     Worker(Worker&& rhs);
     Worker& operator=(Worker&& rhs);
 
+    WorkerFrame& StartNextExecutionFrame();
+    void ExecuteFrame(WorkerFrame& frame);
+
     ~Worker();
 
 private:
@@ -61,6 +63,7 @@ private:
     WorkerType type_;
     VkQueue queue_;
 
+    std::uint64_t currentExecutionFrame_;
     std::vector<WorkerFrame> executionFrames_;
 
 };
