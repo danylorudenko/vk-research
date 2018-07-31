@@ -27,9 +27,6 @@
     <ClCompile Include="src\system\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\application\VulkanApplicationDelegate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\vk_interface\Instance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -61,6 +58,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\vk_interface\worker\WorkerFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\application\VulkanApplicationDelegate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -125,9 +125,6 @@
     <ClInclude Include="src\vk_interface\Instance.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk_interface\Tools.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\vk_interface\Device.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -156,6 +153,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\worker\WorkerFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\Tools.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

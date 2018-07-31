@@ -15,8 +15,9 @@ Loader::Loader(bool debug)
         instanceExtensions.emplace_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 
     auto instanceLayers = std::vector<std::string>{};
-    if (debug)
+    if (debug) {
         instanceLayers.emplace_back("VK_LAYER_LUNARG_standard_validation");
+    }
 
 
 

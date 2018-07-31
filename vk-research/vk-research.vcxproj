@@ -172,9 +172,9 @@
     <ClInclude Include="src\vk_interface\memory\MemoryController.hpp" />
     <ClInclude Include="src\vk_interface\resources\BufferLoader.hpp" />
     <ClInclude Include="src\vk_interface\resources\ResourcesController.hpp" />
-    <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\ImportTable.hpp" />
     <ClInclude Include="src\vk_interface\Loader.hpp" />
+    <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\worker\Worker.hpp" />
     <ClInclude Include="src\vk_interface\worker\WorkerFrame.h" />
     <ClInclude Include="src\vk_interface\worker\WorkerGroup.hpp" />
