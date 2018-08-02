@@ -3,6 +3,8 @@
 
 #include <utility>
 
+#include "../Tools.hpp"
+
 namespace VKW
 {
 
@@ -65,6 +67,14 @@ WorkerFrame& Worker::StartNextExecutionFrame()
 {
     WorkerFrame& currentFrame = executionFrames_[currentExecutionFrame_];
 
+    VkCommandBufferBeginInfo beginInfo;
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.pNext = VK_FLAGS_NONE;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    beginInfo.pInheritanceInfo = nullptr;
+
+    VK_ASSERT(table_->vkBeginCommandBuffer(currentFrame.CommandBuffer(), &beginInfo));
+
     return currentFrame;
 }
 
@@ -74,6 +84,7 @@ void Worker::ExecuteFrame(WorkerFrame& frame)
     assert((&currentFrame == &frame) && "Can't execute frame that is not marked as current!");
 
     VkCommandBuffer commandBuffer = frame.CommandBuffer();
+    VK_ASSERT(table_->vkEndCommandBuffer(commandBuffer));
 
     VkSubmitInfo submitInfo;
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -85,13 +96,15 @@ void Worker::ExecuteFrame(WorkerFrame& frame)
     submitInfo.pCommandBuffers = &commandBuffer;
     submitInfo.signalSemaphoreCount = 0;
     submitInfo.pSignalSemaphores = nullptr;
-    table_->vkQueueSubmit(queue_, 1, &submitInfo, frame.Fence());
 
-    currentExecutionFrame_ = (currentExecutionFrame_ + 1) % executionFrames_.size();
+    VK_ASSERT(table_->vkQueueSubmit(queue_, 1, &submitInfo, frame.Fence()));
 }
 
 Worker::~Worker()
 {
+    for (auto& frame : executionFrames_) {
+        frame.WaitForFence();
+    }
 }
 
 }
