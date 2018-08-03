@@ -49,7 +49,21 @@ void VulkanApplicationDelegate::start()
 
     ///////
 
-    auto& workersSystem = vulkanLoader_.WorkersSystem();
+    auto* worker = vulkanLoader_.WorkersSystem().GetWorker(VKW::WorkerType::GRAPHICS, 0);
+    auto& frame = worker->StartNextExecutionFrame();
+
+
+    VkBufferCopy copyRegion;
+    copyRegion.srcOffset = 0;
+    copyRegion.dstOffset = 0;
+    copyRegion.size = 256;
+
+    vulkanLoader_.Table().vkCmdCopyBuffer(frame.CommandBuffer(), buffer.handle_, buffer2.handle_, 1, &copyRegion);
+
+    worker->ExecuteFrame(frame);
+
+    frame.WaitForFence();
+
 
     ///////
 

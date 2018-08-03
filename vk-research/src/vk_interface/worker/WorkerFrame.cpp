@@ -11,6 +11,7 @@ WorkerFrame::WorkerFrame()
     , device_{ nullptr }
     , commandBuffer_{ VK_NULL_HANDLE }
     , fence_{ VK_NULL_HANDLE }
+    , inExecution_{ false }
 {
 }
 
@@ -19,6 +20,7 @@ WorkerFrame::WorkerFrame(WorkerFrameDesc const& desc)
     , device_{ desc.device_ }
     , commandBuffer_{ desc.commandBuffer_ }
     , fence_{ VK_NULL_HANDLE }
+    , inExecution_{ false }
 {
     VkFenceCreateInfo fenceInfo;
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -47,14 +49,19 @@ WorkerFrame& WorkerFrame::operator=(WorkerFrame&& rhs)
     return *this;
 }
 
-VkCommandBuffer WorkerFrame::CommandBuffer() const
+VkCommandBuffer WorkerFrame::Begin()
 {
-    return commandBuffer_;
+
 }
 
-VkFence WorkerFrame::Fence() const
+void WorkerFrame::End()
 {
-    return fence_;
+
+}
+
+void WorkerFrame::Execute()
+{
+
 }
 
 void WorkerFrame::WaitForFence()

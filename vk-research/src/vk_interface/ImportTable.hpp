@@ -91,6 +91,8 @@ public:
     PFN_vkWaitForFences vkWaitForFences = nullptr;
     PFN_vkDestroyFence vkDestroyFence = nullptr;
 
+    PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
+
 };
 
 }
