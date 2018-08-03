@@ -50,8 +50,9 @@ public:
     Worker(Worker&& rhs);
     Worker& operator=(Worker&& rhs);
 
-    WorkerFrame& StartNextExecutionFrame();
-    void ExecuteFrame(WorkerFrame& frame);
+    VkCommandBuffer StartNextExecutionFrame();
+    void EndCurrentFrame();
+    void ExecuteCurrentFrame();
 
     ~Worker();
 

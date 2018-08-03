@@ -30,9 +30,8 @@ public:
 
     VkCommandBuffer Begin();
     void End();
-    void Execute();
+    void Execute(VkQueue queue);
 
-    void WaitAndResetFence();
     void WaitForFence();
     void ResetFence();
 

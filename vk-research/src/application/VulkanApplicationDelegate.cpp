@@ -50,7 +50,7 @@ void VulkanApplicationDelegate::start()
     ///////
 
     auto* worker = vulkanLoader_.WorkersSystem().GetWorker(VKW::WorkerType::GRAPHICS, 0);
-    auto& frame = worker->StartNextExecutionFrame();
+    auto commandBuffer = worker->StartNextExecutionFrame();
 
 
     VkBufferCopy copyRegion;
@@ -58,16 +58,18 @@ void VulkanApplicationDelegate::start()
     copyRegion.dstOffset = 0;
     copyRegion.size = 256;
 
-    vulkanLoader_.Table().vkCmdCopyBuffer(frame.CommandBuffer(), buffer.handle_, buffer2.handle_, 1, &copyRegion);
+    vulkanLoader_.Table().vkCmdCopyBuffer(commandBuffer, buffer.handle_, buffer2.handle_, 1, &copyRegion);
 
-    worker->ExecuteFrame(frame);
+    worker->EndCurrentFrame();
+    worker->ExecuteCurrentFrame();
 
-    frame.WaitForFence();
+    vulkanLoader_.Table().vkDeviceWaitIdle(device.Handle());
 
 
     ///////
 
     vulkanLoader_.BufferLoader().UnloadBuffer(buffer);
+    vulkanLoader_.BufferLoader().UnloadBuffer(buffer2);
 
 }
 

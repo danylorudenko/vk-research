@@ -35,6 +35,7 @@ WorkerFrame::WorkerFrame(WorkerFrame&& rhs)
     , device_{ nullptr }
     , commandBuffer_{ VK_NULL_HANDLE }
     , fence_{ VK_NULL_HANDLE }
+    , inExecution_{ false }
 {
     operator=(std::move(rhs));
 }
@@ -45,44 +46,68 @@ WorkerFrame& WorkerFrame::operator=(WorkerFrame&& rhs)
     std::swap(device_, rhs.device_);
     std::swap(commandBuffer_, rhs.commandBuffer_);
     std::swap(fence_, rhs.fence_);
+    std::swap(inExecution_, rhs.inExecution_);
 
     return *this;
 }
 
 VkCommandBuffer WorkerFrame::Begin()
 {
+    WaitForFence();
+    inExecution_ = false;
+    
+    VkCommandBufferBeginInfo beginInfo;
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.pNext = VK_FLAGS_NONE;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    beginInfo.pInheritanceInfo = nullptr;
 
+    VK_ASSERT(table_->vkBeginCommandBuffer(commandBuffer_, &beginInfo));
+
+    return commandBuffer_;
 }
 
 void WorkerFrame::End()
 {
-
+    table_->vkEndCommandBuffer(commandBuffer_);
 }
 
-void WorkerFrame::Execute()
+void WorkerFrame::Execute(VkQueue queue)
 {
+    VkSubmitInfo submitInfo;
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.pNext = nullptr;
+    submitInfo.waitSemaphoreCount = 0;
+    submitInfo.pWaitSemaphores = nullptr;
+    submitInfo.pWaitDstStageMask = nullptr;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer_;
+    submitInfo.signalSemaphoreCount = 0;
+    submitInfo.pSignalSemaphores = nullptr;
 
+    ResetFence();
+    inExecution_ = true;
+
+    VK_ASSERT(table_->vkQueueSubmit(queue, 1, &submitInfo, fence_));
 }
 
 void WorkerFrame::WaitForFence()
 {
-    table_->vkWaitForFences(device_->Handle(), 1, &fence_, false, std::numeric_limits<std::uint64_t>::max());
+    if (inExecution_) {
+        VK_ASSERT(table_->vkWaitForFences(device_->Handle(), 1, &fence_, false, std::numeric_limits<std::uint64_t>::max()));
+    }
 }
 
 void WorkerFrame::ResetFence()
 {
-    table_->vkResetFences(device_->Handle(), 1, &fence_);
-}
-
-void WorkerFrame::WaitAndResetFence()
-{
-    WaitForFence();
-    ResetFence();
+    VK_ASSERT(table_->vkResetFences(device_->Handle(), 1, &fence_));
 }
 
 WorkerFrame::~WorkerFrame()
 {
-    table_->vkDestroyFence(device_->Handle(), fence_, nullptr);
+    if (fence_ != VK_NULL_HANDLE) {
+        table_->vkDestroyFence(device_->Handle(), fence_, nullptr);
+    }
 }
 
 }

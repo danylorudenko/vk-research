@@ -63,44 +63,24 @@ Worker& Worker::operator=(Worker&& rhs)
     return *this;
 }
 
-WorkerFrame& Worker::StartNextExecutionFrame()
+VkCommandBuffer Worker::StartNextExecutionFrame()
 {
     currentExecutionFrame_ = (currentExecutionFrame_ + 1) % executionFrames_.size();
     
     WorkerFrame& currentFrame = executionFrames_[currentExecutionFrame_];
-    currentFrame.WaitAndResetFence();
-
-    VkCommandBufferBeginInfo beginInfo;
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.pNext = VK_FLAGS_NONE;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    beginInfo.pInheritanceInfo = nullptr;
-
-    VK_ASSERT(table_->vkBeginCommandBuffer(currentFrame.CommandBuffer(), &beginInfo));
-
-    return currentFrame;
+    return currentFrame.Begin();
 }
 
-void Worker::ExecuteFrame(WorkerFrame& frame)
+void Worker::EndCurrentFrame()
 {
     WorkerFrame& currentFrame = executionFrames_[currentExecutionFrame_];
-    assert((&currentFrame == &frame) && "Can't execute frame that is not marked as current!");
+    currentFrame.End();
+}
 
-    VkCommandBuffer commandBuffer = frame.CommandBuffer();
-    VK_ASSERT(table_->vkEndCommandBuffer(commandBuffer));
-
-    VkSubmitInfo submitInfo;
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.pNext = nullptr;
-    submitInfo.pWaitSemaphores = 0;
-    submitInfo.pWaitSemaphores = nullptr;
-    submitInfo.pWaitDstStageMask = nullptr;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-    submitInfo.signalSemaphoreCount = 0;
-    submitInfo.pSignalSemaphores = nullptr;
-
-    VK_ASSERT(table_->vkQueueSubmit(queue_, 1, &submitInfo, frame.Fence()));
+void Worker::ExecuteCurrentFrame()
+{
+    WorkerFrame& currentFrame = executionFrames_[currentExecutionFrame_];
+    currentFrame.Execute(queue_);
 }
 
 Worker::~Worker()
