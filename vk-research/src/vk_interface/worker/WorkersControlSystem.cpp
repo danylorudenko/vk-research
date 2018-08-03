@@ -24,19 +24,19 @@ WorkersControlSystem::WorkersControlSystem(WorkersControlSystemDesc const& desc)
         FindFamilyIndex(device_, DeviceQueueType::TRANSFER, desc.transferQueueCount_)
     };
 
-    std::uint32_t const queueCounts[QUEUE_TYPES_SIZE] = {
-        desc.graphicsQueueCount_,
-        desc.computeQueueCount_,
-        desc.transferQueueCount_
-    };
-
     WorkerType workerGroupTypes[QUEUE_TYPES_SIZE] = {
         WorkerType::GRAPHICS,
         WorkerType::COMPUTE,
         WorkerType::TRANSFER
     };
 
-    VKW::WorkerGroup* workerGroups[QUEUE_TYPES_SIZE] = {
+    std::uint32_t const queueCounts[QUEUE_TYPES_SIZE] = {
+        desc.graphicsQueueCount_,
+        desc.computeQueueCount_,
+        desc.transferQueueCount_
+    };
+
+    std::unique_ptr<WorkerGroup>* workerGroups[QUEUE_TYPES_SIZE] = {
         &graphicsGroup_,
         &computeGroup_,
         &transferGroup_
@@ -44,14 +44,16 @@ WorkersControlSystem::WorkersControlSystem(WorkersControlSystemDesc const& desc)
 
 
     for (auto i = 0u; i < QUEUE_TYPES_SIZE; ++i) {
-        WorkerGroupDesc workerGroupDesc;
-        workerGroupDesc.table_ = desc.table_;
-        workerGroupDesc.device_ = desc.device_;
-        workerGroupDesc.type_ = workerGroupTypes[i];
-        workerGroupDesc.familyIndex_ = queueIndecies[i];
-        workerGroupDesc.workersCount_ = queueCounts[i];
+        if (queueCounts[i] > 0) {
+            WorkerGroupDesc workerGroupDesc;
+            workerGroupDesc.table_ = desc.table_;
+            workerGroupDesc.device_ = desc.device_;
+            workerGroupDesc.type_ = workerGroupTypes[i];
+            workerGroupDesc.familyIndex_ = queueIndecies[i];
+            workerGroupDesc.workersCount_ = queueCounts[i];
 
-        *workerGroups[i] = VKW::WorkerGroup{ workerGroupDesc };
+            *workerGroups[i] = std::make_unique<VKW::WorkerGroup>(workerGroupDesc);
+        }
     }
 }
 
@@ -77,9 +79,18 @@ WorkersControlSystem::~WorkersControlSystem()
 
 }
 
-Worker* WorkersControlSystem::GetWorker(WorkerType type)
+Worker* WorkersControlSystem::GetWorker(WorkerType type, std::uint32_t index)
 {
-    return nullptr;
+    switch (type) {
+    case WorkerType::GRAPHICS:
+        return graphicsGroup_->GetWorker(index);
+    case WorkerType::COMPUTE:
+        return computeGroup_->GetWorker(index);
+    case WorkerType::TRANSFER:
+        return transferGroup_->GetWorker(index);
+    default:
+        return nullptr;
+    }
 }
 
 std::uint32_t WorkersControlSystem::FindFamilyIndex(Device const* device, DeviceQueueType type, std::uint32_t requiredCount)

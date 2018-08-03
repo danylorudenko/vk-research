@@ -45,6 +45,11 @@ void VulkanApplicationDelegate::start()
     buffInfo.usage_ = VKW::BufferUsage::VERTEX_INDEX;
 
     VKW::Buffer buffer = vulkanLoader_.BufferLoader().LoadBuffer(buffInfo);
+    VKW::Buffer buffer2 = vulkanLoader_.BufferLoader().LoadBuffer(buffInfo);
+
+    ///////
+
+    auto& workersSystem = vulkanLoader_.WorkersSystem();
 
     ///////
 

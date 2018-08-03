@@ -36,6 +36,7 @@ WorkerGroup::WorkerGroup(WorkerGroupDesc const& desc)
         WorkerDesc workerDesc;
         workerDesc.table_ = table_;
         workerDesc.device_ = device_;
+        workerDesc.parentGroup_ = this;
         workerDesc.type_ = type_;
         workerDesc.queueFamilyIndex_ = familyIndex_;
         workerDesc.queueIndex_ = i;

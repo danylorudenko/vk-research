@@ -31,6 +31,7 @@ public:
 
     VKW::MemoryController& MemoryController();
     VKW::BufferLoader& BufferLoader();
+    VKW::WorkersControlSystem& WorkersSystem();
     
 
 private:

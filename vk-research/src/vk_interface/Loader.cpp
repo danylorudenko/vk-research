@@ -67,7 +67,7 @@ Loader::Loader(bool debug)
     wcsDesc.computeQueueCount_ = 0;
     wcsDesc.transferQueueCount_ = 0;
 
-    //workersControlSystem_ = std::make_unique<VKW::WorkersControlSystem>(wcsDesc);
+    workersControlSystem_ = std::make_unique<VKW::WorkersControlSystem>(wcsDesc);
 }
 
 Loader::~Loader()
@@ -94,6 +94,11 @@ VKW::MemoryController& Loader::MemoryController()
 VKW::BufferLoader& Loader::BufferLoader()
 {
     return *bufferLoader_;
+}
+
+VKW::WorkersControlSystem& Loader::WorkersSystem()
+{
+    return *workersControlSystem_;
 }
 
 

@@ -65,7 +65,10 @@ Worker& Worker::operator=(Worker&& rhs)
 
 WorkerFrame& Worker::StartNextExecutionFrame()
 {
+    currentExecutionFrame_ = (currentExecutionFrame_ + 1) % executionFrames_.size();
+    
     WorkerFrame& currentFrame = executionFrames_[currentExecutionFrame_];
+    currentFrame.WaitAndResetFence();
 
     VkCommandBufferBeginInfo beginInfo;
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -103,7 +106,7 @@ void Worker::ExecuteFrame(WorkerFrame& frame)
 Worker::~Worker()
 {
     for (auto& frame : executionFrames_) {
-        frame.WaitForFence();
+        //frame.WaitForFence();
     }
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "..\..\class_features\NonCopyable.hpp"
 
 #include "WorkerGroup.hpp"
@@ -30,7 +32,7 @@ public:
 
     ~WorkersControlSystem();
 
-    Worker* GetWorker(WorkerType type);
+    Worker* GetWorker(WorkerType type, std::uint32_t index);
 
 private:
     static std::uint32_t FindFamilyIndex(Device const* device, DeviceQueueType type, std::uint32_t requiredCount);
@@ -39,9 +41,9 @@ private:
     ImportTable* table_;
     Device* device_;
 
-    WorkerGroup graphicsGroup_;
-    WorkerGroup computeGroup_;
-    WorkerGroup transferGroup_;
+    std::unique_ptr<WorkerGroup> graphicsGroup_;
+    std::unique_ptr<WorkerGroup> computeGroup_;
+    std::unique_ptr<WorkerGroup> transferGroup_;
 };
 
 }
