@@ -1,5 +1,21 @@
 #version 450 core
 
+//layout (constant_id = 0) const int myContst0 = 0;
+//layout (constant_id = 1) const float myConst1 = 1.0f;
+//layout (constant_id = 2) const bool myConst2 = false;
+
+
+layout (set = 0, binding = 0) uniform sampler2D myTexture;
+layout (set = 0, binding = 1) uniform sampler3D myLut;
+layout (set = 1, binding = 0) uniform myTransforms
+{
+	mat4 transform0;
+	mat3 transform1;
+};
+
+
+//layout (local_size_x = 4, local_size_y = 8, local_size_z = 16) in;
+
 void main()
 {
 

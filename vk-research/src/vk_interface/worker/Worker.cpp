@@ -86,7 +86,7 @@ void Worker::ExecuteCurrentFrame()
 Worker::~Worker()
 {
     for (auto& frame : executionFrames_) {
-        //frame.WaitForFence();
+        frame.WaitForFence();
     }
 }
 

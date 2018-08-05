@@ -91,7 +91,37 @@ public:
     PFN_vkWaitForFences vkWaitForFences = nullptr;
     PFN_vkDestroyFence vkDestroyFence = nullptr;
 
+    PFN_vkCreateShaderModule vkCreateShaderModule = nullptr;
+    PFN_vkDestroyShaderModule vkDestroyShaderModule = nullptr;
+
+    PFN_vkCreatePipelineCache vkCreatePipelineCache = nullptr;
+    PFN_vkGetPipelineCacheData vkGetPipelineCacheData = nullptr;
+    PFN_vkMergePipelineCaches vkMergePipelineCaches = nullptr;
+    PFN_vkDestroyPipelineCache vkDestroyPipelineCache = nullptr;
+
+    PFN_vkCreateComputePipelines vkCreateComputePipelines = nullptr;
+    PFN_vkCreateGraphicsPipelines vkCreateGraphicsPipelines = nullptr;
+    PFN_vkDestroyPipeline vkDestroyPipeline = nullptr;
+
+    PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout = nullptr;
+    PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout = nullptr;
+
+    PFN_vkCreatePipelineLayout vkCreatePipelineLayout = nullptr;
+    PFN_vkDestroyPipelineLayout vkDestroyPipelineLayout = nullptr;
+
+    PFN_vkCreateDescriptorPool vkCreateDescriptorPool = nullptr;
+    PFN_vkResetDescriptorPool vkResetDescriptorPool = nullptr;
+    PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool = nullptr;
+
+    PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets = nullptr;
+    PFN_vkFreeDescriptorSets vkFreeDescriptorSets = nullptr;
+
+    PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets = nullptr;
+
     PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
+    PFN_vkCmdBindPipeline vkCmdBindPipeline = nullptr;
+
+    PFN_vkCmdDispatch vkCmdDispatch = nullptr;
 
 };
 
