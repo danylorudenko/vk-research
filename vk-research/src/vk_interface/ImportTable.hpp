@@ -118,9 +118,14 @@ public:
 
     PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets = nullptr;
 
-    PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
-    PFN_vkCmdBindPipeline vkCmdBindPipeline = nullptr;
+    PFN_vkCreateSampler vkCreateSampler = nullptr;
+    PFN_vkDestroySampler vkDestroySampler = nullptr;
 
+    PFN_vkCmdBindPipeline vkCmdBindPipeline = nullptr;
+    PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets = nullptr;
+    PFN_vkCmdPushConstants vkCmdPushConstants = nullptr;
+
+    PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
     PFN_vkCmdDispatch vkCmdDispatch = nullptr;
 
 };
