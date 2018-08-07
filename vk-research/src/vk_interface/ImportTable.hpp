@@ -125,8 +125,15 @@ public:
     PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets = nullptr;
     PFN_vkCmdPushConstants vkCmdPushConstants = nullptr;
 
+    PFN_vkCreateRenderPass vkCreateRenderPass = nullptr;
+    PFN_vkDestroyRenderPass vkDestroyRenderPass = nullptr;
+
+    PFN_vkCreateFramebuffer vkCreateFramebuffer = nullptr;
+    PFN_vkDestroyFramebuffer vkDestroyFramebuffer = nullptr;
+
     PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
     PFN_vkCmdDispatch vkCmdDispatch = nullptr;
+    PFN_vkCmdDraw vkCmdDraw = nullptr;
 
 };
 
