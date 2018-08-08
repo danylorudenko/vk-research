@@ -121,10 +121,6 @@ public:
     PFN_vkCreateSampler vkCreateSampler = nullptr;
     PFN_vkDestroySampler vkDestroySampler = nullptr;
 
-    PFN_vkCmdBindPipeline vkCmdBindPipeline = nullptr;
-    PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets = nullptr;
-    PFN_vkCmdPushConstants vkCmdPushConstants = nullptr;
-
     PFN_vkCreateRenderPass vkCreateRenderPass = nullptr;
     PFN_vkDestroyRenderPass vkDestroyRenderPass = nullptr;
 
@@ -132,7 +128,15 @@ public:
     PFN_vkDestroyFramebuffer vkDestroyFramebuffer = nullptr;
 
     PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
+
+    PFN_vkCmdBindPipeline vkCmdBindPipeline = nullptr;
+    PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets = nullptr;
+    PFN_vkCmdPushConstants vkCmdPushConstants = nullptr;
+
     PFN_vkCmdDispatch vkCmdDispatch = nullptr;
+
+    PFN_vkCmdBeginRenderPass vkCmdBeginRenderPass = nullptr;
+    PFN_vkCmdEndRenderPass vkCmdEndRenderPass = nullptr;
     PFN_vkCmdDraw vkCmdDraw = nullptr;
 
 };
