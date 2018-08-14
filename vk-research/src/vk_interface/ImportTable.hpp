@@ -35,12 +35,25 @@ public:
     PFN_vkGetPhysicalDeviceMemoryProperties vkGetPhysicalDeviceMemoryProperties = nullptr;
     PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties = nullptr;
 
+    PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR vkGetPhysicalDeviceWin32PresentationSupportKHR = nullptr;
+    PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = nullptr;
+    PFN_vkGetPhysicalDeviceSurfaceSupportKHR vkGetPhysicalDeviceSurfaceSupportKHR = nullptr;
+    PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR vkGetPhysicalDeviceSurfaceCapabilitiesKHR = nullptr;
+    PFN_vkGetPhysicalDeviceSurfaceFormatsKHR vkGetPhysicalDeviceSurfaceFormatsKHR = nullptr;
+    
+
     PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT = nullptr;
     PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT = nullptr;
 
     PFN_vkCreateDevice vkCreateDevice = nullptr;
     PFN_vkDeviceWaitIdle vkDeviceWaitIdle = nullptr;
     PFN_vkDestroyDevice vkDestroyDevice = nullptr;
+
+    PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR = nullptr;
+    PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR = nullptr;
+    PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR = nullptr;
+    PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR = nullptr;
+    PFN_vkQueuePresentKHR vkQueuePresentKHR = nullptr;
 
     PFN_vkAllocateMemory vkAllocateMemory = nullptr;
     PFN_vkFreeMemory vkFreeMemory = nullptr;
