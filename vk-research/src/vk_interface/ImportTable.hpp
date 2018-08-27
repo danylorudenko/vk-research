@@ -104,6 +104,9 @@ public:
     PFN_vkWaitForFences vkWaitForFences = nullptr;
     PFN_vkDestroyFence vkDestroyFence = nullptr;
 
+    PFN_vkCreateSemaphore vkCreateSemaphore = nullptr;
+    PFN_vkDestroySemaphore vkDestroySemaphore = nullptr;
+
     PFN_vkCreateShaderModule vkCreateShaderModule = nullptr;
     PFN_vkDestroyShaderModule vkDestroyShaderModule = nullptr;
 

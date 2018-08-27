@@ -10,7 +10,7 @@
 namespace VKW
 {
 
-struct WorkersControlSystemDesc
+struct WorkersProviderDesc
 {
     ImportTable* table_;
     Device* device_;
@@ -20,17 +20,17 @@ struct WorkersControlSystemDesc
     std::uint32_t transferQueueCount_;
 };
 
-class WorkersControlSystem
+class WorkersProvider
     : public NonCopyable
 {
 public:
-    WorkersControlSystem();
-    WorkersControlSystem(WorkersControlSystemDesc const& desc);
+    WorkersProvider();
+    WorkersProvider(WorkersProviderDesc const& desc);
 
-    WorkersControlSystem(WorkersControlSystem&& rhs);
-    WorkersControlSystem& operator=(WorkersControlSystem&& rhs);
+    WorkersProvider(WorkersProvider&& rhs);
+    WorkersProvider& operator=(WorkersProvider&& rhs);
 
-    ~WorkersControlSystem();
+    ~WorkersProvider();
 
     Worker* GetWorker(WorkerType type, std::uint32_t index);
 

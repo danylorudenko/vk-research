@@ -31,7 +31,7 @@ public:
 
     VKW::MemoryController& MemoryController();
     VKW::BufferLoader& BufferLoader();
-    VKW::WorkersControlSystem& WorkersSystem();
+    VKW::WorkersProvider& WorkersProvider();
     
 
 private:
@@ -44,7 +44,7 @@ private:
     std::unique_ptr<VKW::MemoryController> memoryController_;
     std::unique_ptr<VKW::BufferLoader> bufferLoader_;
 
-    std::unique_ptr<VKW::WorkersControlSystem> workersControlSystem_;
+    std::unique_ptr<VKW::WorkersProvider> workersProvider_;
 };
 
 }

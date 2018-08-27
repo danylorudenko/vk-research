@@ -145,7 +145,7 @@
     <ClCompile Include="src\vk_interface\worker\Worker.cpp" />
     <ClCompile Include="src\vk_interface\worker\WorkerFrame.cpp" />
     <ClCompile Include="src\vk_interface\worker\WorkerGroup.cpp" />
-    <ClCompile Include="src\vk_interface\worker\WorkersControlSystem.cpp" />
+    <ClCompile Include="src\vk_interface\worker\WorkersProvider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\vulkan\vk_platform.h" />
@@ -178,7 +178,7 @@
     <ClInclude Include="src\vk_interface\worker\Worker.hpp" />
     <ClInclude Include="src\vk_interface\worker\WorkerFrame.h" />
     <ClInclude Include="src\vk_interface\worker\WorkerGroup.hpp" />
-    <ClInclude Include="src\vk_interface\worker\WorkersControlSystem.hpp" />
+    <ClInclude Include="src\vk_interface\worker\WorkersProvider.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

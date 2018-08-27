@@ -11,6 +11,7 @@ WorkerFrame::WorkerFrame()
     , device_{ nullptr }
     , commandBuffer_{ VK_NULL_HANDLE }
     , fence_{ VK_NULL_HANDLE }
+    //, setSemaphore_{ VK_NULL_HANDLE }
     , inExecution_{ false }
 {
 }
@@ -20,6 +21,7 @@ WorkerFrame::WorkerFrame(WorkerFrameDesc const& desc)
     , device_{ desc.device_ }
     , commandBuffer_{ desc.commandBuffer_ }
     , fence_{ VK_NULL_HANDLE }
+    //, setSemaphore_{ VK_NULL_HANDLE }
     , inExecution_{ false }
 {
     VkFenceCreateInfo fenceInfo;
@@ -28,6 +30,14 @@ WorkerFrame::WorkerFrame(WorkerFrameDesc const& desc)
     fenceInfo.flags = VK_FLAGS_NONE;
 
     VK_ASSERT(table_->vkCreateFence(device_->Handle(), &fenceInfo, nullptr, &fence_));
+
+
+    //VkSemaphoreCreateInfo semaphoreInfo;
+    //semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    //semaphoreInfo.pNext = nullptr;
+    //semaphoreInfo.flags = VK_FLAGS_NONE;
+    //
+    //VK_ASSERT(table_->vkCreateSemaphore(device_->Handle(), &semaphoreInfo, nullptr, &setSemaphore_));
 }
 
 WorkerFrame::WorkerFrame(WorkerFrame&& rhs)
@@ -35,6 +45,7 @@ WorkerFrame::WorkerFrame(WorkerFrame&& rhs)
     , device_{ nullptr }
     , commandBuffer_{ VK_NULL_HANDLE }
     , fence_{ VK_NULL_HANDLE }
+    //, setSemaphore_{ VK_NULL_HANDLE }
     , inExecution_{ false }
 {
     operator=(std::move(rhs));
@@ -46,6 +57,7 @@ WorkerFrame& WorkerFrame::operator=(WorkerFrame&& rhs)
     std::swap(device_, rhs.device_);
     std::swap(commandBuffer_, rhs.commandBuffer_);
     std::swap(fence_, rhs.fence_);
+    //std::swap(setSemaphore_, rhs.setSemaphore_);
     std::swap(inExecution_, rhs.inExecution_);
 
     return *this;

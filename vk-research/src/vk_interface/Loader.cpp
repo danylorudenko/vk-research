@@ -60,14 +60,14 @@ Loader::Loader(bool debug)
 
 
 
-    VKW::WorkersControlSystemDesc wcsDesc;
+    VKW::WorkersProviderDesc wcsDesc;
     wcsDesc.table_ = table_.get();
     wcsDesc.device_ = device_.get();
     wcsDesc.graphicsQueueCount_ = 1;
     wcsDesc.computeQueueCount_ = 0;
     wcsDesc.transferQueueCount_ = 0;
 
-    workersControlSystem_ = std::make_unique<VKW::WorkersControlSystem>(wcsDesc);
+    workersProvider_ = std::make_unique<VKW::WorkersProvider>(wcsDesc);
 }
 
 Loader::~Loader()
@@ -96,9 +96,9 @@ VKW::BufferLoader& Loader::BufferLoader()
     return *bufferLoader_;
 }
 
-VKW::WorkersControlSystem& Loader::WorkersSystem()
+VKW::WorkersProvider& Loader::WorkersProvider()
 {
-    return *workersControlSystem_;
+    return *workersProvider_;
 }
 
 

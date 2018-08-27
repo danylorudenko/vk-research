@@ -42,6 +42,8 @@ private:
     
     VkCommandBuffer commandBuffer_;
     VkFence fence_;
+    //VkSemaphore setSemaphore_;
+
     bool inExecution_;
 
 

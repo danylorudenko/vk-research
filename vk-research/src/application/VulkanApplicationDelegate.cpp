@@ -49,7 +49,7 @@ void VulkanApplicationDelegate::start()
 
     ///////
 
-    auto* worker = vulkanLoader_.WorkersSystem().GetWorker(VKW::WorkerType::GRAPHICS, 0);
+    auto* worker = vulkanLoader_.WorkersProvider().GetWorker(VKW::WorkerType::GRAPHICS, 0);
     auto commandBuffer = worker->StartNextExecutionFrame();
 
 

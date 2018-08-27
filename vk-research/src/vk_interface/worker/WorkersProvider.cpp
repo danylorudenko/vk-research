@@ -1,16 +1,16 @@
-#include "WorkersControlSystem.hpp"
+#include "WorkersProvider.hpp"
 #include <utility>
 
 namespace VKW
 {
 
-WorkersControlSystem::WorkersControlSystem()
+WorkersProvider::WorkersProvider()
     : table_{ nullptr }
     , device_{ nullptr }
 {
 }
 
-WorkersControlSystem::WorkersControlSystem(WorkersControlSystemDesc const& desc)
+WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
 {
@@ -57,12 +57,12 @@ WorkersControlSystem::WorkersControlSystem(WorkersControlSystemDesc const& desc)
     }
 }
 
-WorkersControlSystem::WorkersControlSystem(WorkersControlSystem&& rhs)
+WorkersProvider::WorkersProvider(WorkersProvider&& rhs)
 {
     operator=(std::move(rhs));
 }
 
-WorkersControlSystem& WorkersControlSystem::operator=(WorkersControlSystem&& rhs)
+WorkersProvider& WorkersProvider::operator=(WorkersProvider&& rhs)
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
@@ -74,12 +74,12 @@ WorkersControlSystem& WorkersControlSystem::operator=(WorkersControlSystem&& rhs
     return *this;
 }
 
-WorkersControlSystem::~WorkersControlSystem()
+WorkersProvider::~WorkersProvider()
 {
 
 }
 
-Worker* WorkersControlSystem::GetWorker(WorkerType type, std::uint32_t index)
+Worker* WorkersProvider::GetWorker(WorkerType type, std::uint32_t index)
 {
     switch (type) {
     case WorkerType::GRAPHICS:
@@ -93,7 +93,7 @@ Worker* WorkersControlSystem::GetWorker(WorkerType type, std::uint32_t index)
     }
 }
 
-std::uint32_t WorkersControlSystem::FindFamilyIndex(Device const* device, DeviceQueueType type, std::uint32_t requiredCount)
+std::uint32_t WorkersProvider::FindFamilyIndex(Device const* device, DeviceQueueType type, std::uint32_t requiredCount)
 {
     std::uint32_t result = std::numeric_limits<std::uint32_t>::max();
 
