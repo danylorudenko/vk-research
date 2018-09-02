@@ -83,7 +83,7 @@ Worker* WorkerGroup::GetWorker(std::uint32_t index)
     return &workers_[index];
 }
 
-void WorkerGroup::AllocCommandBuffers(std::uint32_t count, VkCommandBuffer* results)
+void WorkerGroup::AllocCommandBuffers(std::uint32_t count, VkCommandBuffer* buffers)
 {
     VkCommandBufferAllocateInfo allocInfo;
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -92,7 +92,7 @@ void WorkerGroup::AllocCommandBuffers(std::uint32_t count, VkCommandBuffer* resu
     allocInfo.commandBufferCount = count;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
-    VK_ASSERT(table_->vkAllocateCommandBuffers(device_->Handle(), &allocInfo, results));
+    VK_ASSERT(table_->vkAllocateCommandBuffers(device_->Handle(), &allocInfo, buffers));
 }
 
 void WorkerGroup::FreeCommandBuffers(std::uint32_t count, VkCommandBuffer* buffers)

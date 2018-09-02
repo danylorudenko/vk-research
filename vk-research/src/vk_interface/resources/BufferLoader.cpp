@@ -75,22 +75,20 @@ Buffer BufferLoader::LoadBuffer(BufferCreateInfo const& desc)
 
     regionDesc.size_ = memoryRequirements.size;
     regionDesc.alignment_ = memoryRequirements.alignment;
-
+    regionDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
     assert(IsPowerOf2(regionDesc.alignment_) && "Alignemnt is not power of 2!");
 
-    MemoryPageRegion memoryRegion;
-    memoryRegion.page_ = nullptr;
-    memoryRegion.size_ = 0;
-    memoryRegion.offset_ = 0;
 
-    memoryController_->ProvideMemoryPageRegion(regionDesc, memoryRegion);
+    MemoryRegion memoryRegion = { nullptr, 0, 0 };
+    memoryController_->ProvideMemoryRegion(regionDesc, memoryRegion);
     VkDeviceMemory deviceMemory = memoryRegion.page_->deviceMemory_;
+
 
     VkDeviceSize commitmentTest = 0;
     table_->vkGetDeviceMemoryCommitment(device_->Handle(), deviceMemory, &commitmentTest);
 
     assert(memoryRegion.page_ != nullptr && "Couldn't provide memory region for the buffer.");
-    assert(memoryRequirements.memoryTypeBits & (1 << memoryRegion.page_->memoryTypeId_) && "MemoryPageRegion has invalid memoryType");
+    assert(memoryRequirements.memoryTypeBits & (1 << memoryRegion.page_->memoryTypeId_) && "MemoryRegion has invalid memoryType");
     
     
     VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, deviceMemory, memoryRegion.offset_));

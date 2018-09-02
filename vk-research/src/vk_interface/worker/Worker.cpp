@@ -71,7 +71,7 @@ VkCommandBuffer Worker::StartNextExecutionFrame()
     return currentFrame.Begin();
 }
 
-void Worker::EndCurrentFrame()
+void Worker::EndCurrentExecutionFrame()
 {
     WorkerFrame& currentFrame = executionFrames_[currentExecutionFrame_];
     currentFrame.End();
@@ -85,9 +85,10 @@ void Worker::ExecuteCurrentFrame()
 
 Worker::~Worker()
 {
-    for (auto& frame : executionFrames_) {
+    // WorkersProvider is responsible for waiting on the destruction
+    /*for (auto& frame : executionFrames_) {
         frame.WaitForFence();
-    }
+    }*/
 }
 
 }

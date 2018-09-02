@@ -47,7 +47,7 @@ struct MemoryPage
     VkDeviceSize nextFreeOffset_;
 };
 
-struct MemoryPageRegion
+struct MemoryRegion
 {
     MemoryPage* page_;
     std::uint64_t offset_;
@@ -58,6 +58,7 @@ struct MemoryPageRegionDesc
 {
     std::uint64_t size_;
     std::uint64_t alignment_;
+    std::uint32_t memoryTypeBits_;
     MemoryUsage usage_;
 };
 
@@ -84,13 +85,14 @@ public:
     ~MemoryController();
 
 public:
-    void ProvideMemoryPageRegion(MemoryPageRegionDesc desc, MemoryPageRegion& regionOut);
+    void ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
+    void ReleaseMemoryRegion(MemoryRegion& region);
 
 private:
     MemoryPage& AllocPage(MemoryAccess access, MemoryUsage usage, std::uint64_t size);
     void FreePage(std::uint64_t pageIndex);
 
-    void GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryPageRegion& regionOut);
+    void GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryRegion& regionOut);
 
 private:
     ImportTable* table_;

@@ -60,7 +60,7 @@ void VulkanApplicationDelegate::start()
 
     vulkanLoader_.Table().vkCmdCopyBuffer(commandBuffer, buffer.handle_, buffer2.handle_, 1, &copyRegion);
 
-    worker->EndCurrentFrame();
+    worker->EndCurrentExecutionFrame();
     worker->ExecuteCurrentFrame();
 
     vulkanLoader_.Table().vkDeviceWaitIdle(device.Handle());

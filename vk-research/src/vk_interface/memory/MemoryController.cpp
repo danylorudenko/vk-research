@@ -46,7 +46,7 @@ MemoryController::~MemoryController()
     }
 }
 
-void MemoryController::ProvideMemoryPageRegion(MemoryPageRegionDesc desc, MemoryPageRegion& regionOut)
+void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
 {
     MemoryAccess accessFlags = MemoryAccess::NONE;
 
@@ -70,7 +70,7 @@ void MemoryController::ProvideMemoryPageRegion(MemoryPageRegionDesc desc, Memory
         [&desc, accessFlags](MemoryPage const& page)
         {
             auto const accessValid = (page.accessFlags_ & accessFlags) == accessFlags;
-            auto const sizeValid = desc.size_ >= (page.size_ - page.nextFreeOffset_);
+            auto const sizeValid = desc.size_ <= (page.size_ - page.nextFreeOffset_);
             auto const usageValid = desc.usage_ == page.usage_;
 
             return accessValid && sizeValid && usageValid;
@@ -89,7 +89,7 @@ void MemoryController::ProvideMemoryPageRegion(MemoryPageRegionDesc desc, Memory
     }
 }
 
-void MemoryController::GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryPageRegion& regionOut)
+void MemoryController::GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryRegion& regionOut)
 {
     auto const size = desc.size_ + desc.alignment_;
 
@@ -98,6 +98,25 @@ void MemoryController::GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionD
     regionOut.size_ = size;
 
     page.nextFreeOffset_ += size;
+    ++page.bindCount_;
+}
+
+void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
+{
+    auto const regionMemory = region.page_->deviceMemory_;
+
+    std::uint64_t pageIndex = std::numeric_limits<std::uint64_t>::max();
+    for (auto i = 0u; i < allocations_.size(); ++i) {
+        if (regionMemory == allocations_[i].deviceMemory_) {
+            pageIndex = i;
+        }
+    }
+
+    if (pageIndex != std::numeric_limits<std::uint64_t>::max()) {
+        if (--allocations_[pageIndex].bindCount_ == 0) {
+            FreePage(pageIndex);
+        }
+    }
 }
 
 MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage usage, std::uint64_t size)

@@ -1,4 +1,5 @@
 #include "WorkersProvider.hpp"
+#include "../Tools.hpp"
 #include <utility>
 
 namespace VKW
@@ -76,7 +77,7 @@ WorkersProvider& WorkersProvider::operator=(WorkersProvider&& rhs)
 
 WorkersProvider::~WorkersProvider()
 {
-
+    VK_ASSERT(table_->vkDeviceWaitIdle(device_->Handle()));
 }
 
 Worker* WorkersProvider::GetWorker(WorkerType type, std::uint32_t index)

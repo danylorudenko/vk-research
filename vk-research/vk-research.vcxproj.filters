@@ -63,6 +63,9 @@
     <ClCompile Include="src\vk_interface\worker\WorkersProvider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\vk_interface\resources\DynamicResourcesStorage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\system\DynamicLibrary.hpp">
@@ -156,6 +159,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\worker\WorkersProvider.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\resources\Resource.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\resources\DynamicResourcesStorage.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

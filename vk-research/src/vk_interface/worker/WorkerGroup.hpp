@@ -31,7 +31,7 @@ public:
     std::uint32_t WorkersCount() const;
     Worker* GetWorker(std::uint32_t index);
 
-    void AllocCommandBuffers(std::uint32_t count, VkCommandBuffer* results);
+    void AllocCommandBuffers(std::uint32_t count, VkCommandBuffer* buffers);
     void FreeCommandBuffers(std::uint32_t count, VkCommandBuffer* buffers);
 
     ~WorkerGroup();

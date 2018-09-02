@@ -10,7 +10,7 @@
 #include "Device.hpp"
 #include "memory/MemoryController.hpp"
 #include "resources/BufferLoader.hpp"
-#include "worker/WorkersControlSystem.hpp"
+#include "worker/WorkersProvider.hpp"
 
 namespace VKW
 {

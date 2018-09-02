@@ -51,7 +51,7 @@ public:
     Worker& operator=(Worker&& rhs);
 
     VkCommandBuffer StartNextExecutionFrame();
-    void EndCurrentFrame();
+    void EndCurrentExecutionFrame();
     void ExecuteCurrentFrame();
 
     ~Worker();
