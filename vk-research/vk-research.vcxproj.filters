@@ -167,5 +167,11 @@
     <ClInclude Include="src\vk_interface\resources\DynamicResourcesStorage.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_interface\memory\Memory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\runtime\ResourceBindingService.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

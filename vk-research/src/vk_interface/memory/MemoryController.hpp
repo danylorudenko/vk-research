@@ -4,55 +4,11 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 #include "..\..\class_features\NonCopyable.hpp"
-#include "..\ImportTable.hpp"
+#include "Memory.hpp"
 
 namespace VKW
 {
 
-
-enum MemoryUsage
-{
-    VERTEX_INDEX = 0,
-    UPLOAD_BUFFER,
-    UNIFORM,
-    SAMPLE_TEXTURE,
-    COLOR_ATTACHMENT,
-
-    BEGIN = VERTEX_INDEX,
-    END = COLOR_ATTACHMENT + 1,
-    MAX = END
-};
-
-enum MemoryAccess
-{
-    NONE = 0,
-    GPU_LOCAL = 1,
-    CPU_READBACK = 2,
-    CPU_WRITE = 4,
-    CPU_COHERENT = 8,
-};
-
-
-
-struct MemoryPage
-{
-    VkDeviceMemory deviceMemory_;
-    VkDeviceSize size_;
-    std::uint32_t memoryTypeId_;
-    VkMemoryPropertyFlags propertyFlags_;
-    MemoryAccess accessFlags_;
-    MemoryUsage usage_;
-
-    std::uint32_t bindCount_;
-    VkDeviceSize nextFreeOffset_;
-};
-
-struct MemoryRegion
-{
-    MemoryPage* page_;
-    std::uint64_t offset_;
-    std::uint64_t size_;
-};
 
 struct MemoryPageRegionDesc
 {
@@ -65,6 +21,7 @@ struct MemoryPageRegionDesc
 
 
 class Device;
+class ImportTable;
 
 struct MemoryControllerDesc
 {
@@ -92,7 +49,7 @@ private:
     MemoryPage& AllocPage(MemoryAccess access, MemoryUsage usage, std::uint64_t size);
     void FreePage(std::uint64_t pageIndex);
 
-    void GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryRegion& regionOut);
+    void GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
 
 private:
     ImportTable* table_;

@@ -2,6 +2,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "../memory/Memory.hpp"
+
 namespace VKW
 {
 
@@ -14,6 +16,8 @@ enum class ResourceType
 struct BufferResource
 {
     VkBuffer handle_;
+    std::uint32_t size_;
+    MemoryRegion memory_;
 };
 
 struct SubbufferResource

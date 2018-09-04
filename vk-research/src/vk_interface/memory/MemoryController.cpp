@@ -1,5 +1,6 @@
 #include "MemoryController.hpp"
 #include "..\Device.hpp"
+#include "..\ImportTable.hpp"
 #include "..\Tools.hpp"
 #include "..\resources\BufferLoader.hpp"
 
@@ -89,7 +90,7 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
     }
 }
 
-void MemoryController::GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc& desc, MemoryRegion& regionOut)
+void MemoryController::GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
 {
     auto const size = desc.size_ + desc.alignment_;
 
@@ -117,6 +118,10 @@ void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
             FreePage(pageIndex);
         }
     }
+
+    region.page_ = nullptr;
+    region.size_ = 0;
+    region.offset_ = 0;
 }
 
 MemoryPage& MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage usage, std::uint64_t size)

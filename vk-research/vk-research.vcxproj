@@ -170,6 +170,7 @@
     <ClInclude Include="src\system\Window.hpp" />
     <ClInclude Include="src\vk_interface\Device.hpp" />
     <ClInclude Include="src\vk_interface\Instance.hpp" />
+    <ClInclude Include="src\vk_interface\memory\Memory.hpp" />
     <ClInclude Include="src\vk_interface\memory\MemoryController.hpp" />
     <ClInclude Include="src\vk_interface\resources\BufferLoader.hpp" />
     <ClInclude Include="src\vk_interface\resources\DynamicResourcesStorage.hpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="src\vk_interface\resources\ResourcesController.hpp" />
     <ClInclude Include="src\vk_interface\ImportTable.hpp" />
     <ClInclude Include="src\vk_interface\Loader.hpp" />
+    <ClInclude Include="src\vk_interface\runtime\ResourceBindingService.hpp" />
     <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\worker\Worker.hpp" />
     <ClInclude Include="src\vk_interface\worker\WorkerFrame.h" />
