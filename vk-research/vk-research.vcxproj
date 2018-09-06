@@ -143,6 +143,9 @@
     <ClCompile Include="src\vk_interface\resources\ResourcesController.cpp" />
     <ClCompile Include="src\vk_interface\ImportTable.cpp" />
     <ClCompile Include="src\vk_interface\Loader.cpp" />
+    <ClCompile Include="src\vk_interface\runtime\DescriptorSet.cpp" />
+    <ClCompile Include="src\vk_interface\runtime\PipelineFactory.cpp" />
+    <ClCompile Include="src\vk_interface\runtime\ResourceBindingService.cpp" />
     <ClCompile Include="src\vk_interface\worker\Worker.cpp" />
     <ClCompile Include="src\vk_interface\worker\WorkerFrame.cpp" />
     <ClCompile Include="src\vk_interface\worker\WorkerGroup.cpp" />
@@ -178,6 +181,8 @@
     <ClInclude Include="src\vk_interface\resources\ResourcesController.hpp" />
     <ClInclude Include="src\vk_interface\ImportTable.hpp" />
     <ClInclude Include="src\vk_interface\Loader.hpp" />
+    <ClInclude Include="src\vk_interface\runtime\DescriptorSet.hpp" />
+    <ClInclude Include="src\vk_interface\runtime\PipelineFactory.hpp" />
     <ClInclude Include="src\vk_interface\runtime\ResourceBindingService.hpp" />
     <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\worker\Worker.hpp" />

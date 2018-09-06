@@ -66,6 +66,15 @@
     <ClCompile Include="src\vk_interface\resources\DynamicResourcesStorage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\vk_interface\runtime\ResourceBindingService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vk_interface\runtime\DescriptorSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vk_interface\runtime\PipelineFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\system\DynamicLibrary.hpp">
@@ -171,6 +180,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\runtime\ResourceBindingService.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\runtime\DescriptorSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\runtime\PipelineFactory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
