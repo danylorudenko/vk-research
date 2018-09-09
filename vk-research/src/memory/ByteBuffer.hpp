@@ -19,9 +19,9 @@ public:
     void* Data() const;
 
     template<typename T>
-    T* As()
+    T As()
     {
-        return reinterpret_cast<T*>(buffer);
+        return reinterpret_cast<T>(buffer);
     }
 
     ~ByteBuffer();

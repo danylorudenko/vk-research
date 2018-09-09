@@ -12,14 +12,22 @@
 #include "resources/BufferLoader.hpp"
 #include "worker/WorkersProvider.hpp"
 
+class IOManager;
+
 namespace VKW
 {
+
+struct LoaderDesc
+{
+    IOManager* ioManager_;
+    bool debug_ = false;
+};
 
 class Loader final
     : public NonCopyable
 {
 public:
-    Loader(bool debug = false);
+    Loader(LoaderDesc const& desc);
 
     Loader(Loader&& rhs) = default;
     Loader& operator=(Loader&& rhs) = default;

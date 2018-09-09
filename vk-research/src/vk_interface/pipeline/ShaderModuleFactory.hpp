@@ -3,6 +3,8 @@
 #include "ShaderModule.hpp"
 #include <vector>
 
+class IOManager;
+
 namespace VKW
 {
 
@@ -13,6 +15,7 @@ struct ShaderModuleFactoryDesc
 {
     ImportTable* table_;
     Device* device_;
+    IOManager* ioManager_;
 };
 
 struct ShaderModuleDesc
@@ -37,6 +40,7 @@ public:
 private:
     ImportTable* table_;
     Device* device_;
+    IOManager* ioManager_;
 
     std::vector<ShaderModule> loadedModules_;
 };

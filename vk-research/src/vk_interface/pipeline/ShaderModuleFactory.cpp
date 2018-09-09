@@ -3,6 +3,7 @@
 #include "../ImportTable.hpp"
 #include "../Device.hpp"
 #include "../Tools.hpp"
+#include "../../io/IOManager.hpp"
 
 namespace VKW
 {
@@ -10,18 +11,21 @@ namespace VKW
 ShaderModuleFactory::ShaderModuleFactory()
     : table_{ nullptr }
     , device_{ nullptr }
+    , ioManager_{ nullptr }
 {
 }
 
 ShaderModuleFactory::ShaderModuleFactory(ShaderModuleFactoryDesc const& desc)
     : table_{ nullptr }
     , device_{ nullptr }
+    , ioManager_{ nullptr }
 {
 }
 
 ShaderModuleFactory::ShaderModuleFactory(ShaderModuleFactory&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
+    , ioManager_{ nullptr }
 {
     operator=(std::move(rhs));
 }
@@ -30,6 +34,7 @@ ShaderModuleFactory& ShaderModuleFactory::operator=(ShaderModuleFactory&& rhs)
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
+    std::swap(ioManager_, rhs.ioManager_);
     std::swap(loadedModules_, rhs.loadedModules_);
 
     return *this;

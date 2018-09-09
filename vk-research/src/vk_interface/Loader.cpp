@@ -5,17 +5,17 @@
 namespace VKW
 {
 
-Loader::Loader(bool debug)
+Loader::Loader(LoaderDesc const& desc)
     : vulkanLibrary_{ std::make_unique<DynamicLibrary>("vulkan-1.dll") }
     , table_{ std::make_unique<ImportTable>(*vulkanLibrary_) }
 {
 
     auto instanceExtensions = std::vector<std::string>{ "VK_KHR_surface", VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
-    if (debug)
+    if (desc.debug_)
         instanceExtensions.emplace_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 
     auto instanceLayers = std::vector<std::string>{};
-    if (debug) {
+    if (desc.debug_) {
         instanceLayers.emplace_back("VK_LAYER_LUNARG_standard_validation");
     }
 
@@ -25,7 +25,7 @@ Loader::Loader(bool debug)
     instanceDesc.table_ = table_.get();
     instanceDesc.requiredInstanceExtensions_ = instanceExtensions;
     instanceDesc.requiredInstanceLayers_ = instanceLayers;
-    instanceDesc.debug_ = debug;
+    instanceDesc.debug_ = desc.debug_;
 
     instance_ = std::make_unique<VKW::Instance>(instanceDesc);
 

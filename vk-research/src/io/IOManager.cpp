@@ -1,4 +1,5 @@
 #include "IOManager.hpp"
+#include "../memory/ByteBuffer.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -14,18 +15,20 @@ IOManager& IOManager::operator=(IOManager&& rhs)
 
 IOManager::~IOManager() {}
 
-ByteBuffer IOManager::ReadFileToBuffer(char const* path)
+std::uint64_t IOManager::ReadFileToBuffer(char const* path, ByteBuffer& buffer)
 {
-    std::ifstream istream{ path };
+    std::ifstream istream{ path, std::ios_base::binary | std::ios_base::beg };
     if (!istream) {
         std::cerr << "Error opening file in path: " << path << std::endl;
-        return ByteBuffer{};
+        return 0;
     }
 
-    std::uint64_t constexpr defaultInputStep = 2048;
-
-    ByteBuffer memoryBuffer{ defaultInputStep };
-    while (!istream.eof()) {
-        istream.read(memoryBuffer.As<char>(), defaultInputStep);
+    auto const fileSize = istream.seekg(0, std::ios_base::end).tellg();
+    if (buffer.Size() < fileSize) {
+        buffer.Resize(fileSize);
     }
+
+    istream.read(buffer.As<char*>(), fileSize);
+
+    return fileSize;
 }

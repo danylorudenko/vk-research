@@ -1,16 +1,18 @@
 #pragma once
 
 #include "../class_features/NonCopyable.hpp"
-#include "../memory/ByteBuffer.hpp"
+
+class ByteBuffer;
 
 class IOManager
     : public NonCopyable
 {
+public:
     IOManager();
     IOManager(IOManager&& rhs);
     IOManager& operator=(IOManager&& rhs);
 
-    ByteBuffer ReadFileToBuffer(char const* path);
+    std::uint64_t ReadFileToBuffer(char const* path, ByteBuffer& buffer);
 
     ~IOManager();
 

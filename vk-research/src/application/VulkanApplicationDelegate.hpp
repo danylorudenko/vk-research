@@ -6,6 +6,7 @@
 #include "..\system\Window.hpp"
 #include "..\system\DynamicLibrary.hpp"
 
+#include "..\io\IOManager.hpp"
 #include "..\vk_interface\Loader.hpp"
 
 class VulkanApplicationDelegate
@@ -25,5 +26,6 @@ public:
 
 private:
     Window mainWindow_;
+    IOManager ioManager_;
     VKW::Loader vulkanLoader_;
 };

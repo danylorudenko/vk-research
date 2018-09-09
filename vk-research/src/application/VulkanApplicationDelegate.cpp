@@ -11,7 +11,8 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
         "VulkanRenderWindow",
         VulkanApplicationDelegate::WinProc,
         this }
-    , vulkanLoader_{ vkDebug }
+    , ioManager_{}
+    , vulkanLoader_{ { &ioManager_, vkDebug } }
 {
 }
 
