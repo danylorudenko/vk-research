@@ -28,14 +28,17 @@ struct GraphicsPipelineDesc
 
 class PipelineFactory
 {
+public:
     PipelineFactory();
     PipelineFactory(PipelineFactoryDesc const& desc);
 
     PipelineFactory(PipelineFactory&& rhs);
     PipelineFactory& operator=(PipelineFactory&& rhs);
 
-    Pipeline* CreateGraphicsPipeline(GraphicsPipelineDesc const& desc);
-    void DestroyPipeline(Pipeline* pipeline);
+    PipelineHandle CreateGraphicsPipeline(GraphicsPipelineDesc const& desc);
+    void DestroyPipeline(PipelineHandle pipeline);
+
+    Pipeline const& GetPipeline(PipelineHandle handle) const;
 
     ~PipelineFactory();
 

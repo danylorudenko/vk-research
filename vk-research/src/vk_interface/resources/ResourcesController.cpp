@@ -48,7 +48,7 @@ ResourcesController::~ResourcesController()
     }
 }
 
-BufferResource ResourcesController::CreateBuffer(BufferDesc const& desc)
+BufferHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
 {
     VkBufferCreateInfo vkBufferCreateInfo;
     vkBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -90,23 +90,18 @@ BufferResource ResourcesController::CreateBuffer(BufferDesc const& desc)
     assert(IsPowerOf2(regionDesc.alignment_) && "Alignemnt is not power of 2!");
 
 
-    MemoryRegion memoryRegion = { nullptr, 0, 0 };
+    MemoryRegion memoryRegion = { { 0 }, 0, 0 };
     memoryController_->ProvideMemoryRegion(regionDesc, memoryRegion);
-    VkDeviceMemory deviceMemory = memoryRegion.pageHandle_->deviceMemory_;
+    auto const& page = memoryController_->GetPage(memoryRegion.pageHandle_);
+    VkDeviceMemory deviceMemory = page.deviceMemory_;
 
-
-    VkDeviceSize commitmentTest = 0;
-    table_->vkGetDeviceMemoryCommitment(device_->Handle(), deviceMemory, &commitmentTest);
-
-    assert(memoryRegion.pageHandle_ != nullptr && "Couldn't provide memory region for the buffer.");
-    assert(memoryRequirements.memoryTypeBits & (1 << memoryRegion.pageHandle_->memoryTypeId_) && "MemoryRegion has invalid memoryType");
-
+    assert(memoryRequirements.memoryTypeBits & (1 << page.memoryTypeId_) && "MemoryRegion has invalid memoryType");
 
     VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, deviceMemory, memoryRegion.offset_));
 
     staticBuffers_.emplace_back(vkBuffer, desc.size_, memoryRegion);
 
-    return staticBuffers_[staticBuffers_.size() - 1];
+    return { static_cast<std::uint32_t>(staticBuffers_.size()) - 1 };
 }
 
 }

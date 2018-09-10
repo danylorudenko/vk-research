@@ -2,6 +2,8 @@
 
 #include "../class_features/NonCopyable.hpp"
 
+#include <cstdint>
+
 class ByteBuffer;
 
 class IOManager

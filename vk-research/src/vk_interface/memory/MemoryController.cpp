@@ -2,7 +2,6 @@
 #include "..\Device.hpp"
 #include "..\ImportTable.hpp"
 #include "..\Tools.hpp"
-#include "..\resources\BufferLoader.hpp"
 
 #include <algorithm>
 
@@ -47,6 +46,11 @@ MemoryController::~MemoryController()
     }
 }
 
+MemoryPage const& MemoryController::GetPage(MemoryPageHandle handle) const
+{
+    return allocations_[handle.id_];
+}
+
 void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
 {
     MemoryAccess accessFlags = MemoryAccess::NONE;
@@ -67,18 +71,23 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
         break;
     }
 
-    auto validPage = std::find_if(allocations_.begin(), allocations_.end(),
-        [&desc, accessFlags](MemoryPage const& page)
-        {
-            auto const accessValid = (page.accessFlags_ & accessFlags) == accessFlags;
-            auto const sizeValid = desc.size_ <= (page.size_ - page.nextFreeOffset_);
-            auto const usageValid = desc.usage_ == page.usage_;
 
-            return accessValid && sizeValid && usageValid;
-        });
+    std::uint32_t validAllocation = std::numeric_limits<std::uint32_t>::max();
+    auto const allocationsCount = allocations_.size();
+    for (auto i = 0u; i < allocationsCount; ++i) {
+        auto const& page = allocations_[i];
+        auto const accessValid = (page.accessFlags_ & accessFlags) == accessFlags;
+        auto const sizeValid = desc.size_ <= (page.size_ - page.nextFreeOffset_);
+        auto const usageValid = desc.usage_ == page.usage_;
 
-    if (validPage != allocations_.end()) {
-        GetNextFreePageRegion(*validPage, desc, regionOut);
+        if (accessValid && sizeValid && usageValid) {
+            validAllocation = i;
+            break;
+        }
+    }
+
+    if (validAllocation != std::numeric_limits<std::uint32_t>::max()) {
+        GetNextFreePageRegion({ validAllocation }, desc, regionOut);
     }
     else {
         auto const defaultPageSize = defaultPageSizes_[desc.usage_];
@@ -105,16 +114,16 @@ void MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle, Memory
 
 void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
 {
-    auto const regionMemory = allocations_[region.pageHandle_.id_].deviceMemory_;
+    auto const regionMemoryAllocation = allocations_[region.pageHandle_.id_].deviceMemory_;
 
-    std::uint64_t pageIndex = std::numeric_limits<std::uint64_t>::max();
+    std::uint32_t pageIndex = std::numeric_limits<std::uint32_t>::max();
     for (auto i = 0u; i < allocations_.size(); ++i) {
-        if (regionMemory == allocations_[i].deviceMemory_) {
+        if (regionMemoryAllocation == allocations_[i].deviceMemory_) {
             pageIndex = i;
         }
     }
 
-    if (pageIndex != std::numeric_limits<std::uint64_t>::max()) {
+    if (pageIndex != std::numeric_limits<std::uint32_t>::max()) {
         if (--allocations_[pageIndex].bindCount_ == 0) {
             FreePage({ pageIndex });
         }
@@ -177,7 +186,7 @@ MemoryPageHandle MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsa
 
     allocations_.emplace_back(memory);
 
-    return { allocations_.size() - 1 };
+    return { static_cast<std::uint32_t>(allocations_.size()) - 1 };
 }
 
 void MemoryController::FreePage(MemoryPageHandle pageHandle)

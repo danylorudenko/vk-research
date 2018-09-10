@@ -78,14 +78,15 @@ DynamicResourceStorage::StorageHandle DynamicResourceStorage::AllocateStorage(st
     memoryDesc.memoryTypeBits_ = memRequirements.memoryTypeBits;
     memoryDesc.usage_ = MemoryUsage::UNIFORM;
     
-    MemoryRegion memory{ nullptr, 0, 0 };
+    MemoryRegion memory{ {}, 0, 0 };
     memoryController_->ProvideMemoryRegion(memoryDesc, memory);
+    auto const& page = memoryController_->GetPage(memory.pageHandle_);
 
-    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), buffer, memory.pageHandle_->deviceMemory_, memory.offset_));
+    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), buffer, page.deviceMemory_, memory.offset_));
 
-    storages_.emplace_back(buffer, size, 0);
+    storages_.emplace_back(buffer, size, 0, 0);
 
-    return { storages_.size() - 1 };
+    return { static_cast<std::uint32_t>(storages_.size()) - 1 };
 }
 
 void DynamicResourceStorage::FreeStorage(StorageHandle handle)

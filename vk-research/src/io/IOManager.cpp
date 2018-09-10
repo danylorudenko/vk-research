@@ -24,7 +24,7 @@ std::uint64_t IOManager::ReadFileToBuffer(char const* path, ByteBuffer& buffer)
     }
 
     auto const fileSize = istream.seekg(0, std::ios_base::end).tellg();
-    if (buffer.Size() < fileSize) {
+    if (buffer.Size() < static_cast<std::uint64_t>(fileSize)) {
         buffer.Resize(fileSize);
     }
 

@@ -32,8 +32,10 @@ public:
     ShaderModuleFactory(ShaderModuleFactory&& rhs);
     ShaderModuleFactory& operator=(ShaderModuleFactory&& rhs);
 
-    ShaderModule* LoadModule(ShaderModuleDesc const& desc);
-    void UnloadModule(ShaderModule* module);
+    ShaderModuleHandle LoadModule(ShaderModuleDesc const& desc);
+    void UnloadModule(ShaderModuleHandle module);
+
+    ShaderModule const& GetModule(ShaderModuleHandle handle) const;
 
     ~ShaderModuleFactory();
 

@@ -43,23 +43,6 @@ Loader::Loader(LoaderDesc const& desc)
     
 
 
-    VKW::MemoryControllerDesc memoryControllerDesc;
-    memoryControllerDesc.table_ = table_.get();
-    memoryControllerDesc.device_ = device_.get();
-
-    memoryController_ = std::make_unique<VKW::MemoryController>(memoryControllerDesc);
-
-
-
-    VKW::BufferLoaderDesc bufferLoaderDesc;
-    bufferLoaderDesc.table_ = table_.get();
-    bufferLoaderDesc.device_ = device_.get();
-    bufferLoaderDesc.memoryController_ = memoryController_.get();
-
-    bufferLoader_ = std::make_unique<VKW::BufferLoader>(bufferLoaderDesc);
-
-
-
     VKW::WorkersProviderDesc wcsDesc;
     wcsDesc.table_ = table_.get();
     wcsDesc.device_ = device_.get();
@@ -68,6 +51,49 @@ Loader::Loader(LoaderDesc const& desc)
     wcsDesc.transferQueueCount_ = 0;
 
     workersProvider_ = std::make_unique<VKW::WorkersProvider>(wcsDesc);
+
+
+
+    VKW::MemoryControllerDesc memoryControllerDesc;
+    memoryControllerDesc.table_ = table_.get();
+    memoryControllerDesc.device_ = device_.get();
+
+    memoryController_ = std::make_unique<VKW::MemoryController>(memoryControllerDesc);
+
+
+
+    VKW::ResourcesControllerDesc resourcesControllerDesc;
+    resourcesControllerDesc.table_ = table_.get();
+    resourcesControllerDesc.device_ = device_.get();
+    resourcesControllerDesc.memoryController_ = memoryController_.get();
+
+    resourcesController_ = std::make_unique<VKW::ResourcesController>(resourcesControllerDesc);
+
+
+
+    VKW::ShaderModuleFactoryDesc shaderModuleFactoryDesc;
+    shaderModuleFactoryDesc.table_ = table_.get();
+    shaderModuleFactoryDesc.device_ = device_.get();
+    shaderModuleFactoryDesc.ioManager_ = desc.ioManager_;
+
+    shaderModuleFactory_ = std::make_unique<VKW::ShaderModuleFactory>(shaderModuleFactoryDesc);
+
+
+
+    VKW::PipelineFactoryDesc pipelineFactoryDesc;
+    pipelineFactoryDesc.table_ = table_.get();
+    pipelineFactoryDesc.device_ = device_.get();
+
+    pipelineFactory_ = std::make_unique<VKW::PipelineFactory>(pipelineFactoryDesc);
+
+
+
+    VKW::ResourceBindingServiceDesc resourceBindingServiceDesc;
+    resourceBindingServiceDesc.table_ = table_.get();
+    resourceBindingServiceDesc.device_ = device_.get();
+    resourceBindingServiceDesc.framesCount_ = 3;
+
+    resourceBindingService_ = std::make_unique<VKW::ResourceBindingService>(resourceBindingServiceDesc);
 }
 
 Loader::~Loader()
@@ -89,11 +115,6 @@ Device& Loader::Device()
 VKW::MemoryController& Loader::MemoryController()
 {
     return *memoryController_;
-}
-
-VKW::BufferLoader& Loader::BufferLoader()
-{
-    return *bufferLoader_;
 }
 
 VKW::WorkersProvider& Loader::WorkersProvider()

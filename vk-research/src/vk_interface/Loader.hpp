@@ -9,8 +9,11 @@
 #include "Instance.hpp"
 #include "Device.hpp"
 #include "memory/MemoryController.hpp"
-#include "resources/BufferLoader.hpp"
+#include "resources/ResourcesController.hpp"
 #include "worker/WorkersProvider.hpp"
+#include "runtime/ResourceBindingService.hpp"
+#include "pipeline/PipelineFactory.hpp"
+#include "pipeline/ShaderModuleFactory.hpp"
 
 class IOManager;
 
@@ -38,21 +41,27 @@ public:
     VKW::Device& Device();
 
     VKW::MemoryController& MemoryController();
-    VKW::BufferLoader& BufferLoader();
     VKW::WorkersProvider& WorkersProvider();
     
 
 private:
     std::unique_ptr<DynamicLibrary> vulkanLibrary_;
+
     std::unique_ptr<VKW::ImportTable> table_;
 
     std::unique_ptr<VKW::Instance> instance_;
     std::unique_ptr<VKW::Device> device_;
 
-    std::unique_ptr<VKW::MemoryController> memoryController_;
-    std::unique_ptr<VKW::BufferLoader> bufferLoader_;
-
     std::unique_ptr<VKW::WorkersProvider> workersProvider_;
+
+    std::unique_ptr<VKW::MemoryController> memoryController_;
+    std::unique_ptr<VKW::ResourcesController> resourcesController_;
+
+    std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;
+    std::unique_ptr<VKW::PipelineFactory> pipelineFactory_;
+
+    std::unique_ptr<VKW::ResourceBindingService> resourceBindingService_;
+
 };
 
 }

@@ -21,7 +21,7 @@ public:
     template<typename T>
     T As()
     {
-        return reinterpret_cast<T>(buffer);
+        return reinterpret_cast<T>(buffer_);
     }
 
     ~ByteBuffer();

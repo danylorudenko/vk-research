@@ -36,9 +36,6 @@
     <ClCompile Include="src\vk_interface\memory\MemoryController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vk_interface\resources\BufferLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\vk_interface\resources\ResourcesController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -153,9 +150,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\resources\ResourcesController.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vk_interface\resources\BufferLoader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\Loader.hpp">
