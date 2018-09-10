@@ -4,6 +4,7 @@
 #include "../Device.hpp"
 #include "../Tools.hpp"
 #include "../../io/IOManager.hpp"
+#include "../../memory/ByteBuffer.hpp"s
 
 namespace VKW
 {
@@ -49,15 +50,21 @@ ShaderModuleFactory::~ShaderModuleFactory()
 
 ShaderModule* ShaderModuleFactory::LoadModule(ShaderModuleDesc const& desc)
 {
+    ByteBuffer buffer{ 2048 };
+    auto dataSize = ioManager_->ReadFileToBuffer(desc.shaderPath_, buffer);
+    
     VkShaderModule result = VK_NULL_HANDLE;
 
     VkShaderModuleCreateInfo info;
     info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    info.pCode = nullptr;
+    info.pNext= nullptr;
     info.flags = VK_FLAGS_NONE;
-    info.codeSize = 0;
-    info.pCode = nullptr;
+    info.codeSize = dataSize;
+    info.pCode = buffer.As<std::uint32_t const*>();
     VK_ASSERT(table_->vkCreateShaderModule(device_->Handle(), &info, nullptr, &result));
+
+    loadedModules_.emplace_back(result);
+    return &(*loadedModules_.rend());
 }
 
 void ShaderModuleFactory::UnloadModule(ShaderModule* module)

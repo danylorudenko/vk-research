@@ -46,10 +46,10 @@ public:
     void ReleaseMemoryRegion(MemoryRegion& region);
 
 private:
-    MemoryPage& AllocPage(MemoryAccess access, MemoryUsage usage, std::uint64_t size);
-    void FreePage(std::uint64_t pageIndex);
+    MemoryPageHandle AllocPage(MemoryAccess access, MemoryUsage usage, std::uint64_t size);
+    void FreePage(MemoryPageHandle pageIndex);
 
-    void GetNextFreePageRegion(MemoryPage& page, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
+    void GetNextFreePageRegion(MemoryPageHandle page, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
 
 private:
     ImportTable* table_;

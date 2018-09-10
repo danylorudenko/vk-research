@@ -81,14 +81,14 @@ Buffer BufferLoader::LoadBuffer(BufferCreateInfo const& desc)
 
     MemoryRegion memoryRegion = { nullptr, 0, 0 };
     memoryController_->ProvideMemoryRegion(regionDesc, memoryRegion);
-    VkDeviceMemory deviceMemory = memoryRegion.page_->deviceMemory_;
+    VkDeviceMemory deviceMemory = memoryRegion.pageHandle_->deviceMemory_;
 
 
     VkDeviceSize commitmentTest = 0;
     table_->vkGetDeviceMemoryCommitment(device_->Handle(), deviceMemory, &commitmentTest);
 
-    assert(memoryRegion.page_ != nullptr && "Couldn't provide memory region for the buffer.");
-    assert(memoryRequirements.memoryTypeBits & (1 << memoryRegion.page_->memoryTypeId_) && "MemoryRegion has invalid memoryType");
+    assert(memoryRegion.pageHandle_ != nullptr && "Couldn't provide memory region for the buffer.");
+    assert(memoryRequirements.memoryTypeBits & (1 << memoryRegion.pageHandle_->memoryTypeId_) && "MemoryRegion has invalid memoryType");
     
     
     VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, deviceMemory, memoryRegion.offset_));

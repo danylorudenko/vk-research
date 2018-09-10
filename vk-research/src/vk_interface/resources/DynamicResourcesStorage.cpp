@@ -54,7 +54,7 @@ DynamicResourceStorage::~DynamicResourceStorage()
     }
 }
 
-DynamicResourceStorage::Storage& DynamicResourceStorage::AllocateStorage(std::uint32_t size)
+DynamicResourceStorage::StorageHandle DynamicResourceStorage::AllocateStorage(std::uint32_t size)
 {
     VkBufferCreateInfo bufferInfo;
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -81,17 +81,17 @@ DynamicResourceStorage::Storage& DynamicResourceStorage::AllocateStorage(std::ui
     MemoryRegion memory{ nullptr, 0, 0 };
     memoryController_->ProvideMemoryRegion(memoryDesc, memory);
 
-    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), buffer, memory.page_->deviceMemory_, memory.offset_));
+    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), buffer, memory.pageHandle_->deviceMemory_, memory.offset_));
 
     storages_.emplace_back(buffer, size, 0);
 
-    return storages_[storages_.size() - 1];
+    return { storages_.size() - 1 };
 }
 
-void DynamicResourceStorage::FreeStorage(std::uint32_t index)
+void DynamicResourceStorage::FreeStorage(StorageHandle handle)
 {
-    table_->vkDestroyBuffer(device_->Handle(), storages_[index].buffer_, nullptr);
-    storages_.erase(storages_.begin() + index);
+    table_->vkDestroyBuffer(device_->Handle(), storages_[handle.id_].buffer_, nullptr);
+    storages_.erase(storages_.begin() + handle.id_);
 }
 
 void DynamicResourceStorage::AllocSubresourcePatch(std::uint32_t count, std::uint32_t size, SubbufferResource* output)
@@ -115,7 +115,7 @@ void DynamicResourceStorage::FreeSubresourcePatch(std::uint32_t count, Subbuffer
     for (auto i = 0u; i < storages_.size(); i++) {
         if (storages_[i].buffer_ == subbuffers->handle_) {
             if ((storages_[i].subresourcesCount_ -= count) <= 0) {
-                FreeStorage(i);
+                FreeStorage({ i });
             }
             return;
         }

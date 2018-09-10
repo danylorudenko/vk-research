@@ -27,6 +27,11 @@ class DynamicResourceStorage
     : public NonCopyable
 {
 public:
+    struct StorageHandle
+    {
+        std::uint32_t id_;
+    };
+
     struct Storage
     {
         VkBuffer buffer_;
@@ -50,8 +55,8 @@ public:
 
 
 private:
-    Storage& AllocateStorage(std::uint32_t size);
-    void FreeStorage(std::uint32_t index);
+    StorageHandle AllocateStorage(std::uint32_t size);
+    void FreeStorage(StorageHandle index);
 
 private:
     ImportTable* table_;
