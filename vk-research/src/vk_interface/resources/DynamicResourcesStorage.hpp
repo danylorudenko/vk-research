@@ -34,6 +34,8 @@ public:
 
     struct Storage
     {
+        Storage(VkBuffer buffer, std::uint32_t size, std::uint32_t freeOffset, std::uint16_t subresourceCount);
+
         VkBuffer buffer_;
         std::uint32_t size_;
         std::uint32_t freeOffset_;

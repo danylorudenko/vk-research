@@ -19,6 +19,8 @@ enum class ResourceType
 
 struct BufferResource
 {
+    BufferResource(VkBuffer handle, std::uint32_t size, MemoryRegion const& memory);
+
     VkBuffer handle_;
     std::uint32_t size_;
     MemoryRegion memory_;

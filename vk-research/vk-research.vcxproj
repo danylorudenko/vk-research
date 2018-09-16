@@ -141,8 +141,10 @@
     <ClCompile Include="src\vk_interface\Instance.cpp" />
     <ClCompile Include="src\vk_interface\memory\MemoryController.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\PipelineFactory.cpp" />
+    <ClCompile Include="src\vk_interface\pipeline\ShaderModule.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\ShaderModuleFactory.cpp" />
     <ClCompile Include="src\vk_interface\resources\DynamicResourcesStorage.cpp" />
+    <ClCompile Include="src\vk_interface\resources\Resource.cpp" />
     <ClCompile Include="src\vk_interface\resources\ResourcesController.cpp" />
     <ClCompile Include="src\vk_interface\ImportTable.cpp" />
     <ClCompile Include="src\vk_interface\Loader.cpp" />

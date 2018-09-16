@@ -9,6 +9,8 @@ namespace VKW
 
 struct ShaderModule
 {
+    ShaderModule(VkShaderModule module);
+
     VkShaderModule handle_;
 };
 

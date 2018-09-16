@@ -37,9 +37,9 @@ public:
 
     PipelineHandle CreateGraphicsPipeline(GraphicsPipelineDesc const& desc);
     void DestroyPipeline(PipelineHandle pipeline);
-
+    
     Pipeline const& GetPipeline(PipelineHandle handle) const;
-
+    
     ~PipelineFactory();
 
 private:

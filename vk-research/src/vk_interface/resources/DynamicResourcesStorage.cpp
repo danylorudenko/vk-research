@@ -8,6 +8,15 @@
 namespace VKW
 {
 
+DynamicResourceStorage::Storage::Storage(VkBuffer buffer, std::uint32_t size, std::uint32_t freeOffset, std::uint16_t subresourceCount)
+    : buffer_{ buffer }
+    , size_{ size }
+    , freeOffset_{ freeOffset }
+    , subresourcesCount_{ subresourceCount }
+{
+
+}
+
 DynamicResourceStorage::DynamicResourceStorage()
     : table_{ nullptr }
     , device_{ nullptr }
@@ -45,6 +54,8 @@ DynamicResourceStorage& DynamicResourceStorage::operator=(DynamicResourceStorage
     std::swap(memoryController_, rhs.memoryController_);
     std::swap(defaultContainerSize_, rhs.defaultContainerSize_);
     std::swap(storages_, rhs.storages_);
+
+    return *this;
 }
 
 DynamicResourceStorage::~DynamicResourceStorage()

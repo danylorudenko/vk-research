@@ -27,10 +27,10 @@ class ResourceBindingService
 public:
     ResourceBindingService();
     ResourceBindingService(ResourceBindingServiceDesc const& desc);
-
+    
     ResourceBindingService(ResourceBindingService&& rhs);
     ResourceBindingService& operator=(ResourceBindingService&& rhs);
-
+    
     ~ResourceBindingService();
 
 private:

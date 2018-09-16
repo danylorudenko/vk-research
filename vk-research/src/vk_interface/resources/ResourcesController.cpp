@@ -99,7 +99,7 @@ BufferHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
 
     VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, deviceMemory, memoryRegion.offset_));
 
-    staticBuffers_.emplace_back(vkBuffer, desc.size_, memoryRegion);
+    staticBuffers_.emplace_back(vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion);
 
     return { static_cast<std::uint32_t>(staticBuffers_.size()) - 1 };
 }
