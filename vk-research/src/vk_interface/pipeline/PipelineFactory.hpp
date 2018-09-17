@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Pipeline.hpp"
+#include "RenderPass.hpp"
 
 namespace VKW
 {
@@ -23,7 +24,23 @@ struct PipelineFactoryDesc
 
 struct GraphicsPipelineDesc
 {
+    bool optimized_;
 
+    // shader stages count
+    // pShaderStages
+
+    // vertex input desc
+    // primitive assembly desc
+    // viewport desc
+    // resterization desc
+    // multisample desc
+    // depth-stencil desc
+    // color-blend state desc
+    // 
+
+    // layout
+    RenderPassHandle renderPass_;
+    // subpass index
 };
 
 class PipelineFactory

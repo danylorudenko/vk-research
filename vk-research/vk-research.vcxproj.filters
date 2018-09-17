@@ -212,5 +212,8 @@
     <ClInclude Include="src\memory\ByteBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_interface\pipeline\RenderPass.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -35,7 +35,7 @@ public:
     ShaderModuleHandle LoadModule(ShaderModuleDesc const& desc);
     void UnloadModule(ShaderModuleHandle module);
 
-    ShaderModule const& GetModule(ShaderModuleHandle handle) const;
+    ShaderModule const& AccessModule(ShaderModuleHandle handle) const;
 
     ~ShaderModuleFactory();
 

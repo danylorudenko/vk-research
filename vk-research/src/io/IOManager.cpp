@@ -24,11 +24,17 @@ std::uint64_t IOManager::ReadFileToBuffer(char const* path, ByteBuffer& buffer)
     }
 
     auto const fileSize = istream.seekg(0, std::ios_base::end).tellg();
+    if (!istream) {
+        std::cerr << "Error measuring file size: " << path << std::endl;
+        return 0;
+    }
+
     if (buffer.Size() < static_cast<std::uint64_t>(fileSize)) {
         buffer.Resize(fileSize);
     }
 
     istream.read(buffer.As<char*>(), fileSize);
+    istream.close();
 
     return fileSize;
 }

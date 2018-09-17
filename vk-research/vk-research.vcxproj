@@ -183,6 +183,7 @@
     <ClInclude Include="src\vk_interface\memory\MemoryController.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\Pipeline.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\PipelineFactory.hpp" />
+    <ClInclude Include="src\vk_interface\pipeline\RenderPass.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\ShaderModule.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\ShaderModuleFactory.hpp" />
     <ClInclude Include="src\vk_interface\resources\DynamicResourcesStorage.hpp" />

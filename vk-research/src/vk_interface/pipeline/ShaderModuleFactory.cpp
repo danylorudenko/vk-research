@@ -50,7 +50,7 @@ ShaderModuleFactory::~ShaderModuleFactory()
 
 ShaderModuleHandle ShaderModuleFactory::LoadModule(ShaderModuleDesc const& desc)
 {
-    ByteBuffer buffer{ 2048 };
+    ByteBuffer buffer{ 8192 };
     auto dataSize = ioManager_->ReadFileToBuffer(desc.shaderPath_, buffer);
     
     VkShaderModule result = VK_NULL_HANDLE;
@@ -82,7 +82,7 @@ void ShaderModuleFactory::UnloadModule(ShaderModuleHandle module)
     }
 }
 
-ShaderModule const& ShaderModuleFactory::GetModule(ShaderModuleHandle handle) const
+ShaderModule const& ShaderModuleFactory::AccessModule(ShaderModuleHandle handle) const
 {
     return loadedModules_[handle.id_];
 }
