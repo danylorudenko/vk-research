@@ -33,7 +33,7 @@ struct SubbufferResource
     std::uint32_t size_;
 };
 
-struct BufferHandle
+struct BufferResourceHandle
 {
     std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
 };
@@ -43,9 +43,10 @@ struct BufferHandle
 struct ImageResource
 {
     VkImage handle_;
+    VkFormat format_;
 };
 
-struct ImageHandle
+struct ImageResourceHandle
 {
     std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
 };

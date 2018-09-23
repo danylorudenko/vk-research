@@ -48,7 +48,7 @@ ResourcesController::~ResourcesController()
     }
 }
 
-BufferHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
+BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
 {
     VkBufferCreateInfo vkBufferCreateInfo;
     vkBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;

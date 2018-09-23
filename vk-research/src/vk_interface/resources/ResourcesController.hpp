@@ -55,8 +55,11 @@ public:
     ResourcesController(ResourcesController&& rhs);
     ResourcesController& operator=(ResourcesController&& rhs);
 
-    BufferHandle CreateBuffer(BufferDesc const& desc);
-    ImageHandle CreateImage(ImageDesc const& desc);
+    BufferResourceHandle CreateBuffer(BufferDesc const& desc);
+    ImageResourceHandle CreateImage(ImageDesc const& desc);
+
+    BufferResource* GetBuffer(BufferResourceHandle handle) const;
+    ImageResource* GetImage(ImageResourceHandle handle) const;
 
     ~ResourcesController();
 
