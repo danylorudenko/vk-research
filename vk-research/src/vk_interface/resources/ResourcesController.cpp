@@ -104,4 +104,65 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     return { static_cast<std::uint32_t>(staticBuffers_.size()) - 1 };
 }
 
+ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
+{
+    VkImageCreateInfo info;
+    info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    info.pNext = nullptr;
+    info.format = desc.format_;
+    info.imageType = VK_IMAGE_TYPE_2D;
+    info.extent.width = desc.width_;
+    info.extent.height = desc.height_;
+    info.extent.depth = 1;
+    info.arrayLayers = 1;
+    info.mipLevels = 1;
+    info.tiling = VK_IMAGE_TILING_OPTIMAL;
+    info.samples = VK_SAMPLE_COUNT_1_BIT;
+    info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    switch (desc.usage_)
+    {
+    case ImageUsage::TEXTURE:
+        info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        break;
+        
+    case ImageUsage::RENDER_TARGET:
+        info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        break;
+
+    case ImageUsage::DEPTH_STENCIL:
+        info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        break;
+
+    default:
+        assert(false && "Non-supported usage for image.");
+        // TODO
+        break;
+    }
+
+    VkImage image = VK_NULL_HANDLE;
+    VK_ASSERT(table_->vkCreateImage(device_->Handle(), &info, nullptr, &image));
+
+    VkMemoryRequirements memoryRequirements;
+    table_->vkGetImageMemoryRequirements(device_->Handle(), image, &memoryRequirements);
+
+    MemoryPageRegionDesc memoryDesc;
+    memoryDesc.size_ = memoryRequirements.size;
+    memoryDesc.alignment_ = memoryRequirements.alignment;
+    memoryDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
+
+    switch (desc.usage_)
+    {
+    case ImageUsage::TEXTURE:
+        memoryDesc.usage_ = MemoryUsage::SAMPLE_TEXTURE;
+        break;
+
+    case ImageUsage::DEPTH_STENCIL:
+        //memoryDesc.usage_ = MemoryUsage::
+        break;
+    }
+
+    return { static_cast<std::uint32_t>(staticBuffers_.size()) - 1 };
+}
+
 }

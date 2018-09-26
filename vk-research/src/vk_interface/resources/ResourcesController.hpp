@@ -24,13 +24,17 @@ struct BufferDesc
 
 enum class ImageUsage
 {
-    TEXTURE
+    TEXTURE,
+    RENDER_TARGET,
+    DEPTH_STENCIL,
+    SWAP_CHAIN_RENDER_TARGET
 };
 
 struct ImageDesc
 {
     std::uint64_t width_;
     std::uint64_t height_;
+    VkFormat format_;
     ImageUsage usage_;
 };
 

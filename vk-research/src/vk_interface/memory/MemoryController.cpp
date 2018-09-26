@@ -66,9 +66,14 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
     case MemoryUsage::SAMPLE_TEXTURE:
         accessFlags = BitwiseEnumOR32(MemoryAccess::GPU_LOCAL, accessFlags);
         break;
+    case MemoryUsage::DEPTH_STENCIL_ATTACHMENT:
+        accessFlags = BitwiseEnumOR32(MemoryAccess::GPU_LOCAL, accessFlags);
+        break;
     case MemoryUsage::UPLOAD_BUFFER:
         accessFlags = BitwiseEnumOR32(MemoryAccess::CPU_WRITE, accessFlags);
         break;
+    default:
+        assert(false && "Unsupported MemoryUsage");
     }
 
 
