@@ -33,15 +33,15 @@ ResourcesController& ResourcesController::operator=(ResourcesController&& rhs)
     std::swap(device_, rhs.device_);
     std::swap(memoryController_, rhs.memoryController_);
 
-    std::swap(staticBuffers_, rhs.staticBuffers_);
-    std::swap(staticImages_, rhs.staticImages_);
+    std::swap(buffers_, rhs.buffers_);
+    std::swap(images_, rhs.images_);
     
     return *this;
 }
 
 ResourcesController::~ResourcesController()
 {
-    for (auto& staticBuffer : staticBuffers_) {
+    for (auto& staticBuffer : buffers_) {
         auto memory = staticBuffer.memory_;
         table_->vkDestroyBuffer(device_->Handle(), staticBuffer.handle_, nullptr);
         memoryController_->ReleaseMemoryRegion(staticBuffer.memory_);
@@ -90,18 +90,16 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     assert(IsPowerOf2(regionDesc.alignment_) && "Alignemnt is not power of 2!");
 
 
-    MemoryRegion memoryRegion = { { 0 }, 0, 0 };
+    MemoryRegion memoryRegion;
     memoryController_->ProvideMemoryRegion(regionDesc, memoryRegion);
-    auto const& page = memoryController_->GetPage(memoryRegion.pageHandle_);
-    VkDeviceMemory deviceMemory = page.deviceMemory_;
+    assert((memoryRegion.pageHandle_.id_ != MemoryRegion{}.pageHandle_.id_) && "Couldn't find memoryRegion");
 
+    MemoryPage const& page = memoryController_->GetPage(memoryRegion.pageHandle_);
     assert(memoryRequirements.memoryTypeBits & (1 << page.memoryTypeId_) && "MemoryRegion has invalid memoryType");
+    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, page.deviceMemory_, memoryRegion.offset_));
+    buffers_.emplace_back(vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion);
 
-    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, deviceMemory, memoryRegion.offset_));
-
-    staticBuffers_.emplace_back(vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion);
-
-    return { static_cast<std::uint32_t>(staticBuffers_.size()) - 1 };
+    return { static_cast<std::uint32_t>(buffers_.size()) - 1 };
 }
 
 ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
@@ -120,18 +118,24 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     info.samples = VK_SAMPLE_COUNT_1_BIT;
     info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+    MemoryPageRegionDesc memoryDesc;
+
     switch (desc.usage_)
     {
     case ImageUsage::TEXTURE:
         info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        memoryDesc.usage_ = MemoryUsage::SAMPLE_TEXTURE;
         break;
         
     case ImageUsage::RENDER_TARGET:
         info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        memoryDesc.usage_ = MemoryUsage::COLOR_ATTACHMENT;
         break;
 
     case ImageUsage::DEPTH_STENCIL:
         info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        memoryDesc.usage_ = MemoryUsage::DEPTH_STENCIL_ATTACHMENT;
         break;
 
     default:
@@ -146,23 +150,44 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     VkMemoryRequirements memoryRequirements;
     table_->vkGetImageMemoryRequirements(device_->Handle(), image, &memoryRequirements);
 
-    MemoryPageRegionDesc memoryDesc;
     memoryDesc.size_ = memoryRequirements.size;
     memoryDesc.alignment_ = memoryRequirements.alignment;
     memoryDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
 
-    switch (desc.usage_)
-    {
-    case ImageUsage::TEXTURE:
-        memoryDesc.usage_ = MemoryUsage::SAMPLE_TEXTURE;
-        break;
+    MemoryRegion region;
+    memoryController_->ProvideMemoryRegion(memoryDesc, region);
+    assert(region.pageHandle_.id_ != MemoryPageHandle{}.id_ && "Couldn't find appropriate memoryRegion");
 
-    case ImageUsage::DEPTH_STENCIL:
-        //memoryDesc.usage_ = MemoryUsage::
-        break;
-    }
+    MemoryPage const& page = memoryController_->GetPage(region.pageHandle_);
+    assert((memoryRequirements.memoryTypeBits & (1 << page.memoryTypeId_)) && "MemoryRegion has invalid memoryType");
+    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), image, page.deviceMemory_, region.offset_));
+    images_.emplace_back(image, desc.format_, desc.width_, desc.height_, region);
 
-    return { static_cast<std::uint32_t>(staticBuffers_.size()) - 1 };
+    return { static_cast<std::uint32_t>(images_.size()) - 1 };
+}
+
+void ResourcesController::FreeBuffer(BufferResourceHandle handle)
+{
+    auto& buffer = buffers_[handle.id_];
+    table_->vkDestroyBuffer(device_->Handle(), buffer.handle_, nullptr);
+    buffers_.erase(buffers_.begin() + handle.id_);
+}
+
+void ResourcesController::FreeImage(ImageResourceHandle handle)
+{
+    auto& image = images_[handle.id_];
+    table_->vkDestroyImage(device_->Handle(), image.handle_, nullptr);
+    images_.erase(images_.begin() + handle.id_);
+}
+
+BufferResource* ResourcesController::GetBuffer(BufferResourceHandle handle)
+{
+    return buffers_.data() + handle.id_;
+}
+
+ImageResource* ResourcesController::GetImage(ImageResourceHandle handle)
+{
+    return images_.data() + handle.id_;
 }
 
 }

@@ -41,7 +41,6 @@ public:
 
     ~MemoryController();
 
-public:
     void ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
     void ReleaseMemoryRegion(MemoryRegion& region);
 

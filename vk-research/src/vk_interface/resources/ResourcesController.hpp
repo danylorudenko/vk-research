@@ -60,10 +60,13 @@ public:
     ResourcesController& operator=(ResourcesController&& rhs);
 
     BufferResourceHandle CreateBuffer(BufferDesc const& desc);
-    ImageResourceHandle CreateImage(ImageDesc const& desc);
+    void FreeBuffer(BufferResourceHandle handle);
 
-    BufferResource* GetBuffer(BufferResourceHandle handle) const;
-    ImageResource* GetImage(ImageResourceHandle handle) const;
+    ImageResourceHandle CreateImage(ImageDesc const& desc);
+    void FreeImage(ImageResourceHandle handle);
+
+    BufferResource* GetBuffer(BufferResourceHandle handle);
+    ImageResource* GetImage(ImageResourceHandle handle);
 
     ~ResourcesController();
 
@@ -73,8 +76,8 @@ private:
 
     MemoryController* memoryController_;
 
-    std::vector<BufferResource> staticBuffers_;
-    std::vector<ImageResource> staticImages_;
+    std::vector<BufferResource> buffers_;
+    std::vector<ImageResource> images_;
 
 
 };

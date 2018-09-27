@@ -2,6 +2,8 @@
 
 #include <limits>
 #include <cstdint>
+#include <vulkan/vulkan.h>
+#include "../Tools.hpp"
 
 namespace VKW
 {
@@ -12,8 +14,8 @@ enum MemoryUsage
     UPLOAD_BUFFER,
     UNIFORM,
     SAMPLE_TEXTURE,
-    COLOR_ATTACHMENT,
     DEPTH_STENCIL_ATTACHMENT,
+    COLOR_ATTACHMENT,
 
     BEGIN = VERTEX_INDEX,
     END = COLOR_ATTACHMENT + 1,
@@ -36,22 +38,22 @@ struct MemoryPageHandle
 
 struct MemoryPage
 {
-    VkDeviceMemory deviceMemory_;
-    VkDeviceSize size_;
-    std::uint32_t memoryTypeId_;
-    VkMemoryPropertyFlags propertyFlags_;
+    VkDeviceMemory deviceMemory_ = VK_NULL_HANDLE;
+    VkDeviceSize size_ = 0;
+    std::uint32_t memoryTypeId_ = std::numeric_limits<std::uint32_t>::max();
+    VkMemoryPropertyFlags propertyFlags_ = VK_FLAGS_NONE;
     MemoryAccess accessFlags_;
     MemoryUsage usage_;
 
-    std::uint32_t bindCount_;
-    VkDeviceSize nextFreeOffset_;
+    std::uint32_t bindCount_ = 0;
+    VkDeviceSize nextFreeOffset_ = 0;
 };
 
 struct MemoryRegion
 {
     MemoryPageHandle pageHandle_;
-    std::uint64_t offset_;
-    std::uint64_t size_;
+    std::uint64_t offset_ = 0;
+    std::uint64_t size_ = 0;
 };
 
 }

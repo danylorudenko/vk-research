@@ -12,7 +12,8 @@ namespace VKW
 enum class ResourceType
 {
     Buffer,
-    Image
+    Image,
+    Framebuffer
 };
 
 
@@ -21,16 +22,16 @@ struct BufferResource
 {
     BufferResource(VkBuffer handle, std::uint32_t size, MemoryRegion const& memory);
 
-    VkBuffer handle_;
-    std::uint32_t size_;
+    VkBuffer handle_ = VK_NULL_HANDLE;
+    std::uint32_t size_ = 0;
     MemoryRegion memory_;
 };
 
 struct SubbufferResource
 {
-    VkBuffer handle_;
-    std::uint32_t offset_;
-    std::uint32_t size_;
+    VkBuffer handle_ = VK_NULL_HANDLE;
+    std::uint32_t offset_ = 0;
+    std::uint32_t size_ = 0;
 };
 
 struct BufferResourceHandle
@@ -42,8 +43,13 @@ struct BufferResourceHandle
 
 struct ImageResource
 {
-    VkImage handle_;
+    ImageResource(VkImage handle, VkFormat format, std::uint32_t width, std::uint32_t height, MemoryRegion const& memory);
+
+    VkImage handle_ = VK_NULL_HANDLE;
     VkFormat format_;
+    std::uint32_t width_ = 0;
+    std::uint32_t height_ = 0;
+    MemoryRegion memory_;
 };
 
 struct ImageResourceHandle
