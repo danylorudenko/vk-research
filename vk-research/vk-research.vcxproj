@@ -142,7 +142,7 @@
     <ClCompile Include="src\vk_interface\memory\MemoryController.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\PipelineFactory.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\RenderPass.cpp" />
-    <ClCompile Include="src\vk_interface\pipeline\RenderPassFactory.cpp" />
+    <ClCompile Include="src\vk_interface\pipeline\RenderPassController.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\ShaderModule.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\ShaderModuleFactory.cpp" />
     <ClCompile Include="src\vk_interface\resources\DynamicResourcesStorage.cpp" />
@@ -151,6 +151,7 @@
     <ClCompile Include="src\vk_interface\ImportTable.cpp" />
     <ClCompile Include="src\vk_interface\Loader.cpp" />
     <ClCompile Include="src\vk_interface\runtime\DescriptorSet.cpp" />
+    <ClCompile Include="src\vk_interface\runtime\FramebufferController.cpp" />
     <ClCompile Include="src\vk_interface\runtime\ResourceBindingService.cpp" />
     <ClCompile Include="src\vk_interface\worker\Worker.cpp" />
     <ClCompile Include="src\vk_interface\worker\WorkerFrame.cpp" />
@@ -186,7 +187,7 @@
     <ClInclude Include="src\vk_interface\pipeline\Pipeline.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\PipelineFactory.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\RenderPass.hpp" />
-    <ClInclude Include="src\vk_interface\pipeline\RenderPassFactory.hpp" />
+    <ClInclude Include="src\vk_interface\pipeline\RenderPassController.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\ShaderModule.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\ShaderModuleFactory.hpp" />
     <ClInclude Include="src\vk_interface\resources\DynamicResourcesStorage.hpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="src\vk_interface\Loader.hpp" />
     <ClInclude Include="src\vk_interface\runtime\DescriptorSet.hpp" />
     <ClInclude Include="src\vk_interface\runtime\Framebuffer.hpp" />
+    <ClInclude Include="src\vk_interface\runtime\FramebufferController.hpp" />
     <ClInclude Include="src\vk_interface\runtime\ResourceBindingService.hpp" />
     <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\worker\Worker.hpp" />

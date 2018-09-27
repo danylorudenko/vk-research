@@ -29,20 +29,22 @@ struct RenderPassFactoryDesc
     ResourcesController* resourcesController_;
 };
 
-class RenderPassFactory
+class RenderPassController
     : public NonCopyable
 {
 public:
-    RenderPassFactory();
-    RenderPassFactory(RenderPassFactoryDesc const& desc);
-    RenderPassFactory(RenderPassFactory&& rhs);
-    RenderPassFactory& operator=(RenderPassFactory&& rhs);
+    RenderPassController();
+    RenderPassController(RenderPassFactoryDesc const& desc);
+    RenderPassController(RenderPassController&& rhs);
+    RenderPassController& operator=(RenderPassController&& rhs);
 
-    ~RenderPassFactory();
+    ~RenderPassController();
 
 
     RenderPassHandle AssembleRenderPass(RenderPassDesc const& desc);
     void FreeRenderPass(RenderPassHandle handle);
+
+    RenderPass* GetRenderPass(RenderPassHandle handle);
     
 private:
     ImportTable* table_;

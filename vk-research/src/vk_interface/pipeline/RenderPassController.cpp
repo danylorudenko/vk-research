@@ -1,4 +1,4 @@
-#include "RenderPassFactory.hpp"
+#include "RenderPassController.hpp"
 #include "../Tools.hpp"
 #include "../resources/ResourcesController.hpp"
 #include "../ImportTable.hpp"
@@ -7,19 +7,19 @@
 namespace VKW
 {
 
-RenderPassFactory::RenderPassFactory()
+RenderPassController::RenderPassController()
     : table_{ nullptr }
     , device_{ nullptr }
     , resourcesController_{ nullptr }
 {}
 
-RenderPassFactory::RenderPassFactory(RenderPassFactoryDesc const& desc)
+RenderPassController::RenderPassController(RenderPassFactoryDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
     , resourcesController_{ nullptr }
 {}
 
-RenderPassFactory::RenderPassFactory(RenderPassFactory&& rhs)
+RenderPassController::RenderPassController(RenderPassController&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
     , resourcesController_{ nullptr }
@@ -27,7 +27,7 @@ RenderPassFactory::RenderPassFactory(RenderPassFactory&& rhs)
     operator=(std::move(rhs));
 }
 
-RenderPassFactory& RenderPassFactory::operator=(RenderPassFactory&& rhs)
+RenderPassController& RenderPassController::operator=(RenderPassController&& rhs)
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
@@ -37,15 +37,22 @@ RenderPassFactory& RenderPassFactory::operator=(RenderPassFactory&& rhs)
     return *this;
 }
 
-RenderPassFactory::~RenderPassFactory()
+RenderPassController::~RenderPassController()
 {}
 
-RenderPassHandle RenderPassFactory::AssembleRenderPass(RenderPassDesc const& desc)
+RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& desc)
 {
-    std::vector<VkAttachmentDescription> attachments;
+    VkRenderPass renderPass = VK_NULL_HANDLE;
+    RenderPassAttachmentInfo colorAttachmentsInfo[6];
+    RenderPassAttachmentInfo depthStencilAttachmentInfo;
 
+    std::vector<VkAttachmentDescription> attachments;
     std::vector<VkAttachmentReference> colorAttachments;
-    attachments.resize(desc.colorAttachmentsCount_);
+    bool const depthStencilUsed = desc.depthStencilAttachment_.id_ != ImageResourceHandle{}.id_;
+
+    attachments.resize(desc.colorAttachmentsCount_ + (depthStencilUsed ? 1 : 0));
+    colorAttachments.resize(desc.colorAttachmentsCount_);
+
     for (auto i = 0u; i < desc.colorAttachmentsCount_; ++i) {
         ImageResource* imageRes = resourcesController_->GetImage(desc.colorAttachments_[i]);
         auto& attachment = attachments[i];
@@ -59,12 +66,19 @@ RenderPassHandle RenderPassFactory::AssembleRenderPass(RenderPassDesc const& des
         attachment.flags = VK_FLAGS_NONE;
         attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
+        colorAttachmentsInfo[i].format_ = attachment.format;
+        colorAttachmentsInfo[i].used_ = true;
+
         auto& colorReference = colorAttachments[i];
         colorReference.attachment = i;
-        colorReference.layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        colorReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     }
 
-    VkAttachmentReference depthStencilReference = { desc.colorAttachmentsCount_, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
+    VkAttachmentReference depthStencilReference;
+    if (depthStencilUsed) {
+        depthStencilReference = { desc.colorAttachmentsCount_, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
+
+    }
 
     VkSubpassDescription spInfo;
     spInfo.inputAttachmentCount = 0;
@@ -75,7 +89,7 @@ RenderPassHandle RenderPassFactory::AssembleRenderPass(RenderPassDesc const& des
     spInfo.pResolveAttachments = nullptr;
     spInfo.colorAttachmentCount = desc.colorAttachmentsCount_;
     spInfo.pColorAttachments = colorAttachments.data();
-    spInfo.pDepthStencilAttachment = &depthStencilReference;
+    spInfo.pDepthStencilAttachment = depthStencilUsed ? &depthStencilReference : nullptr;
     spInfo.flags = VK_FLAGS_NONE;
 
     
@@ -90,12 +104,31 @@ RenderPassHandle RenderPassFactory::AssembleRenderPass(RenderPassDesc const& des
     rpInfo.subpassCount = 1;
     rpInfo.pSubpasses = &spInfo;
     
-    VkRenderPass renderPass = VK_NULL_HANDLE;
     VK_ASSERT(table_->vkCreateRenderPass(device_->Handle(), &rpInfo, nullptr, &renderPass));
 
-    // create framebuffer and return value
+    renderPasses_.emplace_back(renderPass, desc.colorAttachmentsCount_, colorAttachmentsInfo, depthStencilAttachmentInfo);
 
-    return RenderPassHandle{};
+    return RenderPassHandle{ static_cast<std::uint32_t>(renderPasses_.size()) - 1 };
+}
+
+void RenderPassController::FreeRenderPass(RenderPassHandle handle)
+{
+    auto& renderPass = renderPasses_[handle.id_];
+    table_->vkDestroyRenderPass(device_->Handle(), renderPass.handle_, nullptr);
+    renderPasses_.erase(renderPasses_.begin() + handle.id_);
+}
+
+RenderPass* RenderPassController::GetRenderPass(RenderPassHandle handle)
+{
+    return &renderPasses_[handle.id_];
+}
+
+RenderPassController::~RenderPassController()
+{
+    auto device = device_->Handle();
+    for (auto const& pass : renderPasses_) {
+        table_->vkDestroyRenderPass(device, pass.handle_, nullptr);
+    }
 }
 
 }
