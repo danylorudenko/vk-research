@@ -9,12 +9,12 @@ namespace VKW
 
 struct FramebufferHandle
 {
-    std::uint32_t handle_ = std::numeric_limits<std::uint32_t>::max();
+    std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
 };
 
 struct Framebuffer
 {
-    VkFramebuffer framebuffer_ = VK_NULL_HANDLE;
+    VkFramebuffer handle_ = VK_NULL_HANDLE;
 };
 
 }
