@@ -196,9 +196,11 @@
     <ClInclude Include="src\vk_interface\ImportTable.hpp" />
     <ClInclude Include="src\vk_interface\Loader.hpp" />
     <ClInclude Include="src\vk_interface\runtime\DescriptorSet.hpp" />
+    <ClInclude Include="src\vk_interface\runtime\DescriptorLayout.hpp" />
     <ClInclude Include="src\vk_interface\runtime\Framebuffer.hpp" />
     <ClInclude Include="src\vk_interface\runtime\FramebufferController.hpp" />
     <ClInclude Include="src\vk_interface\runtime\ResourceBindingService.hpp" />
+    <ClInclude Include="src\vk_interface\runtime\DescriptorLayoutController.hpp" />
     <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\worker\Worker.hpp" />
     <ClInclude Include="src\vk_interface\worker\WorkerFrame.h" />

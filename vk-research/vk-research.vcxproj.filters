@@ -233,5 +233,11 @@
     <ClInclude Include="src\vk_interface\runtime\FramebufferController.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_interface\runtime\DescriptorLayoutController.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\runtime\DescriptorLayout.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
