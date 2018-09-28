@@ -46,17 +46,21 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
     RenderPassAttachmentInfo colorAttachmentsInfo[6];
     RenderPassAttachmentInfo depthStencilAttachmentInfo;
 
+    assert(desc.colorAttachmentsCount_ <= 6 && "Maximum number color attachments supported is 6.");
+
     std::vector<VkAttachmentDescription> attachments;
     std::vector<VkAttachmentReference> colorAttachments;
-    bool const depthStencilUsed = desc.depthStencilAttachment_.id_ != ImageResourceHandle{}.id_;
 
-    attachments.resize(desc.colorAttachmentsCount_ + (depthStencilUsed ? 1 : 0));
+    attachments.resize(desc.colorAttachmentsCount_ + (desc.depthStencilAttachment_ != nullptr ? 1 : 0));
     colorAttachments.resize(desc.colorAttachmentsCount_);
 
     for (auto i = 0u; i < desc.colorAttachmentsCount_; ++i) {
-        ImageResource* imageRes = resourcesController_->GetImage(desc.colorAttachments_[i]);
+
+        colorAttachmentsInfo[i].format_ = desc.colorAttachments_[i].format_;
+        colorAttachmentsInfo[i].used_ = true;
+
         auto& attachment = attachments[i];
-        attachment.format = imageRes->format_;
+        attachment.format = desc.colorAttachments_[i].format_;
         attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -66,18 +70,16 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
         attachment.flags = VK_FLAGS_NONE;
         attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
-        colorAttachmentsInfo[i].format_ = attachment.format;
-        colorAttachmentsInfo[i].used_ = true;
-
         auto& colorReference = colorAttachments[i];
         colorReference.attachment = i;
         colorReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     }
 
     VkAttachmentReference depthStencilReference;
-    if (depthStencilUsed) {
+    if (desc.depthStencilAttachment_) {
+        depthStencilAttachmentInfo.format_ = desc.depthStencilAttachment_->format_;
+        depthStencilAttachmentInfo.used_ = true;
         depthStencilReference = { desc.colorAttachmentsCount_, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
-
     }
 
     VkSubpassDescription spInfo;
@@ -89,7 +91,7 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
     spInfo.pResolveAttachments = nullptr;
     spInfo.colorAttachmentCount = desc.colorAttachmentsCount_;
     spInfo.pColorAttachments = colorAttachments.data();
-    spInfo.pDepthStencilAttachment = depthStencilUsed ? &depthStencilReference : nullptr;
+    spInfo.pDepthStencilAttachment = desc.depthStencilAttachment_ ? &depthStencilReference : nullptr;
     spInfo.flags = VK_FLAGS_NONE;
 
     

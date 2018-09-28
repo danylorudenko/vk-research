@@ -17,6 +17,7 @@ struct RenderPassHandle
 struct RenderPassAttachmentInfo
 {
     VkFormat format_;
+
     bool used_ = false;
 };
 

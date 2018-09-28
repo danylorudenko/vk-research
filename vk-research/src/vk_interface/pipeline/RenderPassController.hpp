@@ -13,11 +13,16 @@ class ImportTable;
 class Device;
 class ResourcesController;
 
+struct RenderPassAttachmentDesc
+{
+    VkFormat format_;
+};
+
 struct RenderPassDesc
 {
     std::uint32_t colorAttachmentsCount_;
-    ImageResourceHandle* colorAttachments_;
-    ImageResourceHandle depthStencilAttachment_;
+    RenderPassAttachmentDesc* colorAttachments_;
+    RenderPassAttachmentDesc* depthStencilAttachment_;
 };
 
 
