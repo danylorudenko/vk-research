@@ -21,8 +21,10 @@ struct FramebufferDesc
 
     std::uint32_t colorAttachmentCount_;
     ImageResourceHandle* colorAttachments;
+    ImageResourceHandle* depthStencilAttachment;
+    std::uint32_t width_;
+    std::uint32_t height_;
 
-    ImageResourceHandle depthStencilAttachment;
 };
 
 struct FramebufferFactoryDesc

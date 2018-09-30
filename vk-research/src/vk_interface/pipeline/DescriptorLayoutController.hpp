@@ -8,9 +8,13 @@
 namespace VKW
 {
 
+class Device;
+class ImportTable;
+
 struct DescriptorLayoutControllerDesc
 {
-
+    ImportTable* table_;
+    Device* device_;
 };
 
 class DescriptorLayoutController
