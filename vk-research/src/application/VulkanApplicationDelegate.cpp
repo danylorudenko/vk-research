@@ -50,7 +50,7 @@ void VulkanApplicationDelegate::start()
 
     //vulkanLoader_.BufferLoader().UnloadBuffer(buffer);
 
-    VKW::ImportTable const& table = vulkanLoader_.Table();
+    /*VKW::ImportTable const& table = vulkanLoader_.Table();
     VKW::Device& device = vulkanLoader_.Device();
 
     VkBuffer buffer = VK_NULL_HANDLE;
@@ -91,7 +91,7 @@ void VulkanApplicationDelegate::start()
     VkDeviceMemory memory;
     VK_ASSERT(table.vkAllocateMemory(device.Handle(), &allocInfo, nullptr, &memory));
 
-    VK_ASSERT(table.vkBindBufferMemory(device.Handle(), buffer, memory, 0));
+    VK_ASSERT(table.vkBindBufferMemory(device.Handle(), buffer, memory, 0));*/
 
 }
 

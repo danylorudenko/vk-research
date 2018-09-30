@@ -93,7 +93,7 @@ Buffer BufferLoader::LoadBuffer(BufferCreateInfo const& desc)
     assert(memoryRequirements.memoryTypeBits & (1 << memoryRegion.page_->memoryTypeId_) && "MemoryPageRegion has invalid memoryType");
     
     
-    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, deviceMemory, memoryRegion.offset_));
+    //VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, deviceMemory, memoryRegion.offset_));
 
     return buffer;
 }
