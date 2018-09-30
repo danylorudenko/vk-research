@@ -137,6 +137,7 @@
     <ClCompile Include="src\memory\ByteBuffer.cpp" />
     <ClCompile Include="src\system\DynamicLibrary.cpp" />
     <ClCompile Include="src\system\Window.cpp" />
+    <ClCompile Include="src\vk_interface\buffer\BuffersProvider.cpp" />
     <ClCompile Include="src\vk_interface\Device.cpp" />
     <ClCompile Include="src\vk_interface\Instance.cpp" />
     <ClCompile Include="src\vk_interface\memory\MemoryController.cpp" />
@@ -180,7 +181,10 @@
     <ClInclude Include="src\memory\ByteBuffer.hpp" />
     <ClInclude Include="src\system\DynamicLibrary.hpp" />
     <ClInclude Include="src\system\Window.hpp" />
+    <ClInclude Include="src\vk_interface\buffer\BuffersProvider.hpp" />
+    <ClInclude Include="src\vk_interface\buffer\BufferView.hpp" />
     <ClInclude Include="src\vk_interface\Device.hpp" />
+    <ClInclude Include="src\vk_interface\image\ImagesProvider.hpp" />
     <ClInclude Include="src\vk_interface\Instance.hpp" />
     <ClInclude Include="src\vk_interface\memory\Memory.hpp" />
     <ClInclude Include="src\vk_interface\memory\MemoryController.hpp" />
