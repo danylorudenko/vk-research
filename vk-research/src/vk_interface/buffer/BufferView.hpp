@@ -14,11 +14,13 @@ struct BufferViewHandle
 
 struct BufferView
 {
+    BufferView(VkBufferView view, VkFormat format, BufferResourceHandle buffer, std::uint64_t offset, std::uint64_t size);
+
     VkBufferView handle_ = VK_NULL_HANDLE;
     VkFormat format_ = VK_FORMAT_UNDEFINED;
-    BufferResourceHandle resource_;
     std::uint64_t offset_ = 0;
     std::uint64_t size_ = 0;
+    BufferResourceHandle resource_;
 };
 
 }
