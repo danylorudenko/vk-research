@@ -14,6 +14,12 @@ class Device;
 class ResourcesController;
 
 
+struct ImageViewDesc
+{
+
+};
+
+
 struct ImagesProviderDesc
 {
     ImportTable* table_;
