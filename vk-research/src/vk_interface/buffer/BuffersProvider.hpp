@@ -31,6 +31,19 @@ struct BuffersProviderDesc
 
 class BuffersProvider
 {
+private:
+    static constexpr std::uint32_t INVALID_PROVIDEDBUFFER_INDEX = std::numeric_limits<std::uint32_t>::max();
+    struct ProvidedBuffer
+    {
+    public:
+        ProvidedBuffer(BufferResourceHandle resource, std::uint32_t referenceCount = 0);
+
+        BufferResourceHandle bufferResource_;
+        std::uint32_t referenceCount_;
+    };
+
+
+
 public:
     BuffersProvider();
     BuffersProvider(BuffersProviderDesc const& desc);
@@ -39,12 +52,13 @@ public:
     BuffersProvider& operator=(BuffersProvider&& rhs);
     
     // Should not recieve BufferResourceHandle as a parameter: it is provider's responisbility to create resources if needed.
-    void AcquireBuffers(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferViewHandle* results);
-    void ReleaseBuffers(std::uint32_t buffersCount, BufferViewHandle const* handles);
+    void AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferViewHandle* results);
+    void ReleaseViews(std::uint32_t buffersCount, BufferViewHandle const* handles);
 
     void RegisterViews(std::uint32_t buffersCount, BufferResourceHandle* buffers, BufferViewDesc const* desc, BufferViewHandle* results);
 
     ~BuffersProvider();
+
 
 private:
     ImportTable* table_;
@@ -52,6 +66,7 @@ private:
     ResourcesController* resourcesController_;
 
     std::vector<BufferView> bufferViews_;
+    std::vector<ProvidedBuffer> providedBuffers_;
 };
 
 }

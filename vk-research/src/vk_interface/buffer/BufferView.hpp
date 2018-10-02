@@ -21,6 +21,7 @@ struct BufferView
     std::uint64_t offset_ = 0;
     std::uint64_t size_ = 0;
     BufferResourceHandle resource_;
+    std::uint32_t providedBufferIndex_ = std::numeric_limits<std::uint32_t>::max(); // for BuffersProvider's use
 };
 
 }
