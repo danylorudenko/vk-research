@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClCompile Include="src\application\Application.cpp" />
     <ClCompile Include="src\application\VulkanApplicationDelegate.cpp" />
+    <ClCompile Include="src\class_features\ContinuousDataStorage.cpp" />
     <ClCompile Include="src\io\IOManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory\ByteBuffer.cpp" />

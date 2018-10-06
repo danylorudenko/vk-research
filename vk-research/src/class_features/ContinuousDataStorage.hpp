@@ -4,13 +4,36 @@
 #include <cstdint>
 #include <limits>
 #include <cstdlib>
+#include <vector>
 
 template<typename T>
 struct Handle
 {
+    std::uint32_t id_ = 0;
+};
+
+struct StorageHandle
+{
     std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
 };
 
+class HandleTable
+{
+public:
+    HandleTable(std::uint32_t reserve);
+
+    HandleTable(HandleTable const& rhs);
+    HandleTable(HandleTable&& rhs);
+    HandleTable& operator=(HandleTable const& rhs);
+    HandleTable& operator=(HandleTable&& rhs);
+    ~HandleTable();
+
+    void RegisterStorageHandle(std::uint32_t id);
+    void ReleaseStorageHandle(StorageHandle handle);
+
+private:
+    std::vector<StorageHandle> table_;
+};
 
 template<typename T>
 class ContinuousDataStorage
