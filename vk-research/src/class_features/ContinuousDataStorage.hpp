@@ -25,6 +25,9 @@ public:
         , freeDataHandle_{ 0 }
         , maxObjects_{ dataCount }
     {
+        if (dataCount_ == 0)
+            return;
+        
         storage_ = std::malloc(sizeof(T) * dataCount);
 
         // creating linked list in the free storage
@@ -34,9 +37,6 @@ public:
             *dataLocal = i + 1;
         }
         *(reinterpret_cast<InternalHandle*>(storage_ + iterationsCount)) = 0;
-
-
-        freeDataHandle_ = 0;
     }
 
     ContinuousDataStorage(ContinuousDataStorage&& rhs)

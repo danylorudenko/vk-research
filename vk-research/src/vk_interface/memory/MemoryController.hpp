@@ -52,6 +52,8 @@ private:
 
     void GetNextFreePageRegion(MemoryPageHandle page, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
 
+    void AssignDefaultPageSizes();
+
 private:
     ImportTable* table_;
     Device* device_;

@@ -30,6 +30,7 @@ struct BuffersProviderDesc
 };
 
 class BuffersProvider
+    : public NonCopyable
 {
 private:
     static constexpr std::uint32_t INVALID_PROVIDEDBUFFER_INDEX = std::numeric_limits<std::uint32_t>::max();

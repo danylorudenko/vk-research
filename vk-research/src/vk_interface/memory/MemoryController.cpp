@@ -11,22 +11,22 @@ namespace VKW
 MemoryController::MemoryController()
     : table_{ nullptr }
     , device_{ nullptr }
-{ 
+{
+    AssignDefaultPageSizes();
 }
 
 MemoryController::MemoryController(MemoryControllerDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
 {
-    defaultPageSizes_[VERTEX_INDEX] = 1024 * 1024;
-    defaultPageSizes_[UPLOAD_BUFFER] = 1024 * 1024 * 5;
-    defaultPageSizes_[UNIFORM] = 1024 * 512;
-    defaultPageSizes_[SAMPLE_TEXTURE] = 1024 * 1024 * 64;
-    defaultPageSizes_[COLOR_ATTACHMENT] = 1024 * 1024 * 64;
+    AssignDefaultPageSizes();
 }
 
 MemoryController::MemoryController(MemoryController&& rhs)
+    : table_{ nullptr }
+    , device_{ nullptr }
 {
+    AssignDefaultPageSizes();
     operator=(std::move(rhs));
 }
 
@@ -44,6 +44,15 @@ MemoryController::~MemoryController()
     for (auto const& memory : allocations_) {
         table_->vkFreeMemory(device_->Handle(), memory.deviceMemory_, nullptr);
     }
+}
+
+void MemoryController::AssignDefaultPageSizes()
+{
+    defaultPageSizes_[VERTEX_INDEX] = 1024 * 1024;
+    defaultPageSizes_[UPLOAD_BUFFER] = 1024 * 1024 * 5;
+    defaultPageSizes_[UNIFORM] = 1024 * 512;
+    defaultPageSizes_[SAMPLE_TEXTURE] = 1024 * 1024 * 64;
+    defaultPageSizes_[COLOR_ATTACHMENT] = 1024 * 1024 * 64;
 }
 
 MemoryPage const& MemoryController::GetPage(MemoryPageHandle handle) const
