@@ -7,10 +7,7 @@
 namespace VKW
 {
 
-struct BufferViewHandle
-{
-    std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
-};
+struct BuffersProvider::ProvidedBuffer;
 
 struct BufferView
 {
@@ -21,7 +18,12 @@ struct BufferView
     std::uint64_t offset_ = 0;
     std::uint64_t size_ = 0;
     BufferResourceHandle resource_;
-    std::uint32_t providedBufferIndex_ = std::numeric_limits<std::uint32_t>::max(); // for BuffersProvider's use
+    BuffersProvider::ProvidedBuffer* providedBuffer_ = std::numeric_limits<std::uint32_t>::max(); // for BuffersProvider's use
+};
+
+struct BufferViewHandle
+{
+    BufferView* view_;
 };
 
 }

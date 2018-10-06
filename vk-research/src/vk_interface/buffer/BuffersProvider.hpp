@@ -32,8 +32,7 @@ struct BuffersProviderDesc
 class BuffersProvider
     : public NonCopyable
 {
-private:
-    static constexpr std::uint32_t INVALID_PROVIDEDBUFFER_INDEX = std::numeric_limits<std::uint32_t>::max();
+public:
     struct ProvidedBuffer
     {
     public:
@@ -66,8 +65,8 @@ private:
     Device* device_;
     ResourcesController* resourcesController_;
 
-    std::vector<BufferView> bufferViews_;
-    std::vector<ProvidedBuffer> providedBuffers_;
+    std::vector<BufferView*> bufferViews_;
+    std::vector<ProvidedBuffer*> providedBuffers_;
 };
 
 }

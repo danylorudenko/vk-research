@@ -60,7 +60,7 @@ private:
 
     VkDeviceSize defaultPageSizes_[MemoryUsage::MAX];
 
-    std::vector<MemoryPage> allocations_;
+    std::vector<MemoryPage*> allocations_;
 };
 
 }

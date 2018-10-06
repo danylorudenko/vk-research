@@ -31,11 +31,6 @@ enum MemoryAccess
     CPU_COHERENT = 8,
 };
 
-struct MemoryPageHandle
-{
-    std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
-};
-
 struct MemoryPage
 {
     VkDeviceMemory deviceMemory_ = VK_NULL_HANDLE;
@@ -48,6 +43,12 @@ struct MemoryPage
     std::uint32_t bindCount_ = 0;
     VkDeviceSize nextFreeOffset_ = 0;
 };
+
+struct MemoryPageHandle
+{
+    MemoryPage* page_;
+};
+
 
 struct MemoryRegion
 {

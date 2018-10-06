@@ -42,7 +42,7 @@ MemoryController& MemoryController::operator=(MemoryController&& rhs)
 MemoryController::~MemoryController()
 {
     for (auto const& memory : allocations_) {
-        table_->vkFreeMemory(device_->Handle(), memory.deviceMemory_, nullptr);
+        table_->vkFreeMemory(device_->Handle(), memory->deviceMemory_, nullptr);
     }
 }
 
@@ -57,7 +57,7 @@ void MemoryController::AssignDefaultPageSizes()
 
 MemoryPage const& MemoryController::GetPage(MemoryPageHandle handle) const
 {
-    return allocations_[handle.id_];
+    return *handle.page_;
 }
 
 void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
@@ -92,9 +92,9 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
     auto const allocationsCount = allocations_.size();
     for (auto i = 0u; i < allocationsCount; ++i) {
         auto const& page = allocations_[i];
-        auto const accessValid = (page.accessFlags_ & accessFlags) == accessFlags;
-        auto const sizeValid = desc.size_ <= (page.size_ - page.nextFreeOffset_);
-        auto const usageValid = desc.usage_ == page.usage_;
+        auto const accessValid = (page->accessFlags_ & accessFlags) == accessFlags;
+        auto const sizeValid = desc.size_ <= (page->size_ - page->nextFreeOffset_);
+        auto const usageValid = desc.usage_ == page->usage_;
 
         if (accessValid && sizeValid && usageValid) {
             validAllocation = i;
@@ -103,7 +103,7 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
     }
 
     if (validAllocation != std::numeric_limits<std::uint32_t>::max()) {
-        GetNextFreePageRegion({ validAllocation }, desc, regionOut);
+        GetNextFreePageRegion({ allocations_[validAllocation] }, desc, regionOut);
     }
     else {
         auto const defaultPageSize = defaultPageSizes_[desc.usage_];
@@ -119,7 +119,7 @@ void MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle, Memory
 {
     auto const size = desc.size_ + desc.alignment_;
 
-    auto& page = allocations_[pageHandle.id_];
+    auto& page = *pageHandle.page_;
     regionOut.pageHandle_ = pageHandle;
     regionOut.offset_ = RoundToMultipleOfPOT(page.nextFreeOffset_, desc.alignment_);
     regionOut.size_ = size;
@@ -130,18 +130,18 @@ void MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle, Memory
 
 void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
 {
-    auto const regionMemoryAllocation = allocations_[region.pageHandle_.id_].deviceMemory_;
+    auto const regionMemoryAllocation = region.pageHandle_.page_->deviceMemory_;
 
     std::uint32_t pageIndex = std::numeric_limits<std::uint32_t>::max();
     for (auto i = 0u; i < allocations_.size(); ++i) {
-        if (regionMemoryAllocation == allocations_[i].deviceMemory_) {
+        if (regionMemoryAllocation == allocations_[i]->deviceMemory_) {
             pageIndex = i;
         }
     }
 
     if (pageIndex != std::numeric_limits<std::uint32_t>::max()) {
-        if (--allocations_[pageIndex].bindCount_ == 0) {
-            FreePage({ pageIndex });
+        if (--allocations_[pageIndex]->bindCount_ == 0) {
+            FreePage({ allocations_[pageIndex] });
         }
     }
 
@@ -189,27 +189,39 @@ MemoryPageHandle MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsa
     VkDeviceMemory deviceMemory = VK_NULL_HANDLE;
     VK_ASSERT(table_->vkAllocateMemory(device_->Handle(), &info, nullptr, &deviceMemory));
 
-    MemoryPage memory;
-    memory.deviceMemory_ = deviceMemory;
-    memory.size_ = info.allocationSize;
-    memory.memoryTypeId_ = typeIndex;
-    memory.propertyFlags_ = memoryTypes[typeIndex].propertyFlags;
-    memory.accessFlags_ = accessFlags;
-    memory.usage_ = usage;
+    MemoryPage* memory = new MemoryPage{};
+    memory->deviceMemory_ = deviceMemory;
+    memory->size_ = info.allocationSize;
+    memory->memoryTypeId_ = typeIndex;
+    memory->propertyFlags_ = memoryTypes[typeIndex].propertyFlags;
+    memory->accessFlags_ = accessFlags;
+    memory->usage_ = usage;
     
-    memory.bindCount_ = 0;
-    memory.nextFreeOffset_ = 0;
+    memory->bindCount_ = 0;
+    memory->nextFreeOffset_ = 0;
 
     allocations_.emplace_back(memory);
 
-    return { static_cast<std::uint32_t>(allocations_.size()) - 1 };
+    return { memory };
 }
 
 void MemoryController::FreePage(MemoryPageHandle pageHandle)
 {
-    auto& page = allocations_[pageHandle.id_];
-    table_->vkFreeMemory(device_->Handle(), page.deviceMemory_, nullptr);
-    allocations_.erase(allocations_.begin() + pageHandle.id_);
+    std::uint32_t deletedPageIndex = std::numeric_limits<std::uint32_t>::max();
+
+    std::uint32_t const allocationsCount = allocations_.size();
+    for (auto i = 0u; i < allocationsCount; ++i) {
+        if (pageHandle.page_ == allocations_[i]) {
+            deletedPageIndex = i;
+            break;
+        }
+    }
+    
+    auto* page = allocations_[deletedPageIndex];
+    table_->vkFreeMemory(device_->Handle(), page->deviceMemory_, nullptr);
+
+    delete page;
+    allocations_.erase(allocations_.begin() + deletedPageIndex);
 }
 
 }
