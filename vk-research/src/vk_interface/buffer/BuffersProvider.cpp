@@ -1,6 +1,7 @@
 #include "BuffersProvider.hpp"
 
 #include <utility>
+#include <algorithm>
 
 #include "../Device.hpp"
 #include "../ImportTable.hpp"
@@ -141,16 +142,21 @@ void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferViewHandle 
 {
     VkDevice const device = device_->Handle();
     for (auto i = 0u; i < buffersCount; ++i) {
-        auto const& view = bufferViews_[handles[i].id_];
-        auto& providedBuffer = providedBuffers_[view.providedBuffer_];
+        auto providedBufferIt = std::find(providedBuffers_.cbegin(), providedBuffers_.cend(), handles[i].view_->providedBuffer_);
+        auto viewIt = std::find(bufferViews_.begin(), bufferViews_.end(), handles[i].view_);
+        assert(providedBufferIt != providedBuffers_.end() && "Can't find any buffer attached to the view.");
+
+        BufferView const& view = *handles[i].view_;
+        ProvidedBuffer& providedBuffer = *view.providedBuffer_;
 
         table_->vkDestroyBufferView(device, view.handle_, nullptr);
+
         if (--providedBuffer.referenceCount_ == 0) {
             resourcesController_->FreeBuffer(providedBuffer.bufferResource_);
-            providedBuffers_.erase(providedBuffers_.begin() + view.providedBuffer_);
+            providedBuffers_.erase(providedBufferIt);
         }
 
-        bufferViews // FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!!!!!!!!!! Upon deletion all handles become invalid!! POOR DESIGN!!
+        bufferViews_.erase(viewIt);
     }
 
 }
