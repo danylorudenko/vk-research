@@ -52,6 +52,7 @@ void MemoryController::AssignDefaultPageSizes()
     defaultPageSizes_[UPLOAD_BUFFER] = 1024 * 1024 * 5;
     defaultPageSizes_[UNIFORM] = 1024 * 512;
     defaultPageSizes_[SAMPLE_TEXTURE] = 1024 * 1024 * 64;
+    defaultPageSizes_[DEPTH_STENCIL_ATTACHMENT] = 1024 * 1024 * 16;
     defaultPageSizes_[COLOR_ATTACHMENT] = 1024 * 1024 * 64;
 }
 
@@ -87,11 +88,12 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
         assert(false && "Unsupported MemoryUsage");
     }
 
+    std::uint32_t constexpr INVALID_ALLOCATION = std::numeric_limits<std::uint32_t>::max();
 
-    std::uint32_t validAllocation = std::numeric_limits<std::uint32_t>::max();
+    std::uint32_t validAllocation = INVALID_ALLOCATION;
     auto const allocationsCount = allocations_.size();
     for (auto i = 0u; i < allocationsCount; ++i) {
-        auto const& page = allocations_[i];
+        auto const page = allocations_[i];
         auto const accessValid = (page->accessFlags_ & accessFlags) == accessFlags;
         auto const sizeValid = desc.size_ <= (page->size_ - page->nextFreeOffset_);
         auto const usageValid = desc.usage_ == page->usage_;
@@ -102,8 +104,8 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
         }
     }
 
-    if (validAllocation != std::numeric_limits<std::uint32_t>::max()) {
-        GetNextFreePageRegion({ allocations_[validAllocation] }, desc, regionOut);
+    if (validAllocation != INVALID_ALLOCATION) {
+        GetNextFreePageRegion(MemoryPageHandle{ allocations_[validAllocation] }, desc, regionOut);
     }
     else {
         auto const defaultPageSize = defaultPageSizes_[desc.usage_];
@@ -132,16 +134,18 @@ void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
 {
     auto const regionMemoryAllocation = region.pageHandle_.page_->deviceMemory_;
 
-    std::uint32_t pageIndex = std::numeric_limits<std::uint32_t>::max();
+    std::uint32_t INVALID_PAGE = std::numeric_limits<std::uint32_t>::max();
+
+    std::uint32_t pageIndex = INVALID_PAGE;
     for (auto i = 0u; i < allocations_.size(); ++i) {
         if (regionMemoryAllocation == allocations_[i]->deviceMemory_) {
             pageIndex = i;
         }
     }
 
-    if (pageIndex != std::numeric_limits<std::uint32_t>::max()) {
+    if (pageIndex != INVALID_PAGE) {
         if (--allocations_[pageIndex]->bindCount_ == 0) {
-            FreePage({ allocations_[pageIndex] });
+            FreePage(MemoryPageHandle{ allocations_[pageIndex] });
         }
     }
 
@@ -202,7 +206,7 @@ MemoryPageHandle MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsa
 
     allocations_.emplace_back(memory);
 
-    return { memory };
+    return MemoryPageHandle{ memory };
 }
 
 void MemoryController::FreePage(MemoryPageHandle pageHandle)
