@@ -32,17 +32,6 @@ struct BuffersProviderDesc
 class BuffersProvider
     : public NonCopyable
 {
-public:
-    struct ProvidedBuffer
-    {
-    public:
-        ProvidedBuffer(BufferResourceHandle resource, std::uint32_t referenceCount = 0);
-
-        BufferResourceHandle bufferResource_;
-        std::uint32_t referenceCount_;
-    };
-
-
 
 public:
     BuffersProvider();
@@ -55,7 +44,7 @@ public:
     void AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferViewHandle* results);
     void ReleaseViews(std::uint32_t buffersCount, BufferViewHandle const* handles);
 
-    void RegisterViews(std::uint32_t buffersCount, BufferResourceHandle* buffers, BufferViewDesc const* desc, BufferViewHandle* results);
+    BufferView& GetView(BufferViewHandle handle);
 
     ~BuffersProvider();
 

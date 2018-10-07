@@ -3,12 +3,12 @@
 namespace VKW
 {
 
-BufferView::BufferView(VkBufferView view, VkFormat format, BufferResourceHandle buffer, std::uint64_t offset, std::uint64_t size)
+BufferView::BufferView(VkBufferView view, VkFormat format, std::uint64_t offset, std::uint64_t size, ProvidedBuffer* providedBuffer)
     : handle_{ view }
     , format_{ format }
-    , resource_{ buffer }
     , offset_{ offset }
     , size_{ size_ }
+    , providedBuffer_{ providedBuffer }
 {
 
 }

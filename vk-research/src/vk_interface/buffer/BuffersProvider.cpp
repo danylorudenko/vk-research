@@ -1,4 +1,5 @@
 #include "BuffersProvider.hpp"
+#include "ProvidedBuffer.hpp"
 
 #include <utility>
 #include <algorithm>
@@ -10,7 +11,7 @@
 namespace VKW
 {
 
-BuffersProvider::ProvidedBuffer::ProvidedBuffer(BufferResourceHandle resource, std::uint32_t referenceCount)
+ProvidedBuffer::ProvidedBuffer(BufferResourceHandle resource, std::uint32_t referenceCount)
     : bufferResource_{ resource }
     , referenceCount_{ referenceCount }
 {
@@ -47,65 +48,29 @@ BuffersProvider& BuffersProvider::operator=(BuffersProvider&& rhs)
     std::swap(device_, rhs.device_);
     std::swap(resourcesController_, rhs.resourcesController_);
     std::swap(bufferViews_, rhs.bufferViews_);
+    std::swap(providedBuffers_, rhs.providedBuffers_);
 
     return *this;
 }
 
-void BuffersProvider::RegisterViews(std::uint32_t buffersCount, BufferResourceHandle* buffers, BufferViewDesc const* desc, BufferViewHandle* results)
-{
-    auto const prevSize = bufferViews_.size();
-    bufferViews_.resize(prevSize + buffersCount);
-    
-    VkBufferViewCreateInfo bvInfo;
-    bvInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
-    bvInfo.pNext = nullptr;
-    for (auto i = 0u; i < buffersCount; ++i) {
-        BufferResource* resource = resourcesController_->GetBuffer(buffers[i]);
-
-        bvInfo.buffer = resource->handle_;
-        bvInfo.flags = VK_FLAGS_NONE;
-        bvInfo.format = desc[i].format_;
-        bvInfo.offset = desc[i].offset_;
-        bvInfo.range = desc[i].size_;
-
-        VkBufferView vkView = VK_NULL_HANDLE;
-        VK_ASSERT(table_->vkCreateBufferView(device_->Handle(), &bvInfo, nullptr, &vkView));
-
-        std::uint32_t const viewId = static_cast<std::uint32_t>(prevSize + i);
-        auto& resultView = bufferViews_[viewId];
-        resultView = new BufferView{ vkView, desc[i].format_, buffers[i], desc[i].offset_, desc[i].size_ };
-
-        resultView->handle_ = vkView;
-        resultView->format_ = desc[i].format_;
-        resultView->offset_ = desc[i].offset_;
-        resultView->size_ = desc[i].size_;
-        resultView->resource_ = buffers[i];
-        resultView->providedBuffer_ = nullptr;
-        
-        results[i].view_ = resultView;
-    }
-}
-
 void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferViewHandle* results)
 {
-    std::uint64_t totalSize = 0;
+    std::uint64_t totalBufferSize = 0;
     VkFormat const format = desc[0].format_;
     BufferUsage const usage = desc[0].usage_;
 
     for (auto i = 1u; i < buffersCount; ++i) {
         assert(desc[i].usage_ == desc[i - 1].usage_ && "All acquired resources must share same usage pattern");
-        totalSize += desc->size_;
+        totalBufferSize += desc->size_;
     }
 
     BufferDesc bufferDesc;
-    bufferDesc.size_ = totalSize;
+    bufferDesc.size_ = totalBufferSize;
     bufferDesc.usage_ = desc[0].usage_;
     BufferResourceHandle bufferRes = resourcesController_->CreateBuffer(bufferDesc);
-    auto* providedBuffer = new ProvidedBuffer{ bufferRes, 0 };
+    auto* providedBuffer = new ProvidedBuffer{ bufferRes, buffersCount };
     providedBuffers_.push_back(providedBuffer);
 
-    auto const prevViewsCount = bufferViews_.size();
-    bufferViews_.resize(prevViewsCount + buffersCount);
 
     VkDevice const device = device_->Handle();
 
@@ -124,14 +89,8 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
 
         VK_ASSERT(table_->vkCreateBufferView(device, &viewInfo, nullptr, &view));
 
-        std::uint32_t const viewId = static_cast<std::uint32_t>(prevViewsCount + i);
-        auto& resultView = bufferViews_[viewId];
-        resultView->handle_ = view;
-        resultView->format_ = format;
-        resultView->offset_ = desc[i].offset_;
-        resultView->size_ = desc[i].size_;
-        resultView->resource_ = bufferRes;
-        resultView->providedBuffer_ = providedBuffer;
+        BufferView* resultView = new BufferView{ view, format, desc[i].offset_, desc[i].size_, providedBuffer };
+        bufferViews_.push_back(resultView);
 
         results[i].view_ = resultView;
     }
@@ -141,13 +100,16 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
 void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferViewHandle const* handles)
 {
     VkDevice const device = device_->Handle();
-    for (auto i = 0u; i < buffersCount; ++i) {
-        auto providedBufferIt = std::find(providedBuffers_.cbegin(), providedBuffers_.cend(), handles[i].view_->providedBuffer_);
-        auto viewIt = std::find(bufferViews_.begin(), bufferViews_.end(), handles[i].view_);
-        assert(providedBufferIt != providedBuffers_.end() && "Can't find any buffer attached to the view.");
 
-        BufferView const& view = *handles[i].view_;
-        ProvidedBuffer& providedBuffer = *view.providedBuffer_;
+    for (auto i = 0u; i < buffersCount; ++i) {
+        auto viewIt = std::find(bufferViews_.cbegin(), bufferViews_.cend(), handles[i].view_);
+        assert(viewIt != bufferViews_.cend() && "Can't find BufferView to release.");
+
+        auto providedBufferIt = std::find(providedBuffers_.cbegin(), providedBuffers_.cend(), handles[i].view_->providedBuffer_);
+        assert(providedBufferIt != providedBuffers_.cend() && "Can't find any buffer attached to the view.");
+
+        BufferView const& view = **viewIt; // pointer in iterator
+        ProvidedBuffer& providedBuffer = **providedBufferIt; // same
 
         table_->vkDestroyBufferView(device, view.handle_, nullptr);
 
@@ -159,6 +121,11 @@ void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferViewHandle 
         bufferViews_.erase(viewIt);
     }
 
+}
+
+BufferView& BuffersProvider::GetView(BufferViewHandle handle)
+{
+    return *handle.view_;
 }
 
 }

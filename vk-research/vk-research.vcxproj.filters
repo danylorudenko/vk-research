@@ -269,5 +269,8 @@
     <ClInclude Include="src\class_features\ContinuousDataStorage.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_interface\buffer\ProvidedBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
