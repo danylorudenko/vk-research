@@ -76,8 +76,8 @@ private:
 
     MemoryController* memoryController_;
 
-    std::vector<BufferResource> buffers_;
-    std::vector<ImageResource> images_;
+    std::vector<BufferResource*> buffers_;
+    std::vector<ImageResource*> images_;
 
 
 };

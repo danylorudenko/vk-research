@@ -44,7 +44,7 @@ public:
     void AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferViewHandle* results);
     void ReleaseViews(std::uint32_t buffersCount, BufferViewHandle const* handles);
 
-    BufferView& GetView(BufferViewHandle handle);
+    BufferView* GetView(BufferViewHandle handle);
 
     ~BuffersProvider();
 

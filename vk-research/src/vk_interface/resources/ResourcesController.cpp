@@ -1,4 +1,5 @@
 #include <utility>
+#include <algorithm>
 #include "ResourcesController.hpp"
 #include "../memory/MemoryController.hpp"
 #include "../Device.hpp"
@@ -175,19 +176,19 @@ void ResourcesController::FreeBuffer(BufferResourceHandle handle)
 
 void ResourcesController::FreeImage(ImageResourceHandle handle)
 {
-    auto& image = images_[handle.id_];
-    table_->vkDestroyImage(device_->Handle(), image.handle_, nullptr);
+    auto imageIt = std::find(images_.cbegin(), images_.cend(), handle.resource_);
+    table_->vkDestroyImage(device_->Handle(), imageIt., nullptr);
     images_.erase(images_.begin() + handle.id_);
 }
 
 BufferResource* ResourcesController::GetBuffer(BufferResourceHandle handle)
 {
-    return buffers_.data() + handle.id_;
+    return handle.resource_;
 }
 
 ImageResource* ResourcesController::GetImage(ImageResourceHandle handle)
 {
-    return images_.data() + handle.id_;
+    return handle.resource_;
 }
 
 }

@@ -36,7 +36,7 @@ struct SubbufferResource
 
 struct BufferResourceHandle
 {
-    std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
+    BufferResource* resource_ = nullptr;
 };
 
 
@@ -54,7 +54,7 @@ struct ImageResource
 
 struct ImageResourceHandle
 {
-    std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
+    ImageResource* resource_ = nullptr;
 };
 
 }

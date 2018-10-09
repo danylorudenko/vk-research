@@ -123,9 +123,9 @@ void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferViewHandle 
 
 }
 
-BufferView& BuffersProvider::GetView(BufferViewHandle handle)
+BufferView* BuffersProvider::GetView(BufferViewHandle handle)
 {
-    return *handle.view_;
+    return handle.view_;
 }
 
 }
