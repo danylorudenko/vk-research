@@ -47,6 +47,7 @@ BuffersProvider& BuffersProvider::operator=(BuffersProvider&& rhs)
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
     std::swap(resourcesController_, rhs.resourcesController_);
+
     std::swap(bufferViews_, rhs.bufferViews_);
     std::swap(providedBuffers_, rhs.providedBuffers_);
 

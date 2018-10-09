@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <utility>
 #include "../../class_features/NonCopyable.hpp"
 
 #include "ImageView.hpp"
@@ -16,7 +17,13 @@ class ResourcesController;
 
 struct ImageViewDesc
 {
-
+    VkFormat format_;
+    std::uint32_t width_;
+    std::uint32_t height_;
+    //std::uint32_t depth_;
+    //std::uint32_t arrayLayers_;
+    //std::uint32_t mipmaps_;
+    ImageUsage usage_;
 };
 
 
@@ -36,14 +43,25 @@ public:
     ImagesProvider(ImagesProvider&& rhs);
     ImagesProvider& operator=(ImagesProvider&& rhs);
 
+    ImageViewHandle AcquireImage(ImageViewDesc const& desc);
+    void ReleaseImage(ImageViewHandle handle);
+
     ~ImagesProvider();
+
+
+private:
+    struct ImageViewContainer
+    {
+        ImageView* view_;
+        ImageResourceHandle resource_;
+    };
 
 private:
     ImportTable* table_;
     Device* device_;
     ResourcesController* resourcesController_;
 
-    std::vector<ImageView> imageViews_;
+    std::vector<ImageViewContainer> imageViewContainers_;
 };
 
 }
