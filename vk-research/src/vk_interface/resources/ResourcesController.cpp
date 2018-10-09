@@ -42,10 +42,18 @@ ResourcesController& ResourcesController::operator=(ResourcesController&& rhs)
 
 ResourcesController::~ResourcesController()
 {
-    for (auto& staticBuffer : buffers_) {
-        auto memory = staticBuffer.memory_;
-        table_->vkDestroyBuffer(device_->Handle(), staticBuffer.handle_, nullptr);
-        memoryController_->ReleaseMemoryRegion(staticBuffer.memory_);
+    VkDevice const device = device_->Handle();
+    
+    for (auto& bufferResource : buffers_) {
+        table_->vkDestroyBuffer(device, bufferResource->handle_, nullptr);
+        memoryController_->ReleaseMemoryRegion(bufferResource->memory_);
+        delete bufferResource;
+    }
+
+    for (auto& imageResource : images_) {
+        table_->vkDestroyImage(device, imageResource->handle_, nullptr);
+        memoryController_->ReleaseMemoryRegion(imageResource->memory_);
+        delete imageResource;
     }
 }
 
@@ -93,14 +101,14 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
 
     MemoryRegion memoryRegion;
     memoryController_->ProvideMemoryRegion(regionDesc, memoryRegion);
-    assert((memoryRegion.pageHandle_.id_ != MemoryRegion{}.pageHandle_.id_) && "Couldn't find memoryRegion");
 
     MemoryPage const& page = memoryController_->GetPage(memoryRegion.pageHandle_);
-    assert(memoryRequirements.memoryTypeBits & (1 << page.memoryTypeId_) && "MemoryRegion has invalid memoryType");
     VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, page.deviceMemory_, memoryRegion.offset_));
-    buffers_.emplace_back(vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion);
 
-    return { static_cast<std::uint32_t>(buffers_.size()) - 1 };
+    BufferResource* resource = new BufferResource{ vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion };
+    buffers_.emplace_back(resource);
+
+    return BufferResourceHandle{ resource };
 }
 
 ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
@@ -145,40 +153,52 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
         break;
     }
 
-    VkImage image = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkCreateImage(device_->Handle(), &info, nullptr, &image));
+    VkImage vkImage = VK_NULL_HANDLE;
+    VK_ASSERT(table_->vkCreateImage(device_->Handle(), &info, nullptr, &vkImage));
 
     VkMemoryRequirements memoryRequirements;
-    table_->vkGetImageMemoryRequirements(device_->Handle(), image, &memoryRequirements);
+    table_->vkGetImageMemoryRequirements(device_->Handle(), vkImage, &memoryRequirements);
 
     memoryDesc.size_ = memoryRequirements.size;
     memoryDesc.alignment_ = memoryRequirements.alignment;
     memoryDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
 
-    MemoryRegion region;
-    memoryController_->ProvideMemoryRegion(memoryDesc, region);
-    assert(region.pageHandle_.id_ != MemoryPageHandle{}.id_ && "Couldn't find appropriate memoryRegion");
+    MemoryRegion memoryRegion;
+    memoryController_->ProvideMemoryRegion(memoryDesc, memoryRegion);
 
-    MemoryPage const& page = memoryController_->GetPage(region.pageHandle_);
-    assert((memoryRequirements.memoryTypeBits & (1 << page.memoryTypeId_)) && "MemoryRegion has invalid memoryType");
-    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), image, page.deviceMemory_, region.offset_));
-    images_.emplace_back(image, desc.format_, desc.width_, desc.height_, region);
+    MemoryPage const& page = memoryController_->GetPage(memoryRegion.pageHandle_);
+    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, page.deviceMemory_, memoryRegion.offset_));
 
-    return { static_cast<std::uint32_t>(images_.size()) - 1 };
+    ImageResource* imageResource = new ImageResource{ vkImage, desc.format_, desc.width_, desc.height_, memoryRegion };
+    images_.emplace_back(imageResource);
+
+    return ImageResourceHandle{ imageResource };
 }
 
 void ResourcesController::FreeBuffer(BufferResourceHandle handle)
 {
-    auto& buffer = buffers_[handle.id_];
-    table_->vkDestroyBuffer(device_->Handle(), buffer.handle_, nullptr);
-    buffers_.erase(buffers_.begin() + handle.id_);
+    auto bufferIt = std::find(buffers_.begin(), buffers_.end(), handle.resource_);
+    assert(bufferIt != buffers_.end() && "Can't free BufferResource.");
+
+    auto& buffer = *bufferIt;
+
+    table_->vkDestroyBuffer(device_->Handle(), buffer->handle_, nullptr);
+    delete buffer;
+
+    buffers_.erase(bufferIt);
 }
 
 void ResourcesController::FreeImage(ImageResourceHandle handle)
 {
     auto imageIt = std::find(images_.cbegin(), images_.cend(), handle.resource_);
-    table_->vkDestroyImage(device_->Handle(), imageIt., nullptr);
-    images_.erase(images_.begin() + handle.id_);
+    assert(imageIt != images_.end() && "Can't free ImageResource");
+
+    auto& image = *imageIt;
+
+    table_->vkDestroyImage(device_->Handle(), image->handle_, nullptr);
+    delete image;
+
+    images_.erase(imageIt);
 }
 
 BufferResource* ResourcesController::GetBuffer(BufferResourceHandle handle)
