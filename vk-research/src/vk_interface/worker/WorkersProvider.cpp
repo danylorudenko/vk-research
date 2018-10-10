@@ -8,24 +8,30 @@ namespace VKW
 WorkersProvider::WorkersProvider()
     : table_{ nullptr }
     , device_{ nullptr }
+    , graphicsGroup_{ nullptr }
+    , computeGroup_{ nullptr }
+    , transferGroup_{ nullptr }
 {
 }
 
 WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
+    , graphicsGroup_{ nullptr }
+    , computeGroup_{ nullptr }
+    , transferGroup_{ nullptr }
 {
     std::uint32_t constexpr QUEUE_TYPES_SIZE = 3;
 
     
     
-    std::uint32_t queueIndecies[QUEUE_TYPES_SIZE] = {
+    std::uint32_t const queueIndecies[QUEUE_TYPES_SIZE] = {
         FindFamilyIndex(device_, DeviceQueueType::GRAPHICS, desc.graphicsQueueCount_),
         FindFamilyIndex(device_, DeviceQueueType::COMPUTE, desc.computeQueueCount_),
         FindFamilyIndex(device_, DeviceQueueType::TRANSFER, desc.transferQueueCount_)
     };
 
-    WorkerType workerGroupTypes[QUEUE_TYPES_SIZE] = {
+    WorkerType const workerGroupTypes[QUEUE_TYPES_SIZE] = {
         WorkerType::GRAPHICS,
         WorkerType::COMPUTE,
         WorkerType::TRANSFER
@@ -37,11 +43,7 @@ WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
         desc.transferQueueCount_
     };
 
-    std::unique_ptr<WorkerGroup>* workerGroups[QUEUE_TYPES_SIZE] = {
-        &graphicsGroup_,
-        &computeGroup_,
-        &transferGroup_
-    };
+    std::unique_ptr<WorkerGroup> workerGroups[QUEUE_TYPES_SIZE];
 
 
     for (auto i = 0u; i < QUEUE_TYPES_SIZE; ++i) {
@@ -53,12 +55,22 @@ WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
             workerGroupDesc.familyIndex_ = queueIndecies[i];
             workerGroupDesc.workersCount_ = queueCounts[i];
 
-            *workerGroups[i] = std::make_unique<VKW::WorkerGroup>(workerGroupDesc);
+            workerGroups[i] = std::make_unique<VKW::WorkerGroup>(workerGroupDesc);
         }
     }
+
+
+    graphicsGroup_ = std::move(workerGroups[0]);
+    computeGroup_ = std::move(workerGroups[1]);
+    transferGroup_ = std::move(workerGroups[2]);
 }
 
 WorkersProvider::WorkersProvider(WorkersProvider&& rhs)
+    : table_{ nullptr }
+    , device_{ nullptr }
+    , graphicsGroup_{ nullptr }
+    , computeGroup_{ nullptr }
+    , transferGroup_{ nullptr }
 {
     operator=(std::move(rhs));
 }
@@ -96,7 +108,8 @@ Worker* WorkersProvider::GetWorker(WorkerType type, std::uint32_t index)
 
 std::uint32_t WorkersProvider::FindFamilyIndex(Device const* device, DeviceQueueType type, std::uint32_t requiredCount)
 {
-    std::uint32_t result = std::numeric_limits<std::uint32_t>::max();
+    std::uint32_t constexpr INVALID_RESULT = std::numeric_limits<std::uint32_t>::max();
+    std::uint32_t result = INVALID_RESULT;
 
     if (requiredCount == 0) {
         return result;
@@ -111,7 +124,7 @@ std::uint32_t WorkersProvider::FindFamilyIndex(Device const* device, DeviceQueue
         }
     }
 
-    assert(result != std::numeric_limits<std::uint32_t>::max() && "Couldn't find queue family index for WorkerGroup");
+    assert(result != INVALID_RESULT && "Couldn't find queue family index for WorkerGroup");
 
     return result;
 }

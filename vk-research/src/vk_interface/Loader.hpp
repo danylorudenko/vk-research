@@ -10,6 +10,8 @@
 #include "Device.hpp"
 #include "memory/MemoryController.hpp"
 #include "resources/ResourcesController.hpp"
+#include "image/ImagesProvider.hpp"
+#include "buffer/BuffersProvider.hpp"
 #include "worker/WorkersProvider.hpp"
 #include "runtime/ResourceBindingService.hpp"
 #include "pipeline/PipelineFactory.hpp"
@@ -57,10 +59,13 @@ private:
     std::unique_ptr<VKW::MemoryController> memoryController_;
     std::unique_ptr<VKW::ResourcesController> resourcesController_;
 
-    std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;
-    std::unique_ptr<VKW::PipelineFactory> pipelineFactory_;
+    std::unique_ptr<VKW::BuffersProvider> buffersProvider_;
+    std::unique_ptr<VKW::ImagesProvider> imagesProvider_;
 
-    std::unique_ptr<VKW::ResourceBindingService> resourceBindingService_;
+    //std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;
+    //std::unique_ptr<VKW::PipelineFactory> pipelineFactory_;
+
+    //std::unique_ptr<VKW::ResourceBindingService> resourceBindingService_;
 
 };
 

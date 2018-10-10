@@ -136,6 +136,7 @@ Device::Device(DeviceDesc const& desc)
                     queuePrioritiesVec.emplace_back(queuePriorities);
                     queueCreateInfoVec.emplace_back(queueCreateInfo);
 
+                    // Save queues info for own usage
                     DeviceQueueFamilyInfo queueInfo;
                     queueInfo.familyIndex_ = chosenQueueFamily;
                     queueInfo.count_ = QUEUE_COUNTS[i];

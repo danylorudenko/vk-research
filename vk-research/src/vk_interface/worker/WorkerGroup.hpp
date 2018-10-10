@@ -14,7 +14,6 @@ struct WorkerGroupDesc
 
     WorkerType type_;
     std::uint32_t familyIndex_;
-
     std::uint32_t workersCount_;
 };
 
