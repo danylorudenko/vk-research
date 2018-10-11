@@ -201,6 +201,8 @@
     <ClInclude Include="src\vk_interface\pipeline\RenderPassController.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\ShaderModule.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\ShaderModuleFactory.hpp" />
+    <ClInclude Include="src\vk_interface\presentation\PresentationController.hpp" />
+    <ClInclude Include="src\vk_interface\presentation\SwapChain.hpp" />
     <ClInclude Include="src\vk_interface\resources\DynamicResourcesStorage.hpp" />
     <ClInclude Include="src\vk_interface\resources\Resource.hpp" />
     <ClInclude Include="src\vk_interface\resources\ResourcesController.hpp" />
