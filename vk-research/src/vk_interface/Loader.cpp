@@ -76,7 +76,7 @@ Loader::Loader(LoaderDesc const& desc)
     shaderModuleFactoryDesc.device_ = device_.get();
     shaderModuleFactoryDesc.ioManager_ = desc.ioManager_;
 
-    shaderModuleFactory_ = std::make_unique<VKW::ShaderModuleFactory>(shaderModuleFactoryDesc);
+    //shaderModuleFactory_ = std::make_unique<VKW::ShaderModuleFactory>(shaderModuleFactoryDesc);
 
 
 
@@ -84,7 +84,7 @@ Loader::Loader(LoaderDesc const& desc)
     pipelineFactoryDesc.table_ = table_.get();
     pipelineFactoryDesc.device_ = device_.get();
 
-    pipelineFactory_ = std::make_unique<VKW::PipelineFactory>(pipelineFactoryDesc);
+    //pipelineFactory_ = std::make_unique<VKW::PipelineFactory>(pipelineFactoryDesc);
 
 
 
@@ -93,7 +93,7 @@ Loader::Loader(LoaderDesc const& desc)
     resourceBindingServiceDesc.device_ = device_.get();
     resourceBindingServiceDesc.framesCount_ = 3;
 
-    resourceBindingService_ = std::make_unique<VKW::ResourceBindingService>(resourceBindingServiceDesc);
+    //resourceBindingService_ = std::make_unique<VKW::ResourceBindingService>(resourceBindingServiceDesc);
 }
 
 Loader::~Loader()

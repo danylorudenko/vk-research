@@ -111,6 +111,12 @@
     <ClCompile Include="src\class_features\ContinuousDataStorage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\vk_interface\Swapchain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vk_interface\Surface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\system\DynamicLibrary.hpp">
@@ -272,10 +278,13 @@
     <ClInclude Include="src\vk_interface\buffer\ProvidedBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk_interface\presentation\SwapChain.hpp">
+    <ClInclude Include="src\vk_interface\presentation\PresentationController.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk_interface\presentation\PresentationController.hpp">
+    <ClInclude Include="src\vk_interface\Swapchain.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\Surface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

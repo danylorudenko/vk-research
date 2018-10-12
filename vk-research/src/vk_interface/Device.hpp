@@ -27,7 +27,7 @@ struct DeviceQueueFamilyInfo
 struct DeviceDesc
 {
     ImportTable* table_; 
-    Instance* instance_; 
+    Instance* instance_;
     std::vector<std::string> requiredExtensions_;
 
     std::uint32_t graphicsQueueCount_;
@@ -91,6 +91,8 @@ private:
 
     VkPhysicalDevice physicalDevice_;
     VKW::Device::PhysicalDeviceProperties physicalDeviceProperties_;
+
+    VkSurfaceKHR surface = VK_NULL_HANDLE;
 
     std::vector<DeviceQueueFamilyInfo> queueInfo_;
 };
