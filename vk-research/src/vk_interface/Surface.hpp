@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <vector>
+#include <Windows.h>
 #include "../class_features/NonCopyable.hpp"
 
 namespace VKW
@@ -38,6 +40,7 @@ public:
     VkSurfaceCapabilitiesKHR const& SurfaceCapabilities() const;
     std::vector<VkPresentModeKHR> const& PresentModes() const;
     std::vector<VkSurfaceFormatKHR> const& SurfaceFormats() const;
+    std::vector<std::uint32_t> const& SupportedQueueFamilies() const;
 
 
     ~Surface();
@@ -52,6 +55,7 @@ private:
     VkSurfaceCapabilitiesKHR surfaceCapabilities_;
     std::vector<VkPresentModeKHR> presentModes_;
     std::vector<VkSurfaceFormatKHR> surfaceFormats_;
+    std::vector<std::uint32_t> supportedQueueFamilies_;
 
 };
 

@@ -8,24 +8,28 @@ namespace VKW
 {
 
 class ImportTable;
-class Instance;
 class Device;
+class Surface;
 
 struct SwapchainDesc
 {
     ImportTable* table_;
-    Instance* instance_;
     Device* device_;
+    Surface* surface_;
 
-#ifdef _WIN32
-    HINSTANCE hInstance_;
-    HWND hwnd_;
-#endif
+    std::uint32_t imagesCount_;
 };
 
 class Swapchain
     : public NonCopyable
 {
+public:
+    struct SwapchainImage
+    {
+        VkImage image_;
+        VkImageView view_;
+    };
+
 public:
     Swapchain();
     Swapchain(SwapchainDesc const& desc);
@@ -35,19 +39,17 @@ public:
 
     ~Swapchain();
 
-private:
-    struct SwapChainImage
-    {
-        VkImage image_;
-        VkImageView view_;
-    };
+    VkSwapchainKHR Handle() const;
+    SwapchainImage& Image(std::uint32_t index);
 
+
+private:
     ImportTable* table_;
-    Instance* instance_;
     Device* device_;
+    Surface* surface_;
 
     VkSwapchainKHR swapchain_;
-    std::vector<SwapChainImage> swapChainImages_;
+    std::vector<SwapchainImage> swapchainImages_;
 
 };
 

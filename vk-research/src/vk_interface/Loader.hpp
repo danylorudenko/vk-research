@@ -9,6 +9,7 @@
 #include "Instance.hpp"
 #include "Device.hpp"
 #include "Surface.hpp"
+#include "Swapchain.hpp"
 #include "memory/MemoryController.hpp"
 #include "resources/ResourcesController.hpp"
 #include "image/ImagesProvider.hpp"
@@ -27,6 +28,7 @@ struct LoaderDesc
 {
     HINSTANCE hInstance_;
     HWND hwnd_;
+    std::uint32_t bufferingCount_;
     IOManager* ioManager_;
     bool debug_ = false;
 };
@@ -57,6 +59,7 @@ private:
     std::unique_ptr<VKW::Instance> instance_;
     std::unique_ptr<VKW::Device> device_;
     std::unique_ptr<VKW::Surface> surface_;
+    std::unique_ptr<VKW::Swapchain> swapchain_;
 
     std::unique_ptr<VKW::WorkersProvider> workersProvider_;
 

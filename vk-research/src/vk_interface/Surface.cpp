@@ -59,6 +59,22 @@ Surface::Surface(SurfaceDesc const& desc)
             VK_ASSERT(table_->vkGetPhysicalDeviceSurfaceFormatsKHR(phDevice, surface_, &formatsCount, surfaceFormats_.data()));
         }
 
+        {
+            supportedQueueFamilies_.clear();
+            
+            auto const queueFamilyCount = device_->QueueFamilyCount();
+            for (auto i = 0u; i < queueFamilyCount; ++i) {
+                auto const familyIndex = device_->GetQueueFamily(i).familyIndex_;
+
+                VkBool32 familySupported = VK_FALSE;
+                VK_ASSERT(table_->vkGetPhysicalDeviceSurfaceSupportKHR(phDevice, familyIndex, surface_, &familySupported));
+                
+                if (familySupported == VK_TRUE) {
+                    supportedQueueFamilies_.push_back(familyIndex);
+                }
+            }
+        }
+
         
     }
 }
@@ -109,6 +125,11 @@ std::vector<VkPresentModeKHR> const& Surface::PresentModes() const
 std::vector<VkSurfaceFormatKHR> const& Surface::SurfaceFormats() const
 {
     return surfaceFormats_;
+}
+
+std::vector<std::uint32_t> const& Surface::SupportedQueueFamilies() const
+{
+    return supportedQueueFamilies_;
 }
 
 Surface::~Surface()

@@ -43,6 +43,7 @@ Loader::Loader(LoaderDesc const& desc)
     device_ = std::make_unique<VKW::Device>(deviceDesc);
     
 
+
     VKW::SurfaceDesc surfaceDesc;
     surfaceDesc.table_ = table_.get();
     surfaceDesc.instance_ = instance_.get();
@@ -51,6 +52,16 @@ Loader::Loader(LoaderDesc const& desc)
     surfaceDesc.hwnd_ = desc.hwnd_;
 
     surface_ = std::make_unique<VKW::Surface>(surfaceDesc);
+
+
+
+    VKW::SwapchainDesc swapchainDesc;
+    swapchainDesc.table_ = table_.get();
+    swapchainDesc.device_ = device_.get();
+    swapchainDesc.surface_ = surface_.get();
+    swapchainDesc.imagesCount_ = desc.bufferingCount_;
+
+    swapchain_ = std::make_unique<VKW::Swapchain>(swapchainDesc);
 
 
 
@@ -102,7 +113,7 @@ Loader::Loader(LoaderDesc const& desc)
     VKW::ResourceBindingServiceDesc resourceBindingServiceDesc;
     resourceBindingServiceDesc.table_ = table_.get();
     resourceBindingServiceDesc.device_ = device_.get();
-    resourceBindingServiceDesc.framesCount_ = 3;
+    resourceBindingServiceDesc.framesCount_ = desc.bufferingCount_;
 
     //resourceBindingService_ = std::make_unique<VKW::ResourceBindingService>(resourceBindingServiceDesc);
 }
