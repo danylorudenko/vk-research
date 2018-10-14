@@ -38,10 +38,28 @@ Surface::Surface(SurfaceDesc const& desc)
 #endif
 
     if (surface) {
-        VkSurfaceCapabilitiesKHR surfaceCaps;
-        table_->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device_->PhysicalDeviceHandle(), surface_, &surfaceCaps);
+        VkPhysicalDevice const phDevice = device_->PhysicalDeviceHandle();
 
-        surfaceCapabilities_ = surfaceCaps;
+        {
+            VK_ASSERT(table_->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(phDevice, surface_, &surfaceCapabilities_));
+        }
+
+        {
+            std::uint32_t modesCount = 0;
+            VK_ASSERT(table_->vkGetPhysicalDeviceSurfacePresentModesKHR(phDevice, surface_, &modesCount, nullptr));
+            presentModes_.resize(modesCount);
+            VK_ASSERT(table_->vkGetPhysicalDeviceSurfacePresentModesKHR(phDevice, surface_, &modesCount, presentModes_.data()));
+
+        }
+
+        {
+            std::uint32_t formatsCount = 0;
+            VK_ASSERT(table_->vkGetPhysicalDeviceSurfaceFormatsKHR(phDevice, surface_, &formatsCount, nullptr));
+            surfaceFormats_.resize(formatsCount);
+            VK_ASSERT(table_->vkGetPhysicalDeviceSurfaceFormatsKHR(phDevice, surface_, &formatsCount, surfaceFormats_.data()));
+        }
+
+        
     }
 }
 
@@ -62,8 +80,8 @@ Surface& Surface::operator=(Surface&& rhs)
 
     std::swap(surface_, rhs.surface_);
     std::swap(surfaceCapabilities_, rhs.surfaceCapabilities_);
-    std::swap(presentMode_, rhs.presentMode_);
-    std::swap(surfaceFormat_, rhs.surfaceFormat_);
+    std::swap(presentModes_, rhs.presentModes_);
+    std::swap(surfaceFormats_, rhs.surfaceFormats_);
 
     return *this;
 }
@@ -83,14 +101,14 @@ VkSurfaceCapabilitiesKHR const& Surface::SurfaceCapabilities() const
     return surfaceCapabilities_;
 }
 
-VkPresentModeKHR Surface::PresentMode() const
+std::vector<VkPresentModeKHR> const& Surface::PresentModes() const
 {
-    return presentMode_;
+    return presentModes_;
 }
 
-VkSurfaceFormatKHR const& Surface::SurfaceFormat() const
+std::vector<VkSurfaceFormatKHR> const& Surface::SurfaceFormats() const
 {
-    return surfaceFormat_;
+    return surfaceFormats_;
 }
 
 Surface::~Surface()

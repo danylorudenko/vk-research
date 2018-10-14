@@ -36,8 +36,8 @@ public:
 
     VkSurfaceKHR Handle() const;
     VkSurfaceCapabilitiesKHR const& SurfaceCapabilities() const;
-    VkPresentModeKHR PresentMode() const;
-    VkSurfaceFormatKHR const& SurfaceFormat() const;
+    std::vector<VkPresentModeKHR> const& PresentModes() const;
+    std::vector<VkSurfaceFormatKHR> const& SurfaceFormats() const;
 
 
     ~Surface();
@@ -50,8 +50,8 @@ private:
     VkSurfaceKHR surface_;
 
     VkSurfaceCapabilitiesKHR surfaceCapabilities_;
-    VkPresentModeKHR presentMode_;
-    VkSurfaceFormatKHR surfaceFormat_;
+    std::vector<VkPresentModeKHR> presentModes_;
+    std::vector<VkSurfaceFormatKHR> surfaceFormats_;
 
 };
 
