@@ -11,7 +11,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
         VulkanApplicationDelegate::WinProc,
         this }
     , ioManager_{}
-    , vulkanLoader_{ VKW::LoaderDesc{ instance, mainWindow_.NativeHandle(), &ioManager_, vkDebug } }
+    , vulkanLoader_{ VKW::LoaderDesc{ instance, mainWindow_.NativeHandle(), 2, &ioManager_, vkDebug } }
 {
 }
 

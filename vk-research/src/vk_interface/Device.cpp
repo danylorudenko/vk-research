@@ -128,7 +128,7 @@ Device::Device(DeviceDesc const& desc)
                 bool const queueCountSupported = queueFamilyProperties[j].queueCount >= QUEUE_COUNTS[i];
                 bool const queuePresentSupported = std::find(presentationFamilies.cbegin(), presentationFamilies.cend(), j) != presentationFamilies.cend() ? true : false;
 
-                if(desc.graphicsPresentSupportRequired_ && queueTypeGraphics && !queuePresentSupported)
+                if(queueTypeGraphics && !queuePresentSupported)
                     continue;
 
 

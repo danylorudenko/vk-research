@@ -47,6 +47,8 @@ private:
     std::unique_ptr<WorkerGroup> graphicsPresentGroup_;
     std::unique_ptr<WorkerGroup> computeGroup_;
     std::unique_ptr<WorkerGroup> transferGroup_;
+
+    Worker* presentWorker_;
 };
 
 }

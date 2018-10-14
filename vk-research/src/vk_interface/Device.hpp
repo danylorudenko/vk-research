@@ -30,7 +30,6 @@ struct DeviceDesc
     ImportTable* table_; 
     Instance* instance_;
     std::vector<std::string> requiredExtensions_;
-    bool graphicsPresentSupportRequired_;
 
     std::uint32_t graphicsPresentQueueCount_;
     std::uint32_t computeQueueCount_;
