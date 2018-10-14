@@ -35,12 +35,23 @@ Loader::Loader(LoaderDesc const& desc)
     deviceDesc.table_ = table_.get();
     deviceDesc.instance_ = instance_.get();
     deviceDesc.requiredExtensions_ = { "VK_KHR_swapchain" };
+    deviceDesc.graphicsPresentSupportRequired_ = true;
     deviceDesc.graphicsQueueCount_ = 1;
     deviceDesc.computeQueueCount_ = 0;
     deviceDesc.transferQueueCount_ = 0;
 
     device_ = std::make_unique<VKW::Device>(deviceDesc);
     
+
+    VKW::SurfaceDesc surfaceDesc;
+    surfaceDesc.table_ = table_.get();
+    surfaceDesc.instance_ = instance_.get();
+    surfaceDesc.device_ = device_.get();
+    surfaceDesc.hInstance_ = desc.hInstance_;
+    surfaceDesc.hwnd_ = desc.hwnd_;
+
+    surface_ = std::make_unique<VKW::Surface>(surfaceDesc);
+
 
 
     VKW::WorkersProviderDesc wcsDesc;

@@ -111,6 +111,7 @@ Device::Device(DeviceDesc const& desc)
         
         auto constexpr INVALID_QUEUE_INDEX = std::numeric_limits<std::uint32_t>::max();
         auto const& queueFamilyProperties = physicalDeviceProperties_.queueFamilyProperties;
+        auto const& presentationFamilies = physicalDeviceProperties_.presentationFamilies;
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfoVec;
         std::vector<float*> queuePrioritiesVec;
@@ -121,7 +122,17 @@ Device::Device(DeviceDesc const& desc)
 
             std::uint32_t chosenQueueFamily = INVALID_QUEUE_INDEX;
             for (auto j = 0u; j < queueFamilyProperties.size(); ++j) {
-                if ((queueFamilyProperties[j].queueFlags & QUEUE_TYPE_FLAGS[i]) && (queueFamilyProperties[j].queueCount >= QUEUE_COUNTS[i])) {
+                bool const queueTypeGraphics = queueFamilyProperties[j].queueFlags & QUEUE_TYPE_FLAGS[0];
+
+                bool const queueTypeSupported = queueFamilyProperties[j].queueFlags & QUEUE_TYPE_FLAGS[i];
+                bool const queueCountSupported = queueFamilyProperties[j].queueCount >= QUEUE_COUNTS[i];
+                bool const queuePresentSupported = std::find(presentationFamilies.cbegin(), presentationFamilies.cend(), j) != presentationFamilies.cend() ? true : false;
+
+                if(desc.graphicsPresentSupportRequired_ && queueTypeGraphics && !queuePresentSupported)
+                    continue;
+
+
+                if (queueTypeSupported && queueCountSupported) {
                     VkDeviceQueueCreateInfo queueCreateInfo;
                     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
                     queueCreateInfo.pNext = nullptr;
@@ -140,6 +151,7 @@ Device::Device(DeviceDesc const& desc)
                     DeviceQueueFamilyInfo queueInfo;
                     queueInfo.familyIndex_ = chosenQueueFamily;
                     queueInfo.count_ = QUEUE_COUNTS[i];
+                    queueInfo.presentationSupported_ = queuePresentSupported;
                     if (QUEUE_TYPE_FLAGS[i] & VK_QUEUE_GRAPHICS_BIT) {
                         queueInfo.type_ = DeviceQueueType::GRAPHICS;
                     }
@@ -204,6 +216,7 @@ Device& Device::operator=(Device&& rhs)
     std::swap(table_, rhs.table_);
     std::swap(physicalDevice_, rhs.physicalDevice_);
     std::swap(physicalDeviceProperties_, rhs.physicalDeviceProperties_);
+    std::swap(queueInfo_, rhs.queueInfo_);
 
     return *this;
 }
@@ -211,6 +224,11 @@ Device& Device::operator=(Device&& rhs)
 VkDevice Device::Handle() const
 {
     return device_;
+}
+
+VkPhysicalDevice Device::PhysicalDeviceHandle() const
+{
+    return physicalDevice_;
 }
 
 Device::operator bool() const
@@ -235,7 +253,7 @@ VKW::DeviceQueueFamilyInfo const& Device::GetQueueFamily(std::uint32_t index) co
 
 Device::~Device()
 {
-    if (*this) {
+    if (device_) {
         VK_ASSERT(table_->vkDeviceWaitIdle(device_));
         table_->vkDestroyDevice(device_, nullptr);
         device_ = VK_NULL_HANDLE;
@@ -248,6 +266,7 @@ bool Device::IsPhysicalDeviceValid(
 {    
     bool supportsGraphics = false;
     bool supportsExtensions = true;
+    bool supportsSurface = false;
 
     auto const& queueFamilyProperties = deviceProperties.queueFamilyProperties;
     for (auto i = 0u; i < queueFamilyProperties.size(); ++i) {
@@ -270,7 +289,11 @@ bool Device::IsPhysicalDeviceValid(
         }
     }
 
-    return supportsGraphics && supportsExtensions;
+    if (deviceProperties.presentationFamilies.size() > 0) {
+        supportsSurface = true;
+    }
+
+    return supportsGraphics && supportsExtensions && supportsSurface;
 }
 
 void Device::RequestDeviceProperties(
@@ -285,6 +308,16 @@ void Device::RequestDeviceProperties(
     table_->vkGetPhysicalDeviceQueueFamilyProperties(targetDevice, &queuePropsCount, nullptr);
     deviceProperties.queueFamilyProperties.resize(queuePropsCount);
     table_->vkGetPhysicalDeviceQueueFamilyProperties(targetDevice, &queuePropsCount, deviceProperties.queueFamilyProperties.data());
+
+#ifdef _WIN32
+    deviceProperties.presentationFamilies.clear();
+    for (auto i = 0u; i < queuePropsCount; ++i) {
+        VkBool32 presentationSupport = table_->vkGetPhysicalDeviceWin32PresentationSupportKHR(targetDevice, i);
+        if (presentationSupport == VK_TRUE) {
+            deviceProperties.presentationFamilies.push_back(i);
+        }
+    }
+#endif
 
     auto extensionPropsCount = 0u;
     VK_ASSERT(table_->vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, nullptr));

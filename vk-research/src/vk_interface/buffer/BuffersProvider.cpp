@@ -56,7 +56,7 @@ BuffersProvider& BuffersProvider::operator=(BuffersProvider&& rhs)
 
 void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferViewHandle* results)
 {
-    std::uint64_t totalBufferSize = 0;
+    std::uint32_t totalBufferSize = 0;
     VkFormat const format = desc[0].format_;
     BufferUsage const usage = desc[0].usage_;
 
@@ -113,13 +113,16 @@ void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferViewHandle 
         ProvidedBuffer& providedBuffer = **providedBufferIt; // same
 
         table_->vkDestroyBufferView(device, view.handle_, nullptr);
+        delete *viewIt;
+        bufferViews_.erase(viewIt);
+
 
         if (--providedBuffer.referenceCount_ == 0) {
             resourcesController_->FreeBuffer(providedBuffer.bufferResource_);
+            delete *providedBufferIt;
             providedBuffers_.erase(providedBufferIt);
         }
 
-        bufferViews_.erase(viewIt);
     }
 
 }
@@ -127,6 +130,20 @@ void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferViewHandle 
 BufferView* BuffersProvider::GetView(BufferViewHandle handle)
 {
     return handle.view_;
+}
+
+BuffersProvider::~BuffersProvider()
+{
+    VkDevice const device = device_->Handle();
+    for (auto const& view : bufferViews_) {
+        table_->vkDestroyBufferView(device, view->handle_, nullptr);
+        delete view;
+    }
+
+    for (auto const& providedBuffer : providedBuffers_) {
+        resourcesController_->FreeBuffer(providedBuffer->bufferResource_);
+        delete providedBuffer;
+    }
 }
 
 }

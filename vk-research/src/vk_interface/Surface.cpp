@@ -1,4 +1,5 @@
 #include "Surface.hpp"
+#include "Device.hpp"
 #include "Tools.hpp"
 #include "Instance.hpp"
 
@@ -33,7 +34,15 @@ Surface::Surface(SurfaceDesc const& desc)
     sInfo.hwnd = desc.hwnd_;
     
     VK_ASSERT(table_->vkCreateWin32SurfaceKHR(instance_->Handle(), &sInfo, nullptr, &surface));
+    surface_ = surface;
 #endif
+
+    if (surface) {
+        VkSurfaceCapabilitiesKHR surfaceCaps;
+        table_->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device_->PhysicalDeviceHandle(), surface_, &surfaceCaps);
+
+        surfaceCapabilities_ = surfaceCaps;
+    }
 }
 
 Surface::Surface(Surface&& rhs)
@@ -52,8 +61,36 @@ Surface& Surface::operator=(Surface&& rhs)
     std::swap(device_, rhs.device_);
 
     std::swap(surface_, rhs.surface_);
+    std::swap(surfaceCapabilities_, rhs.surfaceCapabilities_);
+    std::swap(presentMode_, rhs.presentMode_);
+    std::swap(surfaceFormat_, rhs.surfaceFormat_);
 
     return *this;
+}
+
+Surface::operator bool() const
+{
+    return surface_ != VK_NULL_HANDLE;
+}
+
+VkSurfaceKHR Surface::Handle() const
+{
+    return surface_;
+}
+
+VkSurfaceCapabilitiesKHR const& Surface::SurfaceCapabilities() const
+{
+    return surfaceCapabilities_;
+}
+
+VkPresentModeKHR Surface::PresentMode() const
+{
+    return presentMode_;
+}
+
+VkSurfaceFormatKHR const& Surface::SurfaceFormat() const
+{
+    return surfaceFormat_;
 }
 
 Surface::~Surface()

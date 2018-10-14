@@ -38,7 +38,7 @@ private:
 template<typename T>
 class ContinuousDataStorage
 {
-    static_assert(sizeof(T) >= std::uint32_t, "ContinuosDataStorage does not support types less than 4 bytes in size.");
+    static_assert(sizeof(T) >= sizeof(std::uint32_t), "ContinuosDataStorage does not support types less than 4 bytes in size.");
 
     using InternalHandle = std::uint32_t;
 

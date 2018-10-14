@@ -18,7 +18,7 @@ enum class BufferUsage
 
 struct BufferDesc
 {
-    std::uint64_t size_;
+    std::uint32_t size_;
     BufferUsage usage_;
 };
 
@@ -32,8 +32,8 @@ enum class ImageUsage
 
 struct ImageDesc
 {
-    std::uint64_t width_;
-    std::uint64_t height_;
+    std::uint32_t width_;
+    std::uint32_t height_;
     VkFormat format_;
     ImageUsage usage_;
 };

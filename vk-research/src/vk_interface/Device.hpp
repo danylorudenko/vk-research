@@ -22,6 +22,7 @@ struct DeviceQueueFamilyInfo
     DeviceQueueType type_;
     std::uint32_t familyIndex_;
     std::uint32_t count_;
+    bool presentationSupported_;
 };
 
 struct DeviceDesc
@@ -29,10 +30,12 @@ struct DeviceDesc
     ImportTable* table_; 
     Instance* instance_;
     std::vector<std::string> requiredExtensions_;
+    bool graphicsPresentSupportRequired_;
 
     std::uint32_t graphicsQueueCount_;
     std::uint32_t computeQueueCount_;
     std::uint32_t transferQueueCount_;
+
 };
 
 class Device
@@ -51,6 +54,7 @@ public:
         VkPhysicalDeviceMemoryProperties memoryProperties;
         std::vector<VkQueueFamilyProperties> queueFamilyProperties;
         std::vector<VkExtensionProperties> extensionProperties;
+        std::vector<std::uint32_t> presentationFamilies;
         VkPhysicalDeviceFeatures features;
     };
 
@@ -69,13 +73,14 @@ public:
     VKW::DeviceQueueFamilyInfo const& GetQueueFamily(std::uint32_t index) const;
 
     VkDevice Handle() const;
+    VkPhysicalDevice PhysicalDeviceHandle() const;
     operator bool() const;
 
 private:
     static void PrintPhysicalDeviceData(
         VKW::Device::PhysicalDeviceProperties const& deviceProperties);
 
-    static bool IsPhysicalDeviceValid(
+    bool IsPhysicalDeviceValid(
         VKW::Device::PhysicalDeviceProperties const& deviceProperties,
         std::vector<std::string> const& requiredExtensions
     );
@@ -91,8 +96,6 @@ private:
 
     VkPhysicalDevice physicalDevice_;
     VKW::Device::PhysicalDeviceProperties physicalDeviceProperties_;
-
-    VkSurfaceKHR surface = VK_NULL_HANDLE;
 
     std::vector<DeviceQueueFamilyInfo> queueInfo_;
 };

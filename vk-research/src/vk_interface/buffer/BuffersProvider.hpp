@@ -2,7 +2,7 @@
 
 #include "../../class_features/NonCopyable.hpp"
 #include "BufferView.hpp"
-#include "../resources/Resource.hpp"
+#include "../resources/ResourcesController.hpp"
 
 #include <vector>
 
@@ -11,13 +11,12 @@ namespace VKW
 
 class ImportTable;
 class Device;
-class ResourcesController;
 
 struct BufferViewDesc
 {
     VkFormat format_;
-    std::uint64_t offset_;
-    std::uint64_t size_;
+    std::uint32_t offset_;
+    std::uint32_t size_;
     BufferUsage usage_;
 };
 

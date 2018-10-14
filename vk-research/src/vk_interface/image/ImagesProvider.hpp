@@ -5,14 +5,13 @@
 #include "../../class_features/NonCopyable.hpp"
 
 #include "ImageView.hpp"
-
+#include "../resources/ResourcesController.hpp"
 
 namespace VKW
 {
 
 class ImportTable;
 class Device;
-class ResourcesController;
 
 
 struct ImageViewDesc

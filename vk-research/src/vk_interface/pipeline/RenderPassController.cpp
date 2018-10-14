@@ -37,9 +37,6 @@ RenderPassController& RenderPassController::operator=(RenderPassController&& rhs
     return *this;
 }
 
-RenderPassController::~RenderPassController()
-{}
-
 RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& desc)
 {
     VkRenderPass renderPass = VK_NULL_HANDLE;

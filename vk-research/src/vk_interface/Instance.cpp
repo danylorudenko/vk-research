@@ -144,7 +144,7 @@ VkInstance Instance::Handle() const
 
 Instance::~Instance()
 {
-    if (*this)
+    if (instance_)
         table_->vkDestroyInstance(instance_, nullptr);
 
     instance_ = VK_NULL_HANDLE;

@@ -31,6 +31,14 @@ public:
 
     Surface(Surface&& rhs);
     Surface& operator=(Surface&& rhs);
+    
+    operator bool() const;
+
+    VkSurfaceKHR Handle() const;
+    VkSurfaceCapabilitiesKHR const& SurfaceCapabilities() const;
+    VkPresentModeKHR PresentMode() const;
+    VkSurfaceFormatKHR const& SurfaceFormat() const;
+
 
     ~Surface();
 
@@ -40,6 +48,10 @@ private:
     Device* device_;
 
     VkSurfaceKHR surface_;
+
+    VkSurfaceCapabilitiesKHR surfaceCapabilities_;
+    VkPresentModeKHR presentMode_;
+    VkSurfaceFormatKHR surfaceFormat_;
 
 };
 

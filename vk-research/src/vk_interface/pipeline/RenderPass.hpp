@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <vulkan/vulkan.h>
 
-#include "../runtime/Framebuffer.hpp"
 #include "../resources/Resource.hpp"
 
 namespace VKW

@@ -49,7 +49,9 @@ Swapchain& Swapchain::operator=(Swapchain&& rhs)
 
 Swapchain::~Swapchain()
 {
+    if (swapchain_) {
 
+    }
 }
 
 }

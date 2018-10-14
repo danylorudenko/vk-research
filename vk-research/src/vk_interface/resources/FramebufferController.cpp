@@ -68,7 +68,9 @@ FramebufferHandle FramebufferController::CreateFramebuffer(FramebufferDesc const
 
     VkFramebuffer result = VK_NULL_HANDLE;
     VK_ASSERT(table_->vkCreateFramebuffer(device_->Handle(), &fbInfo, nullptr, &result));
-    
+
+
+    return FramebufferHandle{};
 }
 
 }
