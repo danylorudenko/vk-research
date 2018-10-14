@@ -36,6 +36,7 @@ public:
     ~WorkersProvider();
 
     Worker* GetWorker(WorkerType type, std::uint32_t index);
+    Worker* PresentWorker() const;
 
 private:
     static std::uint32_t FindFamilyIndex(Device const* device, DeviceQueueType type, std::uint32_t requiredCount);

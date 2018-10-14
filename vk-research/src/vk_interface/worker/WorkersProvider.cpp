@@ -63,6 +63,8 @@ WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
     graphicsPresentGroup_ = std::move(workerGroups[0]);
     computeGroup_ = std::move(workerGroups[1]);
     transferGroup_ = std::move(workerGroups[2]);
+
+    presentWorker_ = graphicsPresentGroup_->GetWorker(0);
 }
 
 WorkersProvider::WorkersProvider(WorkersProvider&& rhs)
@@ -104,6 +106,11 @@ Worker* WorkersProvider::GetWorker(WorkerType type, std::uint32_t index)
     default:
         return nullptr;
     }
+}
+
+Worker* WorkersProvider::PresentWorker() const
+{
+    return presentWorker_;
 }
 
 std::uint32_t WorkersProvider::FindFamilyIndex(Device const* device, DeviceQueueType type, std::uint32_t requiredCount)
