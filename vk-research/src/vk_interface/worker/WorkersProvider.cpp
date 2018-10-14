@@ -8,7 +8,7 @@ namespace VKW
 WorkersProvider::WorkersProvider()
     : table_{ nullptr }
     , device_{ nullptr }
-    , graphicsGroup_{ nullptr }
+    , graphicsPresentGroup_{ nullptr }
     , computeGroup_{ nullptr }
     , transferGroup_{ nullptr }
 {
@@ -17,7 +17,7 @@ WorkersProvider::WorkersProvider()
 WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
-    , graphicsGroup_{ nullptr }
+    , graphicsPresentGroup_{ nullptr }
     , computeGroup_{ nullptr }
     , transferGroup_{ nullptr }
 {
@@ -26,19 +26,19 @@ WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
     
     
     std::uint32_t const queueIndecies[QUEUE_TYPES_SIZE] = {
-        FindFamilyIndex(device_, DeviceQueueType::GRAPHICS, desc.graphicsQueueCount_),
+        FindFamilyIndex(device_, DeviceQueueType::GRAPHICS_PRESENT, desc.graphicsPresentQueueCount_),
         FindFamilyIndex(device_, DeviceQueueType::COMPUTE, desc.computeQueueCount_),
         FindFamilyIndex(device_, DeviceQueueType::TRANSFER, desc.transferQueueCount_)
     };
 
     WorkerType const workerGroupTypes[QUEUE_TYPES_SIZE] = {
-        WorkerType::GRAPHICS,
+        WorkerType::GRAPHICS_PRESENT,
         WorkerType::COMPUTE,
         WorkerType::TRANSFER
     };
 
     std::uint32_t const queueCounts[QUEUE_TYPES_SIZE] = {
-        desc.graphicsQueueCount_,
+        desc.graphicsPresentQueueCount_,
         desc.computeQueueCount_,
         desc.transferQueueCount_
     };
@@ -60,7 +60,7 @@ WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
     }
 
 
-    graphicsGroup_ = std::move(workerGroups[0]);
+    graphicsPresentGroup_ = std::move(workerGroups[0]);
     computeGroup_ = std::move(workerGroups[1]);
     transferGroup_ = std::move(workerGroups[2]);
 }
@@ -68,7 +68,7 @@ WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
 WorkersProvider::WorkersProvider(WorkersProvider&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
-    , graphicsGroup_{ nullptr }
+    , graphicsPresentGroup_{ nullptr }
     , computeGroup_{ nullptr }
     , transferGroup_{ nullptr }
 {
@@ -80,7 +80,7 @@ WorkersProvider& WorkersProvider::operator=(WorkersProvider&& rhs)
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
     
-    std::swap(graphicsGroup_, rhs.graphicsGroup_);
+    std::swap(graphicsPresentGroup_, rhs.graphicsPresentGroup_);
     std::swap(computeGroup_, rhs.computeGroup_);
     std::swap(transferGroup_, rhs.transferGroup_);
 
@@ -95,8 +95,8 @@ WorkersProvider::~WorkersProvider()
 Worker* WorkersProvider::GetWorker(WorkerType type, std::uint32_t index)
 {
     switch (type) {
-    case WorkerType::GRAPHICS:
-        return graphicsGroup_->GetWorker(index);
+    case WorkerType::GRAPHICS_PRESENT:
+        return graphicsPresentGroup_->GetWorker(index);
     case WorkerType::COMPUTE:
         return computeGroup_->GetWorker(index);
     case WorkerType::TRANSFER:
@@ -115,10 +115,19 @@ std::uint32_t WorkersProvider::FindFamilyIndex(Device const* device, DeviceQueue
         return result;
     }
 
+    bool const presentRequired = type == DeviceQueueType::GRAPHICS_PRESENT;
+
     auto const familyCount = device->QueueFamilyCount();
     for (auto i = 0u; i < familyCount; ++i) {
         auto const& familyDesc = device->GetQueueFamily(i);
-        if (familyDesc.type_ == type && familyDesc.count_ >= requiredCount) {
+
+        // if presentation is required on this type of family, skip family in case it doesn't support presentation
+        if (presentRequired && !familyDesc.presentationSupported_) {
+            continue;
+        }
+
+        if (familyDesc.type_ == type && 
+            familyDesc.count_ >= requiredCount) {
             result = familyDesc.familyIndex_;
             break;
         }

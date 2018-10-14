@@ -12,7 +12,7 @@ namespace VKW
 
 enum class DeviceQueueType
 {
-    GRAPHICS,
+    GRAPHICS_PRESENT,
     COMPUTE,
     TRANSFER
 };
@@ -32,7 +32,7 @@ struct DeviceDesc
     std::vector<std::string> requiredExtensions_;
     bool graphicsPresentSupportRequired_;
 
-    std::uint32_t graphicsQueueCount_;
+    std::uint32_t graphicsPresentQueueCount_;
     std::uint32_t computeQueueCount_;
     std::uint32_t transferQueueCount_;
 

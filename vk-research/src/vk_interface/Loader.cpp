@@ -36,7 +36,7 @@ Loader::Loader(LoaderDesc const& desc)
     deviceDesc.instance_ = instance_.get();
     deviceDesc.requiredExtensions_ = { "VK_KHR_swapchain" };
     deviceDesc.graphicsPresentSupportRequired_ = true;
-    deviceDesc.graphicsQueueCount_ = 1;
+    deviceDesc.graphicsPresentQueueCount_ = 1;
     deviceDesc.computeQueueCount_ = 0;
     deviceDesc.transferQueueCount_ = 0;
 
@@ -68,7 +68,7 @@ Loader::Loader(LoaderDesc const& desc)
     VKW::WorkersProviderDesc wcsDesc;
     wcsDesc.table_ = table_.get();
     wcsDesc.device_ = device_.get();
-    wcsDesc.graphicsQueueCount_ = 1;
+    wcsDesc.graphicsPresentQueueCount_ = 1;
     wcsDesc.computeQueueCount_ = 0;
     wcsDesc.transferQueueCount_ = 0;
 

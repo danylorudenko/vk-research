@@ -104,7 +104,7 @@ Device::Device(DeviceDesc const& desc)
         };
 
         std::uint32_t const QUEUE_COUNTS[QUEUE_TYPE_COUNT] = {
-            desc.graphicsQueueCount_,
+            desc.graphicsPresentQueueCount_,
             desc.computeQueueCount_,
             desc.transferQueueCount_
         };
@@ -153,7 +153,7 @@ Device::Device(DeviceDesc const& desc)
                     queueInfo.count_ = QUEUE_COUNTS[i];
                     queueInfo.presentationSupported_ = queuePresentSupported;
                     if (QUEUE_TYPE_FLAGS[i] & VK_QUEUE_GRAPHICS_BIT) {
-                        queueInfo.type_ = DeviceQueueType::GRAPHICS;
+                        queueInfo.type_ = DeviceQueueType::GRAPHICS_PRESENT;
                     }
                     else if (QUEUE_TYPE_FLAGS[i] & VK_QUEUE_COMPUTE_BIT) {
                         queueInfo.type_ = DeviceQueueType::COMPUTE;

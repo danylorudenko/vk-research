@@ -19,7 +19,7 @@ class WorkerGroup;
 enum class WorkerType
 {
     NONE,
-    GRAPHICS,
+    GRAPHICS_PRESENT,
     COMPUTE,
     TRANSFER
 };

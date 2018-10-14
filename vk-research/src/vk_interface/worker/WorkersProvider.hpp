@@ -10,12 +10,15 @@
 namespace VKW
 {
 
+class Surface;
+
 struct WorkersProviderDesc
 {
     ImportTable* table_;
     Device* device_;
+    Surface* surface_;
 
-    std::uint32_t graphicsQueueCount_;
+    std::uint32_t graphicsPresentQueueCount_;
     std::uint32_t computeQueueCount_;
     std::uint32_t transferQueueCount_;
 };
@@ -41,7 +44,7 @@ private:
     ImportTable* table_;
     Device* device_;
 
-    std::unique_ptr<WorkerGroup> graphicsGroup_;
+    std::unique_ptr<WorkerGroup> graphicsPresentGroup_;
     std::unique_ptr<WorkerGroup> computeGroup_;
     std::unique_ptr<WorkerGroup> transferGroup_;
 };
