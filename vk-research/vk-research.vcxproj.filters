@@ -117,6 +117,9 @@
     <ClCompile Include="src\vk_interface\Surface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\vk_interface\runtime\PresentationController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\system\DynamicLibrary.hpp">
@@ -276,9 +279,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\buffer\ProvidedBuffer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vk_interface\presentation\PresentationController.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\Swapchain.hpp">
