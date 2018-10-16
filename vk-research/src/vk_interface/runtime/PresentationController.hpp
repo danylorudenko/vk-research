@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+#include <vulkan/vulkan.h>
 #include "../../class_features/NonCopyable.hpp"
 
 namespace VKW
@@ -28,6 +30,8 @@ public:
     PresentationController(PresentationController&& rhs);
     PresentationController& operator=(PresentationController&& rhs);
 
+    std::uint32_t AcquireNewContextId();
+
     ~PresentationController();
 
 
@@ -36,6 +40,8 @@ private:
     Device* device_;
     Swapchain* swapchain_;
     Worker* presentationWorker_;
+
+    VkSemaphore imageAcquireSemaphore_;
 };
 
 }

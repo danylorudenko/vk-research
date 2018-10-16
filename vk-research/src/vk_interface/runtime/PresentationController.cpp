@@ -1,6 +1,11 @@
 #include "PresentationController.hpp"
 
+#include "../Tools.hpp"
+#include "../ImportTable.hpp"
+#include "../Device.hpp"
+#include "../Swapchain.hpp"
 #include <utility>
+#include <limits>
 
 namespace VKW
 {
@@ -10,6 +15,7 @@ PresentationController::PresentationController()
     , device_{ nullptr }
     , swapchain_{ nullptr }
     , presentationWorker_{ nullptr }
+    , imageAcquireSemaphore_{ VK_NULL_HANDLE }
 {
 
 }
@@ -19,8 +25,14 @@ PresentationController::PresentationController(PresentationControllerDesc const&
     , device_{ desc.device_ }
     , swapchain_{ desc.swapchain_ }
     , presentationWorker_{ desc.presentationWorker_ }
+    , imageAcquireSemaphore_{ VK_NULL_HANDLE }
 {
+    VkSemaphoreCreateInfo sInfo;
+    sInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    sInfo.pNext = nullptr;
+    sInfo.flags = VK_FLAGS_NONE;
 
+    VK_ASSERT(table_->vkCreateSemaphore(device_->Handle(), &sInfo, nullptr, &imageAcquireSemaphore_));
 }
 
 PresentationController::PresentationController(PresentationController&& rhs)
@@ -28,6 +40,7 @@ PresentationController::PresentationController(PresentationController&& rhs)
     , device_{ nullptr }
     , swapchain_{ nullptr }
     , presentationWorker_{ nullptr }
+    , imageAcquireSemaphore_{ VK_NULL_HANDLE }
 {
     operator=(std::move(rhs));
 }
@@ -39,7 +52,32 @@ PresentationController& PresentationController::operator=(PresentationController
     std::swap(swapchain_, rhs.swapchain_);
     std::swap(presentationWorker_, rhs.presentationWorker_);
 
+    std::swap(imageAcquireSemaphore_, rhs.imageAcquireSemaphore_);
+
     return *this;
+}
+
+PresentationController::~PresentationController()
+{
+    if (imageAcquireSemaphore_) {
+        table_->vkDestroySemaphore(device_->Handle(), imageAcquireSemaphore_, nullptr);
+        imageAcquireSemaphore_ = VK_NULL_HANDLE;
+    }
+}
+
+std::uint32_t PresentationController::AcquireNewContextId()
+{
+    std::uint32_t imageIndex = 0;
+
+    VK_ASSERT(table_->vkAcquireNextImageKHR(
+        device_->Handle(), 
+        swapchain_->Handle(), 
+        std::numeric_limits<std::uint64_t>::max(),
+        imageAcquireSemaphore_,
+        VK_NULL_HANDLE,
+        &imageIndex)
+    );
+
 }
 
 }
