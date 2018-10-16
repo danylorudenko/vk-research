@@ -287,5 +287,8 @@
     <ClInclude Include="src\vk_interface\Surface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_interface\runtime\PresentationController.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
