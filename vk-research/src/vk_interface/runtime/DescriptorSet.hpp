@@ -16,8 +16,7 @@ public:
     DescriptorSet(DescriptorSet&& rhs);
     DescriptorSet& operator=(DescriptorSet&& rhs);
 
-    inline operator bool() const;
-    inline bool IsNull() const;
+    VkDescriptorSet Handle() const;
 
 private:
     VkDescriptorSet handle_;

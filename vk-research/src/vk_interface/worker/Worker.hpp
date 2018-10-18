@@ -50,11 +50,14 @@ public:
     Worker(Worker&& rhs);
     Worker& operator=(Worker&& rhs);
 
+    ~Worker();
+
+    VkQueue QueueHandle() const;
+
     VkCommandBuffer StartNextExecutionFrame();
     void EndCurrentExecutionFrame();
     void ExecuteCurrentFrame();
 
-    ~Worker();
 
 private:
     ImportTable* table_;

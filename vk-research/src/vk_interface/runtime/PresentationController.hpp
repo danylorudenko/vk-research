@@ -30,9 +30,11 @@ public:
     PresentationController(PresentationController&& rhs);
     PresentationController& operator=(PresentationController&& rhs);
 
-    std::uint32_t AcquireNewContextId();
-
     ~PresentationController();
+
+    std::uint32_t AcquireNewContextId();
+    void PresentContextId(std::uint32_t contextId);
+
 
 
 private:

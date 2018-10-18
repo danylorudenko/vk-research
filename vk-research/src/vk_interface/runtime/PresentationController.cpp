@@ -4,6 +4,7 @@
 #include "../ImportTable.hpp"
 #include "../Device.hpp"
 #include "../Swapchain.hpp"
+#include "../worker/Worker.hpp"
 #include <utility>
 #include <limits>
 
@@ -77,6 +78,27 @@ std::uint32_t PresentationController::AcquireNewContextId()
         VK_NULL_HANDLE,
         &imageIndex)
     );
+
+}
+
+void PresentationController::PresentContextId(std::uint32_t contextId)
+{
+    VkQueue presentQueue = presentationWorker_->QueueHandle();
+    VkSwapchainKHR swapchain = swapchain_->Handle();
+    std::uint32_t imageIndex = contextId;
+
+    VkResult result = VK_SUCCESS;
+
+    VkPresentInfoKHR pInfo;
+    pInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    pInfo.pNext = nullptr;
+    pInfo.waitSemaphoreCount = 1;
+    pInfo.pWaitSemaphores = &imageAcquireSemaphore_;
+    pInfo.swapchainCount = 1;
+    pInfo.pSwapchains = &swapchain;
+    pInfo.pImageIndices = &imageIndex;
+
+    VK_ASSERT(table_->vkQueuePresentKHR(presentQueue, &pInfo));
 
 }
 

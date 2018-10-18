@@ -26,14 +26,9 @@ DescriptorSet& DescriptorSet::operator=(DescriptorSet&& rhs)
     return *this;
 }
 
-DescriptorSet::operator bool() const
+VkDescriptorSet DescriptorSet::Handle() const
 {
-    return handle_ != VK_NULL_HANDLE;
-}
-
-bool DescriptorSet::IsNull() const
-{
-    return handle_ == VK_NULL_HANDLE;
+    return handle_;
 }
 
 

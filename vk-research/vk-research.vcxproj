@@ -155,6 +155,7 @@
     <ClCompile Include="src\vk_interface\resources\ResourcesController.cpp" />
     <ClCompile Include="src\vk_interface\ImportTable.cpp" />
     <ClCompile Include="src\vk_interface\Loader.cpp" />
+    <ClCompile Include="src\vk_interface\resources\ResourceTransferService.cpp" />
     <ClCompile Include="src\vk_interface\runtime\DescriptorSet.cpp" />
     <ClCompile Include="src\vk_interface\resources\FramebufferController.cpp" />
     <ClCompile Include="src\vk_interface\runtime\PresentationController.cpp" />
@@ -204,6 +205,8 @@
     <ClInclude Include="src\vk_interface\pipeline\RenderPassController.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\ShaderModule.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\ShaderModuleFactory.hpp" />
+    <ClInclude Include="src\vk_interface\resources\ResourceContext.hpp" />
+    <ClInclude Include="src\vk_interface\resources\ResourceTransferService.hpp" />
     <ClInclude Include="src\vk_interface\runtime\PresentationController.hpp" />
     <ClInclude Include="src\vk_interface\Surface.hpp" />
     <ClInclude Include="src\vk_interface\Swapchain.hpp" />
