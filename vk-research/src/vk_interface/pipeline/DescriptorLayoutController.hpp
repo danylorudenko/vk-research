@@ -29,6 +29,9 @@ class DescriptorLayoutController
     ~DescriptorLayoutController();
     
 private:
+    ImportTable* table_;
+    Device* device_;
+
     std::vector<DescriptorSetLayout> setLayouts_;
     std::vector<DescriptorPipelineLayout> pipelineLayouts_;
 };

@@ -145,6 +145,7 @@
     <ClCompile Include="src\vk_interface\image\ImageView.cpp" />
     <ClCompile Include="src\vk_interface\Instance.cpp" />
     <ClCompile Include="src\vk_interface\memory\MemoryController.cpp" />
+    <ClCompile Include="src\vk_interface\pipeline\DescriptorLayoutController.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\PipelineFactory.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\RenderPass.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\RenderPassController.cpp" />
