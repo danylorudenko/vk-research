@@ -44,7 +44,11 @@ DescriptorLayoutController& DescriptorLayoutController::operator=(DescriptorLayo
 
 DescriptorLayoutController::~DescriptorLayoutController()
 {
-
+    VkDevice const device = device_->Handle();
+    for (auto const& setLayout : setLayouts_) {
+        table_->vkDestroyDescriptorSetLayout(device, setLayout->handle_, nullptr);
+        delete setLayout;
+    }
 }
 
 DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(DescriptorSetLayoutDesc const& desc)
