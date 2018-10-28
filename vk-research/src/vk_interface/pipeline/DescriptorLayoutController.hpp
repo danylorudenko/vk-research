@@ -57,6 +57,9 @@ class DescriptorLayoutController
 
     PipelineLayoutHandle CreatePipelineLayout(PipelineLayoutDesc const& desc);
     void ReleasePipelineLayout(PipelineLayoutHandle handle);
+
+    DescriptorSetLayout* GetDescriptorSetLayout(DescriptorSetLayoutHandle handle);
+    PipelineLayout* GetPipelineLayout(PipelineLayoutHandle handle);
     
 private:
     ImportTable* table_;

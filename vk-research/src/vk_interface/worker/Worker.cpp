@@ -83,6 +83,11 @@ void Worker::ExecuteCurrentFrame()
     currentFrame.Execute(queue_);
 }
 
+VkQueue Worker::QueueHandle() const
+{
+    return queue_;
+}
+
 Worker::~Worker()
 {
     // WorkersProvider is responsible for waiting on the destruction

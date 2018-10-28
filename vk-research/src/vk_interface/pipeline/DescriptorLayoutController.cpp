@@ -111,4 +111,61 @@ void DescriptorLayoutController::ReleaseDescriptorSetLayout(DescriptorSetLayoutH
     setLayouts_.erase(setLayoutIt);
 }
 
+PipelineLayoutHandle DescriptorLayoutController::CreatePipelineLayout(PipelineLayoutDesc const& desc)
+{
+    VkDescriptorSetLayout layouts[PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+    for (auto i = 0u; i < desc.membersCount_; ++i) {
+        DescriptorSetLayout* layout = desc.members_[i].layout_;
+        layouts[i] = layout->handle_;
+    }
+
+
+    VkPipelineLayoutCreateInfo cInfo;
+    cInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    cInfo.pNext = nullptr;
+    cInfo.flags = VK_FLAGS_NONE;
+    cInfo.pushConstantRangeCount = 0;
+    cInfo.pPushConstantRanges = nullptr;
+    cInfo.setLayoutCount = desc.membersCount_;
+    cInfo.pSetLayouts = layouts;
+
+    VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+    VK_ASSERT(table_->vkCreatePipelineLayout(device_->Handle(), &cInfo, nullptr, &pipelineLayout));
+
+    auto* result = new PipelineLayout{};
+    result->handle_ = pipelineLayout;
+    result->membersCount_ = desc.membersCount_;
+    for (auto i = 0u; i < desc.membersCount_; ++i) {
+        result->setLayoutMembers_[i] = desc.members_[i];
+    }
+
+    pipelineLayouts_.push_back(result);
+
+    return PipelineLayoutHandle{ result };
+}
+
+void DescriptorLayoutController::ReleasePipelineLayout(PipelineLayoutHandle handle)
+{
+    auto layoutIt = std::find(pipelineLayouts_.begin(), pipelineLayouts_.end(), handle.layout_);
+    if (layoutIt == pipelineLayouts_.end()) {
+        assert(false && "Attempt to release invalid PipelineLayout.");
+    }
+
+    PipelineLayout* layout = *layoutIt;
+    table_->vkDestroyPipelineLayout(device_->Handle(), layout->handle_, nullptr);
+
+    delete layout;
+    pipelineLayouts_.erase(layoutIt);
+}
+
+DescriptorSetLayout* DescriptorLayoutController::GetDescriptorSetLayout(DescriptorSetLayoutHandle handle)
+{
+    return handle.layout_;
+}
+
+PipelineLayout* DescriptorLayoutController::GetPipelineLayout(PipelineLayoutHandle handle)
+{
+    return handle.layout_;
+}
+
 }

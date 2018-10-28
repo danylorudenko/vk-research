@@ -60,6 +60,8 @@ private:
     Device* device_;
     ResourcesController* resourcesController_;
 
+    VkSampler defaultSampler_;
+
     std::vector<ImageViewContainer> imageViewContainers_;
 };
 

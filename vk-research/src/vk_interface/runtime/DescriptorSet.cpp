@@ -23,6 +23,7 @@ DescriptorSet::DescriptorSet(DescriptorSet&& rhs)
 DescriptorSet& DescriptorSet::operator=(DescriptorSet&& rhs)
 {
     std::swap(handle_, rhs.handle_);
+    std::swap(layout_, rhs.layout_);
     return *this;
 }
 

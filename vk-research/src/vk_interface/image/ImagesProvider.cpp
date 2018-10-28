@@ -12,6 +12,7 @@ namespace VKW
 ImagesProvider::ImagesProvider()
     : table_{ nullptr }
     , device_{ nullptr }
+    , defaultSampler_{ VK_NULL_HANDLE }
     , resourcesController_{ nullptr }
 {
 
@@ -20,14 +21,46 @@ ImagesProvider::ImagesProvider()
 ImagesProvider::ImagesProvider(ImagesProviderDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
+    , defaultSampler_{ VK_NULL_HANDLE }
     , resourcesController_{ desc.resourcesController_ }
 {
+    VkSamplerCreateInfo samplerInfo;
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.pNext = nullptr;
+    samplerInfo.flags = VK_FLAGS_NONE;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.mipLodBias = 0.0f;
+    samplerInfo.anisotropyEnable = VK_FALSE;
+/*
+    VkSamplerCreateFlags    flags;
+    VkFilter                magFilter;
+    VkFilter                minFilter;
+    VkSamplerMipmapMode     mipmapMode;
+    VkSamplerAddressMode    addressModeU;
+    VkSamplerAddressMode    addressModeV;
+    VkSamplerAddressMode    addressModeW;
+    float                   mipLodBias;
+    VkBool32                anisotropyEnable;
+    float                   maxAnisotropy;
+    VkBool32                compareEnable;
+    VkCompareOp             compareOp;
+    float                   minLod;
+    float                   maxLod;
+    VkBorderColor           borderColor;
+    VkBool32                unnormalizedCoordinates;*/
+    
 
 }
 
 ImagesProvider::ImagesProvider(ImagesProvider&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
+    , defaultSampler_{ VK_NULL_HANDLE }
     , resourcesController_{ nullptr }
 {
     operator=(std::move(rhs));
@@ -37,6 +70,7 @@ ImagesProvider& ImagesProvider::operator=(ImagesProvider&& rhs)
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
+    std::swap(defaultSampler_, rhs.defaultSampler_);
     std::swap(resourcesController_, rhs.resourcesController_);
 
     std::swap(imageViewContainers_, rhs.imageViewContainers_);
@@ -85,7 +119,7 @@ ImageViewHandle ImagesProvider::AcquireImage(ImageViewDesc const& desc)
     VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkView));
 
     ImageView* imageView = new ImageView{ vkView, viewInfo.format, viewInfo.viewType, viewInfo.subresourceRange, imageResourceHandle };
-
+    
     ImageViewContainer container;
     container.view_ = imageView;
     container.resource_ = imageResourceHandle;
