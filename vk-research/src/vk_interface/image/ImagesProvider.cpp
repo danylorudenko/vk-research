@@ -36,24 +36,15 @@ ImagesProvider::ImagesProvider(ImagesProviderDesc const& desc)
     samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     samplerInfo.mipLodBias = 0.0f;
     samplerInfo.anisotropyEnable = VK_FALSE;
-/*
-    VkSamplerCreateFlags    flags;
-    VkFilter                magFilter;
-    VkFilter                minFilter;
-    VkSamplerMipmapMode     mipmapMode;
-    VkSamplerAddressMode    addressModeU;
-    VkSamplerAddressMode    addressModeV;
-    VkSamplerAddressMode    addressModeW;
-    float                   mipLodBias;
-    VkBool32                anisotropyEnable;
-    float                   maxAnisotropy;
-    VkBool32                compareEnable;
-    VkCompareOp             compareOp;
-    float                   minLod;
-    float                   maxLod;
-    VkBorderColor           borderColor;
-    VkBool32                unnormalizedCoordinates;*/
-    
+    samplerInfo.maxAnisotropy = 0.0f;
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+    samplerInfo.minLod = 0.0f;
+    samplerInfo.maxLod = 1.0f; // ????????
+    samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+
+    VK_ASSERT(table_->vkCreateSampler(device_->Handle(), &samplerInfo, nullptr, &defaultSampler_));
 
 }
 
@@ -89,6 +80,11 @@ ImagesProvider::~ImagesProvider()
 
         resourcesController_->FreeImage(imageViewCont.resource_);
     }
+}
+
+VkSampler ImagesProvider::DefaultSamplerHandle() const
+{
+    return defaultSampler_;
 }
 
 ImageViewHandle ImagesProvider::AcquireImage(ImageViewDesc const& desc)

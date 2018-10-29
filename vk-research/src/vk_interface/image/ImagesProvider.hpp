@@ -45,6 +45,8 @@ public:
     ImageViewHandle AcquireImage(ImageViewDesc const& desc);
     void ReleaseImage(ImageViewHandle handle);
 
+    VkSampler DefaultSamplerHandle() const;
+
     ~ImagesProvider();
 
 
