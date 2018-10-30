@@ -80,11 +80,21 @@ ImagesProvider::~ImagesProvider()
 
         resourcesController_->FreeImage(imageViewCont.resource_);
     }
+
+    if (defaultSampler_ != VK_NULL_HANDLE) {
+        table_->vkDestroySampler(device, defaultSampler_, nullptr);
+        defaultSampler_ = VK_NULL_HANDLE;
+    }
 }
 
 VkSampler ImagesProvider::DefaultSamplerHandle() const
 {
     return defaultSampler_;
+}
+
+ImageView* ImagesProvider::GetImageView(ImageViewHandle handle)
+{
+    return handle.view_;
 }
 
 ImageViewHandle ImagesProvider::AcquireImage(ImageViewDesc const& desc)

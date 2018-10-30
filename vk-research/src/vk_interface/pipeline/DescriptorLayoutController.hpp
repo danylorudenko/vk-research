@@ -13,11 +13,12 @@ class ImportTable;
 
 enum class DescriptorType
 {
-    TEXTURE,
+    SAMPLED_TEXTURE,
+    SAMPLER,
     UNIFORM_BUFFER
 };
 
-struct DescriptorDesc
+struct LayoutDescriptorDesc
 {
     DescriptorType type_;
     std::uint32_t binding_;
@@ -26,7 +27,7 @@ struct DescriptorDesc
 struct DescriptorSetLayoutDesc
 {
     std::uint32_t membersCount_;
-    DescriptorDesc membersDesc_[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+    LayoutDescriptorDesc membersDesc_[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
 };
 
 struct PipelineLayoutDesc
@@ -44,6 +45,7 @@ struct DescriptorLayoutControllerDesc
 class DescriptorLayoutController
     : public NonCopyable
 {
+public:
     DescriptorLayoutController();
     DescriptorLayoutController(DescriptorLayoutControllerDesc const& desc);
 

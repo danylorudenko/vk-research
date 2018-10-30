@@ -15,13 +15,8 @@ class ImportTable;
 class Device;
 class ImagesProvider;
 class BuffersProvider;
+class DescriptorLayoutController;
 
-
-enum class DescriptorType
-{
-    SAMPLED_TEXTURE,
-    UNIFORM_BUFFER
-};
 
 struct DescriptorDesc
 {
@@ -53,8 +48,6 @@ struct DescriptorSetDesc
 };
 
 
-using DescriptorWriteProc = void(*)(DescriptorDesc const& src, VkWriteDescriptorSet& dst);
-
 
 struct DescriptorSetControllerDesc
 {
@@ -62,6 +55,7 @@ struct DescriptorSetControllerDesc
     Device* device_;
     BuffersProvider* buffersProvider_;
     ImagesProvider* imagesProvider_;
+    DescriptorLayoutController* layoutController_;
 };
 
 class DescriptorSetController
@@ -75,8 +69,20 @@ class DescriptorSetController
 
     ~DescriptorSetController();
 
-    static void DescriptorWriteProcSampledImage(DescriptorDesc const& src, VkWriteDescriptorSet& dst);
-    static void DescriptorWriteProcUniformBuffer(DescriptorDesc const& src, VkWriteDescriptorSet& dst);
+private:
+    struct DescriptorWriteInfo
+    {
+        VkDescriptorImageInfo imageInfo;
+        VkDescriptorBufferInfo bufferInfo;
+        VkBufferView bufferView;
+    };
+
+    void AssembleSetCreateInfo(VkDescriptorSet dstSet, DescriptorSetDesc const& desc, VkWriteDescriptorSet* results);
+
+    static void DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteInfo& dstInfo, VkImageView view);
+    static void DecorateSamplerWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteInfo& dstInfo, VkSampler sampler);
+    static void DecorateBufferViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteInfo& dstInfo, VkBufferView view);
+    static void DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteInfo& dstInfo, VkBuffer buffer, std::uint32_t offset, std::uint32_t size);
 
 private:
     ImportTable* table_;
@@ -84,6 +90,8 @@ private:
 
     BuffersProvider* buffersProvider_;
     ImagesProvider* imagesProvider_;
+    DescriptorLayoutController* layoutController_;
+
 
     std::vector<DescriptorSet*> descriptorSets_;
 };
