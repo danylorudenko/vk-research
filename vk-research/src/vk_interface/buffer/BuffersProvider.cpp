@@ -88,8 +88,10 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
         viewInfo.offset = desc[i].offset_;
         viewInfo.range = desc[i].size_;
 
-        VK_ASSERT(table_->vkCreateBufferView(device, &viewInfo, nullptr, &view));
-
+        if (format != VK_FORMAT_UNDEFINED) {
+            VK_ASSERT(table_->vkCreateBufferView(device, &viewInfo, nullptr, &view));
+        }
+        
         BufferView* resultView = new BufferView{ view, format, desc[i].offset_, desc[i].size_, providedBuffer };
         bufferViews_.push_back(resultView);
 
@@ -112,7 +114,10 @@ void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferViewHandle 
         BufferView const& view = **viewIt; // pointer in iterator
         ProvidedBuffer& providedBuffer = **providedBufferIt; // same
 
-        table_->vkDestroyBufferView(device, view.handle_, nullptr);
+        if (view.handle_ != VK_NULL_HANDLE) {
+            table_->vkDestroyBufferView(device, view.handle_, nullptr);
+        }
+        
         delete *viewIt;
         bufferViews_.erase(viewIt);
 
@@ -130,6 +135,12 @@ void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferViewHandle 
 BufferView* BuffersProvider::GetView(BufferViewHandle handle)
 {
     return handle.view_;
+}
+
+BufferResource* BuffersProvider::GetViewResource(BufferViewHandle handle)
+{
+    BufferResourceHandle resourceHandle = handle.view_->providedBuffer_->bufferResource_;
+    return resourcesController_->GetBuffer(resourceHandle);
 }
 
 BuffersProvider::~BuffersProvider()

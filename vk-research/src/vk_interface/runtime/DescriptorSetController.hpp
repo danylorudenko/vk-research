@@ -20,8 +20,6 @@ class DescriptorLayoutController;
 
 struct DescriptorDesc
 {
-    DescriptorType type_;
-
     union {
         struct {
             ImageViewHandle imageViewHandle_;
@@ -34,7 +32,7 @@ struct DescriptorDesc
         } bufferView;
 
         struct {
-            BufferResourceHandle bufferResource_;
+            BufferViewHandle pureBufferViewHandle_;
             std::uint32_t offset_;
             std::uint32_t size_;
         } bufferInfo;
@@ -67,10 +65,13 @@ class DescriptorSetController
     DescriptorSetController(DescriptorSetController&& rhs);
     DescriptorSetController& operator=(DescriptorSetController&& rhs);
 
+    DescriptorSetHandle AllocDescriptorSet(DescriptorSetDesc const& desc);
+    void ReleaseDescriptorSet(DescriptorSetHandle handle);
+
     ~DescriptorSetController();
 
 private:
-    struct DescriptorWriteInfo
+    struct DescriptorWriteData
     {
         VkDescriptorImageInfo imageInfo;
         VkDescriptorBufferInfo bufferInfo;
@@ -79,10 +80,10 @@ private:
 
     void AssembleSetCreateInfo(VkDescriptorSet dstSet, DescriptorSetDesc const& desc, VkWriteDescriptorSet* results);
 
-    static void DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteInfo& dstInfo, VkImageView view);
-    static void DecorateSamplerWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteInfo& dstInfo, VkSampler sampler);
-    static void DecorateBufferViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteInfo& dstInfo, VkBufferView view);
-    static void DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteInfo& dstInfo, VkBuffer buffer, std::uint32_t offset, std::uint32_t size);
+    static void DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkImageView view);
+    static void DecorateSamplerWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkSampler sampler);
+    static void DecorateBufferViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBufferView view);
+    static void DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBuffer buffer, std::uint32_t offset, std::uint32_t size);
 
 private:
     ImportTable* table_;
@@ -92,6 +93,7 @@ private:
     ImagesProvider* imagesProvider_;
     DescriptorLayoutController* layoutController_;
 
+    VkDescriptorPool pool_;
 
     std::vector<DescriptorSet*> descriptorSets_;
 };

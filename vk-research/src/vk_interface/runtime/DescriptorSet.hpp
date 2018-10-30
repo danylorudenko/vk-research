@@ -8,20 +8,15 @@
 namespace VKW
 {
 
-class DescriptorSet
+struct DescriptorSet
 {
-public:
-    DescriptorSet();
-    DescriptorSet(VkDescriptorSet setHandle);
-
-    DescriptorSet(DescriptorSet&& rhs);
-    DescriptorSet& operator=(DescriptorSet&& rhs);
-
-    VkDescriptorSet Handle() const;
-
-private:
     VkDescriptorSet handle_;
     DescriptorSetLayoutHandle layout_;
+};
+
+struct DescriptorSetHandle
+{
+    DescriptorSet* handle_ = nullptr;
 };
 
 }
