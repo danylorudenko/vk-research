@@ -95,8 +95,6 @@ DescriptorSetController::~DescriptorSetController()
 
 DescriptorSetHandle DescriptorSetController::AllocDescriptorSet(DescriptorSetDesc const& desc)
 {
-    static VkWriteDescriptorSet writeInfo[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-    
     DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(desc.layout_);
     VkDescriptorSetLayout vkLayout = layout->handle_;
 
@@ -116,8 +114,16 @@ DescriptorSetHandle DescriptorSetController::AllocDescriptorSet(DescriptorSetDes
 
     descriptorSets_.emplace_back(result);
 
-    // TODO
-    // write operation
+    // write to descriptors
+
+    static VkWriteDescriptorSet writeInfo[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+    AssembleSetCreateInfo(vkSet, desc, writeInfo);
+
+    table_->vkUpdateDescriptorSets(device_->Handle(),
+        layout->membersCount_,
+        writeInfo,
+        0,
+        nullptr);
 
     return DescriptorSetHandle{ result };
 }
