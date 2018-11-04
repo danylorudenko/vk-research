@@ -118,4 +118,14 @@ Swapchain::~Swapchain()
     }
 }
 
+VkSwapchainKHR Swapchain::Handle() const
+{
+    return swapchain_;
+}
+
+Swapchain::SwapchainImage& Swapchain::Image(std::uint32_t index)
+{
+    return swapchainImages_[index];
+}
+
 }

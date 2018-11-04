@@ -35,7 +35,6 @@ Loader::Loader(LoaderDesc const& desc)
     deviceDesc.table_ = table_.get();
     deviceDesc.instance_ = instance_.get();
     deviceDesc.requiredExtensions_ = { "VK_KHR_swapchain" };
-    deviceDesc.graphicsPresentSupportRequired_ = true;
     deviceDesc.graphicsPresentQueueCount_ = 1;
     deviceDesc.computeQueueCount_ = 0;
     deviceDesc.transferQueueCount_ = 0;
@@ -93,6 +92,37 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
+    VKW::BuffersProviderDesc buffersProviderDesc;
+    buffersProviderDesc.table_ = table_.get();
+    buffersProviderDesc.device_ = device_.get();
+    buffersProviderDesc.resourcesController_ = resourcesController_.get();
+
+    buffersProvider_ = std::make_unique<VKW::BuffersProvider>(buffersProviderDesc);
+
+
+
+    VKW::ImagesProviderDesc imagesProviderDesc;
+    imagesProviderDesc.table_ = table_.get();
+    imagesProviderDesc.device_ = device_.get();
+    imagesProviderDesc.resourcesController_ = resourcesController_.get();
+
+    imagesProvider_ = std::make_unique<VKW::ImagesProvider>(imagesProviderDesc);
+
+
+
+    framedDescriptorsHub_ = std::make_unique<VKW::FramedDescriptorsHub>();
+    assert(desc.bufferingCount_ <= FramedDescriptorsHub::MAX_FRAMES_COUNT);
+    framedDescriptorsHub_->framesCount_ = desc.bufferingCount_;
+
+
+
+    VKW::ResourceRendererProxyDesc resourceRendererProxyDesc;
+    resourceRendererProxyDesc.loader_ = this;
+
+    resourceRendererProxy_ = std::make_unique<VKW::ResourceRendererProxy>(resourceRendererProxyDesc);
+
+
+
     VKW::ShaderModuleFactoryDesc shaderModuleFactoryDesc;
     shaderModuleFactoryDesc.table_ = table_.get();
     shaderModuleFactoryDesc.device_ = device_.get();
@@ -122,27 +152,5 @@ Loader::~Loader()
 {
     
 }
-
-ImportTable const& Loader::Table() const
-{
-    return *table_;
-}
-
-Device& Loader::Device()
-{
-    return *device_;
-}
-
-
-VKW::MemoryController& Loader::MemoryController()
-{
-    return *memoryController_;
-}
-
-VKW::WorkersProvider& Loader::WorkersProvider()
-{
-    return *workersProvider_;
-}
-
 
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../class_features/NonCopyable.hpp"
 #include "../pipeline/DescriptorLayout.hpp"
 
 #include <vulkan/vulkan.h>

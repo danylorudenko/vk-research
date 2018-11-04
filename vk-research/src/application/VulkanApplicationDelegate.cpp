@@ -11,7 +11,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
         VulkanApplicationDelegate::WinProc,
         this }
     , ioManager_{}
-    , vulkanLoader_{ VKW::LoaderDesc{ instance, mainWindow_.NativeHandle(), 2, &ioManager_, vkDebug } }
+    , vulkanLoader_{ std::make_unique<VKW::Loader>(VKW::LoaderDesc{ instance, mainWindow_.NativeHandle(), 2, &ioManager_, vkDebug }) }
 {
 }
 
@@ -38,7 +38,7 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
 
 void VulkanApplicationDelegate::start()
 {
-    auto& device = vulkanLoader_.Device();
+    //auto& device = vulkanLoader_.Device();
 
     //VKW::BufferCreateInfo buffInfo;
     //buffInfo.size_ = 256;

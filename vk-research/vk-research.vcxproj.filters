@@ -129,6 +129,9 @@
     <ClCompile Include="src\vk_interface\runtime\DescriptorSetController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\vk_interface\ResourceRendererProxy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\system\DynamicLibrary.hpp">
@@ -302,10 +305,13 @@
     <ClInclude Include="src\vk_interface\resources\ResourceTransferService.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk_interface\resources\ResourceContext.hpp">
+    <ClInclude Include="src\vk_interface\runtime\DescriptorSetController.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk_interface\runtime\DescriptorSetController.hpp">
+    <ClInclude Include="src\vk_interface\runtime\FramedDescriptorsHub.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\ResourceRendererProxy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

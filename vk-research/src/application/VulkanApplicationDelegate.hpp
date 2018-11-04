@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "Application.hpp"
 #include "..\class_features\NonMovable.hpp"
 
@@ -27,5 +29,5 @@ public:
 private:
     Window mainWindow_;
     IOManager ioManager_;
-    VKW::Loader vulkanLoader_;
+    std::unique_ptr<VKW::Loader> vulkanLoader_;
 };

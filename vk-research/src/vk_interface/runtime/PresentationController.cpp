@@ -79,6 +79,8 @@ std::uint32_t PresentationController::AcquireNewContextId()
         &imageIndex)
     );
 
+    return imageIndex;
+
 }
 
 void PresentationController::PresentContextId(std::uint32_t contextId)

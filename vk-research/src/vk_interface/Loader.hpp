@@ -15,6 +15,8 @@
 #include "image/ImagesProvider.hpp"
 #include "buffer/BuffersProvider.hpp"
 #include "worker/WorkersProvider.hpp"
+#include "runtime/FramedDescriptorsHub.hpp"
+#include "ResourceRendererProxy.hpp"
 #include "runtime/ResourceBindingService.hpp"
 #include "pipeline/PipelineFactory.hpp"
 #include "pipeline/ShaderModuleFactory.hpp"
@@ -44,14 +46,7 @@ public:
 
     ~Loader();
 
-    VKW::ImportTable const& Table() const;
-    VKW::Device& Device();
 
-    VKW::MemoryController& MemoryController();
-    VKW::WorkersProvider& WorkersProvider();
-    
-
-private:
     std::unique_ptr<DynamicLibrary> vulkanLibrary_;
 
     std::unique_ptr<VKW::ImportTable> table_;
@@ -69,6 +64,9 @@ private:
     std::unique_ptr<VKW::BuffersProvider> buffersProvider_;
     std::unique_ptr<VKW::ImagesProvider> imagesProvider_;
 
+    std::unique_ptr<VKW::FramedDescriptorsHub> framedDescriptorsHub_;
+
+    std::unique_ptr<VKW::ResourceRendererProxy> resourceRendererProxy_;
     //std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;
     //std::unique_ptr<VKW::PipelineFactory> pipelineFactory_;
 
