@@ -14,6 +14,8 @@
 #include "resources/ResourcesController.hpp"
 #include "image/ImagesProvider.hpp"
 #include "buffer/BuffersProvider.hpp"
+#include "pipeline/DescriptorLayoutController.hpp"
+#include "runtime/DescriptorSetController.hpp"
 #include "worker/WorkersProvider.hpp"
 #include "runtime/FramedDescriptorsHub.hpp"
 #include "ResourceRendererProxy.hpp"
@@ -63,6 +65,9 @@ public:
 
     std::unique_ptr<VKW::BuffersProvider> buffersProvider_;
     std::unique_ptr<VKW::ImagesProvider> imagesProvider_;
+
+    std::unique_ptr<VKW::DescriptorLayoutController> descriptorLayoutController_;
+    std::unique_ptr<VKW::DescriptorSetController> descriptorSetController_;
 
     std::unique_ptr<VKW::FramedDescriptorsHub> framedDescriptorsHub_;
 

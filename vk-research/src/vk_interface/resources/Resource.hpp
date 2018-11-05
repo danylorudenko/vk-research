@@ -9,14 +9,6 @@
 namespace VKW
 {
 
-enum class ResourceType
-{
-    Buffer,
-    Image,
-    Framebuffer
-};
-
-
 
 struct BufferResource
 {
