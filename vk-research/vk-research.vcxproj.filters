@@ -314,5 +314,8 @@
     <ClInclude Include="src\vk_interface\ResourceRendererProxy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_interface\ProxyHandles.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

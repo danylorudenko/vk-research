@@ -2,7 +2,7 @@
 
 #include "../class_features/NonCopyable.hpp"
 #include "pipeline/DescriptorLayoutController.hpp"
-#include <cstdint>
+#include "ProxyHandles.hpp"
 
 namespace VKW
 {

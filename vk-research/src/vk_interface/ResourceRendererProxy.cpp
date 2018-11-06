@@ -65,9 +65,6 @@ std::uint32_t ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout,
 
         auto& layoutMember = layoutPtr->membersInfo_[i];
 
-        switch (layoutMember.type_) {
-
-        }
     }
 
 

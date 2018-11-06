@@ -116,14 +116,14 @@ DescriptorSetHandle DescriptorSetController::AllocDescriptorSet(DescriptorSetDes
 
     // write to descriptors
 
-    static VkWriteDescriptorSet writeInfo[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-    AssembleSetCreateInfo(vkSet, desc, writeInfo);
+    //static VkWriteDescriptorSet writeInfo[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+    //AssembleSetCreateInfo(vkSet, desc, writeInfo);
 
-    table_->vkUpdateDescriptorSets(device_->Handle(),
-        layout->membersCount_,
-        writeInfo,
-        0,
-        nullptr);
+    //table_->vkUpdateDescriptorSets(device_->Handle(),
+    //    layout->membersCount_,
+    //    writeInfo,
+    //    0,
+    //    nullptr);
 
     return DescriptorSetHandle{ result };
 }
