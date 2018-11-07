@@ -155,29 +155,29 @@ void DescriptorSetController::AssembleSetCreateInfo(VkDescriptorSet dstSet, Desc
         wSet.descriptorCount = 1;
         wSet.descriptorType = layout->membersInfo_[i].type_;
         
-        switch (wSet.descriptorType) {
-        case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-        {
-            ImageView* imageView = imagesProvider_->GetImageView(desc.members_[i].imageDesc.imageViewHandle_);
-            DecorateImageViewWriteDesc(wSet, descriptorData[i], imageView->handle_);
-        }
-            break;
-        case VK_DESCRIPTOR_TYPE_SAMPLER:
-        {
-            VkSampler defaultSampler = imagesProvider_->DefaultSamplerHandle();
-            DecorateSamplerWriteDesc(wSet, descriptorData[i], defaultSampler);
-        }
-            break;
-        case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-        {
-            auto& bufferInfo = desc.members_[i].bufferInfo;
-            BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
-            DecorateBufferWriteDesc(wSet, descriptorData[i], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
-        }
-            break;
-        default:
-            assert(false && "Unsupported DescriptorType.");
-        }
+        //switch (wSet.descriptorType) {
+        //case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+        //{
+        //    ImageView* imageView = imagesProvider_->GetImageView(desc.members_[i].imageDesc.imageViewHandle_);
+        //    DecorateImageViewWriteDesc(wSet, descriptorData[i], imageView->handle_);
+        //}
+        //    break;
+        //case VK_DESCRIPTOR_TYPE_SAMPLER:
+        //{
+        //    VkSampler defaultSampler = imagesProvider_->DefaultSamplerHandle();
+        //    DecorateSamplerWriteDesc(wSet, descriptorData[i], defaultSampler);
+        //}
+        //    break;
+        //case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+        //{
+        //    auto& bufferInfo = desc.members_[i].bufferInfo;
+        //    BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
+        //    DecorateBufferWriteDesc(wSet, descriptorData[i], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
+        //}
+        //    break;
+        //default:
+        //    assert(false && "Unsupported DescriptorType.");
+        //}
     }
 
 }

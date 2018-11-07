@@ -42,7 +42,6 @@ struct DescriptorDesc
 struct DescriptorSetDesc
 {
     DescriptorSetLayoutHandle layout_;
-    DescriptorDesc members_[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
 };
 
 
@@ -59,6 +58,7 @@ struct DescriptorSetControllerDesc
 class DescriptorSetController
     : public NonCopyable
 {
+public:
     DescriptorSetController();
     DescriptorSetController(DescriptorSetControllerDesc const& desc);
 

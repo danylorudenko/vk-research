@@ -6,6 +6,7 @@
 #include "runtime/FramedDescriptorsHub.hpp"
 
 #include <utility>
+#include <cassert>
 
 namespace VKW
 {
@@ -55,17 +56,50 @@ ResourceRendererProxy::~ResourceRendererProxy()
 
 }
 
-std::uint32_t ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout, ProxyResourceDesc const* membersDesc)
+std::uint32_t ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout)
 {
+    // Here, based on the contents of the layout i should decide, 
+    // wheather the descriptorset should be framed
+    
     DescriptorSetLayout* layoutPtr = layoutController_->GetDescriptorSetLayout(layout);
     std::uint32_t const layoutMembersCount = layoutPtr->membersCount_;
 
-
+    bool readOnlySet = true;
     for (auto i = 0u; i < layoutMembersCount; ++i) {
 
         auto& layoutMember = layoutPtr->membersInfo_[i];
 
+        switch (layoutMember.type_) {
+        case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+            readOnlySet = false;
+            break;
+
+        case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+        case VK_DESCRIPTOR_TYPE_SAMPLER:
+            break;
+
+        default:
+            assert(false && "Unsupported descriptor type.");
+        }
     }
+
+    if (readOnlySet) {
+        // create one set and put in all frames
+        DescriptorSetDesc setDesc;
+        setDesc.layout_ = layout;
+
+        DescriptorSetHandle setHandle = descriptorSetsController_->AllocDescriptorSet(setDesc);
+
+        auto id = framedDescriptorsHub_->nextFreeId_++;
+
+    }
+    else {
+        // create multiple sets and put in different frames
+    }
+
+
+    
+
 
 
     DescriptorSetDesc desc;
