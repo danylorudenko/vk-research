@@ -18,8 +18,8 @@ class ImagesProvider;
 class DescriptorSetController;
 class DescriptorLayoutController;
 
-struct BufferDesc;
-struct ImageDesc;
+struct BufferViewDesc;
+struct ImageViewDesc;
 
 
 ///////////////////////////////////
@@ -73,8 +73,8 @@ public:
     ProxySetHandle CreateSet(DescriptorSetLayoutHandle layout);
     void WriteSet(ProxySetHandle handle, ProxyDescriptorDesc* descriptions);
 
-    ProxyBufferHandle CreateBuffer(BufferDesc const& desc);
-    ProxyImageHandle CreateImage(ImageDesc const& desc);
+    ProxyBufferHandle CreateBuffer(BufferViewDesc const& desc);
+    ProxyImageHandle CreateImage(ImageViewDesc const& desc);
 
 
 private:

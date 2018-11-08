@@ -283,14 +283,41 @@ void ResourceRendererProxy::DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, D
     dst.pBufferInfo = &dstInfo.bufferInfo;
 }
 
-ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferDesc const& decs)
+ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferViewDesc const& decs)
 {
-    return { 0 };
+    auto const framesCount = framedDescriptorsHub_->framesCount_;
+    auto const id = framedDescriptorsHub_->nextFreeId_++;
+
+    BufferViewDesc viewDescs[FramedDescriptorsHub::MAX_FRAMES_COUNT];
+    BufferViewHandle views[FramedDescriptorsHub::MAX_FRAMES_COUNT];
+
+
+    for (auto i = 0u; i < framesCount; ++i) {
+        viewDescs[i] = decs;
+    }
+    
+    buffersProvider_->AcquireViews(framesCount, viewDescs, views);
+
+    for (auto i = 0u; i < framesCount; ++i) {
+        assert(framedDescriptorsHub_->contexts_[i].bufferViews_.size() == id && "Unsyncronized write to FramedDescriptors::bufferViews_.");
+        framedDescriptorsHub_->contexts_[i].bufferViews_.emplace_back(views[i]);
+    }
+
+    return ProxyBufferHandle{ id };
 }
 
-ProxyImageHandle ResourceRendererProxy::CreateImage(ImageDesc const& desc)
+ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
 {
-    return { 0 };
+    ImageViewHandle imageHandle = imagesProvider_->AcquireImage(desc);
+
+    auto const id = framedDescriptorsHub_->nextFreeId_++;
+    auto const framesCount = framedDescriptorsHub_->framesCount_;
+    for (auto i = 0u; i < framesCount; ++i) {
+        assert(framedDescriptorsHub_->contexts_[i].imageViews_.size() == id && "Unsyncronized write to FramedDescriptors::bufferViews_.");
+        framedDescriptorsHub_->contexts_[i].imageViews_.emplace_back(imageHandle);
+    }
+    
+    return ProxyImageHandle{ id };
 }
 
 }
