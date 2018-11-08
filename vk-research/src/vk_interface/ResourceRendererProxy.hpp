@@ -9,9 +9,8 @@ namespace VKW
 
 class BuffersProvider;
 class ImagesProvider;
-class DescriptorSetsController;
+class DescriptorSetsController; struct DescriptorDesc;
 class FramedDescriptorsHub;
-
 
 
 ///////////////////////////////////
@@ -40,9 +39,16 @@ public:
     ~ResourceRendererProxy();
 
 
-    std::uint32_t CreateSet(DescriptorSetLayoutHandle layout);
-    void DestroySet(std::uint32_t handle);
+    ProxySetHandle CreateSet(DescriptorSetLayoutHandle layout);
+    void WriteSet(ProxySetHandle handle, DescriptorDesc* descriptions);
 
+private:
+    struct DescriptorWriteData;
+
+    static void DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& pDescriptorWriteData, VkImageView view);
+    static void DecorateSamplerWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkSampler sampler);
+    static void DecorateBufferViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBufferView view);
+    static void DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBuffer buffer, std::uint32_t offset, std::uint32_t size);
 
 private:
     BuffersProvider * buffersProvider_;
@@ -50,6 +56,7 @@ private:
     DescriptorLayoutController* layoutController_;
     DescriptorSetController* descriptorSetsController_;
     FramedDescriptorsHub* framedDescriptorsHub_;
+
 };
 
 }

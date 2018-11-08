@@ -109,21 +109,10 @@ DescriptorSetHandle DescriptorSetController::AllocDescriptorSet(DescriptorSetDes
     VK_ASSERT(table_->vkAllocateDescriptorSets(device_->Handle(), &allocInfo, &vkSet));
 
     auto* result = new DescriptorSet{};
-    result->layout_ = desc.layout_;
     result->handle_ = vkSet;
+    result->layout_ = desc.layout_;
 
     descriptorSets_.emplace_back(result);
-
-    // write to descriptors
-
-    //static VkWriteDescriptorSet writeInfo[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-    //AssembleSetCreateInfo(vkSet, desc, writeInfo);
-
-    //table_->vkUpdateDescriptorSets(device_->Handle(),
-    //    layout->membersCount_,
-    //    writeInfo,
-    //    0,
-    //    nullptr);
 
     return DescriptorSetHandle{ result };
 }
@@ -138,75 +127,9 @@ void DescriptorSetController::ReleaseDescriptorSet(DescriptorSetHandle handle)
     delete set;
 }
 
-void DescriptorSetController::AssembleSetCreateInfo(VkDescriptorSet dstSet, DescriptorSetDesc const& desc, VkWriteDescriptorSet* results)
+DescriptorSet* DescriptorSetController::GetDescriptorSet(DescriptorSetHandle handle)
 {
-    static DescriptorWriteData descriptorData[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-    
-    DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(desc.layout_);
-
-    auto const setMembersCount = layout->membersCount_;
-    for (auto i = 0u; i < setMembersCount; ++i) {
-        auto& wSet = results[i];
-        wSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        wSet.pNext = nullptr;
-        wSet.dstSet = dstSet;
-        wSet.dstBinding = layout->membersInfo_[i].binding_;
-        wSet.dstArrayElement = 0;
-        wSet.descriptorCount = 1;
-        wSet.descriptorType = layout->membersInfo_[i].type_;
-        
-        //switch (wSet.descriptorType) {
-        //case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-        //{
-        //    ImageView* imageView = imagesProvider_->GetImageView(desc.members_[i].imageDesc.imageViewHandle_);
-        //    DecorateImageViewWriteDesc(wSet, descriptorData[i], imageView->handle_);
-        //}
-        //    break;
-        //case VK_DESCRIPTOR_TYPE_SAMPLER:
-        //{
-        //    VkSampler defaultSampler = imagesProvider_->DefaultSamplerHandle();
-        //    DecorateSamplerWriteDesc(wSet, descriptorData[i], defaultSampler);
-        //}
-        //    break;
-        //case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-        //{
-        //    auto& bufferInfo = desc.members_[i].bufferInfo;
-        //    BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
-        //    DecorateBufferWriteDesc(wSet, descriptorData[i], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
-        //}
-        //    break;
-        //default:
-        //    assert(false && "Unsupported DescriptorType.");
-        //}
-    }
-
-}
-
-void DescriptorSetController::DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkImageView view)
-{
-    dstInfo.imageInfo.imageView = view;
-    dst.pImageInfo = &dstInfo.imageInfo;
-}
-
-void DescriptorSetController::DecorateSamplerWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkSampler sampler)
-{
-    dstInfo.imageInfo.sampler = sampler;
-    dst.pImageInfo = &dstInfo.imageInfo;
-}
-
-void DescriptorSetController::DecorateBufferViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBufferView view)
-{
-    dstInfo.bufferView = view;
-    dst.pTexelBufferView = &dstInfo.bufferView;
-}
-
-void DescriptorSetController::DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBuffer buffer, std::uint32_t offset, std::uint32_t size)
-{
-    dstInfo.bufferInfo.buffer = buffer;
-    dstInfo.bufferInfo.offset = offset;
-    dstInfo.bufferInfo.range = size;
-
-    dst.pBufferInfo = &dstInfo.bufferInfo;
+    return handle.handle_;
 }
 
 }

@@ -68,22 +68,10 @@ public:
     DescriptorSetHandle AllocDescriptorSet(DescriptorSetDesc const& desc);
     void ReleaseDescriptorSet(DescriptorSetHandle handle);
 
+    DescriptorSet* GetDescriptorSet(DescriptorSetHandle handle);
+
     ~DescriptorSetController();
 
-private:
-    struct DescriptorWriteData
-    {
-        VkDescriptorImageInfo imageInfo;
-        VkDescriptorBufferInfo bufferInfo;
-        VkBufferView bufferView;
-    };
-
-    void AssembleSetCreateInfo(VkDescriptorSet dstSet, DescriptorSetDesc const& desc, VkWriteDescriptorSet* results);
-
-    static void DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkImageView view);
-    static void DecorateSamplerWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkSampler sampler);
-    static void DecorateBufferViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBufferView view);
-    static void DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBuffer buffer, std::uint32_t offset, std::uint32_t size);
 
 private:
     ImportTable* table_;
