@@ -16,4 +16,14 @@ struct ProxyFramebufferHandle
     std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
 };
 
+struct ProxyBufferHandle
+{
+    std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
+};
+
+struct ProxyImageHandle
+{
+    std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
+};
+
 }

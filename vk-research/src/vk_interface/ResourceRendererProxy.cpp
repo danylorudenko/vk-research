@@ -1,4 +1,6 @@
 #include "ResourceRendererProxy.hpp"
+#include "ImportTable.hpp"
+#include "Device.hpp"
 #include "buffer/BuffersProvider.hpp"
 #include "image/ImagesProvider.hpp"
 #include "pipeline/DescriptorLayoutController.hpp"
@@ -12,7 +14,9 @@ namespace VKW
 {
 
 ResourceRendererProxy::ResourceRendererProxy()
-    : buffersProvider_{ nullptr }
+    : table_{ nullptr }
+    , device_{ nullptr }
+    , buffersProvider_{ nullptr }
     , imagesProvider_{ nullptr }
     , layoutController_{ nullptr }
     , descriptorSetsController_{ nullptr }
@@ -22,7 +26,9 @@ ResourceRendererProxy::ResourceRendererProxy()
 }
 
 ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxyDesc const& desc)
-    : buffersProvider_{ desc.buffersProvider_ }
+    : table_{ desc.table_ }
+    , device_{ desc.device_ }
+    , buffersProvider_{ desc.buffersProvider_ }
     , imagesProvider_{ desc.imagesProvider_ }
     , layoutController_{ desc.layoutController_ }
     , descriptorSetsController_{ desc.descriptorSetsController_ }
@@ -32,7 +38,9 @@ ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxyDesc const& de
 }
 
 ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxy&& rhs)
-    : buffersProvider_{ nullptr }
+    : table_{ nullptr }
+    , device_{ nullptr }
+    , buffersProvider_{ nullptr }
     , imagesProvider_{ nullptr }
     , layoutController_{ nullptr }
     , descriptorSetsController_{ nullptr }
@@ -43,8 +51,11 @@ ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxy&& rhs)
 
 ResourceRendererProxy& ResourceRendererProxy::operator=(ResourceRendererProxy&& rhs)
 {
+    std::swap(table_, rhs.table_);
+    std::swap(device_, rhs.device_);
     std::swap(buffersProvider_, rhs.buffersProvider_);
     std::swap(imagesProvider_, rhs.imagesProvider_);
+    std::swap(layoutController_, rhs.layoutController_);
     std::swap(descriptorSetsController_, rhs.descriptorSetsController_);
     std::swap(framedDescriptorsHub_, rhs.framedDescriptorsHub_);
 
@@ -110,7 +121,7 @@ ProxySetHandle ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout
         }
     }
 
-    return { id };
+    return ProxySetHandle{ id };
 }
 
 
@@ -121,7 +132,7 @@ struct ResourceRendererProxy::DescriptorWriteData
     VkBufferView bufferView;
 };
 
-void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, DescriptorDesc* descriptions)
+void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorDesc* descriptions)
 {
     static DescriptorWriteData descriptorData[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
     static VkWriteDescriptorSet writeDescritorSets[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
@@ -134,13 +145,15 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, DescriptorDesc* d
     }
 
 
+    DescriptorSetHandle firstFrameSetHandle = framedDescriptorsHub_->contexts_[0].descriptorSets_[setHandle.id_];
+    DescriptorSet* firstFrameSet = descriptorSetsController_->GetDescriptorSet(firstFrameSetHandle);
+    DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(firstFrameSet->layout_);
+
+    auto const setMembersCount = layout->membersCount_;
+
     if (framedSet) {
         auto const framesCount = framedDescriptorsHub_->framesCount_;
         
-        DescriptorSetHandle firstFrameSetHandle = framedDescriptorsHub_->contexts_[0].descriptorSets_[setHandle.id_];
-        DescriptorSet* firstFrameSet = descriptorSetsController_->GetDescriptorSet(firstFrameSetHandle);
-        DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(firstFrameSet->layout_);
-
         DescriptorSet* framedSets[FramedDescriptorsHub::MAX_FRAMES_COUNT];
         framedSets[0] = firstFrameSet;
 
@@ -150,13 +163,14 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, DescriptorDesc* d
             framedSets[i] = set;
         }
 
-        auto const setMembersCount = layout->membersCount_;
+        VkDevice const device = device_->Handle();
         for (auto i = 0u; i < framesCount; ++i) { // each frame
+            VkDescriptorSet const targetSet = framedSets[i]->handle_;
             for (auto j = 0u; j < setMembersCount; ++j) { // each member
                 VkWriteDescriptorSet& wds = writeDescritorSets[j];
                 wds.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 wds.pNext = nullptr;
-                wds.dstSet = framedSets[i]->handle_;
+                wds.dstSet = targetSet;
                 wds.dstBinding = layout->membersInfo_[j].binding_;
                 wds.dstArrayElement = 0;
                 wds.descriptorCount = 1;
@@ -165,33 +179,80 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, DescriptorDesc* d
                 switch (wds.descriptorType) {
                 case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
                 {
-                    ImageView* imageView = imagesProvider_->GetImageView(descriptions[j].imageDesc.imageViewHandle_);
+                    ImageView* imageView = imagesProvider_->GetImageView(descriptions[j].frames[i].imageDesc.imageViewHandle_);
                     DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_);
                 }
                 break;
                 case VK_DESCRIPTOR_TYPE_SAMPLER:
                 {
                     VkSampler defaultSampler = imagesProvider_->DefaultSamplerHandle();
-                    DecorateSamplerWriteDesc(wds, descriptorData[i], defaultSampler);
+                    DecorateSamplerWriteDesc(wds, descriptorData[j], defaultSampler);
                 }
                 break;
                 case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
                 {
-                    auto& bufferInfo = descriptions[i].bufferInfo;
+                    auto& bufferInfo = descriptions[j].frames[i].bufferInfo;
                     BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
-                    DecorateBufferWriteDesc(wds, descriptorData[i], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
+                    DecorateBufferWriteDesc(wds, descriptorData[j], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
                 }
                 break;
                 default:
                     assert(false && "Unsupported DescriptorType.");
                 }
             }
-        }
 
-        // TODO actual writes
+            table_->vkUpdateDescriptorSets(
+                device,
+                layout->membersCount_,
+                writeDescritorSets,
+                0,
+                nullptr);
+        }
     }
     else {
-        // TODO
+        VkDescriptorSet const targetSet = firstFrameSet->handle_;
+
+        for (auto i = 0u; i < setMembersCount; ++i) {
+            VkWriteDescriptorSet& wds = writeDescritorSets[i];
+            wds.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            wds.pNext = nullptr;
+            wds.dstSet = targetSet;
+            wds.dstBinding = layout->membersInfo_[i].binding_;
+            wds.dstArrayElement = 0;
+            wds.descriptorCount = 1;
+            wds.descriptorType = layout->membersInfo_[i].type_;
+            // actual data for descriptors goes next
+            switch (wds.descriptorType) {
+            case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+            {
+                ImageView* imageView = imagesProvider_->GetImageView(descriptions[i].frames[0].imageDesc.imageViewHandle_);
+                DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_);
+            }
+            break;
+            case VK_DESCRIPTOR_TYPE_SAMPLER:
+            {
+                VkSampler defaultSampler = imagesProvider_->DefaultSamplerHandle();
+                DecorateSamplerWriteDesc(wds, descriptorData[i], defaultSampler);
+            }
+            break;
+            case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+            {
+                auto& bufferInfo = descriptions[i].frames[0].bufferInfo;
+                BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
+                DecorateBufferWriteDesc(wds, descriptorData[i], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
+            }
+            break;
+            default:
+                assert(false && "Unsupported DescriptorType.");
+            }
+        }
+
+        table_->vkUpdateDescriptorSets(
+            device_->Handle(),
+            setMembersCount,
+            writeDescritorSets,
+            0,
+            nullptr);
     }
 }
 
@@ -220,6 +281,16 @@ void ResourceRendererProxy::DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, D
     dstInfo.bufferInfo.range = size;
 
     dst.pBufferInfo = &dstInfo.bufferInfo;
+}
+
+ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferDesc const& decs)
+{
+    return { 0 };
+}
+
+ProxyImageHandle ResourceRendererProxy::CreateImage(ImageDesc const& desc)
+{
+    return { 0 };
 }
 
 }

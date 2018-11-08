@@ -18,27 +18,6 @@ class BuffersProvider;
 class DescriptorLayoutController;
 
 
-struct DescriptorDesc
-{
-    union {
-        struct {
-            ImageViewHandle imageViewHandle_;
-            VkSampler sampler_;
-            ImageUsage usage_;
-        } imageDesc;
-
-        struct {
-            BufferViewHandle bufferViewHandle_;
-        } bufferView;
-
-        struct {
-            BufferViewHandle pureBufferViewHandle_;
-            std::uint32_t offset_;
-            std::uint32_t size_;
-        } bufferInfo;
-    };
-};
-
 struct DescriptorSetDesc
 {
     DescriptorSetLayoutHandle layout_;

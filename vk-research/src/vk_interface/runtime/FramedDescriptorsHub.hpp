@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include "../buffer/BufferView.hpp"
+#include "../image/ImageView.hpp"
 #include "../runtime/DescriptorSet.hpp"
 #include "../resources/Framebuffer.hpp"
 
@@ -9,6 +11,8 @@ namespace VKW
 
 struct FramedDescriptors
 {
+    std::vector<BufferViewHandle> bufferViews_;
+    std::vector<ImageViewHandle> imageViews_;
     std::vector<DescriptorSetHandle> descriptorSets_;
     std::vector<FramebufferHandle> framebuffers_;
 };

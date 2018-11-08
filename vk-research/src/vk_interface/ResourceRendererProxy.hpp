@@ -1,26 +1,57 @@
 #pragma once
 
 #include "../class_features/NonCopyable.hpp"
-#include "pipeline/DescriptorLayoutController.hpp"
+#include "runtime/FramedDescriptorsHub.hpp"
+#include "pipeline/DescriptorLayout.hpp"
+#include "resources/ResourcesController.hpp"
+#include "buffer/BufferView.hpp"
+#include "image/ImageView.hpp"
 #include "ProxyHandles.hpp"
 
 namespace VKW
 {
 
+class ImportTable;
+class Device;
 class BuffersProvider;
 class ImagesProvider;
-class DescriptorSetsController; struct DescriptorDesc;
-class FramedDescriptorsHub;
+class DescriptorSetController;
+class DescriptorLayoutController;
+
+struct BufferDesc;
+struct ImageDesc;
 
 
 ///////////////////////////////////
 // descriptions
+struct ProxyDescriptorDesc
+{
+    union {
+        struct {
+            ImageViewHandle imageViewHandle_;
+            VkSampler sampler_;
+            ImageUsage usage_;
+        } imageDesc;
+
+        struct {
+            BufferViewHandle bufferViewHandle_;
+        } bufferView;
+
+        struct {
+            BufferViewHandle pureBufferViewHandle_;
+            std::uint32_t offset_;
+            std::uint32_t size_;
+        } bufferInfo;
+    } frames[FramedDescriptorsHub::MAX_FRAMES_COUNT];
+};
 
 ///////////////////////////////////
 
 
 struct ResourceRendererProxyDesc
 {
+    ImportTable* table_;
+    Device* device_;
     BuffersProvider* buffersProvider_;
     ImagesProvider* imagesProvider_;
     DescriptorLayoutController* layoutController_;
@@ -40,7 +71,11 @@ public:
 
 
     ProxySetHandle CreateSet(DescriptorSetLayoutHandle layout);
-    void WriteSet(ProxySetHandle handle, DescriptorDesc* descriptions);
+    void WriteSet(ProxySetHandle handle, ProxyDescriptorDesc* descriptions);
+
+    ProxyBufferHandle CreateBuffer(BufferDesc const& desc);
+    ProxyImageHandle CreateImage(ImageDesc const& desc);
+
 
 private:
     struct DescriptorWriteData;
@@ -51,6 +86,9 @@ private:
     static void DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBuffer buffer, std::uint32_t offset, std::uint32_t size);
 
 private:
+
+    ImportTable* table_;
+    Device* device_;
     BuffersProvider * buffersProvider_;
     ImagesProvider* imagesProvider_;
     DescriptorLayoutController* layoutController_;
