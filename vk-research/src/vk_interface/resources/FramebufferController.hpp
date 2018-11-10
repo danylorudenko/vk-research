@@ -2,7 +2,7 @@
 
 #include "../../class_features/NonCopyable.hpp"
 #include "Framebuffer.hpp"
-#include "../resources/Resource.hpp"
+#include "../image/ImageView.hpp"
 #include "../pipeline/RenderPass.hpp"
 #include <vector>
 #include <cstdint>
@@ -12,16 +12,15 @@ namespace VKW
 
 class ImportTable;
 class Device;
-class ResourcesController;
+class ImagesProvider;
 class RenderPassController;
 
 struct FramebufferDesc
 {
     RenderPassHandle renderPass_;
 
-    std::uint32_t colorAttachmentCount_;
-    ImageResourceHandle* colorAttachments;
-    ImageResourceHandle* depthStencilAttachment;
+    ImageViewHandle* colorAttachments;
+    ImageViewHandle* depthStencilAttachment;
     std::uint32_t width_;
     std::uint32_t height_;
 
@@ -31,7 +30,7 @@ struct FramebufferFactoryDesc
 {
     ImportTable* table_;
     Device* device_;
-    ResourcesController* resourcesController_;
+    ImagesProvider* imagesProvider_;
     RenderPassController* renderPassController_;
 };
 
@@ -56,10 +55,10 @@ private:
     ImportTable* table_;
     Device* device_;
 
-    ResourcesController* resourcesController_;
+    ImagesProvider* imagesProvider_;
     RenderPassController* renderPassController_;
 
-    std::vector<Framebuffer> framebuffers_;
+    std::vector<Framebuffer*> framebuffers_;
 };
 
 }

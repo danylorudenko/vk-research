@@ -10,19 +10,16 @@ namespace VKW
 RenderPassController::RenderPassController()
     : table_{ nullptr }
     , device_{ nullptr }
-    , resourcesController_{ nullptr }
 {}
 
-RenderPassController::RenderPassController(RenderPassFactoryDesc const& desc)
+RenderPassController::RenderPassController(RenderPassControllerDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
-    , resourcesController_{ nullptr }
 {}
 
 RenderPassController::RenderPassController(RenderPassController&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
-    , resourcesController_{ nullptr }
 {
     operator=(std::move(rhs));
 }
@@ -31,7 +28,6 @@ RenderPassController& RenderPassController::operator=(RenderPassController&& rhs
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
-    std::swap(resourcesController_, rhs.resourcesController_);
     std::swap(renderPasses_, rhs.renderPasses_);
 
     return *this;
@@ -39,44 +35,56 @@ RenderPassController& RenderPassController::operator=(RenderPassController&& rhs
 
 RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& desc)
 {
-    VkRenderPass renderPass = VK_NULL_HANDLE;
-    RenderPassAttachmentInfo colorAttachmentsInfo[6];
+    static RenderPassAttachmentInfo colorAttachmentsInfo[RenderPass::MAX_COLOR_ATTACHMENTS];
     RenderPassAttachmentInfo depthStencilAttachmentInfo;
 
-    assert(desc.colorAttachmentsCount_ <= 6 && "Maximum number color attachments supported is 6.");
+    assert(desc.colorAttachmentsCount_ <= RenderPass::MAX_COLOR_ATTACHMENTS && "Maximum number color attachments supported is RenderPass::MAX_COLOR_ATTACHMENTS.");
 
-    std::vector<VkAttachmentDescription> attachments;
-    std::vector<VkAttachmentReference> colorAttachments;
+    static VkAttachmentDescription attachmentDescriptions[RenderPass::MAX_ATTACHMENTS];
+    static VkAttachmentReference colorAttachmentReferences[RenderPass::MAX_COLOR_ATTACHMENTS];
 
-    attachments.resize(desc.colorAttachmentsCount_ + (desc.depthStencilAttachment_ != nullptr ? 1 : 0));
-    colorAttachments.resize(desc.colorAttachmentsCount_);
+    std::uint32_t const allAttachmentsCount = desc.colorAttachmentsCount_ + (desc.depthStencilAttachment_ != nullptr ? 1 : 0);
 
     for (auto i = 0u; i < desc.colorAttachmentsCount_; ++i) {
 
         colorAttachmentsInfo[i].format_ = desc.colorAttachments_[i].format_;
-        colorAttachmentsInfo[i].used_ = true;
+        colorAttachmentsInfo[i].usage_ = RENDER_PASS_ATTACHMENT_USAGE_COLOR;
 
-        auto& attachment = attachments[i];
+        auto& attachment = attachmentDescriptions[i];
         attachment.format = desc.colorAttachments_[i].format_;
         attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         attachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
         attachment.flags = VK_FLAGS_NONE;
         attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
-        auto& colorReference = colorAttachments[i];
+        auto& colorReference = colorAttachmentReferences[i];
         colorReference.attachment = i;
         colorReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     }
 
     VkAttachmentReference depthStencilReference;
     if (desc.depthStencilAttachment_) {
-        depthStencilAttachmentInfo.format_ = desc.depthStencilAttachment_->format_;
-        depthStencilAttachmentInfo.used_ = true;
+        auto& depthStencilAttachment = attachmentDescriptions[desc.colorAttachmentsCount_];
+        depthStencilAttachment.format = desc.depthStencilAttachment_->format_;
+        depthStencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthStencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthStencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthStencilAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+        depthStencilAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthStencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthStencilAttachment.flags = VK_FLAGS_NONE;
+        depthStencilAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+
         depthStencilReference = { desc.colorAttachmentsCount_, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
+        depthStencilAttachmentInfo.format_ = desc.depthStencilAttachment_->format_;
+        depthStencilAttachmentInfo.usage_ = RENDER_PASS_ATTACHMENT_USAGE_DEPTH_STENCIL;
+    }
+    else {
+        depthStencilAttachmentInfo.usage_ = RENDER_PASS_ATTACHMENT_USAGE_NONE;
     }
 
     VkSubpassDescription spInfo;
@@ -87,7 +95,7 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
     spInfo.pPreserveAttachments = nullptr;
     spInfo.pResolveAttachments = nullptr;
     spInfo.colorAttachmentCount = desc.colorAttachmentsCount_;
-    spInfo.pColorAttachments = colorAttachments.data();
+    spInfo.pColorAttachments = colorAttachmentReferences;
     spInfo.pDepthStencilAttachment = desc.depthStencilAttachment_ ? &depthStencilReference : nullptr;
     spInfo.flags = VK_FLAGS_NONE;
 
@@ -98,11 +106,12 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
     rpInfo.dependencyCount = 0;
     rpInfo.pDependencies = nullptr;
     rpInfo.flags = VK_FLAGS_NONE;
-    rpInfo.attachmentCount = desc.colorAttachmentsCount_;
-    rpInfo.pAttachments = attachments.data();
+    rpInfo.attachmentCount = allAttachmentsCount;
+    rpInfo.pAttachments = attachmentDescriptions;
     rpInfo.subpassCount = 1;
     rpInfo.pSubpasses = &spInfo;
     
+    VkRenderPass renderPass = VK_NULL_HANDLE;
     VK_ASSERT(table_->vkCreateRenderPass(device_->Handle(), &rpInfo, nullptr, &renderPass));
 
     renderPasses_.emplace_back(renderPass, desc.colorAttachmentsCount_, colorAttachmentsInfo, depthStencilAttachmentInfo);

@@ -45,6 +45,12 @@ struct ProxyDescriptorDesc
     } frames[FramedDescriptorsHub::MAX_FRAMES_COUNT];
 };
 
+struct ProxyFramebufferDesc
+{
+    struct {
+        ImageViewHandle attachments_;
+    } frames_;
+};
 ///////////////////////////////////
 
 
@@ -75,6 +81,8 @@ public:
 
     ProxyBufferHandle CreateBuffer(BufferViewDesc const& desc);
     ProxyImageHandle CreateImage(ImageViewDesc const& desc);
+
+    ProxyFramebufferHandle CreateFramebuffer();
 
 
 private:

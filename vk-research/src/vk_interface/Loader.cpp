@@ -116,6 +116,14 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
+    VKW::RenderPassControllerDesc renderPassControllerDesc;
+    renderPassControllerDesc.table_ = table_.get();
+    renderPassControllerDesc.device_ = device_.get();
+
+    renderPassController_ = std::make_unique<VKW::RenderPassController>(renderPassControllerDesc);
+
+
+
     VKW::ResourceRendererProxyDesc resourceRendererProxyDesc;
     resourceRendererProxyDesc.table_ = table_.get();
     resourceRendererProxyDesc.device_ = device_.get();

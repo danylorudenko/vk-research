@@ -2,7 +2,6 @@
 
 #include "../../class_features/NonCopyable.hpp"
 #include "RenderPass.hpp"
-#include "../resources/Resource.hpp"
 
 #include <vector>
 
@@ -26,12 +25,10 @@ struct RenderPassDesc
 };
 
 
-struct RenderPassFactoryDesc
+struct RenderPassControllerDesc
 {
     ImportTable* table_;
     Device* device_;
-    
-    ResourcesController* resourcesController_;
 };
 
 class RenderPassController
@@ -39,7 +36,7 @@ class RenderPassController
 {
 public:
     RenderPassController();
-    RenderPassController(RenderPassFactoryDesc const& desc);
+    RenderPassController(RenderPassControllerDesc const& desc);
     RenderPassController(RenderPassController&& rhs);
     RenderPassController& operator=(RenderPassController&& rhs);
 
@@ -54,9 +51,7 @@ public:
 private:
     ImportTable* table_;
     Device* device_;
-
-    ResourcesController* resourcesController_;
-
+    
     std::vector<RenderPass> renderPasses_;
 };
 

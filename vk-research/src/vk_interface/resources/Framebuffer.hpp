@@ -4,17 +4,28 @@
 #include <limits>
 #include <vulkan/vulkan.h>
 
+#include "../image/ImageView.hpp"
+#include "../pipeline/RenderPass.hpp"
+
 namespace VKW
 {
-
-struct FramebufferHandle
-{
-    std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
-};
 
 struct Framebuffer
 {
     VkFramebuffer handle_ = VK_NULL_HANDLE;
+
+    std::uint32_t width_;
+    std::uint32_t height_;
+
+    std::uint32_t colorAttachmentsCount_;
+    ImageViewHandle colorAttachments_[RenderPass::MAX_COLOR_ATTACHMENTS];
+    ImageViewHandle depthStencilAttachment_;
 };
+
+struct FramebufferHandle
+{
+    Framebuffer* framebuffer_;
+};
+
 
 }
