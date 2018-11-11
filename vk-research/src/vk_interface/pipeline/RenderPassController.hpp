@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../class_features/NonCopyable.hpp"
+#include "..\..\class_features\NonCopyable.hpp"
 #include "RenderPass.hpp"
 
 #include <vector>
@@ -12,10 +12,13 @@ class ImportTable;
 class Device;
 class ResourcesController;
 
+
+
 struct RenderPassAttachmentDesc
 {
     VkFormat format_;
 };
+
 
 struct RenderPassDesc
 {
@@ -23,6 +26,7 @@ struct RenderPassDesc
     RenderPassAttachmentDesc* colorAttachments_;
     RenderPassAttachmentDesc* depthStencilAttachment_;
 };
+
 
 
 struct RenderPassControllerDesc

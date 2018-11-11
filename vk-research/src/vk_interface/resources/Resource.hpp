@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan\vulkan.h>
 
 #include <limits>
 
-#include "../memory/Memory.hpp"
+#include "..\memory\Memory.hpp"
 
 namespace VKW
 {

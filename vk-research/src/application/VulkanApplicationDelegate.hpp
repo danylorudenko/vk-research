@@ -10,6 +10,7 @@
 
 #include "..\io\IOManager.hpp"
 #include "..\vk_interface\Loader.hpp"
+#include "..\renderer\Root.hpp"
 
 class VulkanApplicationDelegate
     : public Application::ApplicationDelegate
@@ -30,4 +31,5 @@ private:
     Window mainWindow_;
     IOManager ioManager_;
     std::unique_ptr<VKW::Loader> vulkanLoader_;
+    //std::unique_ptr<Render::Root> renderRoot_;
 };

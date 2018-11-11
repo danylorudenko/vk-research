@@ -1,10 +1,10 @@
 #pragma once
 
 #include <vector>
-#include "../buffer/BufferView.hpp"
-#include "../image/ImageView.hpp"
-#include "../runtime/DescriptorSet.hpp"
-#include "../resources/Framebuffer.hpp"
+#include "..\buffer\BufferView.hpp"
+#include "..\image\ImageView.hpp"
+#include "..\runtime\DescriptorSet.hpp"
+#include "..\resources\Framebuffer.hpp"
 
 namespace VKW
 {

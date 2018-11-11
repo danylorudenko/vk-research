@@ -3,7 +3,7 @@
 #include "..\..\class_features\NonCopyable.hpp"
 #include "Resource.hpp"
 
-#include <vulkan/vulkan.h>
+#include <vulkan\vulkan.h>
 #include <vector>
 
 namespace VKW

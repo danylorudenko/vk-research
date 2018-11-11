@@ -1,9 +1,9 @@
 #include <utility>
 #include <algorithm>
 #include "ResourcesController.hpp"
-#include "../memory/MemoryController.hpp"
-#include "../Device.hpp"
-#include "../Tools.hpp"
+#include "..\memory\MemoryController.hpp"
+#include "..\Device.hpp"
+#include "..\Tools.hpp"
 
 namespace VKW
 {

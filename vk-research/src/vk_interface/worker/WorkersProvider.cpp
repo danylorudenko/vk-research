@@ -1,5 +1,5 @@
 #include "WorkersProvider.hpp"
-#include "../Tools.hpp"
+#include "..\Tools.hpp"
 #include <utility>
 
 namespace VKW
@@ -128,7 +128,7 @@ std::uint32_t WorkersProvider::FindFamilyIndex(Device const* device, DeviceQueue
     for (auto i = 0u; i < familyCount; ++i) {
         auto const& familyDesc = device->GetQueueFamily(i);
 
-        // if presentation is required on this type of family, skip family in case it doesn't support presentation
+        //if presentation is required on this type of family, skip family in case it doesn't support presentation
         if (presentRequired && !familyDesc.presentationSupported_) {
             continue;
         }

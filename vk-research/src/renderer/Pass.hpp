@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../vk_interface/pipeline/RenderPass.hpp"
+#include "..\class_features\NonCopyable.hpp"
+#include "..\vk_interface\pipeline\RenderPassController.hpp"
+#include "..\vk_interface\ResourceRendererProxy.hpp"
 
 namespace VKW
 {
@@ -17,10 +19,12 @@ struct PassDesc
     VKW::ResourceRendererProxy* proxy_;
     VKW::RenderPassController* renderPassController_;
 
-    VKW::RenderPassDesc* renderPassDesc_;
+    VKW::RenderPassDesc renderPassDesc_;
+    VKW::ProxyFramebufferDesc framebufferDesc_;
 };
 
 class Pass
+    : public NonCopyable
 {
 public:
     Pass();

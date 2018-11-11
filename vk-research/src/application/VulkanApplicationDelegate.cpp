@@ -39,7 +39,7 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
 void VulkanApplicationDelegate::start()
 {
     //auto& device = vulkanLoader_.Device();
-
+    //
     //VKW::BufferCreateInfo buffInfo;
     //buffInfo.size_ = 256;
     //buffInfo.usage_ = VKW::BufferUsage::VERTEX_INDEX;
@@ -47,7 +47,7 @@ void VulkanApplicationDelegate::start()
     //VKW::Buffer buffer = vulkanLoader_.BufferLoader().LoadBuffer(buffInfo);
     //VKW::Buffer buffer2 = vulkanLoader_.BufferLoader().LoadBuffer(buffInfo);
     //
-    /////////
+    //\\\\\\\
     //
     //auto* worker = vulkanLoader_.WorkersProvider().GetWorker(VKW::WorkerType::GRAPHICS, 0);
     //auto commandBuffer = worker->StartNextExecutionFrame();
@@ -66,7 +66,7 @@ void VulkanApplicationDelegate::start()
     //vulkanLoader_.Table().vkDeviceWaitIdle(device.Handle());
     //
     //
-    /////////
+    //\\\\\\\
     //
     //vulkanLoader_.BufferLoader().UnloadBuffer(buffer);
     //vulkanLoader_.BufferLoader().UnloadBuffer(buffer2);

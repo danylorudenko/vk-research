@@ -1,9 +1,11 @@
 #pragma once
 
-#include "../resources/Resource.hpp"
+#include "..\resources\Resource.hpp"
+#include "..\resources\ResourcesController.hpp"
 
 namespace VKW
 {
+
 
 struct ImageView
 {

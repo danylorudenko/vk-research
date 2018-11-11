@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BufferView.hpp"
-#include "../resources/Resource.hpp"
+#include "..\resources\Resource.hpp"
 
 namespace VKW
 {

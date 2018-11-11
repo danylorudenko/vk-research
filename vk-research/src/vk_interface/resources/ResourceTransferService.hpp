@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "../../class_features/NonCopyable.hpp"
+#include "..\..\class_features\NonCopyable.hpp"
 #include "Resource.hpp"
 
 namespace VKW

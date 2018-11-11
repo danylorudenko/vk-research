@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../class_features/NonCopyable.hpp"
+#include "..\..\class_features\NonCopyable.hpp"
 #include "DescriptorSet.hpp"
-#include "../image/ImageView.hpp"
-#include "../buffer/BufferView.hpp"
-#include "../resources/ResourcesController.hpp"
+#include "..\image\ImageView.hpp"
+#include "..\buffer\BufferView.hpp"
+#include "..\resources\ResourcesController.hpp"
 
 #include <vector>
 

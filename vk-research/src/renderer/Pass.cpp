@@ -1,6 +1,6 @@
 #include "Pass.hpp"
-#include "../vk_interface/ResourceRendererProxy.hpp"
-#include "../vk_interface/pipeline/RenderPassController.hpp"
+#include "..\vk_interface\ResourceRendererProxy.hpp"
+#include "..\vk_interface\pipeline\RenderPassController.hpp"
 
 namespace Render
 {
@@ -18,7 +18,7 @@ Pass::Pass(PassDesc const& desc)
     , renderPassController_{ desc.renderPassController_ }
     , vkRenderPass_{}
 {
-    vkRenderPass_ = renderPassController_->AssembleRenderPass(*desc.renderPassDesc_);
+    vkRenderPass_ = renderPassController_->AssembleRenderPass(desc.renderPassDesc_);
 
     // now own framebuffer needed form proxy
 }

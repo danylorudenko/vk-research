@@ -4,9 +4,9 @@
 #include <utility>
 #include <algorithm>
 
-#include "../Device.hpp"
-#include "../ImportTable.hpp"
-#include "../resources/ResourcesController.hpp"
+#include "..\Device.hpp"
+#include "..\ImportTable.hpp"
+#include "..\resources\ResourcesController.hpp"
 
 namespace VKW
 {

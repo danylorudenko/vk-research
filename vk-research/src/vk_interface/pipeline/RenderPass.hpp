@@ -1,12 +1,13 @@
 #pragma once
 
 #include <cstdint>
-#include <vulkan/vulkan.h>
+#include <vulkan\vulkan.h>
 
-#include "../resources/Resource.hpp"
+#include "..\resources\Resource.hpp"
 
 namespace VKW
 {
+
 
 enum RenderPassAttachmentUsage
 {

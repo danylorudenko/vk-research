@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan\vulkan.h>
 #include <limits>
 
 namespace VKW
@@ -13,7 +13,7 @@ struct Pipeline
 
 struct PipelineHandle
 {
-    std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
+    Pipeline* pipeline_;
 };
 
 }

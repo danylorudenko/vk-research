@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../class_features/NonCopyable.hpp"
+#include "..\..\class_features\NonCopyable.hpp"
 #include "BufferView.hpp"
-#include "../resources/ResourcesController.hpp"
+#include "..\resources\ResourcesController.hpp"
 
 #include <vector>
 
@@ -12,6 +12,7 @@ namespace VKW
 class ImportTable;
 class Device;
 
+
 struct BufferViewDesc
 {
     VkFormat format_;
@@ -19,6 +20,8 @@ struct BufferViewDesc
     std::uint32_t size_;
     BufferUsage usage_;
 };
+
+
 
 
 struct BuffersProviderDesc

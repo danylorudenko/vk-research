@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../class_features/NonCopyable.hpp"
+#include "..\..\class_features\NonCopyable.hpp"
 #include "Resource.hpp"
 
 #include <cstdint>

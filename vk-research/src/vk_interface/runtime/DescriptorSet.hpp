@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../pipeline/DescriptorLayout.hpp"
+#include "..\pipeline\DescriptorLayout.hpp"
 
-#include <vulkan/vulkan.h>
+#include <vulkan\vulkan.h>
 
 namespace VKW
 {

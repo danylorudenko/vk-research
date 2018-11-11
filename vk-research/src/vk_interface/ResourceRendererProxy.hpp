@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../class_features/NonCopyable.hpp"
-#include "runtime/FramedDescriptorsHub.hpp"
-#include "pipeline/DescriptorLayout.hpp"
-#include "resources/ResourcesController.hpp"
-#include "buffer/BufferView.hpp"
-#include "image/ImageView.hpp"
+#include "..\class_features\NonCopyable.hpp"
+#include "runtime\FramedDescriptorsHub.hpp"
+#include "pipeline\DescriptorLayout.hpp"
+#include "resources\ResourcesController.hpp"
+#include "buffer\BufferView.hpp"
+#include "image\ImageView.hpp"
 #include "ProxyHandles.hpp"
 
 namespace VKW
@@ -23,7 +23,8 @@ struct BufferViewDesc;
 struct ImageViewDesc;
 
 
-///////////////////////////////////
+
+//////////////////////////////////////
 // descriptions
 struct ProxyDescriptorDesc
 {
@@ -58,7 +59,8 @@ struct ProxyFramebufferDesc
         ImageViewHandle* depthStencilAttachment;
     } frames_[FramedDescriptorsHub::MAX_FRAMES_COUNT];
 };
-///////////////////////////////////
+//////////////////////////////////////
+
 
 
 struct ResourceRendererProxyDesc

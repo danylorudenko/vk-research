@@ -1,12 +1,12 @@
 #include "ResourceRendererProxy.hpp"
 #include "ImportTable.hpp"
 #include "Device.hpp"
-#include "buffer/BuffersProvider.hpp"
-#include "image/ImagesProvider.hpp"
-#include "pipeline/DescriptorLayoutController.hpp"
-#include "runtime/DescriptorSetController.hpp"
-#include "resources/FramebufferController.hpp"
-#include "runtime/FramedDescriptorsHub.hpp"
+#include "buffer\BuffersProvider.hpp"
+#include "image\ImagesProvider.hpp"
+#include "pipeline\DescriptorLayoutController.hpp"
+#include "runtime\DescriptorSetController.hpp"
+#include "resources\FramebufferController.hpp"
+#include "runtime\FramedDescriptorsHub.hpp"
 
 #include <utility>
 #include <cassert>

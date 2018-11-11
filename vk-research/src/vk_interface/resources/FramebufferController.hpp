@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../class_features/NonCopyable.hpp"
+#include "..\..\class_features\NonCopyable.hpp"
 #include "Framebuffer.hpp"
-#include "../image/ImageView.hpp"
-#include "../pipeline/RenderPass.hpp"
+#include "..\image\ImageView.hpp"
+#include "..\pipeline\RenderPass.hpp"
 #include <vector>
 #include <cstdint>
 

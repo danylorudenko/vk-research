@@ -1,8 +1,8 @@
 #include "RenderPassController.hpp"
-#include "../Tools.hpp"
-#include "../resources/ResourcesController.hpp"
-#include "../ImportTable.hpp"
-#include "../Device.hpp"
+#include "..\Tools.hpp"
+#include "..\resources\ResourcesController.hpp"
+#include "..\ImportTable.hpp"
+#include "..\Device.hpp"
 
 namespace VKW
 {

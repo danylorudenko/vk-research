@@ -1,7 +1,7 @@
 #include "DynamicResourcesStorage.hpp"
-#include "../memory/MemoryController.hpp"
-#include "../Tools.hpp"
-#include "../Device.hpp"
+#include "..\memory\MemoryController.hpp"
+#include "..\Tools.hpp"
+#include "..\Device.hpp"
 
 #include <algorithm>
 

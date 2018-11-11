@@ -1,11 +1,11 @@
 #include "FramebufferController.hpp"
 
 #include <utility>
-#include "../ImportTable.hpp"
-#include "../Device.hpp"
-#include "../image/ImagesProvider.hpp"
-#include "../pipeline/RenderPassController.hpp"
-#include "../pipeline/RenderPass.hpp"
+#include "..\ImportTable.hpp"
+#include "..\Device.hpp"
+#include "..\image\ImagesProvider.hpp"
+#include "..\pipeline\RenderPassController.hpp"
+#include "..\pipeline\RenderPass.hpp"
 
 namespace VKW
 {

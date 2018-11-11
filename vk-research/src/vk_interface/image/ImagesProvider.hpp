@@ -2,10 +2,10 @@
 
 #include <vector>
 #include <utility>
-#include "../../class_features/NonCopyable.hpp"
+#include "..\..\class_features\NonCopyable.hpp"
 
 #include "ImageView.hpp"
-#include "../resources/ResourcesController.hpp"
+#include "..\resources\ResourcesController.hpp"
 
 namespace VKW
 {
@@ -24,6 +24,7 @@ struct ImageViewDesc
     //std::uint32_t mipmaps_;
     ImageUsage usage_;
 };
+
 
 
 struct ImagesProviderDesc

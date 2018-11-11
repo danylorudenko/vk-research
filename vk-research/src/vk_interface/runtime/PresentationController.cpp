@@ -1,10 +1,10 @@
 #include "PresentationController.hpp"
 
-#include "../Tools.hpp"
-#include "../ImportTable.hpp"
-#include "../Device.hpp"
-#include "../Swapchain.hpp"
-#include "../worker/Worker.hpp"
+#include "..\Tools.hpp"
+#include "..\ImportTable.hpp"
+#include "..\Device.hpp"
+#include "..\Swapchain.hpp"
+#include "..\worker\Worker.hpp"
 #include <utility>
 #include <limits>
 

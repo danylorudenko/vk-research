@@ -2,10 +2,10 @@
 
 #include <cstdint>
 #include <limits>
-#include <vulkan/vulkan.h>
+#include <vulkan\vulkan.h>
 
-#include "../image/ImageView.hpp"
-#include "../pipeline/RenderPass.hpp"
+#include "..\image\ImageView.hpp"
+#include "..\pipeline\RenderPass.hpp"
 
 namespace VKW
 {

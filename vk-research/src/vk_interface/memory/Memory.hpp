@@ -2,8 +2,8 @@
 
 #include <limits>
 #include <cstdint>
-#include <vulkan/vulkan.h>
-#include "../Tools.hpp"
+#include <vulkan\vulkan.h>
+#include "..\Tools.hpp"
 
 namespace VKW
 {

@@ -1,7 +1,7 @@
 #include "ImagesProvider.hpp"
-#include "../Device.hpp"
-#include "../ImportTable.hpp"
-#include "../resources/ResourcesController.hpp"
+#include "..\Device.hpp"
+#include "..\ImportTable.hpp"
+#include "..\resources\ResourcesController.hpp"
 
 #include <utility>
 #include <algorithm>

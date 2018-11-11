@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../class_features/NonCopyable.hpp"
+#include "..\..\class_features\NonCopyable.hpp"
 
-#include <vulkan/vulkan.h>
+#include <vulkan\vulkan.h>
 #include <vector>
 
 #include "Pipeline.hpp"
@@ -28,7 +28,7 @@ struct GraphicsPipelineDesc
 
     // shader stages count
     // pShaderStages
-
+    //
     // vertex input desc
     // primitive assembly desc
     // viewport desc
@@ -37,7 +37,7 @@ struct GraphicsPipelineDesc
     // depth-stencil desc
     // color-blend state desc
     // 
-
+    //
     // layout
     RenderPassHandle renderPass_;
     // subpass index
@@ -55,7 +55,7 @@ public:
     PipelineHandle CreateGraphicsPipeline(GraphicsPipelineDesc const& desc);
     void DestroyPipeline(PipelineHandle pipeline);
     
-    Pipeline const& GetPipeline(PipelineHandle handle) const;
+    Pipeline* GetPipeline(PipelineHandle handle) const;
     
     ~PipelineFactory();
 
