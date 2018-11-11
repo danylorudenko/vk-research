@@ -5,6 +5,7 @@
 #include "image/ImagesProvider.hpp"
 #include "pipeline/DescriptorLayoutController.hpp"
 #include "runtime/DescriptorSetController.hpp"
+#include "resources/FramebufferController.hpp"
 #include "runtime/FramedDescriptorsHub.hpp"
 
 #include <utility>
@@ -20,6 +21,7 @@ ResourceRendererProxy::ResourceRendererProxy()
     , imagesProvider_{ nullptr }
     , layoutController_{ nullptr }
     , descriptorSetsController_{ nullptr }
+    , framebufferController_{ nullptr }
     , framedDescriptorsHub_{ nullptr }
 {
 
@@ -32,6 +34,7 @@ ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxyDesc const& de
     , imagesProvider_{ desc.imagesProvider_ }
     , layoutController_{ desc.layoutController_ }
     , descriptorSetsController_{ desc.descriptorSetsController_ }
+    , framebufferController_{ desc.framebufferController_ }
     , framedDescriptorsHub_{ desc.framedDescriptorsHub_ }
 {
 
@@ -44,6 +47,7 @@ ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxy&& rhs)
     , imagesProvider_{ nullptr }
     , layoutController_{ nullptr }
     , descriptorSetsController_{ nullptr }
+    , framebufferController_{ nullptr }
     , framedDescriptorsHub_{ nullptr }
 {
     operator=(std::move(rhs));
@@ -57,6 +61,7 @@ ResourceRendererProxy& ResourceRendererProxy::operator=(ResourceRendererProxy&& 
     std::swap(imagesProvider_, rhs.imagesProvider_);
     std::swap(layoutController_, rhs.layoutController_);
     std::swap(descriptorSetsController_, rhs.descriptorSetsController_);
+    std::swap(framebufferController_, rhs.framebufferController_);
     std::swap(framedDescriptorsHub_, rhs.framedDescriptorsHub_);
 
     return *this;
@@ -94,7 +99,7 @@ ProxySetHandle ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout
         }
     }
 
-    auto id = framedDescriptorsHub_->nextFreeId_++;
+    auto id = framedDescriptorsHub_->descriptorSetsNextId_++;
 
     DescriptorSetDesc setDesc;
     setDesc.layout_ = layout;
@@ -179,7 +184,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorDe
                 switch (wds.descriptorType) {
                 case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
                 {
-                    ImageView* imageView = imagesProvider_->GetImageView(descriptions[j].frames[i].imageDesc.imageViewHandle_);
+                    ImageView* imageView = imagesProvider_->GetImageView(descriptions[j].frames_[i].imageDesc_.imageViewHandle_);
                     DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_);
                 }
                 break;
@@ -191,7 +196,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorDe
                 break;
                 case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
                 {
-                    auto& bufferInfo = descriptions[j].frames[i].bufferInfo;
+                    auto& bufferInfo = descriptions[j].frames_[i].bufferInfo_;
                     BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
                     DecorateBufferWriteDesc(wds, descriptorData[j], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
                 }
@@ -225,7 +230,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorDe
             switch (wds.descriptorType) {
             case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
             {
-                ImageView* imageView = imagesProvider_->GetImageView(descriptions[i].frames[0].imageDesc.imageViewHandle_);
+                ImageView* imageView = imagesProvider_->GetImageView(descriptions[i].frames_[0].imageDesc_.imageViewHandle_);
                 DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_);
             }
             break;
@@ -237,7 +242,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorDe
             break;
             case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
             {
-                auto& bufferInfo = descriptions[i].frames[0].bufferInfo;
+                auto& bufferInfo = descriptions[i].frames_[0].bufferInfo_;
                 BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
                 DecorateBufferWriteDesc(wds, descriptorData[i], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
             }
@@ -286,7 +291,7 @@ void ResourceRendererProxy::DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, D
 ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferViewDesc const& decs)
 {
     auto const framesCount = framedDescriptorsHub_->framesCount_;
-    auto const id = framedDescriptorsHub_->nextFreeId_++;
+    auto const id = framedDescriptorsHub_->bufferViewsNextId_++;
 
     BufferViewDesc viewDescs[FramedDescriptorsHub::MAX_FRAMES_COUNT];
     BufferViewHandle views[FramedDescriptorsHub::MAX_FRAMES_COUNT];
@@ -310,7 +315,7 @@ ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
 {
     ImageViewHandle imageHandle = imagesProvider_->AcquireImage(desc);
 
-    auto const id = framedDescriptorsHub_->nextFreeId_++;
+    auto const id = framedDescriptorsHub_->imageViewsNextId_++;
     auto const framesCount = framedDescriptorsHub_->framesCount_;
     for (auto i = 0u; i < framesCount; ++i) {
         assert(framedDescriptorsHub_->contexts_[i].imageViews_.size() == id && "Unsyncronized write to FramedDescriptors::bufferViews_.");
@@ -318,6 +323,29 @@ ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
     }
     
     return ProxyImageHandle{ id };
+}
+
+ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebufferDesc const& desc)
+{
+    std::uint32_t const id = framedDescriptorsHub_->framebuffersNextId_;
+    std::uint32_t const framesCount = framedDescriptorsHub_->framesCount_;
+    for (auto i = 0u; i < framesCount; ++i) {
+        auto& frameResources = framedDescriptorsHub_->contexts_[i];
+        assert(frameResources.framebuffers_.size() == id && "Unsynchronized access to FramedDescriptors::framebuffers_");
+        
+        FramebufferDesc vkFBDesc;
+        vkFBDesc.renderPass_ = desc.renderPass_;
+        vkFBDesc.width_ = desc.width_;
+        vkFBDesc.height_ = desc.height_;
+        vkFBDesc.colorAttachments = desc.frames_[i].colorAttachments_;
+        vkFBDesc.depthStencilAttachment = desc.frames_[i].depthStencilAttachment;
+
+        FramebufferHandle framebufferHandle = framebufferController_->CreateFramebuffer(vkFBDesc);
+
+        frameResources.framebuffers_.emplace_back(framebufferHandle);
+    }
+
+    return ProxyFramebufferHandle{ id };
 }
 
 }

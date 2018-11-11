@@ -17,6 +17,7 @@ class BuffersProvider;
 class ImagesProvider;
 class DescriptorSetController;
 class DescriptorLayoutController;
+class FramebufferController;
 
 struct BufferViewDesc;
 struct ImageViewDesc;
@@ -31,25 +32,31 @@ struct ProxyDescriptorDesc
             ImageViewHandle imageViewHandle_;
             VkSampler sampler_;
             ImageUsage usage_;
-        } imageDesc;
+        } imageDesc_;
 
         struct {
             BufferViewHandle bufferViewHandle_;
-        } bufferView;
+        } bufferView_;
 
         struct {
             BufferViewHandle pureBufferViewHandle_;
             std::uint32_t offset_;
             std::uint32_t size_;
-        } bufferInfo;
-    } frames[FramedDescriptorsHub::MAX_FRAMES_COUNT];
+        } bufferInfo_;
+    } frames_[FramedDescriptorsHub::MAX_FRAMES_COUNT];
 };
 
 struct ProxyFramebufferDesc
 {
+    VKW::RenderPassHandle renderPass_;
+
+    std::uint32_t width_;
+    std::uint32_t height_;
+
     struct {
-        ImageViewHandle attachments_;
-    } frames_;
+        ImageViewHandle colorAttachments_[RenderPass::MAX_COLOR_ATTACHMENTS];
+        ImageViewHandle* depthStencilAttachment;
+    } frames_[FramedDescriptorsHub::MAX_FRAMES_COUNT];
 };
 ///////////////////////////////////
 
@@ -62,6 +69,7 @@ struct ResourceRendererProxyDesc
     ImagesProvider* imagesProvider_;
     DescriptorLayoutController* layoutController_;
     DescriptorSetController* descriptorSetsController_;
+    FramebufferController* framebufferController_;
     FramedDescriptorsHub* framedDescriptorsHub_;
 };
 
@@ -82,7 +90,7 @@ public:
     ProxyBufferHandle CreateBuffer(BufferViewDesc const& desc);
     ProxyImageHandle CreateImage(ImageViewDesc const& desc);
 
-    ProxyFramebufferHandle CreateFramebuffer();
+    ProxyFramebufferHandle CreateFramebuffer(ProxyFramebufferDesc const& desc);
 
 
 private:
@@ -101,6 +109,7 @@ private:
     ImagesProvider* imagesProvider_;
     DescriptorLayoutController* layoutController_;
     DescriptorSetController* descriptorSetsController_;
+    FramebufferController* framebufferController_;
     FramedDescriptorsHub* framedDescriptorsHub_;
 
 };

@@ -23,7 +23,12 @@ struct FramedDescriptorsHub
     static std::uint32_t constexpr MAX_FRAMES_COUNT = 3;
 
     std::uint32_t framesCount_ = 0;
-    std::uint32_t nextFreeId_ = 0;
+
+    std::uint32_t bufferViewsNextId_ = 0;
+    std::uint32_t imageViewsNextId_ = 0;
+    std::uint32_t descriptorSetsNextId_ = 0;
+    std::uint32_t framebuffersNextId_ = 0;
+
     FramedDescriptors contexts_[MAX_FRAMES_COUNT];
 };
 
