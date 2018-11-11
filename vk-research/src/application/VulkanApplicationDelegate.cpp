@@ -82,3 +82,8 @@ void VulkanApplicationDelegate::shutdown()
 {
 
 }
+
+void VulkanApplicationDelegate::FakeParseRendererResources()
+{
+
+}

@@ -5,8 +5,13 @@
 #include <string>
 
 #include "..\vk_interface\ProxyHandles.hpp"
-#include "..\vk_interface\buffer\BufferView.hpp"
-#include "..\vk_interface\image\ImageView.hpp"
+#include "..\vk_interface\buffer\BuffersProvider.hpp"
+#include "..\vk_interface\image\ImagesProvider.hpp"
+
+namespace VKW
+{
+class ResourceRendererProxy;
+}
 
 namespace Render
 {
@@ -29,6 +34,8 @@ public:
     void DefineGlobalImage(ResourceHash const& hash, VKW::ImageViewDesc const& desc);
 
 private:
+    VKW::ResourceRendererProxy* resourceProxy_;
+
     GlobalImagesMap globalImages_;
     GlobalBuffersMap globalBuffers_;
 
