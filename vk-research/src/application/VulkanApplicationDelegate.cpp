@@ -1,5 +1,6 @@
 #include "VulkanApplicationDelegate.hpp"
 #include "..\vk_interface\Tools.hpp"
+#include "..\renderer\Root.hpp"
 
 VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug)
     : mainWindow_ {
@@ -38,6 +39,8 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
 
 void VulkanApplicationDelegate::start()
 {
+    FakeParseRendererResources();
+    
     //auto& device = vulkanLoader_.Device();
     //
     //VKW::BufferCreateInfo buffInfo;
@@ -85,5 +88,10 @@ void VulkanApplicationDelegate::shutdown()
 
 void VulkanApplicationDelegate::FakeParseRendererResources()
 {
-
+    VKW::ImageViewDesc imageDesc;
+    imageDesc.format_ = VK_FORMAT_R8G8B8_UNORM;
+    imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
+    imageDesc.width_ = 1024;
+    imageDesc.height_ = 1024;
+    renderRoot_->DefineGlobalImage("test-image", imageDesc);
 }

@@ -1,3 +1,4 @@
+#include <utility>
 #include "Root.hpp"
 #include "..\vk_interface\ResourceRendererProxy.hpp"
 
@@ -10,10 +11,16 @@ Root::Root()
 
 }
 
+Root::Root(RootDesc const& desc)
+    : resourceProxy_{ desc.resourceProxy_ }
+{
+
+}
+
 Root::Root(Root&& rhs)
     : resourceProxy_{ nullptr }
 {
-
+    operator=(std::move(rhs));
 }
 
 Root& Root::operator=(Root&& rhs)
@@ -28,6 +35,18 @@ Root& Root::operator=(Root&& rhs)
 Root::~Root()
 {
 
+}
+
+void Root::DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc)
+{
+    VKW::ProxyBufferHandle bufferHandle = resourceProxy_->CreateBuffer(desc);
+    globalBuffers_[key] = bufferHandle;
+}
+
+void Root::DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc)
+{
+    VKW::ProxyImageHandle imageHandle = resourceProxy_->CreateImage(desc);
+    globalImages_[key] = imageHandle;
 }
 
 }

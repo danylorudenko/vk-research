@@ -16,22 +16,28 @@ class ResourceRendererProxy;
 namespace Render
 {
 
+struct RootDesc
+{
+    VKW::ResourceRendererProxy* resourceProxy_;
+};
+
 class Root
     : public NonCopyable
 {
 public:
-    using ResourceHash = std::string;
-    using GlobalImagesMap = std::unordered_map<ResourceHash, VKW::ProxyImageHandle>;
-    using GlobalBuffersMap = std::unordered_map<ResourceHash, VKW::ProxyBufferHandle>;
+    using ResourceKey = std::string;
+    using GlobalImagesMap = std::unordered_map<ResourceKey, VKW::ProxyImageHandle>;
+    using GlobalBuffersMap = std::unordered_map<ResourceKey, VKW::ProxyBufferHandle>;
 
     Root();
+    Root(RootDesc const& desc);
     Root(Root&& rhs);
     Root& operator=(Root&& rhs);
     ~Root();
 
 
-    void DefineGlobalBuffer(ResourceHash const& hash, VKW::BufferViewDesc const& desc);
-    void DefineGlobalImage(ResourceHash const& hash, VKW::ImageViewDesc const& desc);
+    void DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc);
+    void DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc);
 
 private:
     VKW::ResourceRendererProxy* resourceProxy_;
