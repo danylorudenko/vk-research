@@ -11,9 +11,22 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
         "VulkanRenderWindow",
         VulkanApplicationDelegate::WinProc,
         this }
-    , ioManager_{}
-    , vulkanLoader_{ std::make_unique<VKW::Loader>(VKW::LoaderDesc{ instance, mainWindow_.NativeHandle(), 2, &ioManager_, vkDebug }) }
 {
+    VKW::LoaderDesc loaderDesc;
+    loaderDesc.hInstance_ = instance; 
+    loaderDesc.hwnd_ = mainWindow_.NativeHandle();
+    loaderDesc.bufferingCount_ = 2;
+    loaderDesc.ioManager_ = &ioManager_;
+    loaderDesc.debug_ = vkDebug;
+
+    vulkanLoader_ = std::make_unique<VKW::Loader>(loaderDesc);
+
+
+
+    Render::RootDesc rootDesc;
+    rootDesc.resourceProxy_ = vulkanLoader_->resourceRendererProxy_.get();
+
+    renderRoot_ = std::make_unique<Render::Root>(rootDesc);
 }
 
 VulkanApplicationDelegate::~VulkanApplicationDelegate()

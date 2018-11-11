@@ -127,6 +127,7 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     info.samples = VK_SAMPLE_COUNT_1_BIT;
     info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    info.flags = VK_FLAGS_NONE;
 
     MemoryPageRegionDesc memoryDesc;
 
