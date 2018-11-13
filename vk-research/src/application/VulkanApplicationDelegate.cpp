@@ -102,7 +102,7 @@ void VulkanApplicationDelegate::shutdown()
 void VulkanApplicationDelegate::FakeParseRendererResources()
 {
     VKW::ImageViewDesc imageDesc;
-    imageDesc.format_ = VK_FORMAT_R8G8B8_UNORM;
+    imageDesc.format_ = VK_FORMAT_B8G8R8A8_UNORM;
     imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
     imageDesc.width_ = 1024;
     imageDesc.height_ = 1024;

@@ -112,12 +112,13 @@ ImageViewHandle ImagesProvider::AcquireImage(ImageViewDesc const& desc)
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.pNext = nullptr;
     viewInfo.image = imageResource->handle_;
+    viewInfo.format = desc.format_;
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
     viewInfo.flags = VK_FLAGS_NONE;
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    viewInfo.subresourceRange.baseArrayLayer = 1;
-    viewInfo.subresourceRange.baseMipLevel = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.layerCount = 1;
     viewInfo.subresourceRange.levelCount = 1;
 

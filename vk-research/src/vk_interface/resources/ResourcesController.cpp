@@ -63,6 +63,8 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     vkBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     vkBufferCreateInfo.pNext = nullptr;
     vkBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    vkBufferCreateInfo.queueFamilyIndexCount = 0;
+    vkBufferCreateInfo.pQueueFamilyIndices = nullptr;
     vkBufferCreateInfo.size = desc.size_;
     vkBufferCreateInfo.flags = VK_FLAGS_NONE;
     vkBufferCreateInfo.usage = VK_FLAGS_NONE; // temp
@@ -126,6 +128,8 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     info.tiling = VK_IMAGE_TILING_OPTIMAL;
     info.samples = VK_SAMPLE_COUNT_1_BIT;
     info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    info.queueFamilyIndexCount = 0;
+    info.pQueueFamilyIndices = nullptr;
     info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     info.flags = VK_FLAGS_NONE;
 
