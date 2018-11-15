@@ -124,6 +124,16 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
+    VKW::FramebufferControllerDesc framebufferControllerDesc;
+    framebufferControllerDesc.table_ = table_.get();
+    framebufferControllerDesc.device_ = device_.get();
+    framebufferControllerDesc.imagesProvider_ = imagesProvider_.get();
+    framebufferControllerDesc.renderPassController_ = renderPassController_.get();
+
+    framebufferController_ = std::make_unique<VKW::FramebufferController>(framebufferControllerDesc);
+
+
+
     VKW::ResourceRendererProxyDesc resourceRendererProxyDesc;
     resourceRendererProxyDesc.table_ = table_.get();
     resourceRendererProxyDesc.device_ = device_.get();
@@ -131,6 +141,8 @@ Loader::Loader(LoaderDesc const& desc)
     resourceRendererProxyDesc.imagesProvider_ = imagesProvider_.get();
     resourceRendererProxyDesc.layoutController_ = descriptorLayoutController_.get();
     resourceRendererProxyDesc.descriptorSetsController_ = descriptorSetController_.get();
+    resourceRendererProxyDesc.renderPassController_ = renderPassController_.get();
+    resourceRendererProxyDesc.framebufferController_ = framebufferController_.get();
     resourceRendererProxyDesc.framedDescriptorsHub_ = framedDescriptorsHub_.get();
 
     resourceRendererProxy_ = std::make_unique<VKW::ResourceRendererProxy>(resourceRendererProxyDesc);

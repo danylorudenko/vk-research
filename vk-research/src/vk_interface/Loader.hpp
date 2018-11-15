@@ -21,6 +21,7 @@
 #include "ResourceRendererProxy.hpp"
 #include "runtime\ResourceBindingService.hpp"
 #include "pipeline\RenderPassController.hpp"
+#include "resources\FramebufferController.hpp"
 #include "pipeline\PipelineFactory.hpp"
 #include "pipeline\ShaderModuleFactory.hpp"
 
@@ -73,6 +74,7 @@ public:
     std::unique_ptr<VKW::FramedDescriptorsHub> framedDescriptorsHub_;
 
     std::unique_ptr<VKW::RenderPassController> renderPassController_;
+    std::unique_ptr<VKW::FramebufferController> framebufferController_;
 
     std::unique_ptr<VKW::ResourceRendererProxy> resourceRendererProxy_;
     //std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;

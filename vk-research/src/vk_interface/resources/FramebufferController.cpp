@@ -19,7 +19,7 @@ FramebufferController::FramebufferController()
 
 }
 
-FramebufferController::FramebufferController(FramebufferFactoryDesc const& desc)
+FramebufferController::FramebufferController(FramebufferControllerDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
     , imagesProvider_{ desc.imagesProvider_ }

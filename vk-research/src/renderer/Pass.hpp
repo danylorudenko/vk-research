@@ -3,6 +3,7 @@
 #include "..\class_features\NonCopyable.hpp"
 #include "..\vk_interface\pipeline\RenderPassController.hpp"
 #include "..\vk_interface\ResourceRendererProxy.hpp"
+#include "RootDef.hpp"
 
 namespace VKW
 {
@@ -20,7 +21,11 @@ struct PassDesc
     VKW::RenderPassController* renderPassController_;
 
     VKW::RenderPassDesc renderPassDesc_;
-    VKW::ProxyFramebufferDesc framebufferDesc_;
+
+    std::uint32_t colorAttachmentCount_;
+    ResourceKey colorAttachments[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
+    ResourceKey depthStencilAttachment;
+
 };
 
 class Pass
@@ -38,6 +43,7 @@ private:
     VKW::RenderPassController* renderPassController_;
 
     VKW::RenderPassHandle vkRenderPass_;
+    VKW::ProxyFramebufferHandle framebuffer_;
 };
 
 }

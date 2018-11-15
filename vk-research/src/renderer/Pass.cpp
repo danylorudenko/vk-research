@@ -8,7 +8,6 @@ namespace Render
 Pass::Pass()
     : resourceProxy_{ nullptr }
     , renderPassController_{ nullptr }
-    , vkRenderPass_{}
 {
 
 }
@@ -16,11 +15,11 @@ Pass::Pass()
 Pass::Pass(PassDesc const& desc)
     : resourceProxy_{ desc.proxy_ }
     , renderPassController_{ desc.renderPassController_ }
-    , vkRenderPass_{}
 {
     vkRenderPass_ = renderPassController_->AssembleRenderPass(desc.renderPassDesc_);
 
-    // now own framebuffer needed form proxy
+    
+    //framebuffer_ = resourceProxy_->CreateFramebuffer()
 }
 
 }

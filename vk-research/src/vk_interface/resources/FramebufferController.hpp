@@ -26,7 +26,7 @@ struct FramebufferDesc
 
 };
 
-struct FramebufferFactoryDesc
+struct FramebufferControllerDesc
 {
     ImportTable* table_;
     Device* device_;
@@ -39,7 +39,7 @@ class FramebufferController
 {
 public:
     FramebufferController();
-    FramebufferController(FramebufferFactoryDesc const& desc);
+    FramebufferController(FramebufferControllerDesc const& desc);
 
     FramebufferController(FramebufferController&& rhs);
     FramebufferController& operator=(FramebufferController&& rhs);

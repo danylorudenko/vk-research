@@ -5,6 +5,7 @@
 #include "image\ImagesProvider.hpp"
 #include "pipeline\DescriptorLayoutController.hpp"
 #include "runtime\DescriptorSetController.hpp"
+#include "pipeline\RenderPassController.hpp"
 #include "resources\FramebufferController.hpp"
 #include "runtime\FramedDescriptorsHub.hpp"
 
@@ -21,6 +22,7 @@ ResourceRendererProxy::ResourceRendererProxy()
     , imagesProvider_{ nullptr }
     , layoutController_{ nullptr }
     , descriptorSetsController_{ nullptr }
+    , renderPassController_{ nullptr }
     , framebufferController_{ nullptr }
     , framedDescriptorsHub_{ nullptr }
 {
@@ -34,6 +36,7 @@ ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxyDesc const& de
     , imagesProvider_{ desc.imagesProvider_ }
     , layoutController_{ desc.layoutController_ }
     , descriptorSetsController_{ desc.descriptorSetsController_ }
+    , renderPassController_{ desc.renderPassController_ }
     , framebufferController_{ desc.framebufferController_ }
     , framedDescriptorsHub_{ desc.framedDescriptorsHub_ }
 {
@@ -47,6 +50,7 @@ ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxy&& rhs)
     , imagesProvider_{ nullptr }
     , layoutController_{ nullptr }
     , descriptorSetsController_{ nullptr }
+    , renderPassController_{ nullptr }
     , framebufferController_{ nullptr }
     , framedDescriptorsHub_{ nullptr }
 {
@@ -61,6 +65,7 @@ ResourceRendererProxy& ResourceRendererProxy::operator=(ResourceRendererProxy&& 
     std::swap(imagesProvider_, rhs.imagesProvider_);
     std::swap(layoutController_, rhs.layoutController_);
     std::swap(descriptorSetsController_, rhs.descriptorSetsController_);
+    std::swap(renderPassController_, rhs.renderPassController_);
     std::swap(framebufferController_, rhs.framebufferController_);
     std::swap(framedDescriptorsHub_, rhs.framedDescriptorsHub_);
 
@@ -99,7 +104,7 @@ ProxySetHandle ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout
         }
     }
 
-    auto id = framedDescriptorsHub_->descriptorSetsNextId_++;
+    std::uint32_t id = framedDescriptorsHub_->descriptorSetsNextId_++;
 
     DescriptorSetDesc setDesc;
     setDesc.layout_ = layout;
@@ -327,18 +332,34 @@ ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
 
 ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebufferDesc const& desc)
 {
-    std::uint32_t const id = framedDescriptorsHub_->framebuffersNextId_;
+    RenderPass const* renderPass = renderPassController_->GetRenderPass(desc.renderPass_);
+    std::uint32_t const renderPassColorAttachmentsCount = renderPass->colorAttachmentsCount_;
+
+    std::uint32_t const id = framedDescriptorsHub_->framebuffersNextId_++;
     std::uint32_t const framesCount = framedDescriptorsHub_->framesCount_;
+
     for (auto i = 0u; i < framesCount; ++i) {
         auto& frameResources = framedDescriptorsHub_->contexts_[i];
         assert(frameResources.framebuffers_.size() == id && "Unsynchronized access to FramedDescriptors::framebuffers_");
         
+        ImageViewHandle colorAttachmentHandles[RenderPass::MAX_COLOR_ATTACHMENTS];
+        for (auto j = 0u; j < renderPassColorAttachmentsCount; ++j) {
+            colorAttachmentHandles[j] = frameResources.imageViews_[desc.frames_[i].colorAttachments_[j].id_];
+        }
+
+        ImageViewHandle* depthStancilAttachmentHandle = nullptr;
+        if (renderPass->depthStencilAttachmentInfo_.usage_ == RENDER_PASS_ATTACHMENT_USAGE_DEPTH_STENCIL) {
+            ProxyImageHandle* depthStencilProxyHandle = desc.frames_[i].depthStencilAttachment;
+            assert(depthStancilAttachmentHandle != nullptr && "ResourceRendererProxy::CreateFramebuffer: null depth stencil attachment handle!)");
+            depthStancilAttachmentHandle = &frameResources.imageViews_[depthStencilProxyHandle->id_];
+        }
+
         FramebufferDesc vkFBDesc;
         vkFBDesc.renderPass_ = desc.renderPass_;
         vkFBDesc.width_ = desc.width_;
         vkFBDesc.height_ = desc.height_;
-        vkFBDesc.colorAttachments = desc.frames_[i].colorAttachments_;
-        vkFBDesc.depthStencilAttachment = desc.frames_[i].depthStencilAttachment;
+        vkFBDesc.colorAttachments = colorAttachmentHandles;
+        vkFBDesc.depthStencilAttachment = depthStancilAttachmentHandle;
 
         FramebufferHandle framebufferHandle = framebufferController_->CreateFramebuffer(vkFBDesc);
 

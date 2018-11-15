@@ -15,6 +15,7 @@ class ImportTable;
 class Device;
 class BuffersProvider;
 class ImagesProvider;
+class RenderPassController;
 class DescriptorSetController;
 class DescriptorLayoutController;
 class FramebufferController;
@@ -55,8 +56,8 @@ struct ProxyFramebufferDesc
     std::uint32_t height_;
 
     struct {
-        ImageViewHandle colorAttachments_[RenderPass::MAX_COLOR_ATTACHMENTS];
-        ImageViewHandle* depthStencilAttachment;
+        ProxyImageHandle colorAttachments_[RenderPass::MAX_COLOR_ATTACHMENTS];
+        ProxyImageHandle* depthStencilAttachment;
     } frames_[FramedDescriptorsHub::MAX_FRAMES_COUNT];
 };
 //////////////////////////////////////
@@ -71,6 +72,7 @@ struct ResourceRendererProxyDesc
     ImagesProvider* imagesProvider_;
     DescriptorLayoutController* layoutController_;
     DescriptorSetController* descriptorSetsController_;
+    RenderPassController* renderPassController_;
     FramebufferController* framebufferController_;
     FramedDescriptorsHub* framedDescriptorsHub_;
 };
@@ -111,6 +113,7 @@ private:
     ImagesProvider* imagesProvider_;
     DescriptorLayoutController* layoutController_;
     DescriptorSetController* descriptorSetsController_;
+    RenderPassController* renderPassController_;
     FramebufferController* framebufferController_;
     FramedDescriptorsHub* framedDescriptorsHub_;
 

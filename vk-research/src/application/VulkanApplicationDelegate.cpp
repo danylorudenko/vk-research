@@ -25,6 +25,8 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
 
     Render::RootDesc rootDesc;
     rootDesc.resourceProxy_ = vulkanLoader_->resourceRendererProxy_.get();
+    rootDesc.defaultFramebufferWidth_ = windowWidth;
+    rootDesc.defaultFramebufferHeight_ = windowHeight;
 
     renderRoot_ = std::make_unique<Render::Root>(rootDesc);
 }
