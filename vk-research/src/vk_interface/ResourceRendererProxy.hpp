@@ -56,8 +56,8 @@ struct ProxyFramebufferDesc
     std::uint32_t height_;
 
     struct {
-        ProxyImageHandle colorAttachments_[RenderPass::MAX_COLOR_ATTACHMENTS];
-        ProxyImageHandle* depthStencilAttachment;
+        ProxyImageHandle colorAttachments_[RenderPass::MAX_COLOR_ATTACHMENTS]; // WHAAAAAAAAAAAAAAAAT????? TODO
+        ProxyImageHandle* depthStencilAttachment; // WHAAAAAAAAAAAAAAAAT????? TODO
     } frames_[FramedDescriptorsHub::MAX_FRAMES_COUNT];
 };
 //////////////////////////////////////

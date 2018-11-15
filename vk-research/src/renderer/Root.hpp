@@ -20,6 +20,15 @@ class ResourceRendererProxy;
 namespace Render
 {
 
+struct RootPassDesc
+{
+    VKW::RenderPassDesc vkRenderPassDesc;
+
+    std::uint32_t colorAttachmentsCount;
+    ResourceKey colorAttachments[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
+    ResourceKey depthStencilAttachment;
+};
+
 struct RootDesc
 {
     VKW::ResourceRendererProxy* resourceProxy_;
@@ -49,7 +58,7 @@ public:
     void DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc);
     VKW::ProxyImageHandle FindGlobalImage(ResourceKey const& key);
 
-    void DefineRenderPass(RenderPassKey const& key, PassDesc const& desc);
+    void DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc);
 
 private:
     VKW::ResourceRendererProxy* resourceProxy_;

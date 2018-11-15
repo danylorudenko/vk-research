@@ -67,7 +67,7 @@ VKW::ProxyImageHandle Root::FindGlobalImage(ResourceKey const& key)
     return globalImages_[key];
 }
 
-void Root::DefineRenderPass(RenderPassKey const& key, PassDesc const& desc)
+void Root::DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc)
 {
     
 }
