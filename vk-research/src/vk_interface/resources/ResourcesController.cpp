@@ -154,7 +154,6 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
 
     default:
         assert(false && "Non-supported usage for image.");
-        // TODO
         break;
     }
 

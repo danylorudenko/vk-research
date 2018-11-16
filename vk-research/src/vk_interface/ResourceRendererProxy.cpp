@@ -344,12 +344,12 @@ ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebuffer
         
         ImageViewHandle colorAttachmentHandles[RenderPass::MAX_COLOR_ATTACHMENTS];
         for (auto j = 0u; j < renderPassColorAttachmentsCount; ++j) {
-            colorAttachmentHandles[j] = frameResources.imageViews_[desc.frames_[i].colorAttachments_[j].id_];
+            colorAttachmentHandles[j] = frameResources.imageViews_[desc.colorAttachments_[j].id_];
         }
 
         ImageViewHandle* depthStancilAttachmentHandle = nullptr;
         if (renderPass->depthStencilAttachmentInfo_.usage_ == RENDER_PASS_ATTACHMENT_USAGE_DEPTH_STENCIL) {
-            ProxyImageHandle* depthStencilProxyHandle = desc.frames_[i].depthStencilAttachment;
+            ProxyImageHandle* depthStencilProxyHandle = desc.depthStencilAttachment_;
             assert(depthStancilAttachmentHandle != nullptr && "ResourceRendererProxy::CreateFramebuffer: null depth stencil attachment handle!)");
             depthStancilAttachmentHandle = &frameResources.imageViews_[depthStencilProxyHandle->id_];
         }
@@ -358,8 +358,8 @@ ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebuffer
         vkFBDesc.renderPass_ = desc.renderPass_;
         vkFBDesc.width_ = desc.width_;
         vkFBDesc.height_ = desc.height_;
-        vkFBDesc.colorAttachments = colorAttachmentHandles;
-        vkFBDesc.depthStencilAttachment = depthStancilAttachmentHandle;
+        vkFBDesc.colorAttachments_ = colorAttachmentHandles;
+        vkFBDesc.depthStencilAttachment_ = depthStancilAttachmentHandle;
 
         FramebufferHandle framebufferHandle = framebufferController_->CreateFramebuffer(vkFBDesc);
 

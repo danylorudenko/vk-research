@@ -19,9 +19,6 @@ class Root;
 
 struct PassDesc
 {
-    Root* root_; // for initialization only
-
-    VKW::FramedDescriptorsHub* framedDescriptorsHub_;
     VKW::ResourceRendererProxy* proxy_;
     VKW::RenderPassController* renderPassController_;
 
@@ -30,9 +27,7 @@ struct PassDesc
     std::uint32_t width_;
     std::uint32_t height_;
 
-    std::uint32_t framesCount_;
     std::uint32_t colorAttachmentCount_;
-    
     VKW::ProxyImageHandle colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
     VKW::ProxyImageHandle* depthStencilAttachment_;
     

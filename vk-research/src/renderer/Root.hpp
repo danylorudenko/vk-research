@@ -9,6 +9,7 @@
 #include "..\vk_interface\ProxyHandles.hpp"
 #include "..\vk_interface\buffer\BuffersProvider.hpp"
 #include "..\vk_interface\image\ImagesProvider.hpp"
+#include "..\vk_interface\pipeline\RenderPassController.hpp"
 
 #include "Pass.hpp"
 
@@ -22,16 +23,17 @@ namespace Render
 
 struct RootPassDesc
 {
-    VKW::RenderPassDesc vkRenderPassDesc;
+    VKW::RenderPassDesc vkRenderPassDesc_;
 
-    std::uint32_t colorAttachmentsCount;
-    ResourceKey colorAttachments[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
-    ResourceKey depthStencilAttachment;
+    std::uint32_t colorAttachmentsCount_;
+    ResourceKey colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
+    ResourceKey depthStencilAttachment_;
 };
 
 struct RootDesc
 {
     VKW::ResourceRendererProxy* resourceProxy_;
+    VKW::RenderPassController* renderPassController_;
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;
 };
@@ -62,6 +64,7 @@ public:
 
 private:
     VKW::ResourceRendererProxy* resourceProxy_;
+    VKW::RenderPassController* renderPassController_;
 
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;

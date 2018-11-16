@@ -3,6 +3,8 @@
 #include "..\vk_interface\ResourceRendererProxy.hpp"
 #include "..\vk_interface\pipeline\RenderPassController.hpp"
 
+#include <utility>
+
 namespace Render
 {
 
@@ -17,29 +19,42 @@ Pass::Pass(PassDesc const& desc)
     : resourceProxy_{ desc.proxy_ }
     , renderPassController_{ desc.renderPassController_ }
 {
-    Root& root = *desc.root_;
-
     vkRenderPass_ = renderPassController_->AssembleRenderPass(desc.renderPassDesc_);
-    std::uint32_t const framesCount = desc.framesCount_;
 
-    VKW::ProxyFramebufferDesc framebufferDesc;
-    framebufferDesc.renderPass_ = vkRenderPass_;
-    framebufferDesc.width_ = desc.width_;
-    framebufferDesc.height_ = desc.height_;
+    VKW::ProxyFramebufferDesc framebufferProxyDesc;
+    framebufferProxyDesc.renderPass_ = vkRenderPass_;
+    framebufferProxyDesc.width_ = desc.width_;
+    framebufferProxyDesc.height_ = desc.height_;
 
-    for (auto i = 0u; i < framesCount; ++i) {
-
-        auto& resourceFrame = desc.framedDescriptorsHub_->contexts_[i];
-        auto& dstFrame = framebufferDesc.frames_[i]; // TODO That's pretty messed up, who is responsible for what???
-
-        for (auto j = 0u; j < desc.colorAttachmentCount_; ++j) {
-            dstFrame.colorAttachments_[j] = desc.colorAttachments_[j];
-        }
-        
+    for (auto j = 0u; j < desc.colorAttachmentCount_; ++j) {
+        framebufferProxyDesc.colorAttachments_[j] = desc.colorAttachments_[j];
     }
-    
 
-    //framebuffer_ = resourceProxy_->CreateFramebuffer()
+    framebufferProxyDesc.depthStencilAttachment_ = desc.depthStencilAttachment_;
+    
+    framebuffer_ = resourceProxy_->CreateFramebuffer(framebufferProxyDesc);
+}
+
+Pass::Pass(Pass&& rhs)
+    : resourceProxy_{ nullptr }
+    , renderPassController_{ nullptr }
+{
+    operator=(std::move(rhs));
+}
+
+Pass& Pass::operator=(Pass&& rhs)
+{
+    std::swap(resourceProxy_, rhs.resourceProxy_);
+    std::swap(renderPassController_, rhs.renderPassController_);
+    std::swap(vkRenderPass_, rhs.vkRenderPass_);
+    std::swap(framebuffer_, rhs.framebuffer_);
+
+    return *this;
+}
+
+Pass::~Pass()
+{
+    
 }
 
 }
