@@ -157,6 +157,7 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
         break;
     }
 
+
     VkImage vkImage = VK_NULL_HANDLE;
     VK_ASSERT(table_->vkCreateImage(device_->Handle(), &info, nullptr, &vkImage));
 

@@ -236,6 +236,33 @@ Device::operator bool() const
     return device_ != VK_NULL_HANDLE;
 }
 
+void Device::PrintPhysicalDeviceFormatProperties(VkFormat format)
+{
+    VkFormatProperties fProps;
+    table_->vkGetPhysicalDeviceFormatProperties(physicalDevice_, format, &fProps);
+    
+    bool r1 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
+    bool r2 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
+    bool r3 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT;
+    bool r4 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_UNIFORM_TEXEL_BUFFER_BIT;
+    bool r5 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_BIT;
+    bool r6 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_ATOMIC_BIT;
+    bool r7 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT;
+    bool r8 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
+    bool r9 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT;
+    bool r10 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    bool r12 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_BLIT_SRC_BIT;
+    bool r13 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT;
+    bool r14 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
+    bool r15 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_TRANSFER_SRC_BIT;
+    bool r16 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_TRANSFER_DST_BIT;
+    bool r18 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_IMG;
+    bool r19 = fProps.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_MINMAX_BIT_EXT;
+    bool r20 = false;
+
+    std::cout << "Not implemented!" << std::endl;
+}
+
 VKW::Device::PhysicalDeviceProperties const& Device::Properties() const
 {
     return physicalDeviceProperties_;

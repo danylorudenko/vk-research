@@ -8,6 +8,8 @@ namespace Render
 Root::Root()
     : resourceProxy_{ nullptr }
     , renderPassController_{ nullptr }
+    , imagesProvider_{ nullptr }
+    , framedDescriptorsHub_{ nullptr }
     , defaultFramebufferWidth_{ 0 }
     , defaultFramebufferHeight_{ 0 }
 {
@@ -17,6 +19,8 @@ Root::Root()
 Root::Root(RootDesc const& desc)
     : resourceProxy_{ desc.resourceProxy_ }
     , renderPassController_{ desc.renderPassController_ }
+    , imagesProvider_{ desc.imagesProvider_ }
+    , framedDescriptorsHub_{ desc.framedDescriptorsHub_ }
     , defaultFramebufferWidth_{ desc.defaultFramebufferWidth_ }
     , defaultFramebufferHeight_{ desc.defaultFramebufferHeight_ }
 {
@@ -26,6 +30,8 @@ Root::Root(RootDesc const& desc)
 Root::Root(Root&& rhs)
     : resourceProxy_{ nullptr }
     , renderPassController_{ nullptr }
+    , imagesProvider_{ nullptr }
+    , framedDescriptorsHub_{ nullptr }
     , defaultFramebufferWidth_{ 0 }
     , defaultFramebufferHeight_{ 0 }
 {
@@ -77,7 +83,8 @@ void Root::DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc)
     PassDesc passDesc;
     passDesc.proxy_ = resourceProxy_;
     passDesc.renderPassController_ = renderPassController_;
-    passDesc.renderPassDesc_ = desc.vkRenderPassDesc_;
+    passDesc.framedDescriptorsHub_ = framedDescriptorsHub_;
+    passDesc.imagesProvider_ = imagesProvider_;
     passDesc.width_ = defaultFramebufferWidth_;
     passDesc.height_ = defaultFramebufferHeight_;
     passDesc.colorAttachmentCount_ = desc.colorAttachmentsCount_;

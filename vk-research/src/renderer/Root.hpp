@@ -23,8 +23,6 @@ namespace Render
 
 struct RootPassDesc
 {
-    VKW::RenderPassDesc vkRenderPassDesc_;
-
     std::uint32_t colorAttachmentsCount_;
     ResourceKey colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
     ResourceKey depthStencilAttachment_;
@@ -34,6 +32,8 @@ struct RootDesc
 {
     VKW::ResourceRendererProxy* resourceProxy_;
     VKW::RenderPassController* renderPassController_;
+    VKW::ImagesProvider* imagesProvider_;
+    VKW::FramedDescriptorsHub* framedDescriptorsHub_;
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;
 };
@@ -65,6 +65,8 @@ public:
 private:
     VKW::ResourceRendererProxy* resourceProxy_;
     VKW::RenderPassController* renderPassController_;
+    VKW::ImagesProvider* imagesProvider_;
+    VKW::FramedDescriptorsHub* framedDescriptorsHub_;
 
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;

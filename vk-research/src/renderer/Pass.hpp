@@ -9,6 +9,7 @@ namespace VKW
 {
 class ResourceRendererProxy;
 class RenderPassController;
+struct FramedDescriptorsHub;
 struct RenderPassDesc;
 }
 
@@ -21,8 +22,8 @@ struct PassDesc
 {
     VKW::ResourceRendererProxy* proxy_;
     VKW::RenderPassController* renderPassController_;
-
-    VKW::RenderPassDesc renderPassDesc_;
+    VKW::FramedDescriptorsHub* framedDescriptorsHub_;
+    VKW::ImagesProvider* imagesProvider_;
 
     std::uint32_t width_;
     std::uint32_t height_;

@@ -19,7 +19,37 @@ Pass::Pass(PassDesc const& desc)
     : resourceProxy_{ desc.proxy_ }
     , renderPassController_{ desc.renderPassController_ }
 {
-    vkRenderPass_ = renderPassController_->AssembleRenderPass(desc.renderPassDesc_);
+    std::uint32_t const colorAttachmentCount = desc.colorAttachmentCount_;
+
+    VKW::RenderPassAttachmentDesc colorAttachmentDescs[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
+    VKW::RenderPassAttachmentDesc depthStencilAttachmentDesc;
+
+    VKW::RenderPassDesc vkRenderPassDesc;
+    
+    vkRenderPassDesc.colorAttachmentsCount_ = colorAttachmentCount;
+    for (auto i = 0u; i < colorAttachmentCount; ++i) {
+
+        VKW::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.colorAttachments_[i].id_];
+        VKW::ImageView* imageView = desc.imagesProvider_->GetImageView(imageViewHandle);
+        colorAttachmentDescs[i].format_ = imageView->format_;
+    }
+
+    vkRenderPassDesc.colorAttachments_ = colorAttachmentDescs;
+
+    if (desc.depthStencilAttachment_ != nullptr) {
+        VKW::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.depthStencilAttachment_->id_];
+        VKW::ImageView* imageView = desc.imagesProvider_->GetImageView(imageViewHandle);
+        vkRenderPassDesc.depthStencilAttachment_ = &depthStencilAttachmentDesc;
+        vkRenderPassDesc.depthStencilAttachment_->format_ = imageView->format_;
+    }
+    else {
+        vkRenderPassDesc.depthStencilAttachment_ = nullptr;
+    }
+
+    vkRenderPass_ = renderPassController_->AssembleRenderPass(vkRenderPassDesc);
+
+
+
 
     VKW::ProxyFramebufferDesc framebufferProxyDesc;
     framebufferProxyDesc.renderPass_ = vkRenderPass_;

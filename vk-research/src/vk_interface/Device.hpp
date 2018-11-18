@@ -75,6 +75,8 @@ public:
     VkPhysicalDevice PhysicalDeviceHandle() const;
     operator bool() const;
 
+    void PrintPhysicalDeviceFormatProperties(VkFormat format);
+
 private:
     static void PrintPhysicalDeviceData(
         VKW::Device::PhysicalDeviceProperties const& deviceProperties);

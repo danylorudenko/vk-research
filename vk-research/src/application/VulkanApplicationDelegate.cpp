@@ -25,6 +25,9 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
 
     Render::RootDesc rootDesc;
     rootDesc.resourceProxy_ = vulkanLoader_->resourceRendererProxy_.get();
+    rootDesc.renderPassController_ = vulkanLoader_->renderPassController_.get();
+    rootDesc.imagesProvider_ = vulkanLoader_->imagesProvider_.get();
+    rootDesc.framedDescriptorsHub_ = vulkanLoader_->framedDescriptorsHub_.get();
     rootDesc.defaultFramebufferWidth_ = windowWidth;
     rootDesc.defaultFramebufferHeight_ = windowHeight;
 
@@ -104,9 +107,22 @@ void VulkanApplicationDelegate::shutdown()
 void VulkanApplicationDelegate::FakeParseRendererResources()
 {
     VKW::ImageViewDesc imageDesc;
-    imageDesc.format_ = VK_FORMAT_B8G8R8A8_UNORM;
+    imageDesc.format_ = VK_FORMAT_R8G8B8A8_UNORM;
     imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
     imageDesc.width_ = 1024;
     imageDesc.height_ = 1024;
-    renderRoot_->DefineGlobalImage("test-image", imageDesc);
+
+    renderRoot_->DefineGlobalImage("attchmnt0", imageDesc);
+
+    renderRoot_->DefineGlobalImage("attchmnt1", imageDesc);
+
+    renderRoot_->DefineGlobalImage("attchmnt2", imageDesc);
+
+    Render::RootPassDesc passDesc;
+    passDesc.colorAttachmentsCount_ = 2;
+    passDesc.colorAttachments_[0] = "attchmnt0";
+    passDesc.colorAttachments_[1] = "attchmnt1";
+    passDesc.depthStencilAttachment_ = "";
+
+    renderRoot_->DefineRenderPass("pass0", passDesc);
 }

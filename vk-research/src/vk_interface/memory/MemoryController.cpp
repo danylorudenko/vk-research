@@ -213,7 +213,7 @@ void MemoryController::FreePage(MemoryPageHandle pageHandle)
 {
     std::uint32_t deletedPageIndex = std::numeric_limits<std::uint32_t>::max();
 
-    std::uint32_t const allocationsCount = allocations_.size();
+    std::uint32_t const allocationsCount = static_cast<std::uint32_t>(allocations_.size());
     for (auto i = 0u; i < allocationsCount; ++i) {
         if (pageHandle.page_ == allocations_[i]) {
             deletedPageIndex = i;
