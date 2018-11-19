@@ -84,6 +84,7 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
         break;
     case MemoryUsage::COLOR_ATTACHMENT:
         accessFlags = BitwiseEnumOR32(MemoryAccess::GPU_LOCAL, accessFlags);
+        break;
     default:
         assert(false && "Unsupported MemoryUsage");
     }

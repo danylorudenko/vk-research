@@ -57,7 +57,7 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
         attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         attachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         attachment.flags = VK_FLAGS_NONE;
         attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
