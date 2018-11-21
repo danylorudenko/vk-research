@@ -28,6 +28,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     rootDesc.renderPassController_ = vulkanLoader_->renderPassController_.get();
     rootDesc.imagesProvider_ = vulkanLoader_->imagesProvider_.get();
     rootDesc.framedDescriptorsHub_ = vulkanLoader_->framedDescriptorsHub_.get();
+    rootDesc.layoutController_ = vulkanLoader_->descriptorLayoutController_.get();
     rootDesc.defaultFramebufferWidth_ = windowWidth;
     rootDesc.defaultFramebufferHeight_ = windowHeight;
 

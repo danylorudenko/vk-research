@@ -10,6 +10,7 @@
 #include "..\vk_interface\buffer\BuffersProvider.hpp"
 #include "..\vk_interface\image\ImagesProvider.hpp"
 #include "..\vk_interface\pipeline\RenderPassController.hpp"
+#include "..\vk_interface\pipeline\DescriptorLayoutController.hpp"
 
 #include "Pass.hpp"
 
@@ -34,6 +35,7 @@ struct RootDesc
     VKW::RenderPassController* renderPassController_;
     VKW::ImagesProvider* imagesProvider_;
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
+    VKW::DescriptorLayoutController* layoutController_;
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;
 };
@@ -61,12 +63,14 @@ public:
     VKW::ProxyImageHandle FindGlobalImage(ResourceKey const& key);
 
     void DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc);
+    void DefineSetLayout(SetLayoutKey const& key);
 
 private:
     VKW::ResourceRendererProxy* resourceProxy_;
     VKW::RenderPassController* renderPassController_;
     VKW::ImagesProvider* imagesProvider_;
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
+    VKW::DescriptorLayoutController* layoutController_;
 
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;

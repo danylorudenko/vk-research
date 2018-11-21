@@ -11,11 +11,11 @@ namespace VKW
 class Device;
 class ImportTable;
 
-enum class DescriptorType
+enum DescriptorType
 {
-    SAMPLED_TEXTURE,
-    SAMPLER,
-    UNIFORM_BUFFER
+    DESCRIPTOR_TYPE_SAMPLED_TEXTURE,
+    DESCRIPTOR_TYPE_SAMPLER,
+    DESCRIPTOR_TYPE_UNIFORM_BUFFER
 };
 
 struct LayoutDescriptorDesc

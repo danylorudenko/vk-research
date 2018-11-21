@@ -10,6 +10,7 @@ Root::Root()
     , renderPassController_{ nullptr }
     , imagesProvider_{ nullptr }
     , framedDescriptorsHub_{ nullptr }
+    , layoutController_{ nullptr }
     , defaultFramebufferWidth_{ 0 }
     , defaultFramebufferHeight_{ 0 }
 {
@@ -21,6 +22,7 @@ Root::Root(RootDesc const& desc)
     , renderPassController_{ desc.renderPassController_ }
     , imagesProvider_{ desc.imagesProvider_ }
     , framedDescriptorsHub_{ desc.framedDescriptorsHub_ }
+    , layoutController_{ desc.layoutController_ }
     , defaultFramebufferWidth_{ desc.defaultFramebufferWidth_ }
     , defaultFramebufferHeight_{ desc.defaultFramebufferHeight_ }
 {
@@ -32,6 +34,7 @@ Root::Root(Root&& rhs)
     , renderPassController_{ nullptr }
     , imagesProvider_{ nullptr }
     , framedDescriptorsHub_{ nullptr }
+    , layoutController_{ nullptr }
     , defaultFramebufferWidth_{ 0 }
     , defaultFramebufferHeight_{ 0 }
 {
@@ -42,6 +45,9 @@ Root& Root::operator=(Root&& rhs)
 {
     std::swap(resourceProxy_, rhs.resourceProxy_);
     std::swap(renderPassController_, rhs.renderPassController_);
+    std::swap(imagesProvider_, rhs.imagesProvider_);
+    std::swap(framedDescriptorsHub_, rhs.framedDescriptorsHub_);
+    std::swap(layoutController_, rhs.layoutController_);
     std::swap(defaultFramebufferWidth_, rhs.defaultFramebufferWidth_);
     std::swap(defaultFramebufferHeight_, rhs.defaultFramebufferHeight_);
     std::swap(globalBuffers_, rhs.globalBuffers_);

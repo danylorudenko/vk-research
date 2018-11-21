@@ -62,13 +62,13 @@ DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(
         bindings[i].binding = desc.membersDesc_[i].binding_;
         switch (desc.membersDesc_[i].type_)
         {
-        case DescriptorType::SAMPLED_TEXTURE:
+        case DescriptorType::DESCRIPTOR_TYPE_SAMPLED_TEXTURE:
             bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
             break;
-        case DescriptorType::SAMPLER:
+        case DescriptorType::DESCRIPTOR_TYPE_SAMPLER:
             bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
             break;
-        case DescriptorType::UNIFORM_BUFFER:
+        case DescriptorType::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
             bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             break;
         default:
