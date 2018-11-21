@@ -138,6 +138,7 @@
     <ClCompile Include="src\memory\ByteBuffer.cpp" />
     <ClCompile Include="src\renderer\Pass.cpp" />
     <ClCompile Include="src\renderer\Root.cpp" />
+    <ClCompile Include="src\renderer\SetLayout.cpp" />
     <ClCompile Include="src\system\DynamicLibrary.cpp" />
     <ClCompile Include="src\system\Window.cpp" />
     <ClCompile Include="src\vk_interface\buffer\BuffersProvider.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="src\renderer\Pass.hpp" />
     <ClInclude Include="src\renderer\Root.hpp" />
     <ClInclude Include="src\renderer\RootDef.hpp" />
+    <ClInclude Include="src\renderer\SetLayout.hpp" />
     <ClInclude Include="src\system\DynamicLibrary.hpp" />
     <ClInclude Include="src\system\Window.hpp" />
     <ClInclude Include="src\vk_interface\buffer\BuffersProvider.hpp" />

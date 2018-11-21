@@ -13,6 +13,7 @@
 #include "..\vk_interface\pipeline\DescriptorLayoutController.hpp"
 
 #include "Pass.hpp"
+#include "SetLayout.hpp"
 
 namespace VKW
 {
@@ -46,8 +47,8 @@ class Root
 public:
     using GlobalImagesMap = std::unordered_map<ResourceKey, VKW::ProxyImageHandle>;
     using GlobalBuffersMap = std::unordered_map<ResourceKey, VKW::ProxyBufferHandle>;
-
     using RenderPassMap = std::map<RenderPassKey, Pass>;
+    using SetLayoutMap = std::map<SetLayoutKey, SetLayout>;
 
     Root();
     Root(RootDesc const& desc);
@@ -63,7 +64,8 @@ public:
     VKW::ProxyImageHandle FindGlobalImage(ResourceKey const& key);
 
     void DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc);
-    void DefineSetLayout(SetLayoutKey const& key);
+
+    void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
 
 private:
     VKW::ResourceRendererProxy* resourceProxy_;
@@ -79,6 +81,7 @@ private:
     GlobalBuffersMap globalBuffers_;
 
     RenderPassMap renderPassMap_;
+    SetLayoutMap setLayoutMap_;
 
 };
 

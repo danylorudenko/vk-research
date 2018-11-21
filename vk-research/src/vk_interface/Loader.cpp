@@ -134,6 +134,15 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
+    VKW::DescriptorLayoutControllerDesc descriptorLayoutControllerDesc;
+    descriptorLayoutControllerDesc.device_ = device_.get();
+    descriptorLayoutControllerDesc.table_ = table_.get();
+
+    descriptorLayoutController_ = std::make_unique<VKW::DescriptorLayoutController>(descriptorLayoutControllerDesc);
+
+
+
+
     VKW::ResourceRendererProxyDesc resourceRendererProxyDesc;
     resourceRendererProxyDesc.table_ = table_.get();
     resourceRendererProxyDesc.device_ = device_.get();

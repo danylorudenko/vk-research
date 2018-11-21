@@ -102,4 +102,10 @@ void Root::DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc)
     renderPassMap_[key] = Pass{ passDesc };
 }
 
+void Root::DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc)
+{
+    VKW::DescriptorSetLayoutHandle handle = layoutController_->CreateDescriptorSetLayout(desc);
+    setLayoutMap_[key] = SetLayout{ handle };
+}
+
 }
