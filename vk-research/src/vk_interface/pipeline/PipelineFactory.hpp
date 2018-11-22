@@ -63,7 +63,7 @@ private:
     ImportTable* table_;
     Device* device_;
 
-    std::vector<Pipeline> pipelines_;
+    std::vector<Pipeline*> pipelines_;
 };
 
 }

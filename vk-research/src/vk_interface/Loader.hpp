@@ -77,8 +77,9 @@ public:
     std::unique_ptr<VKW::FramebufferController> framebufferController_;
 
     std::unique_ptr<VKW::ResourceRendererProxy> resourceRendererProxy_;
-    //std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;
-    //std::unique_ptr<VKW::PipelineFactory> pipelineFactory_;
+
+    std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;
+    std::unique_ptr<VKW::PipelineFactory> pipelineFactory_;
 
     //std::unique_ptr<VKW::ResourceBindingService> resourceBindingService_;
 

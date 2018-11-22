@@ -35,7 +35,7 @@ public:
     ShaderModuleHandle LoadModule(ShaderModuleDesc const& desc);
     void UnloadModule(ShaderModuleHandle module);
 
-    ShaderModule const& AccessModule(ShaderModuleHandle handle) const;
+    ShaderModule* AccessModule(ShaderModuleHandle handle) const;
 
     ~ShaderModuleFactory();
 
@@ -44,7 +44,7 @@ private:
     Device* device_;
     IOManager* ioManager_;
 
-    std::vector<ShaderModule> loadedModules_;
+    std::vector<ShaderModule*> loadedModules_;
 };
 
 }

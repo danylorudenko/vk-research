@@ -16,7 +16,7 @@ struct ShaderModule
 
 struct ShaderModuleHandle
 {
-    std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
+    ShaderModule* handle_ = nullptr;
 };
 
 }

@@ -30,8 +30,15 @@ PipelineFactory& PipelineFactory::operator=(PipelineFactory&& rhs)
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
+    std::swap(pipelines_, rhs.pipelines_);
 
     return *this;
 }
+
+PipelineFactory::~PipelineFactory()
+{
+
+}
+
 
 }

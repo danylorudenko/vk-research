@@ -33,7 +33,8 @@ std::uint64_t IOManager::ReadFileToBuffer(char const* path, ByteBuffer& buffer)
         buffer.Resize(fileSize);
     }
 
-    istream.read(buffer.As<char*>(), fileSize);
+    istream.seekg(0, std::ios_base::beg);
+    istream.read(buffer.As<char*>(), static_cast<std::uint64_t>(fileSize));
     istream.close();
 
     return fileSize;

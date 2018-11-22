@@ -163,7 +163,7 @@ Loader::Loader(LoaderDesc const& desc)
     shaderModuleFactoryDesc.device_ = device_.get();
     shaderModuleFactoryDesc.ioManager_ = desc.ioManager_;
 
-    //shaderModuleFactory_ = std::make_unique<VKW::ShaderModuleFactory>(shaderModuleFactoryDesc);
+    shaderModuleFactory_ = std::make_unique<VKW::ShaderModuleFactory>(shaderModuleFactoryDesc);
 
 
 

@@ -60,14 +60,12 @@ void ByteBuffer::Resize(std::uint64_t newSize)
 {
     void* newBuffer = malloc(newSize);
 
-    void* bufferLocal = buffer_;
-    if (bufferLocal) {
-        std::memcpy(newBuffer, bufferLocal, newSize);
-        free(bufferLocal);
-        bufferLocal = newBuffer;
+    if (buffer_) {
+        std::memcpy(newBuffer, buffer_, newSize);
+        free(buffer_);
     }
 
-    buffer_ = bufferLocal;
+    buffer_ = newBuffer;
     size_ = newSize;
 }
 
