@@ -21,6 +21,8 @@ struct ShaderModuleFactoryDesc
 struct ShaderModuleDesc
 {
     char const* shaderPath_;
+    char const* entryPoint_;
+    ShaderModuleType type_;
 };
 
 class ShaderModuleFactory

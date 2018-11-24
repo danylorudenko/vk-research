@@ -11,6 +11,7 @@
 #include "..\vk_interface\image\ImagesProvider.hpp"
 #include "..\vk_interface\pipeline\RenderPassController.hpp"
 #include "..\vk_interface\pipeline\DescriptorLayoutController.hpp"
+#include "..\vk_interface\pipeline\PipelineFactory.hpp"
 
 #include "Pass.hpp"
 #include "SetLayout.hpp"
@@ -37,6 +38,7 @@ struct RootDesc
     VKW::ImagesProvider* imagesProvider_;
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
     VKW::DescriptorLayoutController* layoutController_;
+    VKW::PipelineFactory* pipelineFactory_;
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;
 };
@@ -73,6 +75,7 @@ private:
     VKW::ImagesProvider* imagesProvider_;
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
     VKW::DescriptorLayoutController* layoutController_;
+    VKW::PipelineFactory* pipelineFactory_;
 
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;

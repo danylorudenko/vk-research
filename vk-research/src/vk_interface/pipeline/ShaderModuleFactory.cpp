@@ -64,6 +64,8 @@ ShaderModuleHandle ShaderModuleFactory::LoadModule(ShaderModuleDesc const& desc)
     VK_ASSERT(table_->vkCreateShaderModule(device_->Handle(), &info, nullptr, &vkModule));
 
     auto* resultModule = new ShaderModule{ vkModule };
+    resultModule->entryPoint_ = desc.entryPoint_;
+    resultModule->type_ = desc.type_;
     loadedModules_.emplace_back(resultModule);
 
     return { resultModule };

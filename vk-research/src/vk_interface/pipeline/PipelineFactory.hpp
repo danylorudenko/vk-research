@@ -7,44 +7,100 @@
 
 #include "Pipeline.hpp"
 #include "RenderPass.hpp"
+#include "ShaderModule.hpp"
+#include "DescriptorLayoutController.hpp"
 
 namespace VKW
 {
 
 class ImportTable;
 class Device;
-
+class RenderPassController;
+class ShaderModuleFactory;
+class DescriptorLayoutController;
 
 struct PipelineFactoryDesc
 {
     ImportTable* table_;
     Device* device_;
+    RenderPassController* renderPassController_;
+    ShaderModuleFactory* shaderModuleFactory_;
+    DescriptorLayoutController* descriptorLayoutController_;
 };
 
+struct ShaderStageInfo
+{
+    ShaderModuleHandle shaderModuleHandle_;
+};
+
+struct VertexInputInfo
+{
+    std::uint32_t vertexAttributesCount_;
+    struct Attribute {
+        std::uint32_t location_;
+        std::uint32_t offset_;
+        std::uint32_t stride_;
+        VkFormat format_;
+    } vertexAttributes_[Pipeline::MAX_VERTEX_ATTRIBUTES];
+};
+
+struct InputAssemblyInfo
+{
+    VkPrimitiveTopology primitiveTopology_;
+    bool primitiveRestartEnable_;
+};
+
+struct ViewportInfo
+{
+    std::uint32_t viewportsCount_;
+    struct {
+        float x_;
+        float y_;
+        float width_;
+        float height_;
+        float minDepth_;
+        float maxDepth_;
+        
+        float scissorXoffset_;
+        float scissorYoffset_;
+        float scissorXextent_;
+        float scissorYextent_;
+    } viewports_[Pipeline::MAX_VIEWPORTS];
+};
+
+struct DepthStencilInfo
+{
+    bool depthTestEnabled_;
+    bool depthWriteEnabled_;
+    float minDepthBound_;
+    float maxDepthBound_;
+    VkCompareOp depthCompareOp_;
+
+    bool stencilTestEnabled_;
+    VkStencilOpState frontStencilState_;
+    VkStencilOpState backStencilState_;
+};
 
 struct GraphicsPipelineDesc
 {
     bool optimized_;
 
-    // shader stages count
-    // pShaderStages
-    //
-    // vertex input desc
-    // primitive assembly desc
-    // viewport desc
-    // resterization desc
-    // multisample desc
-    // depth-stencil desc
-    // color-blend state desc
-    // 
-    //
-    // layout
+    std::uint32_t shaderStagesCount_;
+    ShaderStageInfo shaderStages_[Pipeline::MAX_SHADER_STAGES];
+
+    InputAssemblyInfo* inputAssemblyInfo_;
+    VertexInputInfo* vertexInputInfo_;
+    ViewportInfo* viewportInfo_;
+    DepthStencilInfo* depthStencilInfo_;
+    // blending info should be here later
+    
+    PipelineLayoutDesc layoutDesc_;
     RenderPassHandle renderPass_;
-    // subpass index
 };
 
 class PipelineFactory
 {
+
 public:
     PipelineFactory();
     PipelineFactory(PipelineFactoryDesc const& desc);
@@ -62,6 +118,10 @@ public:
 private:
     ImportTable* table_;
     Device* device_;
+    RenderPassController* renderPassController_;
+    ShaderModuleFactory* shaderModuleFactory_;
+    DescriptorLayoutController* descriptorLayoutController_;
+
 
     std::vector<Pipeline*> pipelines_;
 };
