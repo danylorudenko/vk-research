@@ -58,14 +58,63 @@ PipelineFactory::~PipelineFactory()
 
 }
 
+VkShaderStageFlagBits VKWShaderTypeToVkFlags(ShaderModuleType type)
+{
+    switch (type) {
+
+    case SHADER_MODULE_TYPE_VERTEX:
+        return VK_SHADER_STAGE_VERTEX_BIT;
+    case SHADER_MODULE_TYPE_FRAGMENT:
+        return VK_SHADER_STAGE_FRAGMENT_BIT;
+    case SHADER_MODULE_TYPE_COMPUTE:
+        return VK_SHADER_STAGE_COMPUTE_BIT;
+
+    default:
+        return static_cast<VkShaderStageFlagBits>(VK_FLAGS_NONE);
+    }
+}
+
 PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& desc)
 {
+    static VkPipelineShaderStageCreateInfo shaderStagesInfo[Pipeline::MAX_SHADER_STAGES];
+    static VkVertexInputBindingDescription inputBindigsInfo[Pipeline::MAX_VERTEX_ATTRIBUTES];
+    static VkVertexInputAttributeDescription inputAttributesInfo[Pipeline::MAX_VERTEX_ATTRIBUTES];
+    
     PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(desc.layoutDesc_);
     PipelineLayout* layout = descriptorLayoutController_->GetPipelineLayout(layoutHandle);
+    RenderPass* renderPass = renderPassController_->GetRenderPass(desc.renderPass_);
+
+    static VkGraphicsPipelineCreateInfo graphicsPipelineInfo;
+    graphicsPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    graphicsPipelineInfo.pNext = nullptr;
+    graphicsPipelineInfo.flags = desc.optimized_ ? VK_FLAGS_NONE : VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT;
+    graphicsPipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+    graphicsPipelineInfo.basePipelineIndex = 0;
+    graphicsPipelineInfo.layout = layout->handle_;
+    graphicsPipelineInfo.renderPass = renderPass->handle_;
+    graphicsPipelineInfo.subpass = 0;
+
+
+
+    graphicsPipelineInfo.stageCount = desc.shaderStagesCount_;
+    for (auto i = 0u; i < desc.shaderStagesCount_; ++i) {
+        ShaderModule* shModule = shaderModuleFactory_->AccessModule(desc.shaderStages_[i].shaderModuleHandle_);
+        
+        auto& vkShStage = shaderStagesInfo[i];
+        vkShStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        vkShStage.pNext = nullptr;
+        vkShStage.module = shModule->handle_;
+        vkShStage.pName = shModule->entryPoint_.c_str();
+        vkShStage.stage = VKWShaderTypeToVkFlags(shModule->type_);
+        vkShStage.flags = VK_FLAGS_NONE;
+        vkShStage.pSpecializationInfo = nullptr;
+    }
+
+    VkPipelineVertexInputStateCreateInfo vertexInputState;
+    vertexInputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertexInputState.pNext = nullptr;
+    //vertexInputState.
     
-
-
-    VkGraphicsPipelineCreateInfo graphicsPipelineInfo;
 
 
     VkPipeline vkPipeline = VK_NULL_HANDLE;
