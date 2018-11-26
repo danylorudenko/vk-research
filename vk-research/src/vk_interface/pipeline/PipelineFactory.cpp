@@ -77,8 +77,10 @@ VkShaderStageFlagBits VKWShaderTypeToVkFlags(ShaderModuleType type)
 PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& desc)
 {
     static VkPipelineShaderStageCreateInfo shaderStagesInfo[Pipeline::MAX_SHADER_STAGES];
-    static VkVertexInputBindingDescription inputBindigsInfo[Pipeline::MAX_VERTEX_ATTRIBUTES];
+    static VkVertexInputBindingDescription inputBindingsInfo[Pipeline::MAX_VERTEX_ATTRIBUTES];
     static VkVertexInputAttributeDescription inputAttributesInfo[Pipeline::MAX_VERTEX_ATTRIBUTES];
+    static VkViewport viewports[Pipeline::MAX_VIEWPORTS];
+    static VkRect2D scissorRects[Pipeline::MAX_VIEWPORTS];
     
     PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(desc.layoutDesc_);
     PipelineLayout* layout = descriptorLayoutController_->GetPipelineLayout(layoutHandle);
@@ -111,10 +113,94 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     }
 
     VkPipelineVertexInputStateCreateInfo vertexInputState;
-    vertexInputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputState.pNext = nullptr;
-    //vertexInputState.
+    {
+        vertexInputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        vertexInputState.pNext = nullptr;
+        vertexInputState.flags = VK_FLAGS_NONE;
+
+        auto const attrCount = desc.vertexInputInfo_->vertexAttributesCount_;
+        vertexInputState.vertexBindingDescriptionCount = 1;
+        vertexInputState.vertexAttributeDescriptionCount = attrCount;
+
+        inputBindingsInfo[0].binding = desc.vertexInputInfo_->binding_;
+        inputBindingsInfo[0].stride = desc.vertexInputInfo_->stride_;
+        inputBindingsInfo[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        for (auto i = 0u; i < attrCount; ++i) {
+            auto const& sourceVertexInfo = desc.vertexInputInfo_->vertexAttributes_[i];
+            inputAttributesInfo[i].binding = i;
+            inputAttributesInfo[i].location = sourceVertexInfo.location_;
+            inputAttributesInfo[i].offset = sourceVertexInfo.offset_;
+            inputAttributesInfo[i].format = sourceVertexInfo.format_;
+        }
+
+        vertexInputState.pVertexBindingDescriptions = inputBindingsInfo;
+        vertexInputState.pVertexAttributeDescriptions = inputAttributesInfo;
+    }
+
+    graphicsPipelineInfo.pVertexInputState = &vertexInputState;
     
+
+    VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
+    {
+        inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        inputAssemblyInfo.pNext = nullptr;
+        inputAssemblyInfo.flags = VK_FLAGS_NONE;
+        inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        inputAssemblyInfo.primitiveRestartEnable = false;
+    }
+
+    graphicsPipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
+
+
+    VkPipelineViewportStateCreateInfo viewportInfo;
+    {
+        viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        viewportInfo.pNext = nullptr;
+        viewportInfo.flags = VK_FLAGS_NONE;
+
+        auto const& viewportCount = desc.viewportInfo_->viewportsCount_;
+        viewportInfo.viewportCount = viewportCount;
+        for (auto i = 0u; i < viewportCount; ++i) {
+            auto const& vDesc = desc.viewportInfo_->viewports_[i];
+
+            auto& v = viewports[i];
+            v.x = vDesc.x_;
+            v.y = vDesc.y_;
+            v.width = vDesc.width_;
+            v.height = vDesc.height_;
+            v.minDepth = vDesc.minDepth_;
+            v.maxDepth = vDesc.maxDepth_;
+            
+            auto& sc = scissorRects[i];
+            sc.offset.x = vDesc.scissorXoffset_;
+            sc.offset.y = vDesc.scissorYoffset_;
+            sc.extent.width = vDesc.scissorXextent_;
+            sc.extent.height = vDesc.scissorYextent_;
+        }
+
+        viewportInfo.pViewports = viewports;
+        viewportInfo.pScissors = scissorRects;
+    }
+
+    graphicsPipelineInfo.pViewportState = &viewportInfo;
+
+
+    VkPipelineRasterizationStateCreateInfo rasterizationInfo;
+    {
+        rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+        rasterizationInfo.pNext = nullptr;
+        rasterizationInfo.flags = VK_FLAGS_NONE;
+        //rasterizationInfo.
+    }
+
+    graphicsPipelineInfo.pRasterizationState = &rasterizationInfo;
+    
+
+    // viewport
+    // rasterization
+    
+
 
 
     VkPipeline vkPipeline = VK_NULL_HANDLE;

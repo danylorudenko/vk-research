@@ -35,11 +35,12 @@ struct ShaderStageInfo
 
 struct VertexInputInfo
 {
+    std::uint32_t binding_;
+    std::uint32_t stride_;
     std::uint32_t vertexAttributesCount_;
     struct Attribute {
         std::uint32_t location_;
         std::uint32_t offset_;
-        std::uint32_t stride_;
         VkFormat format_;
     } vertexAttributes_[Pipeline::MAX_VERTEX_ATTRIBUTES];
 };
