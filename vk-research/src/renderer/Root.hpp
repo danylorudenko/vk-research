@@ -15,6 +15,7 @@
 
 #include "Pass.hpp"
 #include "SetLayout.hpp"
+#include "RendererPipeline.hpp"
 
 namespace VKW
 {
@@ -51,6 +52,7 @@ public:
     using GlobalBuffersMap = std::unordered_map<ResourceKey, VKW::ProxyBufferHandle>;
     using RenderPassMap = std::map<RenderPassKey, Pass>;
     using SetLayoutMap = std::map<SetLayoutKey, SetLayout>;
+    using PipelineMap = std::map<PipelineKey, Pipeline>;
 
     Root();
     Root(RootDesc const& desc);
@@ -69,6 +71,8 @@ public:
 
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
 
+    void DefineGraphicsPipeline(PipelineKey const& key, VKW::GraphicsPipelineDesc const& desc);
+
 private:
     VKW::ResourceRendererProxy* resourceProxy_;
     VKW::RenderPassController* renderPassController_;
@@ -85,6 +89,7 @@ private:
 
     RenderPassMap renderPassMap_;
     SetLayoutMap setLayoutMap_;
+    PipelineMap pipelineMap_;
 
 };
 

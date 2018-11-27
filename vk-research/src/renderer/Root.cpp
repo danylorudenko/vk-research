@@ -112,4 +112,10 @@ void Root::DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc
     setLayoutMap_[key] = SetLayout{ handle };
 }
 
+void Root::DefineGraphicsPipeline(PipelineKey const& key, VKW::GraphicsPipelineDesc const& desc)
+{
+    VKW::PipelineHandle handle = pipelineFactory_->CreateGraphicsPipeline(desc);
+    pipelineMap_[key] = Pipeline{ handle };
+}
+
 }

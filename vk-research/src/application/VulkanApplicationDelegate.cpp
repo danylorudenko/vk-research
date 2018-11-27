@@ -147,4 +147,13 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     renderRoot_->DefineSetLayout("layout0", setLayoutDesc);
 
+
+
+
+    VKW::GraphicsPipelineDesc pipelineDesc;
+
+    VKW::VertexInputInfo vInfo;
+    vInfo.binding_ = 0;
+    //vInfo.
+
 }

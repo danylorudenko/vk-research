@@ -81,6 +81,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     static VkVertexInputAttributeDescription inputAttributesInfo[Pipeline::MAX_VERTEX_ATTRIBUTES];
     static VkViewport viewports[Pipeline::MAX_VIEWPORTS];
     static VkRect2D scissorRects[Pipeline::MAX_VIEWPORTS];
+    static VkPipelineColorBlendAttachmentState colorBlendAttachmentInfo[RenderPass::MAX_ATTACHMENTS];
     
     PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(desc.layoutDesc_);
     PipelineLayout* layout = descriptorLayoutController_->GetPipelineLayout(layoutHandle);
@@ -112,7 +113,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
         vkShStage.pSpecializationInfo = nullptr;
     }
 
-    VkPipelineVertexInputStateCreateInfo vertexInputState;
+    static VkPipelineVertexInputStateCreateInfo vertexInputState;
     {
         vertexInputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputState.pNext = nullptr;
@@ -141,7 +142,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     graphicsPipelineInfo.pVertexInputState = &vertexInputState;
     
 
-    VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
+    static VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
     {
         inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         inputAssemblyInfo.pNext = nullptr;
@@ -153,7 +154,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     graphicsPipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
 
 
-    VkPipelineViewportStateCreateInfo viewportInfo;
+    static VkPipelineViewportStateCreateInfo viewportInfo;
     {
         viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         viewportInfo.pNext = nullptr;
@@ -186,26 +187,81 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     graphicsPipelineInfo.pViewportState = &viewportInfo;
 
 
-    VkPipelineRasterizationStateCreateInfo rasterizationInfo;
+    static VkPipelineRasterizationStateCreateInfo rasterizationInfo;
     {
         rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterizationInfo.pNext = nullptr;
         rasterizationInfo.flags = VK_FLAGS_NONE;
-        //rasterizationInfo.
+        rasterizationInfo.depthClampEnable = VK_FALSE;
+        rasterizationInfo.rasterizerDiscardEnable = VK_FALSE;
+        rasterizationInfo.polygonMode = VK_POLYGON_MODE_FILL;
+        rasterizationInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+        rasterizationInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterizationInfo.depthBiasEnable = VK_FALSE;
+        rasterizationInfo.depthBiasConstantFactor = 0.0f;
+        rasterizationInfo.depthBiasClamp = 0.0f;
+        rasterizationInfo.depthBiasSlopeFactor = 0.0f;
+        rasterizationInfo.lineWidth = 1.0f;
     }
 
     graphicsPipelineInfo.pRasterizationState = &rasterizationInfo;
+
+
+
+    static VkPipelineMultisampleStateCreateInfo multisampleInfo;
+    {
+        multisampleInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        multisampleInfo.pNext = nullptr;
+        multisampleInfo.flags = VK_FLAGS_NONE;
+        multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+        multisampleInfo.sampleShadingEnable = VK_FALSE;
+        multisampleInfo.minSampleShading = 1.0f;
+        multisampleInfo.pSampleMask = nullptr;
+        multisampleInfo.alphaToCoverageEnable = VK_FALSE;
+        multisampleInfo.alphaToOneEnable = VK_FALSE;
+
+    }
+
+    graphicsPipelineInfo.pMultisampleState = &multisampleInfo;
+
+
+
+    static VkPipelineColorBlendStateCreateInfo colorBlendInfo;
+    {
+        colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        colorBlendInfo.pNext = nullptr;
+        colorBlendInfo.flags = VK_FLAGS_NONE;
+        colorBlendInfo.logicOpEnable = VK_FALSE;
+        colorBlendInfo.logicOp = VK_LOGIC_OP_NO_OP;
+        
+        auto const attachmentCount = renderPass->colorAttachmentsCount_;
+        for (auto i = 0u; i < attachmentCount; ++i) {
+            auto& info = colorBlendAttachmentInfo[i];
+            info.blendEnable = VK_FALSE;
+            info.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+            info.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            info.colorBlendOp = VK_BLEND_OP_ADD; // don't care
+            info.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            info.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            info.alphaBlendOp = VK_BLEND_OP_ADD; // don't care
+            info.colorWriteMask = 
+                VK_COLOR_COMPONENT_R_BIT | 
+                VK_COLOR_COMPONENT_G_BIT |
+                VK_COLOR_COMPONENT_B_BIT |
+                VK_COLOR_COMPONENT_A_BIT;
+        }
+    }
+
+    graphicsPipelineInfo.pColorBlendState = &colorBlendInfo;
     
-
-    // viewport
-    // rasterization
-    
-
-
 
     VkPipeline vkPipeline = VK_NULL_HANDLE;
     VK_ASSERT(table_->vkCreateGraphicsPipelines(device_->Handle(), VK_NULL_HANDLE, 1, &graphicsPipelineInfo, nullptr, &vkPipeline));
-    return PipelineHandle{ nullptr };
+
+    auto* result = new Pipeline{};
+    result->vkPipeline_ = vkPipeline;
+
+    return PipelineHandle{ result };
 }
 
 
