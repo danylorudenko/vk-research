@@ -107,6 +107,21 @@ void VulkanApplicationDelegate::shutdown()
 
 void VulkanApplicationDelegate::FakeParseRendererResources()
 {
+    //VKW::DescriptorSetLayoutDesc setLayoutDesc;
+    //setLayoutDesc.membersCount_ = 3;
+    //
+    //setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_SAMPLED_TEXTURE;
+    //setLayoutDesc.membersDesc_[0].binding_ = 0;
+    //
+    //setLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    //setLayoutDesc.membersDesc_[1].binding_ = 1;
+    //
+    //setLayoutDesc.membersDesc_[2].type_ = VKW::DESCRIPTOR_TYPE_SAMPLER;
+    //setLayoutDesc.membersDesc_[2].binding_ = 2;
+    //
+    //renderRoot_->DefineSetLayout("layout0", setLayoutDesc);
+
+
     VKW::ImageViewDesc imageDesc;
     imageDesc.format_ = VK_FORMAT_R8G8B8A8_UNORM;
     imageDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
@@ -115,45 +130,71 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     renderRoot_->DefineGlobalImage("attchmnt0", imageDesc);
 
-    renderRoot_->DefineGlobalImage("attchmnt1", imageDesc);
+    //renderRoot_->DefineGlobalImage("attchmnt1", imageDesc);
 
-    renderRoot_->DefineGlobalImage("attchmnt2", imageDesc);
-
-
+    //renderRoot_->DefineGlobalImage("attchmnt2", imageDesc);
 
 
     Render::RootPassDesc passDesc;
-    passDesc.colorAttachmentsCount_ = 2;
+    passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0] = "attchmnt0";
-    passDesc.colorAttachments_[1] = "attchmnt1";
-    passDesc.depthStencilAttachment_ = "";
 
     renderRoot_->DefineRenderPass("pass0", passDesc);
 
+    VKW::ShaderModuleDesc vertexModuleDesc;
+    vertexModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
+    vertexModuleDesc.shaderPath_ = "shader-src\\test-vertex.spv";
+    vertexModuleDesc.entryPoint_ = "main";
 
 
+    VKW::ShaderModuleDesc fragmentModuleDesc;
+    vertexModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
+    vertexModuleDesc.shaderPath_ = "shader-src\\test-frag.spv";
+    vertexModuleDesc.entryPoint_ = "main";
 
-    VKW::DescriptorSetLayoutDesc setLayoutDesc;
-    setLayoutDesc.membersCount_ = 3;
-
-    setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_SAMPLED_TEXTURE;
-    setLayoutDesc.membersDesc_[0].binding_ = 0;
-
-    setLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    setLayoutDesc.membersDesc_[1].binding_ = 1;
-    
-    setLayoutDesc.membersDesc_[2].type_ = VKW::DESCRIPTOR_TYPE_SAMPLER;
-    setLayoutDesc.membersDesc_[2].binding_ = 2;
-
-    renderRoot_->DefineSetLayout("layout0", setLayoutDesc);
-
-
-
+    VKW::ShaderModuleHandle vertexHandle = vulkanLoader_->shaderModuleFactory_->LoadModule(vertexModuleDesc);
+    VKW::ShaderModuleHandle fragmentHandle = vulkanLoader_->shaderModuleFactory_->LoadModule(fragmentModuleDesc);
 
     VKW::GraphicsPipelineDesc pipelineDesc;
 
+    pipelineDesc.shaderStagesCount_ = 2;
+    pipelineDesc.shaderStages_[0].shaderModuleHandle_ = vertexHandle;
+    pipelineDesc.shaderStages_[1].shaderModuleHandle_ = fragmentHandle;
+
+    VKW::InputAssemblyInfo iaInfo;
+    iaInfo.primitiveRestartEnable_ = false;
+    iaInfo.primitiveTopology_ = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+
     VKW::VertexInputInfo vInfo;
     vInfo.binding_ = 0;
-    //vInfo.
+    vInfo.stride_ = 12;
+    vInfo.vertexAttributesCount_ = 1;
+    vInfo.vertexAttributes_[0].location_ = 0;
+    vInfo.vertexAttributes_[0].offset_ = 0;
+    vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
+
+    VKW::ViewportInfo vpInfo;
+    vpInfo.viewportsCount_ = 1;
+
+    auto& vp = vpInfo.viewports_[0];
+    vp.x_ = 0.0f;
+    vp.y_ = 0.0f;
+    vp.width_ = 1024.0f;
+    vp.width_ = 1024.0f;
+    vp.minDepth_ = 0.0f;
+    vp.maxDepth_ = 1000.0f;
+    vp.scissorXoffset_ = 0.0f;
+    vp.scissorYoffset_ = 0.0f;
+    vp.scissorXextent_ = 1024.0f;
+    vp.scissorYextent_ = 1024.0f;
+
+    pipelineDesc.layoutDesc_.membersCount_ = 0;
+
+
+    renderRoot_->DefineGraphicsPipeline("testpipe", pipelineDesc);
+
+    
+    
 
 }

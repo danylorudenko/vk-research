@@ -2,6 +2,7 @@
 
 #include <vulkan\vulkan.h>
 #include <limits>
+#include <cstdint>
 
 namespace VKW
 {
