@@ -170,8 +170,11 @@ Loader::Loader(LoaderDesc const& desc)
     VKW::PipelineFactoryDesc pipelineFactoryDesc;
     pipelineFactoryDesc.table_ = table_.get();
     pipelineFactoryDesc.device_ = device_.get();
+    pipelineFactoryDesc.descriptorLayoutController_ = descriptorLayoutController_.get();
+    pipelineFactoryDesc.renderPassController_ = renderPassController_.get();
+    pipelineFactoryDesc.shaderModuleFactory_ = shaderModuleFactory_.get();
 
-    //pipelineFactory_ = std::make_unique<VKW::PipelineFactory>(pipelineFactoryDesc);
+    pipelineFactory_ = std::make_unique<VKW::PipelineFactory>(pipelineFactoryDesc);
 
 
 

@@ -44,6 +44,23 @@ struct RootDesc
     std::uint32_t defaultFramebufferHeight_;
 };
 
+struct RootPipelineDesc
+{
+    bool optimized_;
+
+    std::uint32_t shaderStagesCount_;
+    VKW::ShaderStageInfo shaderStages_[VKW::Pipeline::MAX_SHADER_STAGES];
+
+    VKW::InputAssemblyInfo* inputAssemblyInfo_;
+    VKW::VertexInputInfo* vertexInputInfo_;
+    VKW::ViewportInfo* viewportInfo_;
+    VKW::DepthStencilInfo* depthStencilInfo_;
+    // blending info should be here later
+
+    VKW::PipelineLayoutDesc layoutDesc_;
+    RenderPassKey renderPass_;
+};
+
 class Root
     : public NonCopyable
 {
@@ -71,7 +88,7 @@ public:
 
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
 
-    void DefineGraphicsPipeline(PipelineKey const& key, VKW::GraphicsPipelineDesc const& desc);
+    void DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const& desc);
 
 private:
     VKW::ResourceRendererProxy* resourceProxy_;

@@ -27,4 +27,9 @@ Pipeline& Pipeline::operator=(Pipeline&& rhs)
     return *this;
 }
 
+Pipeline::~Pipeline()
+{
+
+}
+
 }

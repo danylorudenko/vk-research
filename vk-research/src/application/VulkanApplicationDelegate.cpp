@@ -29,6 +29,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     rootDesc.imagesProvider_ = vulkanLoader_->imagesProvider_.get();
     rootDesc.framedDescriptorsHub_ = vulkanLoader_->framedDescriptorsHub_.get();
     rootDesc.layoutController_ = vulkanLoader_->descriptorLayoutController_.get();
+    rootDesc.pipelineFactory_ = vulkanLoader_->pipelineFactory_.get();
     rootDesc.defaultFramebufferWidth_ = windowWidth;
     rootDesc.defaultFramebufferHeight_ = windowHeight;
 
@@ -148,9 +149,9 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 
     VKW::ShaderModuleDesc fragmentModuleDesc;
-    vertexModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
-    vertexModuleDesc.shaderPath_ = "shader-src\\test-frag.spv";
-    vertexModuleDesc.entryPoint_ = "main";
+    fragmentModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
+    fragmentModuleDesc.shaderPath_ = "shader-src\\test-frag.spv";
+    fragmentModuleDesc.entryPoint_ = "main";
 
     VKW::ShaderModuleHandle vertexHandle = vulkanLoader_->shaderModuleFactory_->LoadModule(vertexModuleDesc);
     VKW::ShaderModuleHandle fragmentHandle = vulkanLoader_->shaderModuleFactory_->LoadModule(fragmentModuleDesc);
@@ -190,6 +191,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     vp.scissorYextent_ = 1024.0f;
 
     pipelineDesc.layoutDesc_.membersCount_ = 0;
+    pipelineDesc.renderPass_ = 
 
 
     renderRoot_->DefineGraphicsPipeline("testpipe", pipelineDesc);
