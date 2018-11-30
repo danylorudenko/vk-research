@@ -112,9 +112,22 @@ void Root::DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc
     setLayoutMap_[key] = SetLayout{ handle };
 }
 
-void Root::DefineGraphicsPipeline(PipelineKey const& key, VKW::GraphicsPipelineDesc const& desc)
+void Root::DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const& desc)
 {
-    VKW::PipelineHandle handle = pipelineFactory_->CreateGraphicsPipeline(desc);
+    VKW::GraphicsPipelineDesc vkwDesc;
+    vkwDesc.optimized_ = desc.optimized_;
+    vkwDesc.inputAssemblyInfo_ = desc.inputAssemblyInfo_;
+    vkwDesc.vertexInputInfo_ = desc.vertexInputInfo_;
+    vkwDesc.shaderStagesCount_ = desc.shaderStagesCount_;
+    for (auto i = 0u; i < desc.shaderStagesCount_; ++i) {
+        vkwDesc.shaderStages_[i] = desc.shaderStages_[i];
+    }
+    vkwDesc.viewportInfo_ = desc.viewportInfo_;
+    vkwDesc.layoutDesc_ = desc.layoutDesc_;
+    vkwDesc.renderPass_ = renderPassMap_[desc.renderPass_].VKWRenderPass();
+    vkwDesc.depthStencilInfo_ = desc.depthStencilInfo_;
+    
+    VKW::PipelineHandle handle = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
     pipelineMap_[key] = Pipeline{ handle };
 }
 

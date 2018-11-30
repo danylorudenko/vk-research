@@ -87,4 +87,9 @@ Pass::~Pass()
     
 }
 
+VKW::RenderPassHandle Pass::VKWRenderPass() const
+{
+    return vkRenderPass_;
+}
+
 }

@@ -62,10 +62,10 @@ struct ViewportInfo
         float minDepth_;
         float maxDepth_;
         
-        float scissorXoffset_;
-        float scissorYoffset_;
-        float scissorXextent_;
-        float scissorYextent_;
+        std::int32_t scissorXoffset_;
+        std::int32_t scissorYoffset_;
+        std::uint32_t scissorXextent_;
+        std::uint32_t scissorYextent_;
     } viewports_[Pipeline::MAX_VIEWPORTS];
 };
 
@@ -95,7 +95,7 @@ struct GraphicsPipelineDesc
     DepthStencilInfo* depthStencilInfo_;
     // blending info should be here later
     
-    PipelineLayoutDesc layoutDesc_;
+    PipelineLayoutDesc* layoutDesc_;
     RenderPassHandle renderPass_;
 };
 

@@ -44,6 +44,8 @@ public:
     Pass& operator=(Pass&& rhs);
     ~Pass();
 
+    VKW::RenderPassHandle VKWRenderPass() const;
+
 private:
     VKW::ResourceRendererProxy* resourceProxy_;
     VKW::RenderPassController* renderPassController_;

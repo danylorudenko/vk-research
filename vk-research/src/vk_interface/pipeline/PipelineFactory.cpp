@@ -83,7 +83,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     static VkRect2D scissorRects[Pipeline::MAX_VIEWPORTS];
     static VkPipelineColorBlendAttachmentState colorBlendAttachmentInfo[RenderPass::MAX_ATTACHMENTS];
     
-    PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(desc.layoutDesc_);
+    PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
     PipelineLayout* layout = descriptorLayoutController_->GetPipelineLayout(layoutHandle);
     RenderPass* renderPass = renderPassController_->GetRenderPass(desc.renderPass_);
 
@@ -112,6 +112,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
         vkShStage.flags = VK_FLAGS_NONE;
         vkShStage.pSpecializationInfo = nullptr;
     }
+    graphicsPipelineInfo.pStages = shaderStagesInfo;
 
     static VkPipelineVertexInputStateCreateInfo vertexInputState;
     {
@@ -162,6 +163,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
         auto const& viewportCount = desc.viewportInfo_->viewportsCount_;
         viewportInfo.viewportCount = viewportCount;
+        viewportInfo.scissorCount = viewportCount;
         for (auto i = 0u; i < viewportCount; ++i) {
             auto const& vDesc = desc.viewportInfo_->viewports_[i];
 
@@ -235,6 +237,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
         colorBlendInfo.logicOp = VK_LOGIC_OP_NO_OP;
         
         auto const attachmentCount = renderPass->colorAttachmentsCount_;
+        colorBlendInfo.attachmentCount = attachmentCount;
         for (auto i = 0u; i < attachmentCount; ++i) {
             auto& info = colorBlendAttachmentInfo[i];
             info.blendEnable = VK_FALSE;
@@ -250,6 +253,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
                 VK_COLOR_COMPONENT_B_BIT |
                 VK_COLOR_COMPONENT_A_BIT;
         }
+        colorBlendInfo.pAttachments = colorBlendAttachmentInfo;
     }
 
     graphicsPipelineInfo.pColorBlendState = &colorBlendInfo;

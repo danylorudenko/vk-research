@@ -156,15 +156,25 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     VKW::ShaderModuleHandle vertexHandle = vulkanLoader_->shaderModuleFactory_->LoadModule(vertexModuleDesc);
     VKW::ShaderModuleHandle fragmentHandle = vulkanLoader_->shaderModuleFactory_->LoadModule(fragmentModuleDesc);
 
-    VKW::GraphicsPipelineDesc pipelineDesc;
+
+
+
+    Render::RootPipelineDesc pipelineDesc;
+
 
     pipelineDesc.shaderStagesCount_ = 2;
     pipelineDesc.shaderStages_[0].shaderModuleHandle_ = vertexHandle;
     pipelineDesc.shaderStages_[1].shaderModuleHandle_ = fragmentHandle;
 
+
+
     VKW::InputAssemblyInfo iaInfo;
     iaInfo.primitiveRestartEnable_ = false;
     iaInfo.primitiveTopology_ = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+    pipelineDesc.inputAssemblyInfo_ = &iaInfo;
+
+
 
 
     VKW::VertexInputInfo vInfo;
@@ -175,6 +185,10 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     vInfo.vertexAttributes_[0].offset_ = 0;
     vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
 
+    pipelineDesc.vertexInputInfo_ = &vInfo;
+
+
+
     VKW::ViewportInfo vpInfo;
     vpInfo.viewportsCount_ = 1;
 
@@ -182,16 +196,24 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     vp.x_ = 0.0f;
     vp.y_ = 0.0f;
     vp.width_ = 1024.0f;
-    vp.width_ = 1024.0f;
+    vp.height_ = 1024.0f;
     vp.minDepth_ = 0.0f;
-    vp.maxDepth_ = 1000.0f;
-    vp.scissorXoffset_ = 0.0f;
-    vp.scissorYoffset_ = 0.0f;
-    vp.scissorXextent_ = 1024.0f;
-    vp.scissorYextent_ = 1024.0f;
+    vp.maxDepth_ = 1.0f;
+    vp.scissorXoffset_ = 0;
+    vp.scissorYoffset_ = 0;
+    vp.scissorXextent_ = 1024;
+    vp.scissorYextent_ = 1024;
 
-    pipelineDesc.layoutDesc_.membersCount_ = 0;
-    pipelineDesc.renderPass_ = 
+    pipelineDesc.viewportInfo_ = &vpInfo;
+
+
+
+    VKW::PipelineLayoutDesc layoutDesc;
+    layoutDesc.membersCount_ = 0;
+
+    pipelineDesc.layoutDesc_ = &layoutDesc;
+
+    pipelineDesc.renderPass_ = "pass0";
 
 
     renderRoot_->DefineGraphicsPipeline("testpipe", pipelineDesc);

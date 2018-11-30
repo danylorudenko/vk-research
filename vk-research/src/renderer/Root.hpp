@@ -57,7 +57,7 @@ struct RootPipelineDesc
     VKW::DepthStencilInfo* depthStencilInfo_;
     // blending info should be here later
 
-    VKW::PipelineLayoutDesc layoutDesc_;
+    VKW::PipelineLayoutDesc* layoutDesc_;
     RenderPassKey renderPass_;
 };
 
