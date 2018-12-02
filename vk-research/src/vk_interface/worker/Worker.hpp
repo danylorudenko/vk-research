@@ -7,7 +7,7 @@
 #include "..\..\class_features\NonCopyable.hpp"
 
 #include "..\Device.hpp"
-#include "WorkerFrame.h"
+#include "WorkerFrame.hpp"
 
 namespace VKW
 {
@@ -54,9 +54,9 @@ public:
 
     VkQueue QueueHandle() const;
 
-    VkCommandBuffer StartNextExecutionFrame();
+    WorkerFrameCommandReciever StartNextExecutionFrame();
     void EndCurrentExecutionFrame();
-    void ExecuteCurrentFrame();
+    WorkerFrameCompleteSemaphore ExecuteCurrentFrame();
 
 
 private:

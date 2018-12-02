@@ -1,4 +1,4 @@
-#include "WorkerFrame.h"
+#include "WorkerFrame.hpp"
 
 #include <utility>
 #include "..\Tools.hpp"
@@ -11,7 +11,7 @@ WorkerFrame::WorkerFrame()
     , device_{ nullptr }
     , commandBuffer_{ VK_NULL_HANDLE }
     , fence_{ VK_NULL_HANDLE }
-    //, setSemaphore_{ VK_NULL_HANDLE }
+    , frameCompleteSemaphore_{ VK_NULL_HANDLE }
     , inExecution_{ false }
 {
 }
@@ -21,7 +21,7 @@ WorkerFrame::WorkerFrame(WorkerFrameDesc const& desc)
     , device_{ desc.device_ }
     , commandBuffer_{ desc.commandBuffer_ }
     , fence_{ VK_NULL_HANDLE }
-    //, setSemaphore_{ VK_NULL_HANDLE }
+    , frameCompleteSemaphore_{ VK_NULL_HANDLE }
     , inExecution_{ false }
 {
     VkFenceCreateInfo fenceInfo;
@@ -32,12 +32,12 @@ WorkerFrame::WorkerFrame(WorkerFrameDesc const& desc)
     VK_ASSERT(table_->vkCreateFence(device_->Handle(), &fenceInfo, nullptr, &fence_));
 
 
-    //VkSemaphoreCreateInfo semaphoreInfo;
-    //semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    //semaphoreInfo.pNext = nullptr;
-    //semaphoreInfo.flags = VK_FLAGS_NONE;
-    //
-    //VK_ASSERT(table_->vkCreateSemaphore(device_->Handle(), &semaphoreInfo, nullptr, &setSemaphore_));
+    VkSemaphoreCreateInfo semaphoreInfo;
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    semaphoreInfo.pNext = nullptr;
+    semaphoreInfo.flags = VK_FLAGS_NONE;
+    
+    VK_ASSERT(table_->vkCreateSemaphore(device_->Handle(), &semaphoreInfo, nullptr, &frameCompleteSemaphore_));
 }
 
 WorkerFrame::WorkerFrame(WorkerFrame&& rhs)
@@ -45,7 +45,7 @@ WorkerFrame::WorkerFrame(WorkerFrame&& rhs)
     , device_{ nullptr }
     , commandBuffer_{ VK_NULL_HANDLE }
     , fence_{ VK_NULL_HANDLE }
-    //, setSemaphore_{ VK_NULL_HANDLE }
+    , frameCompleteSemaphore_{ VK_NULL_HANDLE }
     , inExecution_{ false }
 {
     operator=(std::move(rhs));
@@ -57,13 +57,13 @@ WorkerFrame& WorkerFrame::operator=(WorkerFrame&& rhs)
     std::swap(device_, rhs.device_);
     std::swap(commandBuffer_, rhs.commandBuffer_);
     std::swap(fence_, rhs.fence_);
-    //std::swap(setSemaphore_, rhs.setSemaphore_);
+    std::swap(frameCompleteSemaphore_, rhs.frameCompleteSemaphore_);
     std::swap(inExecution_, rhs.inExecution_);
 
     return *this;
 }
 
-VkCommandBuffer WorkerFrame::Begin()
+WorkerFrameCommandReciever WorkerFrame::Begin()
 {
     WaitForFence();
     inExecution_ = false;
@@ -76,7 +76,7 @@ VkCommandBuffer WorkerFrame::Begin()
 
     VK_ASSERT(table_->vkBeginCommandBuffer(commandBuffer_, &beginInfo));
 
-    return commandBuffer_;
+    return WorkerFrameCommandReciever{ commandBuffer_ };
 }
 
 void WorkerFrame::End()
@@ -84,7 +84,7 @@ void WorkerFrame::End()
     table_->vkEndCommandBuffer(commandBuffer_);
 }
 
-void WorkerFrame::Execute(VkQueue queue)
+WorkerFrameCompleteSemaphore WorkerFrame::Execute(VkQueue queue)
 {
     VkSubmitInfo submitInfo;
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -94,13 +94,15 @@ void WorkerFrame::Execute(VkQueue queue)
     submitInfo.pWaitDstStageMask = nullptr;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer_;
-    submitInfo.signalSemaphoreCount = 0;
-    submitInfo.pSignalSemaphores = nullptr;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = &frameCompleteSemaphore_;
 
     ResetFence();
     inExecution_ = true;
 
     VK_ASSERT(table_->vkQueueSubmit(queue, 1, &submitInfo, fence_));
+
+    return WorkerFrameCompleteSemaphore{ frameCompleteSemaphore_ };
 }
 
 void WorkerFrame::WaitForFence()

@@ -12,6 +12,7 @@ class Device;
 class ResourceRendererProxy;
 class RenderPassController;
 class Worker;
+struct WorkerFrameCommandReciever;
 struct FramedDescriptorsHub;
 struct RenderPassDesc;
 }
@@ -51,9 +52,9 @@ public:
 
     VKW::RenderPassHandle VKWRenderPass() const;
 
-    void Begin(std::uint32_t contextId, VKW::Worker* worker);
-    void Render(std::uint32_t contextId, VKW::Worker* worker);
-    void End(std::uint32_t contextId, VKW::Worker* worker);
+    void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever);
+    void Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever);
+    void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever);
 
     void AddPipeline(PipelineKey const& pipeline);
 

@@ -1,6 +1,7 @@
 #include <utility>
 #include "Root.hpp"
 #include "..\vk_interface\ResourceRendererProxy.hpp"
+#include "..\vk_interface\worker\Worker.hpp"
 
 namespace Render
 {
@@ -13,6 +14,7 @@ Root::Root()
     , layoutController_{ nullptr }
     , pipelineFactory_{ nullptr }
     , presentationController_{ nullptr }
+    , mainWorkerTemp_{ nullptr }
     , defaultFramebufferWidth_{ 0 }
     , defaultFramebufferHeight_{ 0 }
 {
@@ -27,6 +29,7 @@ Root::Root(RootDesc const& desc)
     , layoutController_{ desc.layoutController_ }
     , pipelineFactory_{ desc.pipelineFactory_ }
     , presentationController_{ desc.presentationController_ }
+    , mainWorkerTemp_{ desc.mainWorkerTemp_ }
     , defaultFramebufferWidth_{ desc.defaultFramebufferWidth_ }
     , defaultFramebufferHeight_{ desc.defaultFramebufferHeight_ }
 {
@@ -41,6 +44,7 @@ Root::Root(Root&& rhs)
     , layoutController_{ nullptr }
     , pipelineFactory_{ nullptr }
     , presentationController_{ nullptr }
+    , mainWorkerTemp_{ nullptr }
     , defaultFramebufferWidth_{ 0 }
     , defaultFramebufferHeight_{ 0 }
 {
@@ -56,6 +60,7 @@ Root& Root::operator=(Root&& rhs)
     std::swap(layoutController_, rhs.layoutController_);
     std::swap(pipelineFactory_, rhs.pipelineFactory_);
     std::swap(presentationController_, rhs.presentationController_);
+    std::swap(mainWorkerTemp_, rhs.mainWorkerTemp_);
     std::swap(defaultFramebufferWidth_, rhs.defaultFramebufferWidth_);
     std::swap(defaultFramebufferHeight_, rhs.defaultFramebufferHeight_);
     std::swap(globalBuffers_, rhs.globalBuffers_);
@@ -162,15 +167,20 @@ void Root::IterateRenderGraph()
 {
     std::uint32_t const contextId = presentationController_->AcquireNewContextId();
 
+    auto commandReciever = mainWorkerTemp_->StartNextExecutionFrame();
+
     std::uint32_t const passCount = static_cast<std::uint32_t>(renderGraphRootTemp_.size());
     for (auto i = 0u; i < passCount; ++i) {
         auto& pass = renderPassMap_[renderGraphRootTemp_[i]];
-        pass.Begin(contextId);
-        pass.Render(contextId);
-        pass.End(contextId);
+        pass.Begin(contextId, &commandReciever);
+        pass.Render(contextId, &commandReciever);
+        pass.End(contextId, &commandReciever);
     }
 
-    presentationController_->PresentContextId(contextId);
+    mainWorkerTemp_->EndCurrentExecutionFrame();
+    auto completeSemaphore = mainWorkerTemp_->ExecuteCurrentFrame();
+
+    presentationController_->PresentContextId(contextId, completeSemaphore);
 }
 
 }

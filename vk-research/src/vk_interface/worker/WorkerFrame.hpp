@@ -16,6 +16,16 @@ struct WorkerFrameDesc
     VkCommandBuffer commandBuffer_;
 };
 
+struct WorkerFrameCommandReciever
+{
+    VkCommandBuffer commandBuffer_;
+};
+
+struct WorkerFrameCompleteSemaphore
+{
+    VkSemaphore frameCompleteSemaphore_;
+};
+
 class WorkerFrame
     : public NonCopyable
 {
@@ -28,9 +38,9 @@ public:
 
     ~WorkerFrame();
 
-    VkCommandBuffer Begin();
+    WorkerFrameCommandReciever Begin();
     void End();
-    void Execute(VkQueue queue);
+    WorkerFrameCompleteSemaphore Execute(VkQueue queue);
 
     void WaitForFence();
     void ResetFence();
@@ -42,7 +52,7 @@ private:
     
     VkCommandBuffer commandBuffer_;
     VkFence fence_;
-    //VkSemaphore setSemaphore_;
+    VkSemaphore frameCompleteSemaphore_;
 
     bool inExecution_;
 

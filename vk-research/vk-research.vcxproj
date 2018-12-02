@@ -239,7 +239,7 @@
     <ClInclude Include="src\vk_interface\pipeline\DescriptorLayoutController.hpp" />
     <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\worker\Worker.hpp" />
-    <ClInclude Include="src\vk_interface\worker\WorkerFrame.h" />
+    <ClInclude Include="src\vk_interface\worker\WorkerFrame.hpp" />
     <ClInclude Include="src\vk_interface\worker\WorkerGroup.hpp" />
     <ClInclude Include="src\vk_interface\worker\WorkersProvider.hpp" />
   </ItemGroup>

@@ -11,6 +11,7 @@ class ImportTable;
 class Device;
 class Swapchain;
 class Worker;
+struct WorkerFrameCompleteSemaphore;
 
 struct PresentationControllerDesc
 {
@@ -33,7 +34,7 @@ public:
     ~PresentationController();
 
     std::uint32_t AcquireNewContextId();
-    void PresentContextId(std::uint32_t contextId);
+    void PresentContextId(std::uint32_t contextId, WorkerFrameCompleteSemaphore frameRenderingCompleteSemaphore);
 
 
 
@@ -44,7 +45,7 @@ private:
     Worker* presentationWorker_;
 
     VkSemaphore presentCompleteSemaphore_;
-    VkSemaphore frameCompleteSemaphore_;
+    //VkSemaphore frameCompleteSemaphore_;
 };
 
 }

@@ -63,7 +63,7 @@ Worker& Worker::operator=(Worker&& rhs)
     return *this;
 }
 
-VkCommandBuffer Worker::StartNextExecutionFrame()
+WorkerFrameCommandReciever Worker::StartNextExecutionFrame()
 {
     currentExecutionFrame_ = (currentExecutionFrame_ + 1) % executionFrames_.size();
     
@@ -77,10 +77,10 @@ void Worker::EndCurrentExecutionFrame()
     currentFrame.End();
 }
 
-void Worker::ExecuteCurrentFrame()
+WorkerFrameCompleteSemaphore Worker::ExecuteCurrentFrame()
 {
     WorkerFrame& currentFrame = executionFrames_[currentExecutionFrame_];
-    currentFrame.Execute(queue_);
+    return currentFrame.Execute(queue_);
 }
 
 VkQueue Worker::QueueHandle() const

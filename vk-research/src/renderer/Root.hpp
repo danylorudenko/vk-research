@@ -21,6 +21,7 @@
 namespace VKW
 {
 class ResourceRendererProxy;
+class Worker;
 }
 
 namespace Render
@@ -42,6 +43,7 @@ struct RootDesc
     VKW::DescriptorLayoutController* layoutController_;
     VKW::PipelineFactory* pipelineFactory_;
     VKW::PresentationController* presentationController_;
+    VKW::Worker* mainWorkerTemp_;
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;
 };
@@ -110,6 +112,7 @@ private:
     VKW::PipelineFactory* pipelineFactory_;
 
     VKW::PresentationController* presentationController_;
+    VKW::Worker* mainWorkerTemp_;
 
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;

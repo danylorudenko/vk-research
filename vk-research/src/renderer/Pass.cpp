@@ -4,6 +4,7 @@
 #include "..\vk_interface\pipeline\RenderPassController.hpp"
 #include "..\vk_interface\ImportTable.hpp"
 #include "..\vk_interface\Device.hpp"
+#include "..\vk_interface\worker\Worker.hpp"
 
 #include <utility>
 
@@ -102,25 +103,19 @@ void Pass::AddPipeline(PipelineKey const& pipeline)
     pipelines_.emplace_back(pipeline);
 }
 
-void Pass::Begin(std::uint32_t contextId, VKW::Worker* worker)
+void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
     VKW::RenderPass* pass = renderPassController_->GetRenderPass(vkRenderPass_);
     VKW::Framebuffer* framebuffer = resourceProxy_->GetFramebuffer(framebuffer_, contextId);
-
-    //VkRenderPassBeginInfo beginInfo;
-    //beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    //beginInfo.pNext = nullptr;
-    //beginInfo.renderPass = pass->handle_;
-    //beginInfo.framebuffer = framebuffer->handle_;
-    //beginInfo.renderArea.
+    
 }
 
-void Pass::Render(std::uint32_t contextId, VKW::Worker* worker)
+void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
 
 }
 
-void Pass::End(std::uint32_t contextId, VKW::Worker* worker)
+void Pass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
     
 }

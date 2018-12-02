@@ -227,9 +227,6 @@
     <ClInclude Include="src\vk_interface\worker\WorkerGroup.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk_interface\worker\WorkerFrame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\vk_interface\Tools.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -345,6 +342,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\PresentService.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_interface\worker\WorkerFrame.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
