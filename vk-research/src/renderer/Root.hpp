@@ -12,6 +12,7 @@
 #include "..\vk_interface\pipeline\RenderPassController.hpp"
 #include "..\vk_interface\pipeline\DescriptorLayoutController.hpp"
 #include "..\vk_interface\pipeline\PipelineFactory.hpp"
+#include "..\vk_interface\runtime\PresentationController.hpp"
 
 #include "Pass.hpp"
 #include "SetLayout.hpp"
@@ -40,6 +41,7 @@ struct RootDesc
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
     VKW::DescriptorLayoutController* layoutController_;
     VKW::PipelineFactory* pipelineFactory_;
+    VKW::PresentationController* presentationController_;
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;
 };
@@ -71,6 +73,8 @@ public:
     using SetLayoutMap = std::map<SetLayoutKey, SetLayout>;
     using PipelineMap = std::map<PipelineKey, Pipeline>;
 
+    using RenderGraphRoot = std::vector<RenderPassKey>;
+
     Root();
     Root(RootDesc const& desc);
     Root(Root&& rhs);
@@ -85,10 +89,17 @@ public:
     VKW::ProxyImageHandle FindGlobalImage(ResourceKey const& key);
 
     void DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc);
+    Pass& FindPass(RenderPassKey const& key);
 
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
+    SetLayout& FindSetLayout(SetLayoutKey const& key);
 
     void DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const& desc);
+    Pipeline& FindPipeline(PipelineKey const& key);
+
+    void PushPassTemp(RenderPassKey const& key);
+
+    void IterateRenderGraph();
 
 private:
     VKW::ResourceRendererProxy* resourceProxy_;
@@ -97,6 +108,8 @@ private:
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
     VKW::DescriptorLayoutController* layoutController_;
     VKW::PipelineFactory* pipelineFactory_;
+
+    VKW::PresentationController* presentationController_;
 
     std::uint32_t defaultFramebufferWidth_;
     std::uint32_t defaultFramebufferHeight_;
@@ -107,6 +120,9 @@ private:
     RenderPassMap renderPassMap_;
     SetLayoutMap setLayoutMap_;
     PipelineMap pipelineMap_;
+
+
+    RenderGraphRoot renderGraphRootTemp_;
 
 };
 

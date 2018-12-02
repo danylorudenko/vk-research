@@ -16,7 +16,8 @@ PresentationController::PresentationController()
     , device_{ nullptr }
     , swapchain_{ nullptr }
     , presentationWorker_{ nullptr }
-    , imageAcquireSemaphore_{ VK_NULL_HANDLE }
+    , presentCompleteSemaphore_{ VK_NULL_HANDLE }
+    , frameCompleteSemaphore_{ VK_NULL_HANDLE }
 {
 
 }
@@ -26,14 +27,15 @@ PresentationController::PresentationController(PresentationControllerDesc const&
     , device_{ desc.device_ }
     , swapchain_{ desc.swapchain_ }
     , presentationWorker_{ desc.presentationWorker_ }
-    , imageAcquireSemaphore_{ VK_NULL_HANDLE }
+    , presentCompleteSemaphore_{ VK_NULL_HANDLE }
+    , frameCompleteSemaphore_{ VK_NULL_HANDLE }
 {
     VkSemaphoreCreateInfo sInfo;
     sInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     sInfo.pNext = nullptr;
     sInfo.flags = VK_FLAGS_NONE;
 
-    VK_ASSERT(table_->vkCreateSemaphore(device_->Handle(), &sInfo, nullptr, &imageAcquireSemaphore_));
+    VK_ASSERT(table_->vkCreateSemaphore(device_->Handle(), &sInfo, nullptr, &presentCompleteSemaphore_));
 }
 
 PresentationController::PresentationController(PresentationController&& rhs)
@@ -41,7 +43,8 @@ PresentationController::PresentationController(PresentationController&& rhs)
     , device_{ nullptr }
     , swapchain_{ nullptr }
     , presentationWorker_{ nullptr }
-    , imageAcquireSemaphore_{ VK_NULL_HANDLE }
+    , presentCompleteSemaphore_{ VK_NULL_HANDLE }
+    , frameCompleteSemaphore_{ VK_NULL_HANDLE }
 {
     operator=(std::move(rhs));
 }
@@ -53,16 +56,22 @@ PresentationController& PresentationController::operator=(PresentationController
     std::swap(swapchain_, rhs.swapchain_);
     std::swap(presentationWorker_, rhs.presentationWorker_);
 
-    std::swap(imageAcquireSemaphore_, rhs.imageAcquireSemaphore_);
+    std::swap(presentCompleteSemaphore_, rhs.presentCompleteSemaphore_);
+    std::swap(frameCompleteSemaphore_, rhs.frameCompleteSemaphore_);
 
     return *this;
 }
 
 PresentationController::~PresentationController()
 {
-    if (imageAcquireSemaphore_) {
-        table_->vkDestroySemaphore(device_->Handle(), imageAcquireSemaphore_, nullptr);
-        imageAcquireSemaphore_ = VK_NULL_HANDLE;
+    if (presentCompleteSemaphore_) {
+        table_->vkDestroySemaphore(device_->Handle(), presentCompleteSemaphore_, nullptr);
+        presentCompleteSemaphore_ = VK_NULL_HANDLE;
+    }
+
+    if (frameCompleteSemaphore_) {
+        table_->vkDestroySemaphore(device_->Handle(), frameCompleteSemaphore_, nullptr);
+        frameCompleteSemaphore_ = VK_NULL_HANDLE;
     }
 }
 
@@ -74,7 +83,7 @@ std::uint32_t PresentationController::AcquireNewContextId()
         device_->Handle(), 
         swapchain_->Handle(), 
         std::numeric_limits<std::uint64_t>::max(),
-        imageAcquireSemaphore_,
+        presentCompleteSemaphore_,
         VK_NULL_HANDLE,
         &imageIndex)
     );
@@ -95,7 +104,7 @@ void PresentationController::PresentContextId(std::uint32_t contextId)
     pInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     pInfo.pNext = nullptr;
     pInfo.waitSemaphoreCount = 1;
-    pInfo.pWaitSemaphores = &imageAcquireSemaphore_;
+    pInfo.pWaitSemaphores = &frameCompleteSemaphore_;
     pInfo.swapchainCount = 1;
     pInfo.pSwapchains = &swapchain;
     pInfo.pImageIndices = &imageIndex;

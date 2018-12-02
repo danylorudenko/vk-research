@@ -7,8 +7,11 @@
 
 namespace VKW
 {
+class ImportTable;
+class Device;
 class ResourceRendererProxy;
 class RenderPassController;
+class Worker;
 struct FramedDescriptorsHub;
 struct RenderPassDesc;
 }
@@ -20,6 +23,8 @@ class Root;
 
 struct PassDesc
 {
+    Root* root_;
+
     VKW::ResourceRendererProxy* proxy_;
     VKW::RenderPassController* renderPassController_;
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
@@ -46,12 +51,25 @@ public:
 
     VKW::RenderPassHandle VKWRenderPass() const;
 
+    void Begin(std::uint32_t contextId, VKW::Worker* worker);
+    void Render(std::uint32_t contextId, VKW::Worker* worker);
+    void End(std::uint32_t contextId, VKW::Worker* worker);
+
+    void AddPipeline(PipelineKey const& pipeline);
+
 private:
+    Root* root_;
+
+    VKW::ImportTable* table_;
+    VKW::Device* device_;
+
     VKW::ResourceRendererProxy* resourceProxy_;
     VKW::RenderPassController* renderPassController_;
 
     VKW::RenderPassHandle vkRenderPass_;
     VKW::ProxyFramebufferHandle framebuffer_;
+
+    std::vector<PipelineKey> pipelines_; 
 };
 
 }

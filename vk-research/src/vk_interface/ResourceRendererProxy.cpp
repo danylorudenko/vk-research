@@ -316,6 +316,12 @@ ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferViewDesc const& decs
     return ProxyBufferHandle{ id };
 }
 
+BufferView* ResourceRendererProxy::GetBufferView(ProxyBufferHandle handle, std::uint32_t context)
+{
+    BufferViewHandle bufferViewHandle = framedDescriptorsHub_->contexts_[context].bufferViews_[handle.id_];
+    return buffersProvider_->GetView(bufferViewHandle);
+}
+
 ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
 {
     ImageViewHandle imageHandle = imagesProvider_->AcquireImage(desc);
@@ -328,6 +334,12 @@ ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
     }
     
     return ProxyImageHandle{ id };
+}
+
+ImageView* ResourceRendererProxy::GetImageView(ProxyImageHandle handle, std::uint32_t context)
+{
+    ImageViewHandle imageViewHandle = framedDescriptorsHub_->contexts_[context].imageViews_[handle.id_];
+    return imagesProvider_->GetImageView(imageViewHandle);
 }
 
 ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebufferDesc const& desc)
@@ -367,6 +379,12 @@ ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebuffer
     }
 
     return ProxyFramebufferHandle{ id };
+}
+
+Framebuffer* ResourceRendererProxy::GetFramebuffer(ProxyFramebufferHandle handle, std::uint32_t context)
+{
+    FramebufferHandle framebufferHandle = framedDescriptorsHub_->contexts_[context].framebuffers_[handle.id_];
+    return framebufferController_->GetFramebuffer(framebufferHandle);
 }
 
 }

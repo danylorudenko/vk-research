@@ -90,9 +90,13 @@ public:
     void WriteSet(ProxySetHandle handle, ProxyDescriptorDesc* descriptions);
 
     ProxyBufferHandle CreateBuffer(BufferViewDesc const& desc);
+    BufferView* GetBufferView(ProxyBufferHandle handle, std::uint32_t context);
+
     ProxyImageHandle CreateImage(ImageViewDesc const& desc);
+    ImageView* GetImageView(ProxyImageHandle handle, std::uint32_t context);
 
     ProxyFramebufferHandle CreateFramebuffer(ProxyFramebufferDesc const& desc);
+    Framebuffer* GetFramebuffer(ProxyFramebufferHandle handle, std::uint32_t context);
 
 
 private:

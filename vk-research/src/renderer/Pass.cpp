@@ -2,6 +2,8 @@
 #include "Root.hpp"
 #include "..\vk_interface\ResourceRendererProxy.hpp"
 #include "..\vk_interface\pipeline\RenderPassController.hpp"
+#include "..\vk_interface\ImportTable.hpp"
+#include "..\vk_interface\Device.hpp"
 
 #include <utility>
 
@@ -9,14 +11,16 @@ namespace Render
 {
 
 Pass::Pass()
-    : resourceProxy_{ nullptr }
+    : root_{ nullptr }
+    , resourceProxy_{ nullptr }
     , renderPassController_{ nullptr }
 {
 
 }
 
 Pass::Pass(PassDesc const& desc)
-    : resourceProxy_{ desc.proxy_ }
+    : root_{ nullptr }
+    , resourceProxy_{ desc.proxy_ }
     , renderPassController_{ desc.renderPassController_ }
 {
     std::uint32_t const colorAttachmentCount = desc.colorAttachmentCount_;
@@ -74,6 +78,7 @@ Pass::Pass(Pass&& rhs)
 
 Pass& Pass::operator=(Pass&& rhs)
 {
+    std::swap(root_, rhs.root_);
     std::swap(resourceProxy_, rhs.resourceProxy_);
     std::swap(renderPassController_, rhs.renderPassController_);
     std::swap(vkRenderPass_, rhs.vkRenderPass_);
@@ -90,6 +95,34 @@ Pass::~Pass()
 VKW::RenderPassHandle Pass::VKWRenderPass() const
 {
     return vkRenderPass_;
+}
+
+void Pass::AddPipeline(PipelineKey const& pipeline)
+{
+    pipelines_.emplace_back(pipeline);
+}
+
+void Pass::Begin(std::uint32_t contextId, VKW::Worker* worker)
+{
+    VKW::RenderPass* pass = renderPassController_->GetRenderPass(vkRenderPass_);
+    VKW::Framebuffer* framebuffer = resourceProxy_->GetFramebuffer(framebuffer_, contextId);
+
+    //VkRenderPassBeginInfo beginInfo;
+    //beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    //beginInfo.pNext = nullptr;
+    //beginInfo.renderPass = pass->handle_;
+    //beginInfo.framebuffer = framebuffer->handle_;
+    //beginInfo.renderArea.
+}
+
+void Pass::Render(std::uint32_t contextId, VKW::Worker* worker)
+{
+
+}
+
+void Pass::End(std::uint32_t contextId, VKW::Worker* worker)
+{
+    
 }
 
 }

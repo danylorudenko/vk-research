@@ -178,6 +178,15 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
+    VKW::PresentationControllerDesc presentationControllerDesc;
+    presentationControllerDesc.table_ = table_.get();
+    presentationControllerDesc.device_ = device_.get();
+    presentationControllerDesc.swapchain_ = swapchain_.get();
+    //presentationControllerDesc.presentationWorker_ = ??????????????????????????????
+
+    //presentationController_ = std::make_unique<VKW::PresentationController>(presentationControllerDesc);
+
+
     VKW::ResourceBindingServiceDesc resourceBindingServiceDesc;
     resourceBindingServiceDesc.table_ = table_.get();
     resourceBindingServiceDesc.device_ = device_.get();

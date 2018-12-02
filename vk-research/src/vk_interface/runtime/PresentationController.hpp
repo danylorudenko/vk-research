@@ -43,7 +43,8 @@ private:
     Swapchain* swapchain_;
     Worker* presentationWorker_;
 
-    VkSemaphore imageAcquireSemaphore_;
+    VkSemaphore presentCompleteSemaphore_;
+    VkSemaphore frameCompleteSemaphore_;
 };
 
 }

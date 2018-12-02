@@ -12,6 +12,7 @@ Root::Root()
     , framedDescriptorsHub_{ nullptr }
     , layoutController_{ nullptr }
     , pipelineFactory_{ nullptr }
+    , presentationController_{ nullptr }
     , defaultFramebufferWidth_{ 0 }
     , defaultFramebufferHeight_{ 0 }
 {
@@ -25,6 +26,7 @@ Root::Root(RootDesc const& desc)
     , framedDescriptorsHub_{ desc.framedDescriptorsHub_ }
     , layoutController_{ desc.layoutController_ }
     , pipelineFactory_{ desc.pipelineFactory_ }
+    , presentationController_{ desc.presentationController_ }
     , defaultFramebufferWidth_{ desc.defaultFramebufferWidth_ }
     , defaultFramebufferHeight_{ desc.defaultFramebufferHeight_ }
 {
@@ -38,6 +40,7 @@ Root::Root(Root&& rhs)
     , framedDescriptorsHub_{ nullptr }
     , layoutController_{ nullptr }
     , pipelineFactory_{ nullptr }
+    , presentationController_{ nullptr }
     , defaultFramebufferWidth_{ 0 }
     , defaultFramebufferHeight_{ 0 }
 {
@@ -52,11 +55,15 @@ Root& Root::operator=(Root&& rhs)
     std::swap(framedDescriptorsHub_, rhs.framedDescriptorsHub_);
     std::swap(layoutController_, rhs.layoutController_);
     std::swap(pipelineFactory_, rhs.pipelineFactory_);
+    std::swap(presentationController_, rhs.presentationController_);
     std::swap(defaultFramebufferWidth_, rhs.defaultFramebufferWidth_);
     std::swap(defaultFramebufferHeight_, rhs.defaultFramebufferHeight_);
     std::swap(globalBuffers_, rhs.globalBuffers_);
     std::swap(globalImages_, rhs.globalImages_);
     std::swap(renderPassMap_, rhs.renderPassMap_);
+    std::swap(setLayoutMap_, rhs.setLayoutMap_);
+    std::swap(pipelineMap_, rhs.pipelineMap_);
+    std::swap(renderGraphRootTemp_, rhs.renderGraphRootTemp_);
 
     return *this;
 }
@@ -106,10 +113,20 @@ void Root::DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc)
     renderPassMap_[key] = Pass{ passDesc };
 }
 
+Pass& Root::FindPass(RenderPassKey const& key)
+{
+    return renderPassMap_[key];
+}
+
 void Root::DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc)
 {
     VKW::DescriptorSetLayoutHandle handle = layoutController_->CreateDescriptorSetLayout(desc);
     setLayoutMap_[key] = SetLayout{ handle };
+}
+
+SetLayout& Root::FindSetLayout(SetLayoutKey const& key)
+{
+    return setLayoutMap_[key];
 }
 
 void Root::DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const& desc)
@@ -129,6 +146,31 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const
     
     VKW::PipelineHandle handle = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
     pipelineMap_[key] = Pipeline{ handle };
+}
+
+Pipeline& Root::FindPipeline(PipelineKey const& key)
+{
+    return pipelineMap_[key];
+}
+
+void Root::PushPassTemp(RenderPassKey const& key)
+{
+    renderGraphRootTemp_.emplace_back(key);
+}
+
+void Root::IterateRenderGraph()
+{
+    std::uint32_t const contextId = presentationController_->AcquireNewContextId();
+
+    std::uint32_t const passCount = static_cast<std::uint32_t>(renderGraphRootTemp_.size());
+    for (auto i = 0u; i < passCount; ++i) {
+        auto& pass = renderPassMap_[renderGraphRootTemp_[i]];
+        pass.Begin(contextId);
+        pass.Render(contextId);
+        pass.End(contextId);
+    }
+
+    presentationController_->PresentContextId(contextId);
 }
 
 }

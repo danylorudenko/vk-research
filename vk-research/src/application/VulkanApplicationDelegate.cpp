@@ -30,6 +30,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     rootDesc.framedDescriptorsHub_ = vulkanLoader_->framedDescriptorsHub_.get();
     rootDesc.layoutController_ = vulkanLoader_->descriptorLayoutController_.get();
     rootDesc.pipelineFactory_ = vulkanLoader_->pipelineFactory_.get();
+    rootDesc.presentationController_ = vulkanLoader_->presentationController_.get();
     rootDesc.defaultFramebufferWidth_ = windowWidth;
     rootDesc.defaultFramebufferHeight_ = windowHeight;
 
@@ -98,7 +99,7 @@ void VulkanApplicationDelegate::start()
 
 void VulkanApplicationDelegate::update()
 {
-
+    renderRoot_->IterateRenderGraph();
 }
 
 void VulkanApplicationDelegate::shutdown()
@@ -219,6 +220,6 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->DefineGraphicsPipeline("testpipe", pipelineDesc);
 
     
-    
+    renderRoot_->PushPassTemp("pass0");
 
 }

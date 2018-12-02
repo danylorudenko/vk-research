@@ -24,6 +24,7 @@
 #include "resources\FramebufferController.hpp"
 #include "pipeline\PipelineFactory.hpp"
 #include "pipeline\ShaderModuleFactory.hpp"
+#include "runtime\PresentationController.hpp"
 
 class IOManager;
 
@@ -80,6 +81,8 @@ public:
 
     std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;
     std::unique_ptr<VKW::PipelineFactory> pipelineFactory_;
+
+    std::unique_ptr<VKW::PresentationController> presentationController_;
 
     //std::unique_ptr<VKW::ResourceBindingService> resourceBindingService_;
 
