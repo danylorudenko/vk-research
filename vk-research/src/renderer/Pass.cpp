@@ -5,6 +5,8 @@
 #include "..\vk_interface\ImportTable.hpp"
 #include "..\vk_interface\Device.hpp"
 #include "..\vk_interface\worker\Worker.hpp"
+#include "..\vk_interface\ImportTable.hpp"
+#include "..\vk_interface\Device.hpp"
 
 #include <utility>
 
@@ -13,16 +15,23 @@ namespace Render
 
 Pass::Pass()
     : root_{ nullptr }
+    , table_{ nullptr }
+    , device_{ nullptr }
     , resourceProxy_{ nullptr }
     , renderPassController_{ nullptr }
+    , width_{ 0 }
+    , height_{ 0 }
 {
-
 }
 
 Pass::Pass(PassDesc const& desc)
-    : root_{ nullptr }
+    : root_{ desc.root_ }
+    , table_{ desc.table_ }
+    , device_{ desc.device_}
     , resourceProxy_{ desc.proxy_ }
     , renderPassController_{ desc.renderPassController_ }
+    , width_{ desc.width_ }
+    , height_{ desc.height_ }
 {
     std::uint32_t const colorAttachmentCount = desc.colorAttachmentCount_;
 
@@ -71,8 +80,13 @@ Pass::Pass(PassDesc const& desc)
 }
 
 Pass::Pass(Pass&& rhs)
-    : resourceProxy_{ nullptr }
+    : root_{ nullptr }
+    , table_{ nullptr }
+    , device_{ nullptr }
+    , resourceProxy_{ nullptr }
     , renderPassController_{ nullptr }
+    , width_{ 0 }
+    , height_{ 0 }
 {
     operator=(std::move(rhs));
 }
@@ -80,10 +94,15 @@ Pass::Pass(Pass&& rhs)
 Pass& Pass::operator=(Pass&& rhs)
 {
     std::swap(root_, rhs.root_);
+    std::swap(table_, rhs.table_);
+    std::swap(device_, rhs.device_);
     std::swap(resourceProxy_, rhs.resourceProxy_);
     std::swap(renderPassController_, rhs.renderPassController_);
     std::swap(vkRenderPass_, rhs.vkRenderPass_);
     std::swap(framebuffer_, rhs.framebuffer_);
+    std::swap(width_, rhs.width_);
+    std::swap(height_, rhs.height_);
+    std::swap(pipelines_, rhs.pipelines_);
 
     return *this;
 }
@@ -107,6 +126,40 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
 {
     VKW::RenderPass* pass = renderPassController_->GetRenderPass(vkRenderPass_);
     VKW::Framebuffer* framebuffer = resourceProxy_->GetFramebuffer(framebuffer_, contextId);
+
+    VkClearValue clearValues[VKW::RenderPass::MAX_ATTACHMENTS];
+    for (auto i = 0u; i < VKW::RenderPass::MAX_ATTACHMENTS; ++i) {
+        auto& val = clearValues[i];
+        val.color.float32[0] = 0.0f;
+        val.color.float32[1] = 0.0f;
+        val.color.float32[2] = 0.0f;
+        val.color.float32[3] = 0.0f;
+        val.color.int32[0] = 0;
+        val.color.int32[1] = 0;
+        val.color.int32[2] = 0;
+        val.color.int32[3] = 0;
+        val.color.uint32[0] = 0;
+        val.color.uint32[1] = 0;
+        val.color.uint32[2] = 0;
+        val.color.uint32[3] = 0;
+        val.depthStencil.depth = 0.0f;
+        val.depthStencil.stencil = 0;
+    }
+
+    VkRenderPassBeginInfo beginInfo;
+    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    beginInfo.pNext = nullptr;
+    beginInfo.renderPass = pass->handle_;
+    beginInfo.framebuffer = framebuffer->handle_;
+    beginInfo.renderArea.offset.x = 0;
+    beginInfo.renderArea.offset.y = 0;
+    beginInfo.renderArea.extent.width = width_;
+    beginInfo.renderArea.extent.height = height_;
+    beginInfo.clearValueCount = pass->colorAttachmentsCount_ + pass->depthStencilAttachmentInfo_.format_ == VK_FORMAT_UNDEFINED ? 0 : 1;
+    beginInfo.pClearValues = clearValues;
+
+
+    table_->vkCmdBeginRenderPass(commandReciever->commandBuffer_, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
     
 }
 

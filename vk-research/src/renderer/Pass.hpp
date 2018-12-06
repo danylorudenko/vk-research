@@ -26,6 +26,9 @@ struct PassDesc
 {
     Root* root_;
 
+    VKW::ImportTable* table_;
+    VKW::Device* device_;
+
     VKW::ResourceRendererProxy* proxy_;
     VKW::RenderPassController* renderPassController_;
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
@@ -69,6 +72,8 @@ private:
 
     VKW::RenderPassHandle vkRenderPass_;
     VKW::ProxyFramebufferHandle framebuffer_;
+    std::uint32_t width_;
+    std::uint32_t height_;
 
     std::vector<PipelineKey> pipelines_; 
 };
