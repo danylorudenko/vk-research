@@ -56,7 +56,7 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
         attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         attachment.flags = VK_FLAGS_NONE;
         attachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -70,11 +70,11 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
     if (desc.depthStencilAttachment_) {
         auto& depthStencilAttachment = attachmentDescriptions[desc.colorAttachmentsCount_];
         depthStencilAttachment.format = desc.depthStencilAttachment_->format_;
-        depthStencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depthStencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthStencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthStencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         depthStencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthStencilAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
-        depthStencilAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthStencilAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthStencilAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         depthStencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         depthStencilAttachment.flags = VK_FLAGS_NONE;
         depthStencilAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -99,12 +99,30 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
     spInfo.pDepthStencilAttachment = desc.depthStencilAttachment_ ? &depthStencilReference : nullptr;
     spInfo.flags = VK_FLAGS_NONE;
 
+
+    VkSubpassDependency dependencies[2];
+    dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependencies[0].dstSubpass = 0;
+    dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+    dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+    dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+    dependencies[1].srcSubpass = 0;
+    dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+    dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+    dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+    dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
     
     VkRenderPassCreateInfo rpInfo;
     rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     rpInfo.pNext = nullptr;
-    rpInfo.dependencyCount = 0;
-    rpInfo.pDependencies = nullptr;
+    rpInfo.dependencyCount = 2;
+    rpInfo.pDependencies = dependencies;
     rpInfo.flags = VK_FLAGS_NONE;
     rpInfo.attachmentCount = allAttachmentsCount;
     rpInfo.pAttachments = attachmentDescriptions;

@@ -182,9 +182,9 @@ Loader::Loader(LoaderDesc const& desc)
     presentationControllerDesc.table_ = table_.get();
     presentationControllerDesc.device_ = device_.get();
     presentationControllerDesc.swapchain_ = swapchain_.get();
-    //presentationControllerDesc.presentationWorker_ = ??????????????????????????????
+    presentationControllerDesc.presentationWorker_ = workersProvider_->PresentWorker();
 
-    //presentationController_ = std::make_unique<VKW::PresentationController>(presentationControllerDesc);
+    presentationController_ = std::make_unique<VKW::PresentationController>(presentationControllerDesc);
 
 
     VKW::ResourceBindingServiceDesc resourceBindingServiceDesc;
