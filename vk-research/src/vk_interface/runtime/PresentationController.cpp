@@ -73,7 +73,7 @@ std::uint32_t PresentationController::AcquireNewContextId()
     VK_ASSERT(table_->vkAcquireNextImageKHR(
         device_->Handle(), 
         swapchain_->Handle(), 
-        std::numeric_limits<std::uint64_t>::max(),
+        std::numeric_limits<std::uint64_t>::max() / 2, // https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#vkAcquireNextImageKHR: timeout must not be UINT64_MAX
         presentCompleteSemaphore_,
         VK_NULL_HANDLE,
         &imageIndex)

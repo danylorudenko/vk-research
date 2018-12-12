@@ -121,6 +121,12 @@ WorkerFrame::~WorkerFrame()
 {
     if (fence_ != VK_NULL_HANDLE) {
         table_->vkDestroyFence(device_->Handle(), fence_, nullptr);
+        fence_ = nullptr;
+    }
+
+    if (frameCompleteSemaphore_ != VK_NULL_HANDLE) {
+        table_->vkDestroySemaphore(device_->Handle(), frameCompleteSemaphore_, nullptr);
+        frameCompleteSemaphore_ = nullptr;
     }
 }
 

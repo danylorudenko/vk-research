@@ -45,7 +45,6 @@ private:
     Worker* presentationWorker_;
 
     VkSemaphore presentCompleteSemaphore_;
-    //VkSemaphore frameCompleteSemaphore_;
 };
 
 }
