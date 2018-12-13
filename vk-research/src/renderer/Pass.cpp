@@ -130,10 +130,10 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
     VkClearValue clearValues[VKW::RenderPass::MAX_ATTACHMENTS];
     for (auto i = 0u; i < VKW::RenderPass::MAX_ATTACHMENTS; ++i) {
         auto& val = clearValues[i];
-        val.color.float32[0] = 0.0f;
-        val.color.float32[1] = 0.0f;
-        val.color.float32[2] = 0.0f;
-        val.color.float32[3] = 0.0f;
+        val.color.float32[0] = 1.0f;
+        val.color.float32[1] = 0.5f;
+        val.color.float32[2] = 0.3f;
+        val.color.float32[3] = 1.0f;
         val.color.int32[0] = 0;
         val.color.int32[1] = 0;
         val.color.int32[2] = 0;
@@ -170,7 +170,7 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
 
 void Pass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
-    
+    table_->vkCmdEndRenderPass(commandReciever->commandBuffer_);
 }
 
 }

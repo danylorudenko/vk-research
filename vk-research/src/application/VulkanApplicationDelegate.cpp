@@ -144,6 +144,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     passDesc.colorAttachments_[0] = "attchmnt0";
 
     renderRoot_->DefineRenderPass("pass0", passDesc);
+    Render::Pass& pass = renderRoot_->FindPass("pass0");
 
     VKW::ShaderModuleDesc vertexModuleDesc;
     vertexModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
@@ -164,21 +165,14 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     Render::RootPipelineDesc pipelineDesc;
 
-
+    pipelineDesc.renderPass_ = "pass0";
     pipelineDesc.shaderStagesCount_ = 2;
     pipelineDesc.shaderStages_[0].shaderModuleHandle_ = vertexHandle;
     pipelineDesc.shaderStages_[1].shaderModuleHandle_ = fragmentHandle;
 
-
-
     VKW::InputAssemblyInfo iaInfo;
     iaInfo.primitiveRestartEnable_ = false;
     iaInfo.primitiveTopology_ = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-
-    pipelineDesc.inputAssemblyInfo_ = &iaInfo;
-
-
-
 
     VKW::VertexInputInfo vInfo;
     vInfo.binding_ = 0;
@@ -188,13 +182,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     vInfo.vertexAttributes_[0].offset_ = 0;
     vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
 
-    pipelineDesc.vertexInputInfo_ = &vInfo;
-
-
-
     VKW::ViewportInfo vpInfo;
     vpInfo.viewportsCount_ = 1;
-
     auto& vp = vpInfo.viewports_[0];
     vp.x_ = 0.0f;
     vp.y_ = 0.0f;
@@ -207,20 +196,17 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     vp.scissorXextent_ = 1024;
     vp.scissorYextent_ = 1024;
 
-    pipelineDesc.viewportInfo_ = &vpInfo;
-
-
-
     VKW::PipelineLayoutDesc layoutDesc;
     layoutDesc.membersCount_ = 0;
 
+    pipelineDesc.inputAssemblyInfo_ = &iaInfo;
+    pipelineDesc.vertexInputInfo_ = &vInfo;
+    pipelineDesc.viewportInfo_ = &vpInfo;
     pipelineDesc.layoutDesc_ = &layoutDesc;
-
-    pipelineDesc.renderPass_ = "pass0";
-
 
     renderRoot_->DefineGraphicsPipeline("testpipe", pipelineDesc);
 
+    pass.AddPipeline("testpipe");
     renderRoot_->PushPassTemp("pass0");
 
 }
