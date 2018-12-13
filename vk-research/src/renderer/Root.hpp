@@ -22,6 +22,7 @@ namespace VKW
 {
 class ResourceRendererProxy;
 class Worker;
+class Loader;
 }
 
 namespace Render
@@ -36,6 +37,7 @@ struct RootPassDesc
 
 struct RootDesc
 {
+    VKW::Loader* loader_;
     VKW::ResourceRendererProxy* resourceProxy_;
     VKW::RenderPassController* renderPassController_;
     VKW::ImagesProvider* imagesProvider_;
@@ -104,6 +106,7 @@ public:
     void IterateRenderGraph();
 
 private:
+    VKW::Loader* loader_;
     VKW::ResourceRendererProxy* resourceProxy_;
     VKW::RenderPassController* renderPassController_;
     VKW::ImagesProvider* imagesProvider_;

@@ -18,6 +18,8 @@ struct WorkersProviderDesc
     Device* device_;
     Surface* surface_;
 
+    std::uint32_t bufferingCount_;
+
     std::uint32_t graphicsPresentQueueCount_;
     std::uint32_t computeQueueCount_;
     std::uint32_t transferQueueCount_;

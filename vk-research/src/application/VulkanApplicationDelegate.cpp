@@ -24,6 +24,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
 
 
     Render::RootDesc rootDesc;
+    rootDesc.loader_ = vulkanLoader_.get();
     rootDesc.resourceProxy_ = vulkanLoader_->resourceRendererProxy_.get();
     rootDesc.renderPassController_ = vulkanLoader_->renderPassController_.get();
     rootDesc.imagesProvider_ = vulkanLoader_->imagesProvider_.get();
@@ -31,6 +32,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     rootDesc.layoutController_ = vulkanLoader_->descriptorLayoutController_.get();
     rootDesc.pipelineFactory_ = vulkanLoader_->pipelineFactory_.get();
     rootDesc.presentationController_ = vulkanLoader_->presentationController_.get();
+    rootDesc.mainWorkerTemp_ = vulkanLoader_->workersProvider_->GetWorker(VKW::WorkerType::GRAPHICS_PRESENT, 0);
     rootDesc.defaultFramebufferWidth_ = windowWidth;
     rootDesc.defaultFramebufferHeight_ = windowHeight;
 
@@ -74,7 +76,7 @@ void VulkanApplicationDelegate::start()
     //\\\\\\\
     //
     //auto* worker = vulkanLoader_.WorkersProvider().GetWorker(VKW::WorkerType::GRAPHICS, 0);
-    //auto commandBuffer = worker->StartNextExecutionFrame();
+    //auto commandBuffer = worker->StartExecutionFrame();
     //
     //
     //VkBufferCopy copyRegion;
@@ -84,8 +86,8 @@ void VulkanApplicationDelegate::start()
     //
     //vulkanLoader_.Table().vkCmdCopyBuffer(commandBuffer, buffer.handle_, buffer2.handle_, 1, &copyRegion);
     //
-    //worker->EndCurrentExecutionFrame();
-    //worker->ExecuteCurrentFrame();
+    //worker->EndExecutionFrame();
+    //worker->ExecuteFrame();
     //
     //vulkanLoader_.Table().vkDeviceWaitIdle(device.Handle());
     //
@@ -219,7 +221,6 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     renderRoot_->DefineGraphicsPipeline("testpipe", pipelineDesc);
 
-    
     renderRoot_->PushPassTemp("pass0");
 
 }

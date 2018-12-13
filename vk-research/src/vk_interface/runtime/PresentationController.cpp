@@ -91,6 +91,8 @@ void PresentationController::PresentContextId(std::uint32_t contextId, WorkerFra
 
     VkSemaphore waitSemaphore = frameRenderingCompleteSemaphore.frameCompleteSemaphore_;
 
+    VkResult results = VK_SUCCESS;
+
     VkPresentInfoKHR pInfo;
     pInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     pInfo.pNext = nullptr;
@@ -99,6 +101,7 @@ void PresentationController::PresentContextId(std::uint32_t contextId, WorkerFra
     pInfo.swapchainCount = 1;
     pInfo.pSwapchains = &swapchain;
     pInfo.pImageIndices = &imageIndex;
+    pInfo.pResults = &results;
 
     VK_ASSERT(table_->vkQueuePresentKHR(presentQueue, &pInfo));
 

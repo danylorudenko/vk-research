@@ -2,12 +2,14 @@
 #include "Root.hpp"
 #include "..\vk_interface\ResourceRendererProxy.hpp"
 #include "..\vk_interface\worker\Worker.hpp"
+#include "..\vk_interface\Loader.hpp"
 
 namespace Render
 {
 
 Root::Root()
-    : resourceProxy_{ nullptr }
+    : loader_{ nullptr }
+    , resourceProxy_{ nullptr }
     , renderPassController_{ nullptr }
     , imagesProvider_{ nullptr }
     , framedDescriptorsHub_{ nullptr }
@@ -22,7 +24,8 @@ Root::Root()
 }
 
 Root::Root(RootDesc const& desc)
-    : resourceProxy_{ desc.resourceProxy_ }
+    : loader_{ desc.loader_ }
+    , resourceProxy_{ desc.resourceProxy_ }
     , renderPassController_{ desc.renderPassController_ }
     , imagesProvider_{ desc.imagesProvider_ }
     , framedDescriptorsHub_{ desc.framedDescriptorsHub_ }
@@ -37,7 +40,8 @@ Root::Root(RootDesc const& desc)
 }
 
 Root::Root(Root&& rhs)
-    : resourceProxy_{ nullptr }
+    : loader_{ nullptr }
+    , resourceProxy_{ nullptr }
     , renderPassController_{ nullptr }
     , imagesProvider_{ nullptr }
     , framedDescriptorsHub_{ nullptr }
@@ -53,6 +57,7 @@ Root::Root(Root&& rhs)
 
 Root& Root::operator=(Root&& rhs)
 {
+    std::swap(loader_, rhs.loader_);
     std::swap(resourceProxy_, rhs.resourceProxy_);
     std::swap(renderPassController_, rhs.renderPassController_);
     std::swap(imagesProvider_, rhs.imagesProvider_);
@@ -103,6 +108,9 @@ VKW::ProxyImageHandle Root::FindGlobalImage(ResourceKey const& key)
 void Root::DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc)
 {
     PassDesc passDesc;
+    passDesc.root_ = this;
+    passDesc.table_ = loader_->table_.get();
+    passDesc.device_ = loader_->device_.get();
     passDesc.proxy_ = resourceProxy_;
     passDesc.renderPassController_ = renderPassController_;
     passDesc.framedDescriptorsHub_ = framedDescriptorsHub_;
@@ -167,7 +175,7 @@ void Root::IterateRenderGraph()
 {
     std::uint32_t const contextId = presentationController_->AcquireNewContextId();
 
-    auto commandReciever = mainWorkerTemp_->StartNextExecutionFrame();
+    auto commandReciever = mainWorkerTemp_->StartExecutionFrame(contextId);
 
     std::uint32_t const passCount = static_cast<std::uint32_t>(renderGraphRootTemp_.size());
     for (auto i = 0u; i < passCount; ++i) {
@@ -177,8 +185,8 @@ void Root::IterateRenderGraph()
         pass.End(contextId, &commandReciever);
     }
 
-    mainWorkerTemp_->EndCurrentExecutionFrame();
-    auto completeSemaphore = mainWorkerTemp_->ExecuteCurrentFrame();
+    mainWorkerTemp_->EndExecutionFrame(contextId);
+    auto completeSemaphore = mainWorkerTemp_->ExecuteFrame(contextId);
 
     presentationController_->PresentContextId(contextId, completeSemaphore);
 }

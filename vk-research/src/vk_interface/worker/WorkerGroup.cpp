@@ -40,7 +40,7 @@ WorkerGroup::WorkerGroup(WorkerGroupDesc const& desc)
         workerDesc.type_ = type_;
         workerDesc.queueFamilyIndex_ = familyIndex_;
         workerDesc.queueIndex_ = i;
-        workerDesc.bufferingCount_ = 1;
+        workerDesc.bufferingCount_ = desc.bufferingCount_;
 
         workers_.emplace_back(workerDesc);
     }

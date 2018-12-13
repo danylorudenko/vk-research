@@ -67,6 +67,7 @@ Loader::Loader(LoaderDesc const& desc)
     VKW::WorkersProviderDesc wcsDesc;
     wcsDesc.table_ = table_.get();
     wcsDesc.device_ = device_.get();
+    wcsDesc.bufferingCount_ = desc.bufferingCount_;
     wcsDesc.graphicsPresentQueueCount_ = 1;
     wcsDesc.computeQueueCount_ = 0;
     wcsDesc.transferQueueCount_ = 0;

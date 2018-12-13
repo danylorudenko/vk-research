@@ -54,6 +54,7 @@ WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
             workerGroupDesc.type_ = workerGroupTypes[i];
             workerGroupDesc.familyIndex_ = queueIndecies[i];
             workerGroupDesc.workersCount_ = queueCounts[i];
+            workerGroupDesc.bufferingCount_ = desc.bufferingCount_;
 
             workerGroups[i] = std::make_unique<VKW::WorkerGroup>(workerGroupDesc);
         }

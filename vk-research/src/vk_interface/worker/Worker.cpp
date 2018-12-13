@@ -14,7 +14,6 @@ Worker::Worker()
     , parentGroup_{ nullptr }
     , type_{ WorkerType::NONE }
     , queue_{ VK_NULL_HANDLE }
-    , currentExecutionFrame_{ 0 }
 {
 }
 
@@ -24,7 +23,6 @@ Worker::Worker(WorkerDesc const& desc)
     , parentGroup_{ desc.parentGroup_ }
     , type_{ desc.type_ }
     , queue_{ VK_NULL_HANDLE }
-    , currentExecutionFrame_{ 0 }
 {
     table_->vkGetDeviceQueue(device_->Handle(), desc.queueFamilyIndex_, desc.queueIndex_, &queue_);
     assert(queue_ != VK_NULL_HANDLE && "Can't get device queue.");
@@ -57,29 +55,26 @@ Worker& Worker::operator=(Worker&& rhs)
     std::swap(parentGroup_, rhs.parentGroup_);
     std::swap(type_, rhs.type_);
     std::swap(queue_, rhs.queue_);
-    std::swap(currentExecutionFrame_, rhs.currentExecutionFrame_);
     std::swap(executionFrames_, rhs.executionFrames_);
 
     return *this;
 }
 
-WorkerFrameCommandReciever Worker::StartNextExecutionFrame()
-{
-    currentExecutionFrame_ = (currentExecutionFrame_ + 1) % executionFrames_.size();
-    
-    WorkerFrame& currentFrame = executionFrames_[currentExecutionFrame_];
+WorkerFrameCommandReciever Worker::StartExecutionFrame(std::uint32_t contextId)
+{    
+    WorkerFrame& currentFrame = executionFrames_[contextId];
     return currentFrame.Begin();
 }
 
-void Worker::EndCurrentExecutionFrame()
+void Worker::EndExecutionFrame(std::uint32_t contextId)
 {
-    WorkerFrame& currentFrame = executionFrames_[currentExecutionFrame_];
+    WorkerFrame& currentFrame = executionFrames_[contextId];
     currentFrame.End();
 }
 
-WorkerFrameCompleteSemaphore Worker::ExecuteCurrentFrame()
+WorkerFrameCompleteSemaphore Worker::ExecuteFrame(std::uint32_t contextId)
 {
-    WorkerFrame& currentFrame = executionFrames_[currentExecutionFrame_];
+    WorkerFrame& currentFrame = executionFrames_[contextId];
     return currentFrame.Execute(queue_);
 }
 

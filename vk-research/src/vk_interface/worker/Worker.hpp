@@ -54,9 +54,9 @@ public:
 
     VkQueue QueueHandle() const;
 
-    WorkerFrameCommandReciever StartNextExecutionFrame();
-    void EndCurrentExecutionFrame();
-    WorkerFrameCompleteSemaphore ExecuteCurrentFrame();
+    WorkerFrameCommandReciever StartExecutionFrame(std::uint32_t contextId);
+    void EndExecutionFrame(std::uint32_t contextId);
+    WorkerFrameCompleteSemaphore ExecuteFrame(std::uint32_t contextId);
 
 
 private:
@@ -67,7 +67,6 @@ private:
     WorkerType type_;
     VkQueue queue_;
 
-    std::uint64_t currentExecutionFrame_;
     std::vector<WorkerFrame> executionFrames_;
 
 };
