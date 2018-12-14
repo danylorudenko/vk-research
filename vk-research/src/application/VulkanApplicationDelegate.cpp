@@ -148,7 +148,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     VKW::ShaderModuleDesc vertexModuleDesc;
     vertexModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
-    vertexModuleDesc.shaderPath_ = "shader-src\\test-vertex.spv";
+    vertexModuleDesc.shaderPath_ = "shader-src\\test-vertex2.spv";
     vertexModuleDesc.entryPoint_ = "main";
 
 
@@ -176,8 +176,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     VKW::VertexInputInfo vInfo;
     vInfo.binding_ = 0;
-    vInfo.stride_ = 12;
-    vInfo.vertexAttributesCount_ = 1;
+    vInfo.stride_ = 0;
+    vInfo.vertexAttributesCount_ = 0;
     vInfo.vertexAttributes_[0].location_ = 0;
     vInfo.vertexAttributes_[0].offset_ = 0;
     vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;

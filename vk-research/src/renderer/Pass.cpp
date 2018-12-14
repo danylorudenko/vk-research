@@ -127,8 +127,9 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
     VKW::RenderPass* pass = renderPassController_->GetRenderPass(vkRenderPass_);
     VKW::Framebuffer* framebuffer = resourceProxy_->GetFramebuffer(framebuffer_, contextId);
 
+    std::uint32_t const attachmentsCount = pass->colorAttachmentsCount_ + pass->depthStencilAttachmentInfo_.usage_ == VKW::RENDER_PASS_ATTACHMENT_USAGE_NONE ? 0 : 1;
     VkClearValue clearValues[VKW::RenderPass::MAX_ATTACHMENTS];
-    for (auto i = 0u; i < VKW::RenderPass::MAX_ATTACHMENTS; ++i) {
+    for (auto i = 0u; i < attachmentsCount; ++i) {
         auto& val = clearValues[i];
         val.color.float32[0] = 1.0f;
         val.color.float32[1] = 0.5f;
