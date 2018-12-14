@@ -1,6 +1,7 @@
 #include "ResourceRendererProxy.hpp"
 #include "ImportTable.hpp"
 #include "Device.hpp"
+#include "Swapchain.hpp"
 #include "buffer\BuffersProvider.hpp"
 #include "image\ImagesProvider.hpp"
 #include "pipeline\DescriptorLayoutController.hpp"
@@ -18,6 +19,7 @@ namespace VKW
 ResourceRendererProxy::ResourceRendererProxy()
     : table_{ nullptr }
     , device_{ nullptr }
+    , swapchain_{ nullptr }
     , buffersProvider_{ nullptr }
     , imagesProvider_{ nullptr }
     , layoutController_{ nullptr }
@@ -32,6 +34,7 @@ ResourceRendererProxy::ResourceRendererProxy()
 ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxyDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
+    , swapchain_{ nullptr }
     , buffersProvider_{ desc.buffersProvider_ }
     , imagesProvider_{ desc.imagesProvider_ }
     , layoutController_{ desc.layoutController_ }
@@ -40,12 +43,17 @@ ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxyDesc const& de
     , framebufferController_{ desc.framebufferController_ }
     , framedDescriptorsHub_{ desc.framedDescriptorsHub_ }
 {
+    std::uint32_t const buffering = framedDescriptorsHub_->framesCount_;
+    for (auto i = 0u; i < buffering; ++i) {
+        auto& swapchainImage = swapchain_->Image(i);
 
+    }
 }
 
 ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxy&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
+    , swapchain_{ nullptr }
     , buffersProvider_{ nullptr }
     , imagesProvider_{ nullptr }
     , layoutController_{ nullptr }
@@ -61,6 +69,7 @@ ResourceRendererProxy& ResourceRendererProxy::operator=(ResourceRendererProxy&& 
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
+    std::swap(swapchain_, rhs.swapchain_);
     std::swap(buffersProvider_, rhs.buffersProvider_);
     std::swap(imagesProvider_, rhs.imagesProvider_);
     std::swap(layoutController_, rhs.layoutController_);

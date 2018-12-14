@@ -126,13 +126,13 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     //renderRoot_->DefineSetLayout("layout0", setLayoutDesc);
 
 
-    VKW::ImageViewDesc imageDesc;
-    imageDesc.format_ = VK_FORMAT_R8G8B8A8_UNORM;
-    imageDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
-    imageDesc.width_ = 1024;
-    imageDesc.height_ = 1024;
-
-    renderRoot_->DefineGlobalImage("attchmnt0", imageDesc);
+    //VKW::ImageViewDesc imageDesc;
+    //imageDesc.format_ = VK_FORMAT_R8G8B8A8_UNORM;
+    //imageDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
+    //imageDesc.width_ = 1024;
+    //imageDesc.height_ = 1024;
+    //
+    //renderRoot_->DefineGlobalImage("attchmnt0", imageDesc);
 
     //renderRoot_->DefineGlobalImage("attchmnt1", imageDesc);
 
@@ -141,7 +141,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     Render::RootPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
-    passDesc.colorAttachments_[0] = "attchmnt0";
+    passDesc.colorAttachments_[0] = "attchmnt0"; // we need swapchain reference here
 
     renderRoot_->DefineRenderPass("pass0", passDesc);
     Render::Pass& pass = renderRoot_->FindPass("pass0");
@@ -176,11 +176,11 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     VKW::VertexInputInfo vInfo;
     vInfo.binding_ = 0;
-    vInfo.stride_ = 12;
-    vInfo.vertexAttributesCount_ = 1;
-    vInfo.vertexAttributes_[0].location_ = 0;
-    vInfo.vertexAttributes_[0].offset_ = 0;
-    vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
+    vInfo.stride_ = 0;
+    vInfo.vertexAttributesCount_ = 0;
+    //vInfo.vertexAttributes_[0].location_ = 0;
+    //vInfo.vertexAttributes_[0].offset_ = 0;
+    //vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
 
     VKW::ViewportInfo vpInfo;
     vpInfo.viewportsCount_ = 1;
