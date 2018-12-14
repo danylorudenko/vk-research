@@ -19,6 +19,7 @@ class RenderPassController;
 class DescriptorSetController;
 class DescriptorLayoutController;
 class FramebufferController;
+class Swapchain;
 
 struct BufferViewDesc;
 struct ImageViewDesc;
@@ -111,8 +112,9 @@ private:
 
     ImportTable* table_;
     Device* device_;
-    BuffersProvider * buffersProvider_;
+    BuffersProvider* buffersProvider_;
     ImagesProvider* imagesProvider_;
+    Swapchain* swapchain_;
     DescriptorLayoutController* layoutController_;
     DescriptorSetController* descriptorSetsController_;
     RenderPassController* renderPassController_;
