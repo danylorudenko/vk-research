@@ -15,7 +15,21 @@ Swapchain::Swapchain()
     , device_{ nullptr }
     , surface_{ nullptr }
     , swapchain_{ VK_NULL_HANDLE }
+    , swapchainFormat_{ VK_FORMAT_UNDEFINED, VK_COLORSPACE_SRGB_NONLINEAR_KHR }
+    , width_{ 0 }
+    , height_{ 0 }
+    , swapchainImageCount_{ 0 }
 {
+    //ImportTable* table_;
+    //Device* device_;
+    //Surface* surface_;
+
+    //VkSwapchainKHR swapchain_;
+    //VkSurfaceFormatKHR swapchainFormat_;
+    //std::uint32_t width_;
+    //std::uint32_t height_;
+    //std::uint32_t swapchainImageCount_;
+    //std::vector<SwapchainImage> swapchainImages_;
 
 }
 
@@ -24,6 +38,10 @@ Swapchain::Swapchain(SwapchainDesc const& desc)
     , device_{ desc.device_ }
     , surface_{ desc.surface_ }
     , swapchain_{ VK_NULL_HANDLE }
+    , swapchainFormat_{ VK_FORMAT_UNDEFINED, VK_COLORSPACE_SRGB_NONLINEAR_KHR }
+    , width_{ 0 }
+    , height_{ 0 }
+    , swapchainImageCount_{ 0 }
 {
     auto const& surfaceFormats = surface_->SurfaceFormats();
     assert(surfaceFormats.size() > 0 && "Surface supportes no formats!");
@@ -53,6 +71,9 @@ Swapchain::Swapchain(SwapchainDesc const& desc)
     
     VK_ASSERT(table_->vkCreateSwapchainKHR(device_->Handle(), &swapchainInfo, nullptr, &swapchain_));
 
+    swapchainFormat_ = validSurfaceFormat;
+    width_ = surface_->SurfaceCapabilities().currentExtent.width;
+    height_ = surface_->SurfaceCapabilities().currentExtent.height;
 
 
     std::vector<VkImage> swapchainImages;
@@ -60,30 +81,14 @@ Swapchain::Swapchain(SwapchainDesc const& desc)
 
     VK_ASSERT(table_->vkGetSwapchainImagesKHR(device_->Handle(), swapchain_, &swapchainImagesCount, nullptr));
     swapchainImages.resize(swapchainImagesCount);
+    swapchainImageCount_ = swapchainImagesCount;
     VK_ASSERT(table_->vkGetSwapchainImagesKHR(device_->Handle(), swapchain_, &swapchainImagesCount, swapchainImages.data()));
 
     for (auto i = 0u; i < swapchainImagesCount; ++i) {
-        VkImageView imageView = VK_NULL_HANDLE;
         
-        VkImageViewCreateInfo viewInfo;
-        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        viewInfo.pNext = nullptr;
-        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        viewInfo.image = swapchainImages[i];
-        viewInfo.format = validSurfaceFormat.format;
-        viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
-        viewInfo.flags = VK_FLAGS_NONE;
-        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.layerCount = 1;
-        viewInfo.subresourceRange.levelCount = 1;
-
-        VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &imageView));
-
         SwapchainImage swapchainImageWrapper;
         swapchainImageWrapper.image_ = swapchainImages[i];
-        swapchainImageWrapper.view_ = imageView;
+        //swapchainImageWrapper.view_ = imageView;
 
         swapchainImages_.push_back(swapchainImageWrapper);
     }
@@ -121,6 +126,26 @@ Swapchain::~Swapchain()
 VkSwapchainKHR Swapchain::Handle() const
 {
     return swapchain_;
+}
+
+VkFormat Swapchain::Format() const
+{
+    return swapchainFormat_.format;
+}
+
+std::uint32_t Swapchain::Width() const
+{
+    return width_;
+}
+
+std::uint32_t Swapchain::Height() const
+{
+    return height_;
+}
+
+std::uint32_t Swapchain::ImageCount() const
+{
+    return swapchainImageCount_;
 }
 
 Swapchain::SwapchainImage& Swapchain::Image(std::uint32_t index)

@@ -27,7 +27,6 @@ public:
     struct SwapchainImage
     {
         VkImage image_;
-        VkImageView view_;
     };
 
 public:
@@ -40,6 +39,10 @@ public:
     ~Swapchain();
 
     VkSwapchainKHR Handle() const;
+    VkFormat Format() const;
+    std::uint32_t Width() const;
+    std::uint32_t Height() const;
+    std::uint32_t ImageCount() const;
     SwapchainImage& Image(std::uint32_t index);
 
 
@@ -49,6 +52,10 @@ private:
     Surface* surface_;
 
     VkSwapchainKHR swapchain_;
+    VkSurfaceFormatKHR swapchainFormat_;
+    std::uint32_t width_;
+    std::uint32_t height_;
+    std::uint32_t swapchainImageCount_;
     std::vector<SwapchainImage> swapchainImages_;
 
 };

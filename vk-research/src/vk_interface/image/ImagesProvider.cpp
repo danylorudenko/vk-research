@@ -1,6 +1,7 @@
 #include "ImagesProvider.hpp"
 #include "..\Device.hpp"
 #include "..\ImportTable.hpp"
+#include "..\Swapchain.hpp"
 #include "..\resources\ResourcesController.hpp"
 
 #include <utility>
@@ -12,6 +13,7 @@ namespace VKW
 ImagesProvider::ImagesProvider()
     : table_{ nullptr }
     , device_{ nullptr }
+    , swapchain_{ nullptr }
     , defaultSampler_{ VK_NULL_HANDLE }
     , resourcesController_{ nullptr }
 {
@@ -21,6 +23,7 @@ ImagesProvider::ImagesProvider()
 ImagesProvider::ImagesProvider(ImagesProviderDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
+    , swapchain_{ desc.swapchain_ }
     , defaultSampler_{ VK_NULL_HANDLE }
     , resourcesController_{ desc.resourcesController_ }
 {
@@ -45,12 +48,13 @@ ImagesProvider::ImagesProvider(ImagesProviderDesc const& desc)
     samplerInfo.unnormalizedCoordinates = VK_FALSE;
 
     VK_ASSERT(table_->vkCreateSampler(device_->Handle(), &samplerInfo, nullptr, &defaultSampler_));
-
+ 
 }
 
 ImagesProvider::ImagesProvider(ImagesProvider&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
+    , swapchain_{ nullptr }
     , defaultSampler_{ VK_NULL_HANDLE }
     , resourcesController_{ nullptr }
 {
@@ -61,6 +65,7 @@ ImagesProvider& ImagesProvider::operator=(ImagesProvider&& rhs)
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
+    std::swap(swapchain_, rhs.swapchain_);
     std::swap(defaultSampler_, rhs.defaultSampler_);
     std::swap(resourcesController_, rhs.resourcesController_);
 
@@ -75,10 +80,11 @@ ImagesProvider::~ImagesProvider()
     
     for (auto const& imageViewCont : imageViewContainers_) {
         ImageView* imageView = imageViewCont.view_;
+        ImageResourceHandle imageResource = imageView->resource_;
         table_->vkDestroyImageView(device, imageView->handle_, nullptr);
         delete imageView;
 
-        resourcesController_->FreeImage(imageViewCont.resource_);
+        resourcesController_->FreeImage(imageResource);
     }
 
     if (defaultSampler_ != VK_NULL_HANDLE) {
@@ -97,7 +103,34 @@ ImageView* ImagesProvider::GetImageView(ImageViewHandle handle)
     return handle.view_;
 }
 
-ImageViewHandle ImagesProvider::AcquireImage(ImageViewDesc const& desc)
+ImageViewHandle ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDesc const& desc)
+{
+    VkImageView vkImageView = VK_NULL_HANDLE;
+
+    VkImageViewCreateInfo viewInfo;
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.pNext = nullptr;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.image = swapchain_->Image(desc.index_).image_;
+    viewInfo.format = swapchain_->Format();
+    viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+    viewInfo.flags = VK_FLAGS_NONE;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+    viewInfo.subresourceRange.levelCount = 1;
+
+    VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkImageView));
+
+    ImageView* imageView = new ImageView{ vkImageView, swapchain_->Format(), VK_IMAGE_VIEW_TYPE_2D, viewInfo.subresourceRange, ImageResourceHandle{} };
+    
+    imageViewContainers_.emplace_back(ImageViewContainer{ imageView });
+    
+    return ImageViewHandle{ imageView };
+}
+
+ImageViewHandle ImagesProvider::AcquireImageView(ImageViewDesc const& desc)
 {
     ImageDesc imageDesc;
     imageDesc.format_ = desc.format_;
@@ -129,7 +162,6 @@ ImageViewHandle ImagesProvider::AcquireImage(ImageViewDesc const& desc)
     
     ImageViewContainer container;
     container.view_ = imageView;
-    container.resource_ = imageResourceHandle;
 
     imageViewContainers_.emplace_back(container);
 
@@ -148,10 +180,11 @@ void ImagesProvider::ReleaseImage(ImageViewHandle handle)
     assert(imageViewContIt != imageViewContainers_.end() && "Can't release ImageView.");
 
     ImageView* imageView = imageViewContIt->view_;
+    ImageResourceHandle imageResource = imageView->resource_;
     table_->vkDestroyImageView(device_->Handle(), imageView->handle_, nullptr);
     delete imageView;
 
-    resourcesController_->FreeImage(imageViewContIt->resource_);
+    resourcesController_->FreeImage(imageResource);
 
     imageViewContainers_.erase(imageViewContIt);
 }

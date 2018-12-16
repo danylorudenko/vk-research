@@ -12,7 +12,13 @@ namespace VKW
 
 class ImportTable;
 class Device;
+class Swapchain;
+class Surface;
 
+struct SwapchainImageViewDesc
+{
+    std::uint32_t index_;
+};
 
 struct ImageViewDesc
 {
@@ -31,6 +37,8 @@ struct ImagesProviderDesc
 {
     ImportTable* table_;
     Device* device_;
+    Surface* surface_;
+    Swapchain* swapchain_;
     ResourcesController* resourcesController_;
 };
 
@@ -43,7 +51,8 @@ public:
     ImagesProvider(ImagesProvider&& rhs);
     ImagesProvider& operator=(ImagesProvider&& rhs);
 
-    ImageViewHandle AcquireImage(ImageViewDesc const& desc);
+    ImageViewHandle RegisterSwapchainImageView(SwapchainImageViewDesc const& desc);
+    ImageViewHandle AcquireImageView(ImageViewDesc const& desc);
     void ReleaseImage(ImageViewHandle handle);
 
     ImageView* GetImageView(ImageViewHandle handle);
@@ -57,12 +66,12 @@ private:
     struct ImageViewContainer
     {
         ImageView* view_;
-        ImageResourceHandle resource_;
     };
 
 private:
     ImportTable* table_;
     Device* device_;
+    Swapchain* swapchain_;
     ResourcesController* resourcesController_;
 
     VkSampler defaultSampler_;

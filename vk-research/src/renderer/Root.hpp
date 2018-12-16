@@ -71,6 +71,9 @@ class Root
     : public NonCopyable
 {
 public:
+    static constexpr char const* SWAPCHAIN_IMAGE_KEY = "swapchain";
+
+
     using GlobalImagesMap = std::unordered_map<ResourceKey, VKW::ProxyImageHandle>;
     using GlobalBuffersMap = std::unordered_map<ResourceKey, VKW::ProxyBufferHandle>;
     using RenderPassMap = std::map<RenderPassKey, Pass>;

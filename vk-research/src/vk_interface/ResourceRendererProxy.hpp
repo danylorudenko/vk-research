@@ -19,7 +19,6 @@ class RenderPassController;
 class DescriptorSetController;
 class DescriptorLayoutController;
 class FramebufferController;
-class Swapchain;
 
 struct BufferViewDesc;
 struct ImageViewDesc;
@@ -86,6 +85,7 @@ public:
     ResourceRendererProxy& operator=(ResourceRendererProxy&& rhs);
     ~ResourceRendererProxy();
 
+    ProxyImageHandle RegisterSwapchainImageViews();
 
     ProxySetHandle CreateSet(DescriptorSetLayoutHandle layout);
     void WriteSet(ProxySetHandle handle, ProxyDescriptorDesc* descriptions);
@@ -114,7 +114,6 @@ private:
     Device* device_;
     BuffersProvider* buffersProvider_;
     ImagesProvider* imagesProvider_;
-    Swapchain* swapchain_;
     DescriptorLayoutController* layoutController_;
     DescriptorSetController* descriptorSetsController_;
     RenderPassController* renderPassController_;

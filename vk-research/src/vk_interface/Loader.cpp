@@ -67,7 +67,7 @@ Loader::Loader(LoaderDesc const& desc)
     VKW::WorkersProviderDesc wcsDesc;
     wcsDesc.table_ = table_.get();
     wcsDesc.device_ = device_.get();
-    wcsDesc.bufferingCount_ = desc.bufferingCount_;
+    wcsDesc.bufferingCount_ = swapchain_->ImageCount();
     wcsDesc.graphicsPresentQueueCount_ = 1;
     wcsDesc.computeQueueCount_ = 0;
     wcsDesc.transferQueueCount_ = 0;
@@ -105,6 +105,7 @@ Loader::Loader(LoaderDesc const& desc)
     VKW::ImagesProviderDesc imagesProviderDesc;
     imagesProviderDesc.table_ = table_.get();
     imagesProviderDesc.device_ = device_.get();
+    imagesProviderDesc.swapchain_ = swapchain_.get();
     imagesProviderDesc.resourcesController_ = resourcesController_.get();
 
     imagesProvider_ = std::make_unique<VKW::ImagesProvider>(imagesProviderDesc);
@@ -112,8 +113,8 @@ Loader::Loader(LoaderDesc const& desc)
 
 
     framedDescriptorsHub_ = std::make_unique<VKW::FramedDescriptorsHub>();
-    assert(desc.bufferingCount_ <= FramedDescriptorsHub::MAX_FRAMES_COUNT);
-    framedDescriptorsHub_->framesCount_ = desc.bufferingCount_;
+    assert(swapchain_->ImageCount() <= FramedDescriptorsHub::MAX_FRAMES_COUNT);
+    framedDescriptorsHub_->framesCount_ = swapchain_->ImageCount();
 
 
 
@@ -128,6 +129,7 @@ Loader::Loader(LoaderDesc const& desc)
     VKW::FramebufferControllerDesc framebufferControllerDesc;
     framebufferControllerDesc.table_ = table_.get();
     framebufferControllerDesc.device_ = device_.get();
+    framebufferControllerDesc.swapchain_ = swapchain_.get();
     framebufferControllerDesc.imagesProvider_ = imagesProvider_.get();
     framebufferControllerDesc.renderPassController_ = renderPassController_.get();
 
@@ -191,7 +193,7 @@ Loader::Loader(LoaderDesc const& desc)
     VKW::ResourceBindingServiceDesc resourceBindingServiceDesc;
     resourceBindingServiceDesc.table_ = table_.get();
     resourceBindingServiceDesc.device_ = device_.get();
-    resourceBindingServiceDesc.framesCount_ = desc.bufferingCount_;
+    resourceBindingServiceDesc.framesCount_ = swapchain_->ImageCount();
 
     //resourceBindingService_ = std::make_unique<VKW::ResourceBindingService>(resourceBindingServiceDesc);
 }

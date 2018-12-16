@@ -3,6 +3,7 @@
 #include <utility>
 #include "..\ImportTable.hpp"
 #include "..\Device.hpp"
+#include "..\Swapchain.hpp"
 #include "..\image\ImagesProvider.hpp"
 #include "..\pipeline\RenderPassController.hpp"
 #include "..\pipeline\RenderPass.hpp"
@@ -13,6 +14,7 @@ namespace VKW
 FramebufferController::FramebufferController()
     : table_{ nullptr }
     , device_{ nullptr }
+    , swapchain_{ nullptr }
     , imagesProvider_{ nullptr }
     , renderPassController_{ nullptr }
 {
@@ -22,6 +24,7 @@ FramebufferController::FramebufferController()
 FramebufferController::FramebufferController(FramebufferControllerDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
+    , swapchain_{ desc.swapchain_ }
     , imagesProvider_{ desc.imagesProvider_ }
     , renderPassController_{ desc.renderPassController_ }
 {
@@ -31,6 +34,7 @@ FramebufferController::FramebufferController(FramebufferControllerDesc const& de
 FramebufferController::FramebufferController(FramebufferController&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
+    , swapchain_{ nullptr }
     , imagesProvider_{ nullptr }
     , renderPassController_{ nullptr }
 {
@@ -41,6 +45,7 @@ FramebufferController& FramebufferController::operator=(FramebufferController&& 
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
+    std::swap(swapchain_, rhs.swapchain_);
     std::swap(imagesProvider_, rhs.imagesProvider_);
     std::swap(renderPassController_, rhs.renderPassController_);
     std::swap(framebuffers_, rhs.framebuffers_);

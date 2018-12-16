@@ -36,7 +36,8 @@ Root::Root(RootDesc const& desc)
     , defaultFramebufferWidth_{ desc.defaultFramebufferWidth_ }
     , defaultFramebufferHeight_{ desc.defaultFramebufferHeight_ }
 {
-
+    VKW::ProxyImageHandle swapchainView = resourceProxy_->RegisterSwapchainImageViews();
+    globalImages_[SWAPCHAIN_IMAGE_KEY] = swapchainView;
 }
 
 Root::Root(Root&& rhs)

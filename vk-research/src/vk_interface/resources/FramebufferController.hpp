@@ -14,6 +14,8 @@ class ImportTable;
 class Device;
 class ImagesProvider;
 class RenderPassController;
+class Swapchain;
+
 
 struct FramebufferDesc
 {
@@ -30,6 +32,7 @@ struct FramebufferControllerDesc
 {
     ImportTable* table_;
     Device* device_;
+    Swapchain* swapchain_;
     ImagesProvider* imagesProvider_;
     RenderPassController* renderPassController_;
 };
@@ -55,6 +58,7 @@ private:
     ImportTable* table_;
     Device* device_;
 
+    Swapchain* swapchain_;
     ImagesProvider* imagesProvider_;
     RenderPassController* renderPassController_;
 
