@@ -33,8 +33,8 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     rootDesc.pipelineFactory_ = vulkanLoader_->pipelineFactory_.get();
     rootDesc.presentationController_ = vulkanLoader_->presentationController_.get();
     rootDesc.mainWorkerTemp_ = vulkanLoader_->workersProvider_->GetWorker(VKW::WorkerType::GRAPHICS_PRESENT, 0);
-    rootDesc.defaultFramebufferWidth_ = windowWidth;
-    rootDesc.defaultFramebufferHeight_ = windowHeight;
+    rootDesc.defaultFramebufferWidth_ = vulkanLoader_->swapchain_->Width();
+    rootDesc.defaultFramebufferHeight_ = vulkanLoader_->swapchain_->Height();
 
     renderRoot_ = std::make_unique<Render::Root>(rootDesc);
 }
