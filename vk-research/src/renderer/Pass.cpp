@@ -166,7 +166,7 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
 
 void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
-
+    table_->vkCmdClear
 }
 
 void Pass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)

@@ -40,7 +40,7 @@ public:
 
     WorkerFrameCommandReciever Begin();
     void End();
-    WorkerFrameCompleteSemaphore Execute(VkQueue queue);
+    WorkerFrameCompleteSemaphore Execute(VkQueue queue, VkSemaphore waitSemaphore);
 
     void WaitForFence();
     void ResetFence();

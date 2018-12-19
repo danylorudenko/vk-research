@@ -43,6 +43,8 @@ Swapchain::Swapchain(SwapchainDesc const& desc)
     , height_{ 0 }
     , swapchainImageCount_{ 0 }
 {
+    VkDevice const device = device_->Handle();
+
     auto const& surfaceFormats = surface_->SurfaceFormats();
     assert(surfaceFormats.size() > 0 && "Surface supportes no formats!");
     assert(surface_->SupportedQueueFamilies().size() > 0 && "Surface doesn't support any queue families on the initialized device.");
@@ -69,7 +71,7 @@ Swapchain::Swapchain(SwapchainDesc const& desc)
     swapchainInfo.preTransform = surface_->SurfaceCapabilities().currentTransform;
     swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
     
-    VK_ASSERT(table_->vkCreateSwapchainKHR(device_->Handle(), &swapchainInfo, nullptr, &swapchain_));
+    VK_ASSERT(table_->vkCreateSwapchainKHR(device, &swapchainInfo, nullptr, &swapchain_));
 
     swapchainFormat_ = validSurfaceFormat;
     width_ = surface_->SurfaceCapabilities().currentExtent.width;
@@ -79,17 +81,16 @@ Swapchain::Swapchain(SwapchainDesc const& desc)
     std::vector<VkImage> swapchainImages;
     std::uint32_t swapchainImagesCount = 0;
 
-    VK_ASSERT(table_->vkGetSwapchainImagesKHR(device_->Handle(), swapchain_, &swapchainImagesCount, nullptr));
+    VK_ASSERT(table_->vkGetSwapchainImagesKHR(device, swapchain_, &swapchainImagesCount, nullptr));
     swapchainImages.resize(swapchainImagesCount);
     swapchainImageCount_ = swapchainImagesCount;
-    VK_ASSERT(table_->vkGetSwapchainImagesKHR(device_->Handle(), swapchain_, &swapchainImagesCount, swapchainImages.data()));
+    VK_ASSERT(table_->vkGetSwapchainImagesKHR(device, swapchain_, &swapchainImagesCount, swapchainImages.data()));
 
     for (auto i = 0u; i < swapchainImagesCount; ++i) {
         
         SwapchainImage swapchainImageWrapper;
         swapchainImageWrapper.image_ = swapchainImages[i];
-        //swapchainImageWrapper.view_ = imageView;
-
+        
         swapchainImages_.push_back(swapchainImageWrapper);
     }
 }
@@ -152,5 +153,6 @@ Swapchain::SwapchainImage& Swapchain::Image(std::uint32_t index)
 {
     return swapchainImages_[index];
 }
+
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <vector>
 #include <vulkan\vulkan.h>
 #include "..\..\class_features\NonCopyable.hpp"
 
@@ -12,6 +12,14 @@ class Device;
 class Swapchain;
 class Worker;
 struct WorkerFrameCompleteSemaphore;
+
+
+struct PresentationContext
+{
+    std::uint32_t contextId_;
+    VkSemaphore contextPresentationCompleteSemaphore_;
+};
+
 
 struct PresentationControllerDesc
 {
@@ -33,7 +41,7 @@ public:
 
     ~PresentationController();
 
-    std::uint32_t AcquireNewContextId();
+    PresentationContext AcquireNewPresentationContext();
     void PresentContextId(std::uint32_t contextId, WorkerFrameCompleteSemaphore frameRenderingCompleteSemaphore);
 
 
@@ -44,7 +52,8 @@ private:
     Swapchain* swapchain_;
     Worker* presentationWorker_;
 
-    VkSemaphore presentCompleteSemaphore_;
+    std::uint64_t nextSemaphore_;
+    std::vector<VkSemaphore> semaphoresQueue_;
 };
 
 }

@@ -174,7 +174,8 @@ void Root::PushPassTemp(RenderPassKey const& key)
 
 void Root::IterateRenderGraph()
 {
-    std::uint32_t const contextId = presentationController_->AcquireNewContextId();
+    VKW::PresentationContext const presentationContext = presentationController_->AcquireNewPresentationContext();
+    std::uint32_t const contextId = presentationContext.contextId_;
 
     auto commandReciever = mainWorkerTemp_->StartExecutionFrame(contextId);
 
@@ -187,9 +188,9 @@ void Root::IterateRenderGraph()
     }
 
     mainWorkerTemp_->EndExecutionFrame(contextId);
-    auto completeSemaphore = mainWorkerTemp_->ExecuteFrame(contextId);
+    auto renderingCompleteSemaphore = mainWorkerTemp_->ExecuteFrame(contextId, presentationContext.contextPresentationCompleteSemaphore_);
 
-    presentationController_->PresentContextId(contextId, completeSemaphore);
+    presentationController_->PresentContextId(contextId, renderingCompleteSemaphore);
 }
 
 }

@@ -16,7 +16,7 @@ PresentationController::PresentationController()
     , device_{ nullptr }
     , swapchain_{ nullptr }
     , presentationWorker_{ nullptr }
-    , presentCompleteSemaphore_{ VK_NULL_HANDLE }
+    , nextSemaphore_{ 0 }
 {
 
 }
@@ -26,14 +26,24 @@ PresentationController::PresentationController(PresentationControllerDesc const&
     , device_{ desc.device_ }
     , swapchain_{ desc.swapchain_ }
     , presentationWorker_{ desc.presentationWorker_ }
-    , presentCompleteSemaphore_{ VK_NULL_HANDLE }
+    , nextSemaphore_{ 0 }
 {
     VkSemaphoreCreateInfo sInfo;
     sInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     sInfo.pNext = nullptr;
     sInfo.flags = VK_FLAGS_NONE;
 
-    VK_ASSERT(table_->vkCreateSemaphore(device_->Handle(), &sInfo, nullptr, &presentCompleteSemaphore_));
+    VkDevice const device = device_->Handle();
+
+    std::uint32_t const swapchainImagesCount = swapchain_->ImageCount();
+    std::uint32_t const semaphoresCount = swapchainImagesCount * 2;
+    for (auto i = 0u; i < semaphoresCount; ++i) {
+        VkSemaphore semaphore = VK_NULL_HANDLE;
+        VK_ASSERT(table_->vkCreateSemaphore(device, &sInfo, nullptr, &semaphore));
+        semaphoresQueue_.emplace_back(semaphore);
+    }
+
+    
 }
 
 PresentationController::PresentationController(PresentationController&& rhs)
@@ -41,7 +51,7 @@ PresentationController::PresentationController(PresentationController&& rhs)
     , device_{ nullptr }
     , swapchain_{ nullptr }
     , presentationWorker_{ nullptr }
-    , presentCompleteSemaphore_{ VK_NULL_HANDLE }
+    , nextSemaphore_{ 0 }
 {
     operator=(std::move(rhs));
 }
@@ -53,34 +63,37 @@ PresentationController& PresentationController::operator=(PresentationController
     std::swap(swapchain_, rhs.swapchain_);
     std::swap(presentationWorker_, rhs.presentationWorker_);
 
-    std::swap(presentCompleteSemaphore_, rhs.presentCompleteSemaphore_);
+    std::swap(nextSemaphore_, rhs.nextSemaphore_);
+    std::swap(semaphoresQueue_, rhs.semaphoresQueue_);
 
     return *this;
 }
 
 PresentationController::~PresentationController()
 {
-    if (presentCompleteSemaphore_) {
-        table_->vkDestroySemaphore(device_->Handle(), presentCompleteSemaphore_, nullptr);
-        presentCompleteSemaphore_ = VK_NULL_HANDLE;
+    VkDevice const device = device_->Handle();
+    for (auto& semaphore : semaphoresQueue_) {
+        table_->vkDestroySemaphore(device, semaphore, nullptr);
     }
 }
 
-std::uint32_t PresentationController::AcquireNewContextId()
+PresentationContext PresentationController::AcquireNewPresentationContext()
 {
+    std::uint32_t const currentSemaphoreId = (nextSemaphore_++ % semaphoresQueue_.size());
+    VkSemaphore currentSemaphore = semaphoresQueue_[currentSemaphoreId];
+
     std::uint32_t imageIndex = 0;
 
     VK_ASSERT(table_->vkAcquireNextImageKHR(
         device_->Handle(), 
         swapchain_->Handle(), 
         std::numeric_limits<std::uint64_t>::max() / 2, // https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#vkAcquireNextImageKHR: timeout must not be UINT64_MAX
-        presentCompleteSemaphore_,
+        currentSemaphore,
         VK_NULL_HANDLE,
         &imageIndex)
     );
 
-    return imageIndex;
-
+    return PresentationContext{ imageIndex, currentSemaphore };
 }
 
 void PresentationController::PresentContextId(std::uint32_t contextId, WorkerFrameCompleteSemaphore frameRenderingCompleteSemaphore)
