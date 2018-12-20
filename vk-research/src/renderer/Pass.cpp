@@ -130,21 +130,22 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
     std::uint32_t const attachmentsCount = pass->colorAttachmentsCount_ + pass->depthStencilAttachmentInfo_.usage_ == VKW::RENDER_PASS_ATTACHMENT_USAGE_NONE ? 0 : 1;
     VkClearValue clearValues[VKW::RenderPass::MAX_ATTACHMENTS];
     for (auto i = 0u; i < attachmentsCount; ++i) {
+        // ERROR!!!! this is all union and we're rewriting data
         auto& val = clearValues[i];
         val.color.float32[0] = 1.0f;
         val.color.float32[1] = 0.5f;
         val.color.float32[2] = 0.3f;
         val.color.float32[3] = 1.0f;
-        val.color.int32[0] = 0;
-        val.color.int32[1] = 0;
-        val.color.int32[2] = 0;
-        val.color.int32[3] = 0;
-        val.color.uint32[0] = 0;
-        val.color.uint32[1] = 0;
-        val.color.uint32[2] = 0;
-        val.color.uint32[3] = 0;
-        val.depthStencil.depth = 0.0f;
-        val.depthStencil.stencil = 0;
+        //val.color.int32[0] = 0;
+        //val.color.int32[1] = 0;
+        //val.color.int32[2] = 0;
+        //val.color.int32[3] = 0;
+        //val.color.uint32[0] = 0;
+        //val.color.uint32[1] = 0;
+        //val.color.uint32[2] = 0;
+        //val.color.uint32[3] = 0;
+        //val.depthStencil.depth = 0.0f;
+        //val.depthStencil.stencil = 0;
     }
 
     VkRenderPassBeginInfo beginInfo;
@@ -166,7 +167,7 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
 
 void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
-    table_->vkCmdClear
+    
 }
 
 void Pass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
