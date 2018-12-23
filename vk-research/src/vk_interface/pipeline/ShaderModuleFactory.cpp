@@ -43,8 +43,9 @@ ShaderModuleFactory& ShaderModuleFactory::operator=(ShaderModuleFactory&& rhs)
 
 ShaderModuleFactory::~ShaderModuleFactory()
 {
-    for (auto const& module : loadedModules_) {
-        table_->vkDestroyShaderModule(device_->Handle(), module->handle_, nullptr);
+    for (auto const& shaderModule : loadedModules_) {
+        table_->vkDestroyShaderModule(device_->Handle(), shaderModule->handle_, nullptr);
+        delete shaderModule;
     }
 }
 
@@ -81,6 +82,7 @@ void ShaderModuleFactory::UnloadModule(ShaderModuleHandle module)
         if (localHandle == deletedModule->handle_) {
             table_->vkDestroyShaderModule(device_->Handle(), localHandle, nullptr);
             loadedModules_.erase(loadedModules_.begin() + i);
+            delete deletedModule;
             return;
         }
     }

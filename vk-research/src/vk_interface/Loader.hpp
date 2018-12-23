@@ -61,8 +61,6 @@ public:
     std::unique_ptr<VKW::Surface> surface_;
     std::unique_ptr<VKW::Swapchain> swapchain_;
 
-    std::unique_ptr<VKW::WorkersProvider> workersProvider_;
-
     std::unique_ptr<VKW::MemoryController> memoryController_;
     std::unique_ptr<VKW::ResourcesController> resourcesController_;
 
@@ -82,7 +80,10 @@ public:
     std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;
     std::unique_ptr<VKW::PipelineFactory> pipelineFactory_;
 
+    std::unique_ptr<VKW::WorkersProvider> workersProvider_;
+
     std::unique_ptr<VKW::PresentationController> presentationController_;
+
 
     //std::unique_ptr<VKW::ResourceBindingService> resourceBindingService_;
 

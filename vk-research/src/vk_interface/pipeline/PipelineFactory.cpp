@@ -55,7 +55,11 @@ PipelineFactory& PipelineFactory::operator=(PipelineFactory&& rhs)
 
 PipelineFactory::~PipelineFactory()
 {
-
+    VkDevice const device = device_->Handle();
+    for (auto const& pipeline : pipelines_) {
+        table_->vkDestroyPipeline(device, pipeline->vkPipeline_, nullptr);
+        delete pipeline;
+    }
 }
 
 VkShaderStageFlagBits VKWShaderTypeToVkFlags(ShaderModuleType type)

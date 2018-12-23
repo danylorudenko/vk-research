@@ -20,17 +20,6 @@ Swapchain::Swapchain()
     , height_{ 0 }
     , swapchainImageCount_{ 0 }
 {
-    //ImportTable* table_;
-    //Device* device_;
-    //Surface* surface_;
-
-    //VkSwapchainKHR swapchain_;
-    //VkSurfaceFormatKHR swapchainFormat_;
-    //std::uint32_t width_;
-    //std::uint32_t height_;
-    //std::uint32_t swapchainImageCount_;
-    //std::vector<SwapchainImage> swapchainImages_;
-
 }
 
 Swapchain::Swapchain(SwapchainDesc const& desc)
@@ -106,11 +95,26 @@ Swapchain::Swapchain(Swapchain&& rhs)
 
 Swapchain& Swapchain::operator=(Swapchain&& rhs)
 {
+/*
+    ImportTable* table_;
+    Device* device_;
+    Surface* surface_;
+
+    VkSwapchainKHR swapchain_;
+    VkSurfaceFormatKHR swapchainFormat_;
+    std::uint32_t width_;
+    std::uint32_t height_;
+    std::uint32_t swapchainImageCount_;
+    std::vector<SwapchainImage> swapchainImages_;*/
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
     std::swap(surface_, rhs.surface_);
 
     std::swap(swapchain_, rhs.swapchain_);
+    std::swap(swapchainFormat_, rhs.swapchainFormat_);
+    std::swap(width_, rhs.width_);
+    std::swap(height_, rhs.height_);
+    std::swap(swapchainImageCount_, rhs.swapchainImageCount_);
     std::swap(swapchainImages_, rhs.swapchainImages_);
 
     return *this;

@@ -10,12 +10,14 @@ namespace VKW
 RenderPassController::RenderPassController()
     : table_{ nullptr }
     , device_{ nullptr }
-{}
+{
+}
 
 RenderPassController::RenderPassController(RenderPassControllerDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
-{}
+{
+}
 
 RenderPassController::RenderPassController(RenderPassController&& rhs)
     : table_{ nullptr }

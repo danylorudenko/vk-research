@@ -64,17 +64,6 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
-    VKW::WorkersProviderDesc wcsDesc;
-    wcsDesc.table_ = table_.get();
-    wcsDesc.device_ = device_.get();
-    wcsDesc.bufferingCount_ = swapchain_->ImageCount();
-    wcsDesc.graphicsPresentQueueCount_ = 1;
-    wcsDesc.computeQueueCount_ = 0;
-    wcsDesc.transferQueueCount_ = 0;
-
-    workersProvider_ = std::make_unique<VKW::WorkersProvider>(wcsDesc);
-
-
 
     VKW::MemoryControllerDesc memoryControllerDesc;
     memoryControllerDesc.table_ = table_.get();
@@ -181,6 +170,18 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
+    VKW::WorkersProviderDesc wcsDesc;
+    wcsDesc.table_ = table_.get();
+    wcsDesc.device_ = device_.get();
+    wcsDesc.bufferingCount_ = swapchain_->ImageCount();
+    wcsDesc.graphicsPresentQueueCount_ = 1;
+    wcsDesc.computeQueueCount_ = 0;
+    wcsDesc.transferQueueCount_ = 0;
+
+    workersProvider_ = std::make_unique<VKW::WorkersProvider>(wcsDesc);
+
+
+
     VKW::PresentationControllerDesc presentationControllerDesc;
     presentationControllerDesc.table_ = table_.get();
     presentationControllerDesc.device_ = device_.get();
@@ -188,6 +189,7 @@ Loader::Loader(LoaderDesc const& desc)
     presentationControllerDesc.presentationWorker_ = workersProvider_->PresentWorker();
 
     presentationController_ = std::make_unique<VKW::PresentationController>(presentationControllerDesc);
+
 
 
     VKW::ResourceBindingServiceDesc resourceBindingServiceDesc;

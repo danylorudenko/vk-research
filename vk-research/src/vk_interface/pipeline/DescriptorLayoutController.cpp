@@ -45,10 +45,17 @@ DescriptorLayoutController& DescriptorLayoutController::operator=(DescriptorLayo
 DescriptorLayoutController::~DescriptorLayoutController()
 {
     VkDevice const device = device_->Handle();
+
+    for (auto const& pipelineLayout : pipelineLayouts_) {
+        table_->vkDestroyPipelineLayout(device, pipelineLayout->handle_, nullptr);
+        delete pipelineLayout;
+    }
+
     for (auto const& setLayout : setLayouts_) {
         table_->vkDestroyDescriptorSetLayout(device, setLayout->handle_, nullptr);
         delete setLayout;
     }
+
 }
 
 DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(DescriptorSetLayoutDesc const& desc)

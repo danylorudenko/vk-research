@@ -43,6 +43,7 @@ MemoryController::~MemoryController()
 {
     for (auto const& memory : allocations_) {
         table_->vkFreeMemory(device_->Handle(), memory->deviceMemory_, nullptr);
+        delete memory;
     }
 }
 
