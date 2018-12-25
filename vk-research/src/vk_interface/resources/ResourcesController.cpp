@@ -195,6 +195,11 @@ void ResourcesController::FreeBuffer(BufferResourceHandle handle)
 
 void ResourcesController::FreeImage(ImageResourceHandle handle)
 {
+    // TODO this is for the case of swapchain. dirty hack
+    if (handle.resource_ == nullptr) {
+        return;
+    }
+    
     auto imageIt = std::find(images_.cbegin(), images_.cend(), handle.resource_);
     assert(imageIt != images_.end() && "Can't free ImageResource");
 

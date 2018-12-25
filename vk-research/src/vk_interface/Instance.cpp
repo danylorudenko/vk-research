@@ -144,6 +144,9 @@ VkInstance Instance::Handle() const
 
 Instance::~Instance()
 {
+    if (debugCallback_)
+        table_->vkDestroyDebugReportCallbackEXT(instance_, debugCallback_, nullptr);
+
     if (instance_)
         table_->vkDestroyInstance(instance_, nullptr);
 
