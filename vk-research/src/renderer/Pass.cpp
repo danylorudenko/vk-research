@@ -133,9 +133,9 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
 
         // for now we only support floating attachments
         auto& val = clearValues[i];
-        val.color.float32[0] = 1.0f;
-        val.color.float32[1] = 0.5f;
-        val.color.float32[2] = 0.3f;
+        val.color.float32[0] = 0.0f;
+        val.color.float32[1] = 0.0f;
+        val.color.float32[2] = 0.0f;
         val.color.float32[3] = 1.0f;
     }
 
@@ -165,7 +165,11 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
 
 void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
-    
+    std::uint32_t const pipelinesCount = static_cast<std::uint32_t>(pipelines_.size());
+    for (auto i = 0u; i < pipelinesCount; ++i) {
+        auto& pipeline = root_->FindPipeline(pipelines_[i]);
+        //pipelin
+    }
 }
 
 void Pass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
