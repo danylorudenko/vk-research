@@ -2,13 +2,26 @@
 
 #include "..\class_features\NonCopyable.hpp"
 #include "..\vk_interface\pipeline\Pipeline.hpp"
+#include "..\vk_interface\pipeline\DescriptorLayout.hpp"
+#include "..\renderer\RootDef.hpp"
 
 namespace Render
 {
 
-struct PipelineProperties
+struct VertexStageProperties
 {
 
+};
+
+struct FragmentStageProperties
+{
+
+};
+
+struct PipelineProperties
+{
+    VertexStageProperties vertexProperties_;
+    FragmentStageProperties fragmentProperties_;
 };
 
 class Pipeline
