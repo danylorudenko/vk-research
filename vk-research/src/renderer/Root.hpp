@@ -50,6 +50,11 @@ struct RootDesc
     std::uint32_t defaultFramebufferHeight_;
 };
 
+struct RootShaderDesc
+{
+    std::string shaderPath_;
+};
+
 struct RootPipelineDesc
 {
     bool optimized_;
@@ -103,6 +108,8 @@ public:
 
     void DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const& desc);
     Pipeline& FindPipeline(PipelineKey const& key);
+
+    void DefineShader(ShaderKey const& key, RootShaderDesc const& desc);
 
     void PushPassTemp(RenderPassKey const& key);
 

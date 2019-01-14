@@ -10,7 +10,7 @@ namespace Render
 
 struct VertexStageProperties
 {
-
+    ShaderKey shader_;
 };
 
 struct FragmentStageProperties
