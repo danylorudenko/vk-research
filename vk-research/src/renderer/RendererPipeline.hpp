@@ -10,7 +10,12 @@ namespace Render
 
 struct VertexStageProperties
 {
-    
+    std::uint32_t vertexStride_;
+    std::uint32_t vertexAttributesCount_;
+    struct {
+        std::uint32_t location_;
+        std::uint32_t offset_;
+    } vertexAttributes[VKW::Pipeline::MAX_VERTEX_ATTRIBUTES];
     ShaderKey shader_;
 };
 
