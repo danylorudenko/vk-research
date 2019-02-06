@@ -2,6 +2,8 @@
 #include "Root.hpp"
 #include "..\vk_interface\ResourceRendererProxy.hpp"
 #include "..\vk_interface\pipeline\RenderPassController.hpp"
+#include "..\vk_interface\pipeline\PipelineFactory.hpp"
+#include "..\vk_interface\pipeline\Pipeline.hpp"
 #include "..\vk_interface\ImportTable.hpp"
 #include "..\vk_interface\Device.hpp"
 #include "..\vk_interface\worker\Worker.hpp"
@@ -19,6 +21,7 @@ Pass::Pass()
     , device_{ nullptr }
     , resourceProxy_{ nullptr }
     , renderPassController_{ nullptr }
+    , pipelineFactory_{ nullptr }
     , width_{ 0 }
     , height_{ 0 }
 {
@@ -30,6 +33,7 @@ Pass::Pass(PassDesc const& desc)
     , device_{ desc.device_}
     , resourceProxy_{ desc.proxy_ }
     , renderPassController_{ desc.renderPassController_ }
+    , pipelineFactory_{ desc.pipelineFactory_ }
     , width_{ desc.width_ }
     , height_{ desc.height_ }
 {
@@ -85,6 +89,7 @@ Pass::Pass(Pass&& rhs)
     , device_{ nullptr }
     , resourceProxy_{ nullptr }
     , renderPassController_{ nullptr }
+    , pipelineFactory_{ nullptr }
     , width_{ 0 }
     , height_{ 0 }
 {
@@ -98,6 +103,7 @@ Pass& Pass::operator=(Pass&& rhs)
     std::swap(device_, rhs.device_);
     std::swap(resourceProxy_, rhs.resourceProxy_);
     std::swap(renderPassController_, rhs.renderPassController_);
+    std::swap(pipelineFactory_, rhs.pipelineFactory_);
     std::swap(vkRenderPass_, rhs.vkRenderPass_);
     std::swap(framebuffer_, rhs.framebuffer_);
     std::swap(width_, rhs.width_);
@@ -168,7 +174,15 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
     std::uint32_t const pipelinesCount = static_cast<std::uint32_t>(pipelines_.size());
     for (auto i = 0u; i < pipelinesCount; ++i) {
         auto& pipeline = root_->FindPipeline(pipelines_[i]);
-        //pipelin
+        VKW::PipelineHandle const pipelineHandle = pipeline.Handle();
+        VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(pipelineHandle);
+
+        VkCommandBuffer const commandBuffer = commandReciever->commandBuffer_;
+        table_->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkwPipeline->vkPipeline_);
+        
+        // temporaty testing zalepa
+        // TODO
+        table_->vkCmdDraw(commandBuffer, 3, 1, 0, 0);
     }
 }
 

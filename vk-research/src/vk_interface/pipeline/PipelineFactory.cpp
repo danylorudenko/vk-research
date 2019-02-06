@@ -125,7 +125,9 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
         vertexInputState.flags = VK_FLAGS_NONE;
 
         auto const attrCount = desc.vertexInputInfo_->vertexAttributesCount_;
-        vertexInputState.vertexBindingDescriptionCount = 1;
+        // TODO
+        //vertexInputState.vertexBindingDescriptionCount = 1;
+        vertexInputState.vertexBindingDescriptionCount = 0;
         vertexInputState.vertexAttributeDescriptionCount = attrCount;
 
         inputBindingsInfo[0].binding = desc.vertexInputInfo_->binding_;
@@ -202,7 +204,9 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
         rasterizationInfo.rasterizerDiscardEnable = VK_FALSE;
         rasterizationInfo.polygonMode = VK_POLYGON_MODE_FILL;
         rasterizationInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizationInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        // TODO
+        //rasterizationInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterizationInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizationInfo.depthBiasEnable = VK_FALSE;
         rasterizationInfo.depthBiasConstantFactor = 0.0f;
         rasterizationInfo.depthBiasClamp = 0.0f;
@@ -274,5 +278,9 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     return PipelineHandle{ result };
 }
 
+Pipeline* PipelineFactory::GetPipeline(PipelineHandle handle) const
+{
+    return handle.pipeline_;
+}
 
 }

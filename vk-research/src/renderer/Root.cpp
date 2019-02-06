@@ -114,6 +114,7 @@ void Root::DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc)
     passDesc.device_ = loader_->device_.get();
     passDesc.proxy_ = resourceProxy_;
     passDesc.renderPassController_ = renderPassController_;
+    passDesc.pipelineFactory_ = pipelineFactory_;
     passDesc.framedDescriptorsHub_ = framedDescriptorsHub_;
     passDesc.imagesProvider_ = imagesProvider_;
     passDesc.width_ = defaultFramebufferWidth_;

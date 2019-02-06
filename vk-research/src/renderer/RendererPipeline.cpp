@@ -27,6 +27,11 @@ Pipeline& Pipeline::operator=(Pipeline&& rhs)
     return *this;
 }
 
+VKW::PipelineHandle Pipeline::Handle() const
+{
+    return pipelineHandle_;
+}
+
 Pipeline::~Pipeline()
 {
 

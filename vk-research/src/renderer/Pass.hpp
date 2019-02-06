@@ -11,6 +11,7 @@ class ImportTable;
 class Device;
 class ResourceRendererProxy;
 class RenderPassController;
+class PipelineFactory;
 class Worker;
 struct WorkerFrameCommandReciever;
 struct FramedDescriptorsHub;
@@ -31,6 +32,7 @@ struct PassDesc
 
     VKW::ResourceRendererProxy* proxy_;
     VKW::RenderPassController* renderPassController_;
+    VKW::PipelineFactory* pipelineFactory_;
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
     VKW::ImagesProvider* imagesProvider_;
 
@@ -69,6 +71,7 @@ private:
 
     VKW::ResourceRendererProxy* resourceProxy_;
     VKW::RenderPassController* renderPassController_;
+    VKW::PipelineFactory* pipelineFactory_;
 
     VKW::RenderPassHandle vkRenderPass_;
     VKW::ProxyFramebufferHandle framebuffer_;
