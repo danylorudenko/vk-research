@@ -168,6 +168,11 @@ Pipeline& Root::FindPipeline(PipelineKey const& key)
     return pipelineMap_[key];
 }
 
+void Root::DefineShader(ShaderKey const& key, RootShaderDesc const& desc)
+{
+
+}
+
 void Root::PushPassTemp(RenderPassKey const& key)
 {
     renderGraphRootTemp_.emplace_back(key);

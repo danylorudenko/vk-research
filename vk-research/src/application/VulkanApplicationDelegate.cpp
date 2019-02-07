@@ -182,19 +182,22 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     //vInfo.vertexAttributes_[0].offset_ = 0;
     //vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
 
+    float const width = static_cast< float >(mainWindow_.Width());
+    float const height = static_cast< float >(mainWindow_.Height());
+
     VKW::ViewportInfo vpInfo;
     vpInfo.viewportsCount_ = 1;
     auto& vp = vpInfo.viewports_[0];
     vp.x_ = 0.0f;
     vp.y_ = 0.0f;
-    vp.width_ = static_cast< float >( mainWindow_.Width() );
-    vp.height_ = static_cast< float >( mainWindow_.Height() );
+    vp.width_ = width;
+    vp.height_ = height;
     vp.minDepth_ = 0.0f;
     vp.maxDepth_ = 1.0f;
     vp.scissorXoffset_ = 0;
     vp.scissorYoffset_ = 0;
-    vp.scissorXextent_ = 1024;
-    vp.scissorYextent_ = 1024;
+    vp.scissorXextent_ = width;
+    vp.scissorYextent_ = height;
 
     VKW::PipelineLayoutDesc layoutDesc;
     layoutDesc.membersCount_ = 0;
