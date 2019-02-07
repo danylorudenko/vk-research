@@ -187,8 +187,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     auto& vp = vpInfo.viewports_[0];
     vp.x_ = 0.0f;
     vp.y_ = 0.0f;
-    vp.width_ = 1024.0f;
-    vp.height_ = 1024.0f;
+    vp.width_ = static_cast< float >( mainWindow_.Width() );
+    vp.height_ = static_cast< float >( mainWindow_.Height() );
     vp.minDepth_ = 0.0f;
     vp.maxDepth_ = 1.0f;
     vp.scissorXoffset_ = 0;
