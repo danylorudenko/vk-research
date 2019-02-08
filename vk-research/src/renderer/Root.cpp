@@ -14,6 +14,7 @@ Root::Root()
     , imagesProvider_{ nullptr }
     , framedDescriptorsHub_{ nullptr }
     , layoutController_{ nullptr }
+    , shaderModuleFactory_{ nullptr }
     , pipelineFactory_{ nullptr }
     , presentationController_{ nullptr }
     , mainWorkerTemp_{ nullptr }
@@ -30,6 +31,7 @@ Root::Root(RootDesc const& desc)
     , imagesProvider_{ desc.imagesProvider_ }
     , framedDescriptorsHub_{ desc.framedDescriptorsHub_ }
     , layoutController_{ desc.layoutController_ }
+    , shaderModuleFactory_{ desc.shaderModuleFactory_ }
     , pipelineFactory_{ desc.pipelineFactory_ }
     , presentationController_{ desc.presentationController_ }
     , mainWorkerTemp_{ desc.mainWorkerTemp_ }
@@ -47,6 +49,7 @@ Root::Root(Root&& rhs)
     , imagesProvider_{ nullptr }
     , framedDescriptorsHub_{ nullptr }
     , layoutController_{ nullptr }
+    , shaderModuleFactory_{ nullptr }
     , pipelineFactory_{ nullptr }
     , presentationController_{ nullptr }
     , mainWorkerTemp_{ nullptr }
@@ -64,6 +67,7 @@ Root& Root::operator=(Root&& rhs)
     std::swap(imagesProvider_, rhs.imagesProvider_);
     std::swap(framedDescriptorsHub_, rhs.framedDescriptorsHub_);
     std::swap(layoutController_, rhs.layoutController_);
+    std::swap(shaderModuleFactory_, rhs.shaderModuleFactory_);
     std::swap(pipelineFactory_, rhs.pipelineFactory_);
     std::swap(presentationController_, rhs.presentationController_);
     std::swap(mainWorkerTemp_, rhs.mainWorkerTemp_);
@@ -152,7 +156,8 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const
     vkwDesc.vertexInputInfo_ = desc.vertexInputInfo_;
     vkwDesc.shaderStagesCount_ = desc.shaderStagesCount_;
     for (auto i = 0u; i < desc.shaderStagesCount_; ++i) {
-        vkwDesc.shaderStages_[i] = desc.shaderStages_[i];
+        VKW::ShaderModuleHandle moduleHandle = shaderModuleFactory_->LoadModule(desc.shaderStages_[i].desc_);
+        vkwDesc.shaderStages_[i] = VKW::ShaderStageInfo{ moduleHandle };
     }
     vkwDesc.viewportInfo_ = desc.viewportInfo_;
     vkwDesc.layoutDesc_ = desc.layoutDesc_;
@@ -166,11 +171,6 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const
 Pipeline& Root::FindPipeline(PipelineKey const& key)
 {
     return pipelineMap_[key];
-}
-
-void Root::DefineShader(ShaderKey const& key, RootShaderDesc const& desc)
-{
-
 }
 
 void Root::PushPassTemp(RenderPassKey const& key)

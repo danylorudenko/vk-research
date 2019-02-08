@@ -11,6 +11,7 @@
 #include "..\vk_interface\image\ImagesProvider.hpp"
 #include "..\vk_interface\pipeline\RenderPassController.hpp"
 #include "..\vk_interface\pipeline\DescriptorLayoutController.hpp"
+#include "..\vk_interface\pipeline\ShaderModuleFactory.hpp"
 #include "..\vk_interface\pipeline\PipelineFactory.hpp"
 #include "..\vk_interface\runtime\PresentationController.hpp"
 
@@ -43,6 +44,7 @@ struct RootDesc
     VKW::ImagesProvider* imagesProvider_;
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
     VKW::DescriptorLayoutController* layoutController_;
+    VKW::ShaderModuleFactory* shaderModuleFactory_;
     VKW::PipelineFactory* pipelineFactory_;
     VKW::PresentationController* presentationController_;
     VKW::Worker* mainWorkerTemp_;
@@ -52,7 +54,7 @@ struct RootDesc
 
 struct RootShaderDesc
 {
-    std::string shaderPath_;
+    VKW::ShaderModuleDesc desc_;
 };
 
 struct RootPipelineDesc
@@ -60,7 +62,7 @@ struct RootPipelineDesc
     bool optimized_;
 
     std::uint32_t shaderStagesCount_;
-    VKW::ShaderStageInfo shaderStages_[VKW::Pipeline::MAX_SHADER_STAGES];
+    RootShaderDesc shaderStages_[VKW::Pipeline::MAX_SHADER_STAGES];
 
     VKW::InputAssemblyInfo* inputAssemblyInfo_;
     VKW::VertexInputInfo* vertexInputInfo_;
@@ -109,8 +111,6 @@ public:
     void DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const& desc);
     Pipeline& FindPipeline(PipelineKey const& key);
 
-    void DefineShader(ShaderKey const& key, RootShaderDesc const& desc);
-
     void PushPassTemp(RenderPassKey const& key);
 
     void IterateRenderGraph();
@@ -122,6 +122,7 @@ private:
     VKW::ImagesProvider* imagesProvider_;
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
     VKW::DescriptorLayoutController* layoutController_;
+    VKW::ShaderModuleFactory* shaderModuleFactory_;
     VKW::PipelineFactory* pipelineFactory_;
 
     VKW::PresentationController* presentationController_;

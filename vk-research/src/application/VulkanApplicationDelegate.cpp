@@ -2,6 +2,8 @@
 #include "..\vk_interface\Tools.hpp"
 #include "..\renderer\Root.hpp"
 
+#include <utility>
+
 VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug)
     : mainWindow_ {
         instance,
@@ -30,6 +32,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     rootDesc.imagesProvider_ = vulkanLoader_->imagesProvider_.get();
     rootDesc.framedDescriptorsHub_ = vulkanLoader_->framedDescriptorsHub_.get();
     rootDesc.layoutController_ = vulkanLoader_->descriptorLayoutController_.get();
+    rootDesc.shaderModuleFactory_ = vulkanLoader_->shaderModuleFactory_.get();
     rootDesc.pipelineFactory_ = vulkanLoader_->pipelineFactory_.get();
     rootDesc.presentationController_ = vulkanLoader_->presentationController_.get();
     rootDesc.mainWorkerTemp_ = vulkanLoader_->workersProvider_->GetWorker(VKW::WorkerType::GRAPHICS_PRESENT, 0);
@@ -156,19 +159,13 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     fragmentModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
     fragmentModuleDesc.shaderPath_ = "shader-src\\test-frag.spv";
     fragmentModuleDesc.entryPoint_ = "main";
-
-    VKW::ShaderModuleHandle vertexHandle = vulkanLoader_->shaderModuleFactory_->LoadModule(vertexModuleDesc);
-    VKW::ShaderModuleHandle fragmentHandle = vulkanLoader_->shaderModuleFactory_->LoadModule(fragmentModuleDesc);
-
-
-
-
+    
     Render::RootPipelineDesc pipelineDesc;
 
     pipelineDesc.renderPass_ = "pass0";
     pipelineDesc.shaderStagesCount_ = 2;
-    pipelineDesc.shaderStages_[0].shaderModuleHandle_ = vertexHandle;
-    pipelineDesc.shaderStages_[1].shaderModuleHandle_ = fragmentHandle;
+    pipelineDesc.shaderStages_[0].desc_ = std::move(vertexModuleDesc);
+    pipelineDesc.shaderStages_[1].desc_ = std::move(fragmentModuleDesc);
 
     VKW::InputAssemblyInfo iaInfo;
     iaInfo.primitiveRestartEnable_ = false;
@@ -182,16 +179,16 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     //vInfo.vertexAttributes_[0].offset_ = 0;
     //vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
 
-    float const width = static_cast< float >(mainWindow_.Width());
-    float const height = static_cast< float >(mainWindow_.Height());
+    auto const width = (mainWindow_.Width());
+    auto const height = (mainWindow_.Height());
 
     VKW::ViewportInfo vpInfo;
     vpInfo.viewportsCount_ = 1;
     auto& vp = vpInfo.viewports_[0];
     vp.x_ = 0.0f;
     vp.y_ = 0.0f;
-    vp.width_ = width;
-    vp.height_ = height;
+    vp.width_ = static_cast< float >(width);
+    vp.height_ = static_cast< float >(height);
     vp.minDepth_ = 0.0f;
     vp.maxDepth_ = 1.0f;
     vp.scissorXoffset_ = 0;
