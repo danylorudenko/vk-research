@@ -96,6 +96,8 @@ public:
     ~Root();
 
 
+    void CreateUniformBuffer()
+
     void DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc);
     VKW::ProxyBufferHandle FindGlobalBuffer(ResourceKey const& key);
 

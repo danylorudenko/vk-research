@@ -439,6 +439,7 @@
     <ClInclude Include="src\renderer\Pass.hpp" />
     <ClInclude Include="src\renderer\PresentService.hpp" />
     <ClInclude Include="src\renderer\RendererPipeline.hpp" />
+    <ClInclude Include="src\renderer\RenderItem.hpp" />
     <ClInclude Include="src\renderer\Root.hpp" />
     <ClInclude Include="src\renderer\RootDef.hpp" />
     <ClInclude Include="src\renderer\SetLayout.hpp" />
