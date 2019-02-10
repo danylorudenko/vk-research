@@ -141,6 +141,15 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     //renderRoot_->DefineGlobalImage("attchmnt2", imageDesc);
 
+    VKW::BufferViewDesc bufferDesc;
+    bufferDesc.format_ = VK_FORMAT_UNDEFINED;
+    bufferDesc.size_ = 64;
+    bufferDesc.usage_ = VKW::BufferUsage::UNIFORM;
+
+    auto id = renderRoot_->AcquireUniformBuffer(64);
+
+    Render::UniformBuffer buffer = renderRoot_->FindUniformBuffer(id);
+
 
     Render::RootPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;

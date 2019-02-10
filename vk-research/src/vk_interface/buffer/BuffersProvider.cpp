@@ -56,13 +56,13 @@ BuffersProvider& BuffersProvider::operator=(BuffersProvider&& rhs)
 
 void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferViewHandle* results)
 {
-    std::uint32_t totalBufferSize = 0;
+    std::uint32_t totalBufferSize = desc[0].size_;
     VkFormat const format = desc[0].format_;
     BufferUsage const usage = desc[0].usage_;
 
     for (auto i = 1u; i < buffersCount; ++i) {
         assert(desc[i].usage_ == desc[i - 1].usage_ && "All acquired resources must share same usage pattern");
-        totalBufferSize += desc->size_;
+        totalBufferSize += desc[i].size_;
     }
 
     BufferDesc bufferDesc;
@@ -85,14 +85,15 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
         viewInfo.flags = VK_FLAGS_NONE;
         viewInfo.buffer = resource->handle_;
         viewInfo.format = format;
-        viewInfo.offset = desc[i].offset_;
+        //viewInfo.offset = desc[i].offset_;
+        viewInfo.offset = 0u;
         viewInfo.range = desc[i].size_;
 
         if (format != VK_FORMAT_UNDEFINED) {
             VK_ASSERT(table_->vkCreateBufferView(device, &viewInfo, nullptr, &view));
         }
         
-        BufferView* resultView = new BufferView{ view, format, desc[i].offset_, desc[i].size_, providedBuffer };
+        BufferView* resultView = new BufferView{ view, format, viewInfo.offset, viewInfo.range, providedBuffer };
         bufferViews_.push_back(resultView);
 
         results[i].view_ = resultView;

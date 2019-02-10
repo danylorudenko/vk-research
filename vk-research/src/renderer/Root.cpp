@@ -20,6 +20,7 @@ Root::Root()
     , mainWorkerTemp_{ nullptr }
     , defaultFramebufferWidth_{ 0 }
     , defaultFramebufferHeight_{ 0 }
+    , nextUniformBufferId_{ 0u }
 {
 
 }
@@ -37,6 +38,7 @@ Root::Root(RootDesc const& desc)
     , mainWorkerTemp_{ desc.mainWorkerTemp_ }
     , defaultFramebufferWidth_{ desc.defaultFramebufferWidth_ }
     , defaultFramebufferHeight_{ desc.defaultFramebufferHeight_ }
+    , nextUniformBufferId_{ 0u }
 {
     VKW::ProxyImageHandle swapchainView = resourceProxy_->RegisterSwapchainImageViews();
     globalImages_[SWAPCHAIN_IMAGE_KEY] = swapchainView;
@@ -55,6 +57,7 @@ Root::Root(Root&& rhs)
     , mainWorkerTemp_{ nullptr }
     , defaultFramebufferWidth_{ 0 }
     , defaultFramebufferHeight_{ 0 }
+    , nextUniformBufferId_{ 0u }
 {
     operator=(std::move(rhs));
 }
@@ -75,6 +78,8 @@ Root& Root::operator=(Root&& rhs)
     std::swap(defaultFramebufferHeight_, rhs.defaultFramebufferHeight_);
     std::swap(globalBuffers_, rhs.globalBuffers_);
     std::swap(globalImages_, rhs.globalImages_);
+    std::swap(uniformBuffers_, rhs.uniformBuffers_);
+    std::swap(nextUniformBufferId_, rhs.nextUniformBufferId_);
     std::swap(renderPassMap_, rhs.renderPassMap_);
     std::swap(setLayoutMap_, rhs.setLayoutMap_);
     std::swap(pipelineMap_, rhs.pipelineMap_);
@@ -88,6 +93,37 @@ Root::~Root()
 
 }
 
+UniformBufferId Root::AcquireUniformBuffer(std::uint32_t size)
+{
+    VKW::BufferViewDesc desc;
+    desc.usage_ = VKW::BufferUsage::UNIFORM;
+    desc.size_ = size;
+    desc.format_ = VK_FORMAT_UNDEFINED;
+    
+    VKW::ProxyBufferHandle bufferHandle = resourceProxy_->CreateBuffer(desc);
+    UniformBufferId id = nextUniformBufferId_++;
+    uniformBuffers_[id] = UniformBuffer{ bufferHandle };
+
+    return id;
+}
+
+UniformBuffer Root::FindUniformBuffer(UniformBufferId id)
+{
+    return uniformBuffers_[id];
+}
+
+VKW::BufferView* Root::FindUniformBuffer(UniformBufferId id, std::uint32_t frame)
+{
+    auto const& proxyHandle = uniformBuffers_[id].proxyBufferViewHandle_;
+    return resourceProxy_->GetBufferView(proxyHandle, frame);
+}
+
+void Root::ReleaseUniformBuffer(UniformBufferId id)
+{
+    // no implementation
+    std::cout << "Attampt to release uniform buffer by id: " << id << std::endl;
+}
+
 void Root::DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc)
 {
     VKW::ProxyBufferHandle bufferHandle = resourceProxy_->CreateBuffer(desc);
@@ -99,6 +135,12 @@ VKW::ProxyBufferHandle Root::FindGlobalBuffer(ResourceKey const& key)
     return globalBuffers_[key];
 }
 
+VKW::BufferView* Root::FindGlobalBuffer(ResourceKey const& key, std::uint32_t frame)
+{
+    auto const& proxyHandle = globalBuffers_[key];
+    return resourceProxy_->GetBufferView(proxyHandle, frame);
+}
+
 void Root::DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc)
 {
     VKW::ProxyImageHandle imageHandle = resourceProxy_->CreateImage(desc);
@@ -108,6 +150,12 @@ void Root::DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& d
 VKW::ProxyImageHandle Root::FindGlobalImage(ResourceKey const& key)
 {
     return globalImages_[key];
+}
+
+VKW::ImageView* Root::FindGlobalImage(ResourceKey const& key, std::uint32_t frame)
+{
+    auto const& proxyHandle = globalImages_[key];
+    return resourceProxy_->GetImageView(proxyHandle, frame);
 }
 
 void Root::DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc)

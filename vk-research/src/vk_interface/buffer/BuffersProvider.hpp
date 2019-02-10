@@ -16,7 +16,6 @@ class Device;
 struct BufferViewDesc
 {
     VkFormat format_;
-    std::uint32_t offset_;
     std::uint32_t size_;
     BufferUsage usage_;
 };

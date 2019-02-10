@@ -18,6 +18,7 @@
 #include "Pass.hpp"
 #include "SetLayout.hpp"
 #include "RendererPipeline.hpp"
+#include "UniformBuffer.hpp"
 
 namespace VKW
 {
@@ -83,11 +84,14 @@ public:
 
     using GlobalImagesMap = std::unordered_map<ResourceKey, VKW::ProxyImageHandle>;
     using GlobalBuffersMap = std::unordered_map<ResourceKey, VKW::ProxyBufferHandle>;
+    using UniformBufferMap = std::unordered_map< UniformBufferId, UniformBuffer >;
+
     using RenderPassMap = std::map<RenderPassKey, Pass>;
     using SetLayoutMap = std::map<SetLayoutKey, SetLayout>;
     using PipelineMap = std::map<PipelineKey, Pipeline>;
 
     using RenderGraphRoot = std::vector<RenderPassKey>;
+
 
     Root();
     Root(RootDesc const& desc);
@@ -96,13 +100,18 @@ public:
     ~Root();
 
 
-    void CreateUniformBuffer()
+    UniformBufferId AcquireUniformBuffer(std::uint32_t size);
+    UniformBuffer FindUniformBuffer(UniformBufferId id);
+    VKW::BufferView* FindUniformBuffer(UniformBufferId id, std::uint32_t frame);
+    void ReleaseUniformBuffer(UniformBufferId id);
 
     void DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc);
     VKW::ProxyBufferHandle FindGlobalBuffer(ResourceKey const& key);
+    VKW::BufferView* FindGlobalBuffer(ResourceKey const& key, std::uint32_t frame);
 
     void DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc);
     VKW::ProxyImageHandle FindGlobalImage(ResourceKey const& key);
+    VKW::ImageView* FindGlobalImage(ResourceKey const& key, std::uint32_t frame);
 
     void DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc);
     Pass& FindPass(RenderPassKey const& key);
@@ -135,6 +144,8 @@ private:
 
     GlobalImagesMap globalImages_;
     GlobalBuffersMap globalBuffers_;
+    UniformBufferMap uniformBuffers_;
+    UniformBufferId nextUniformBufferId_;
 
     RenderPassMap renderPassMap_;
     SetLayoutMap setLayoutMap_;
