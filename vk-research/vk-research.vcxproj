@@ -139,6 +139,7 @@
     <ClCompile Include="src\memory\ByteBuffer.cpp" />
     <ClCompile Include="src\renderer\Pass.cpp" />
     <ClCompile Include="src\renderer\RendererPipeline.cpp" />
+    <ClCompile Include="src\renderer\RenderItem.cpp" />
     <ClCompile Include="src\renderer\Root.cpp" />
     <ClCompile Include="src\renderer\SetLayout.cpp" />
     <ClCompile Include="src\system\DynamicLibrary.cpp" />

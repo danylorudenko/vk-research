@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstdint>
+#include <limits>
 
 namespace Render
 {
@@ -11,6 +12,10 @@ using RenderPassKey = std::string;
 using SetLayoutKey = std::string;
 using PipelineKey = std::string;
 using ShaderKey = std::string;
-using UniformBufferId = std::uint64_t;
+
+struct UniformBufferHandle
+{
+    std::uint64_t id_ = std::numeric_limits<std::uint64_t>::max();
+};
 
 }

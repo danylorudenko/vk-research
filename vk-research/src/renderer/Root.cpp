@@ -93,7 +93,7 @@ Root::~Root()
 
 }
 
-UniformBufferId Root::AcquireUniformBuffer(std::uint32_t size)
+UniformBufferHandle Root::AcquireUniformBuffer(std::uint32_t size)
 {
     VKW::BufferViewDesc desc;
     desc.usage_ = VKW::BufferUsage::UNIFORM;
@@ -101,27 +101,27 @@ UniformBufferId Root::AcquireUniformBuffer(std::uint32_t size)
     desc.format_ = VK_FORMAT_UNDEFINED;
     
     VKW::ProxyBufferHandle bufferHandle = resourceProxy_->CreateBuffer(desc);
-    UniformBufferId id = nextUniformBufferId_++;
-    uniformBuffers_[id] = UniformBuffer{ bufferHandle };
+    UniformBufferHandle handle { nextUniformBufferId_++ };
+    uniformBuffers_[handle.id_] = UniformBuffer{ bufferHandle };
 
-    return id;
+    return handle;
 }
 
-UniformBuffer Root::FindUniformBuffer(UniformBufferId id)
+UniformBuffer Root::FindUniformBuffer(UniformBufferHandle handle)
 {
-    return uniformBuffers_[id];
+    return uniformBuffers_[handle.id_];
 }
 
-VKW::BufferView* Root::FindUniformBuffer(UniformBufferId id, std::uint32_t frame)
+VKW::BufferView* Root::FindUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 {
-    auto const& proxyHandle = uniformBuffers_[id].proxyBufferViewHandle_;
+    auto const& proxyHandle = uniformBuffers_[handle.id_].proxyBufferViewHandle_;
     return resourceProxy_->GetBufferView(proxyHandle, frame);
 }
 
-void Root::ReleaseUniformBuffer(UniformBufferId id)
+void Root::ReleaseUniformBuffer(UniformBufferHandle handle)
 {
     // no implementation
-    std::cout << "Attampt to release uniform buffer by id: " << id << std::endl;
+    std::cout << "Attampt to release uniform buffer by id: " << handle.id_ << std::endl;
 }
 
 void Root::DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc)

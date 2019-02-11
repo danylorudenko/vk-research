@@ -84,7 +84,7 @@ public:
 
     using GlobalImagesMap = std::unordered_map<ResourceKey, VKW::ProxyImageHandle>;
     using GlobalBuffersMap = std::unordered_map<ResourceKey, VKW::ProxyBufferHandle>;
-    using UniformBufferMap = std::unordered_map< UniformBufferId, UniformBuffer >;
+    using UniformBufferMap = std::unordered_map< std::uint64_t, UniformBuffer >;
 
     using RenderPassMap = std::map<RenderPassKey, Pass>;
     using SetLayoutMap = std::map<SetLayoutKey, SetLayout>;
@@ -100,10 +100,10 @@ public:
     ~Root();
 
 
-    UniformBufferId AcquireUniformBuffer(std::uint32_t size);
-    UniformBuffer FindUniformBuffer(UniformBufferId id);
-    VKW::BufferView* FindUniformBuffer(UniformBufferId id, std::uint32_t frame);
-    void ReleaseUniformBuffer(UniformBufferId id);
+    UniformBufferHandle AcquireUniformBuffer(std::uint32_t size);
+    UniformBuffer FindUniformBuffer(UniformBufferHandle id);
+    VKW::BufferView* FindUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
+    void ReleaseUniformBuffer(UniformBufferHandle id);
 
     void DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc);
     VKW::ProxyBufferHandle FindGlobalBuffer(ResourceKey const& key);
@@ -145,7 +145,7 @@ private:
     GlobalImagesMap globalImages_;
     GlobalBuffersMap globalBuffers_;
     UniformBufferMap uniformBuffers_;
-    UniformBufferId nextUniformBufferId_;
+    std::uint64_t nextUniformBufferId_;
 
     RenderPassMap renderPassMap_;
     SetLayoutMap setLayoutMap_;
