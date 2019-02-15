@@ -231,6 +231,8 @@ RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc co
 {
     pipeline.renderItems_.emplace_back();
     auto& item = pipeline.renderItems_.back();
+
+    item.vertexCount_ = desc.vertexCount_;
     
     item.uniformBuffersCount_ = desc.uniformBuffersCount_;
     auto const uniformBuffersCount = desc.uniformBuffersCount_;

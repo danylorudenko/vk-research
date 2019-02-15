@@ -9,6 +9,8 @@
 namespace VKW
 {
 
+char constexpr DEFAULT_SHADER_ENTRY_POINT[] = "main";
+
 ShaderModuleFactory::ShaderModuleFactory()
     : table_{ nullptr }
     , device_{ nullptr }
@@ -65,7 +67,7 @@ ShaderModuleHandle ShaderModuleFactory::LoadModule(ShaderModuleDesc const& desc)
     VK_ASSERT(table_->vkCreateShaderModule(device_->Handle(), &info, nullptr, &vkModule));
 
     auto* resultModule = new ShaderModule{ vkModule };
-    resultModule->entryPoint_ = desc.entryPoint_;
+    resultModule->entryPoint_ = DEFAULT_SHADER_ENTRY_POINT;
     resultModule->type_ = desc.type_;
     loadedModules_.emplace_back(resultModule);
 

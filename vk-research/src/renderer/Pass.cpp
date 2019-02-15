@@ -181,7 +181,14 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
         
         // temporaty testing zalepa
         // TODO
-        table_->vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+        auto& renderItems = pipeline.renderItems_;
+        auto const renderItemsCount = static_cast<std::uint32_t>(renderItems.size());
+        for (auto i = 0u; i < renderItemsCount; ++i) {
+            auto& renderItem = renderItems[i];
+            table_->vkCmdDraw(commandBuffer, renderItem.vertexCount_, 1, 0, 0);
+        }
+        
     }
 }
 

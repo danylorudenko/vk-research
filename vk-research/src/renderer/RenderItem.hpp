@@ -21,6 +21,7 @@ struct RenderItemUniform
 
 struct RenderItem
 {
+    std::uint32_t vertexCount_;
     std::uint32_t uniformBuffersCount_;
     RenderItemUniform uniformBuffers_[RENDER_ITEM_UNIFORM_MAX_COUNT];
 };

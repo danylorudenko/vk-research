@@ -78,6 +78,7 @@ struct GraphicsPipelineDesc
 
 struct RenderItemDesc
 {
+    std::uint32_t vertexCount_;
     std::uint32_t uniformBuffersCount_;
     struct {
         char const* name_;

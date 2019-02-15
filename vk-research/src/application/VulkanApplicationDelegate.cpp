@@ -141,37 +141,29 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     //renderRoot_->DefineGlobalImage("attchmnt2", imageDesc);
 
-    VKW::BufferViewDesc bufferDesc;
-    bufferDesc.format_ = VK_FORMAT_UNDEFINED;
-    bufferDesc.size_ = 64;
-    bufferDesc.usage_ = VKW::BufferUsage::UNIFORM;
-
-    auto id = renderRoot_->AcquireUniformBuffer(64);
-
-    Render::UniformBuffer buffer = renderRoot_->FindUniformBuffer(id);
+    char constexpr passKey[] = "pass0";
+    char constexpr pipeKey[] = "pipe0";
 
 
     Render::RenderPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0] = Render::Root::SWAPCHAIN_IMAGE_KEY; // we need swapchain reference here
 
-    renderRoot_->DefineRenderPass("pass0", passDesc);
-    Render::Pass& pass = renderRoot_->FindPass("pass0");
+    renderRoot_->DefineRenderPass(passKey, passDesc);
+    Render::Pass& pass = renderRoot_->FindPass(passKey);
 
     VKW::ShaderModuleDesc vertexModuleDesc;
     vertexModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
     vertexModuleDesc.shaderPath_ = "shader-src\\test-vertex.spv";
-    vertexModuleDesc.entryPoint_ = "main";
 
 
     VKW::ShaderModuleDesc fragmentModuleDesc;
     fragmentModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
     fragmentModuleDesc.shaderPath_ = "shader-src\\test-frag.spv";
-    fragmentModuleDesc.entryPoint_ = "main";
     
     Render::GraphicsPipelineDesc pipelineDesc;
 
-    pipelineDesc.renderPass_ = "pass0";
+    pipelineDesc.renderPass_ = passKey;
     pipelineDesc.shaderStagesCount_ = 2;
     pipelineDesc.shaderStages_[0].desc_ = std::move(vertexModuleDesc);
     pipelineDesc.shaderStages_[1].desc_ = std::move(fragmentModuleDesc);
@@ -196,8 +188,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     auto& vp = vpInfo.viewports_[0];
     vp.x_ = 0.0f;
     vp.y_ = 0.0f;
-    vp.width_ = static_cast< float >(width);
-    vp.height_ = static_cast< float >(height);
+    vp.width_ = static_cast<float>(width);
+    vp.height_ = static_cast<float>(height);
     vp.minDepth_ = 0.0f;
     vp.maxDepth_ = 1.0f;
     vp.scissorXoffset_ = 0;
@@ -213,9 +205,17 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     pipelineDesc.viewportInfo_ = &vpInfo;
     pipelineDesc.layoutDesc_ = &layoutDesc;
 
-    renderRoot_->DefineGraphicsPipeline("testpipe", pipelineDesc);
+    renderRoot_->DefineGraphicsPipeline(pipeKey, pipelineDesc);
+    
+    Render::RenderItemDesc itemDesc;
+    itemDesc.vertexCount_ = 3;
+    itemDesc.uniformBuffersCount_ = 1;
+    itemDesc.uniformBuffersDescs[0].name_ = "transform";
+    itemDesc.uniformBuffersDescs[0].size_ = 16;
 
-    pass.AddPipeline("testpipe");
-    renderRoot_->PushPassTemp("pass0");
+    renderRoot_->ConstructRenderItem(pipeKey, itemDesc);
+
+    pass.AddPipeline(pipeKey);
+    renderRoot_->PushPassTemp(passKey);
 
 }
