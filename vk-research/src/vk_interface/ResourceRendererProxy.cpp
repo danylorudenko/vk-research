@@ -78,6 +78,11 @@ ResourceRendererProxy::~ResourceRendererProxy()
 
 }
 
+std::uint32_t ResourceRendererProxy::FramesCount() const
+{
+    return framedDescriptorsHub_->framesCount_;
+}
+
 ProxyImageHandle ResourceRendererProxy::RegisterSwapchainImageViews()
 {
     std::uint32_t const id = framedDescriptorsHub_->imageViewsNextId_++;

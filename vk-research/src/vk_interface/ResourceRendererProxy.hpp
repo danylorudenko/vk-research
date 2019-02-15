@@ -85,6 +85,8 @@ public:
     ResourceRendererProxy& operator=(ResourceRendererProxy&& rhs);
     ~ResourceRendererProxy();
 
+    std::uint32_t FramesCount() const;
+
     ProxyImageHandle RegisterSwapchainImageViews();
 
     ProxySetHandle CreateSet(DescriptorSetLayoutHandle layout);

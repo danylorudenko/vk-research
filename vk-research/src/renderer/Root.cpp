@@ -93,6 +93,11 @@ Root::~Root()
 
 }
 
+VKW::ImportTable* Root::VulkanFuncTable() const
+{
+    return loader_->table_.get();
+}
+
 UniformBufferHandle Root::AcquireUniformBuffer(std::uint32_t size)
 {
     VKW::BufferViewDesc desc;
@@ -107,7 +112,7 @@ UniformBufferHandle Root::AcquireUniformBuffer(std::uint32_t size)
     return handle;
 }
 
-UniformBuffer Root::FindUniformBuffer(UniformBufferHandle handle)
+UniformBuffer& Root::FindUniformBuffer(UniformBufferHandle handle)
 {
     return uniformBuffers_[handle.id_];
 }
@@ -158,7 +163,7 @@ VKW::ImageView* Root::FindGlobalImage(ResourceKey const& key, std::uint32_t fram
     return resourceProxy_->GetImageView(proxyHandle, frame);
 }
 
-void Root::DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc)
+void Root::DefineRenderPass(RenderPassKey const& key, RenderPassDesc const& desc)
 {
     PassDesc passDesc;
     passDesc.root_ = this;
@@ -196,7 +201,7 @@ SetLayout& Root::FindSetLayout(SetLayoutKey const& key)
     return setLayoutMap_[key];
 }
 
-void Root::DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const& desc)
+void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc const& desc)
 {
     VKW::GraphicsPipelineDesc vkwDesc;
     vkwDesc.optimized_ = desc.optimized_;
@@ -213,12 +218,69 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const
     vkwDesc.depthStencilInfo_ = desc.depthStencilInfo_;
     
     VKW::PipelineHandle handle = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
+    // TODO: construction not complete
     pipelineMap_[key] = Pipeline{ handle };
 }
 
 Pipeline& Root::FindPipeline(PipelineKey const& key)
 {
     return pipelineMap_[key];
+}
+
+RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc const& desc)
+{
+    pipeline.renderItems_.emplace_back();
+    auto& item = pipeline.renderItems_.back();
+    
+    item.uniformBuffersCount_ = desc.uniformBuffersCount_;
+    auto const uniformBuffersCount = desc.uniformBuffersCount_;
+    for (auto i = 0u; i < uniformBuffersCount; ++i) {
+        
+        auto& uniformBuffDesc = desc.uniformBuffersDescs[i];
+        auto& uniform = item.uniformBuffers_[i];
+
+        std::strcpy(uniform.name_, uniformBuffDesc.name_);
+
+        auto const dataSize = uniformBuffDesc.size_;
+        uniform.hostBuffer_ = reinterpret_cast<std::uint8_t*>(malloc(dataSize));
+        uniform.hostBufferSize_ = dataSize;
+        
+        uniform.serverBufferHandle_ = AcquireUniformBuffer(dataSize);
+        UniformBuffer const& buffer = FindUniformBuffer(uniform.serverBufferHandle_);
+    }
+
+    return RenderItemHandle{ static_cast<std::uint32_t>(pipeline.renderItems_.size() - 1) };
+}
+
+void Root::ReleaseRenderItem(Pipeline& pipeline, RenderItemHandle handle)
+{
+    auto& item = pipeline.renderItems_[handle.id_];
+    auto const uniformBuffersCount = item.uniformBuffersCount_;
+    for (auto i = 0u; i < uniformBuffersCount; ++i) {
+        auto& uniform = item.uniformBuffers_[i];
+        ReleaseUniformBuffer(uniform.serverBufferHandle_);
+        std::free(uniform.hostBuffer_);
+    }
+}
+
+RenderItem* Root::FindRenderItem(Pipeline& pipeline, RenderItemHandle handle)
+{
+    return &pipeline.renderItems_[handle.id_];
+}
+
+RenderItemHandle Root::ConstructRenderItem(PipelineKey const& pipelineKey, RenderItemDesc const& desc)
+{
+    return ConstructRenderItem(FindPipeline(pipelineKey), desc);
+}
+
+void Root::ReleaseRenderItem(PipelineKey const& pipelineKey, RenderItemHandle handle)
+{
+    return ReleaseRenderItem(FindPipeline(pipelineKey), handle);
+}
+
+VKW::ResourceRendererProxy* Root::ResourceProxy() const
+{
+    return resourceProxy_;
 }
 
 void Root::PushPassTemp(RenderPassKey const& key)

@@ -19,6 +19,7 @@
 #include "SetLayout.hpp"
 #include "RendererPipeline.hpp"
 #include "UniformBuffer.hpp"
+#include "RenderItem.hpp"
 
 namespace VKW
 {
@@ -30,7 +31,7 @@ class Loader;
 namespace Render
 {
 
-struct RootPassDesc
+struct RenderPassDesc
 {
     std::uint32_t colorAttachmentsCount_;
     ResourceKey colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
@@ -53,17 +54,17 @@ struct RootDesc
     std::uint32_t defaultFramebufferHeight_;
 };
 
-struct RootShaderDesc
+struct ShaderDesc
 {
     VKW::ShaderModuleDesc desc_;
 };
 
-struct RootPipelineDesc
+struct GraphicsPipelineDesc
 {
     bool optimized_;
 
     std::uint32_t shaderStagesCount_;
-    RootShaderDesc shaderStages_[VKW::Pipeline::MAX_SHADER_STAGES];
+    ShaderDesc shaderStages_[VKW::Pipeline::MAX_SHADER_STAGES];
 
     VKW::InputAssemblyInfo* inputAssemblyInfo_;
     VKW::VertexInputInfo* vertexInputInfo_;
@@ -73,6 +74,15 @@ struct RootPipelineDesc
 
     VKW::PipelineLayoutDesc* layoutDesc_;
     RenderPassKey renderPass_;
+};
+
+struct RenderItemDesc
+{
+    std::uint32_t uniformBuffersCount_;
+    struct {
+        char const* name_;
+        std::uint32_t size_;
+    } uniformBuffersDescs[RENDER_ITEM_UNIFORM_MAX_COUNT];
 };
 
 class Root
@@ -99,9 +109,10 @@ public:
     Root& operator=(Root&& rhs);
     ~Root();
 
+    VKW::ImportTable* VulkanFuncTable() const;
 
     UniformBufferHandle AcquireUniformBuffer(std::uint32_t size);
-    UniformBuffer FindUniformBuffer(UniformBufferHandle id);
+    UniformBuffer& FindUniformBuffer(UniformBufferHandle id);
     VKW::BufferView* FindUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
     void ReleaseUniformBuffer(UniformBufferHandle id);
 
@@ -113,14 +124,22 @@ public:
     VKW::ProxyImageHandle FindGlobalImage(ResourceKey const& key);
     VKW::ImageView* FindGlobalImage(ResourceKey const& key, std::uint32_t frame);
 
-    void DefineRenderPass(RenderPassKey const& key, RootPassDesc const& desc);
+    void DefineRenderPass(RenderPassKey const& key, RenderPassDesc const& desc);
     Pass& FindPass(RenderPassKey const& key);
 
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
     SetLayout& FindSetLayout(SetLayoutKey const& key);
 
-    void DefineGraphicsPipeline(PipelineKey const& key, RootPipelineDesc const& desc);
+    void DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc const& desc);
     Pipeline& FindPipeline(PipelineKey const& key);
+
+    RenderItemHandle ConstructRenderItem(PipelineKey const& key, RenderItemDesc const& desc);
+    RenderItemHandle ConstructRenderItem(Pipeline& pipeline, RenderItemDesc const& desc);
+    RenderItem* FindRenderItem(Pipeline& pipeline, RenderItemHandle handle);
+    void ReleaseRenderItem(PipelineKey const& key, RenderItemHandle handle);
+    void ReleaseRenderItem(Pipeline& pipeline, RenderItemHandle handle);
+
+    VKW::ResourceRendererProxy* ResourceProxy() const;
 
     void PushPassTemp(RenderPassKey const& key);
 

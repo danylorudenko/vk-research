@@ -174,8 +174,7 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
     std::uint32_t const pipelinesCount = static_cast<std::uint32_t>(pipelines_.size());
     for (auto i = 0u; i < pipelinesCount; ++i) {
         auto& pipeline = root_->FindPipeline(pipelines_[i]);
-        VKW::PipelineHandle const pipelineHandle = pipeline.Handle();
-        VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(pipelineHandle);
+        VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(pipeline.pipelineHandle_);
 
         VkCommandBuffer const commandBuffer = commandReciever->commandBuffer_;
         table_->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkwPipeline->vkPipeline_);

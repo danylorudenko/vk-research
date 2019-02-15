@@ -3,7 +3,8 @@
 #include "..\class_features\NonCopyable.hpp"
 #include "..\vk_interface\pipeline\Pipeline.hpp"
 #include "..\vk_interface\pipeline\DescriptorLayout.hpp"
-#include "..\renderer\RootDef.hpp"
+#include "RootDef.hpp"
+#include "RenderItem.hpp"
 
 namespace Render
 {
@@ -24,25 +25,13 @@ struct PipelineProperties
     FragmentStageProperties fragmentProperties_;
 };
 
-class Pipeline
-    : public NonCopyable
+struct Pipeline
 {
-public:
-    Pipeline();
-    Pipeline(VKW::PipelineHandle handle);
-
-    Pipeline(Pipeline&& rhs);
-    Pipeline& operator=(Pipeline&& rhs);
-
-    VKW::PipelineHandle Handle() const;
-
-    ~Pipeline();
-
-private:
     VKW::PipelineHandle pipelineHandle_;
     VKW::PipelineLayoutHandle layoutHandle_;
 
     PipelineProperties properties_;
+    std::vector<RenderItem> renderItems_;
 };
 
 }

@@ -151,7 +151,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     Render::UniformBuffer buffer = renderRoot_->FindUniformBuffer(id);
 
 
-    Render::RootPassDesc passDesc;
+    Render::RenderPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0] = Render::Root::SWAPCHAIN_IMAGE_KEY; // we need swapchain reference here
 
@@ -169,7 +169,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     fragmentModuleDesc.shaderPath_ = "shader-src\\test-frag.spv";
     fragmentModuleDesc.entryPoint_ = "main";
     
-    Render::RootPipelineDesc pipelineDesc;
+    Render::GraphicsPipelineDesc pipelineDesc;
 
     pipelineDesc.renderPass_ = "pass0";
     pipelineDesc.shaderStagesCount_ = 2;

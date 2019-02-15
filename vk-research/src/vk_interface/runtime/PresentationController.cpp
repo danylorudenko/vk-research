@@ -79,7 +79,7 @@ PresentationController::~PresentationController()
 
 PresentationContext PresentationController::AcquireNewPresentationContext()
 {
-    std::uint32_t const currentSemaphoreId = (nextSemaphore_++ % semaphoresQueue_.size());
+    std::uint32_t const currentSemaphoreId = (nextSemaphore_++ % static_cast<std::uint32_t>(semaphoresQueue_.size()));
     VkSemaphore currentSemaphore = semaphoresQueue_[currentSemaphoreId];
 
     std::uint32_t imageIndex = 0;
