@@ -44,7 +44,7 @@ public:
     void ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
     void ReleaseMemoryRegion(MemoryRegion& region);
 
-    MemoryPage const& GetPage(MemoryPageHandle handle) const;
+    MemoryPage* GetPage(MemoryPageHandle handle);
 
 private:
     MemoryPageHandle AllocPage(MemoryAccess access, MemoryUsage usage, std::uint64_t size);

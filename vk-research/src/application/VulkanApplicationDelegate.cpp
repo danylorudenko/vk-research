@@ -104,6 +104,17 @@ void VulkanApplicationDelegate::start()
 
 void VulkanApplicationDelegate::update()
 {
+    Render::Pipeline& pipeline = renderRoot_->FindPipeline("pipe0");
+    Render::RenderItem* testRenderItem = renderRoot_->FindRenderItem(pipeline, customData_.testRenderItemHandle_);
+
+    // HOLY FUCKING SHIT
+    Render::UniformBufferHandle uniformHandle = testRenderItem->uniformBuffers_[0].serverBufferHandle_;
+    VKW::BufferView* uniformBufferView = renderRoot_->FindUniformBuffer(uniformHandle, 0);
+    VKW::MemoryPage* memoryPage = renderRoot_->GetViewMemoryPage(uniformBufferView);
+
+
+
+    std::cout << "NANI" << std::endl;
     renderRoot_->IterateRenderGraph();
 }
 
@@ -213,7 +224,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     itemDesc.uniformBuffersDescs[0].name_ = "transform";
     itemDesc.uniformBuffersDescs[0].size_ = 16;
 
-    renderRoot_->ConstructRenderItem(pipeKey, itemDesc);
+    auto renderItemHandle = renderRoot_->ConstructRenderItem(pipeKey, itemDesc);
+    customData_.testRenderItemHandle_ = renderItemHandle;
 
     pass.AddPipeline(pipeKey);
     renderRoot_->PushPassTemp(passKey);

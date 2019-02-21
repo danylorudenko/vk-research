@@ -117,6 +117,9 @@ public:
     VKW::BufferView* FindUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
     void ReleaseUniformBuffer(UniformBufferHandle id);
 
+    VKW::BufferResource* GetViewResource(VKW::BufferView* view);
+    VKW::MemoryPage* GetViewMemoryPage(VKW::BufferView* view);
+
     void DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc);
     VKW::ProxyBufferHandle FindGlobalBuffer(ResourceKey const& key);
     VKW::BufferView* FindGlobalBuffer(ResourceKey const& key, std::uint32_t frame);

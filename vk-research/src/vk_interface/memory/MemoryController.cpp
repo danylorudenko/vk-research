@@ -57,9 +57,9 @@ void MemoryController::AssignDefaultPageSizes()
     defaultPageSizes_[COLOR_ATTACHMENT] = 1024 * 1024 * 64;
 }
 
-MemoryPage const& MemoryController::GetPage(MemoryPageHandle handle) const
+MemoryPage* MemoryController::GetPage(MemoryPageHandle handle)
 {
-    return *handle.page_;
+    return handle.page_;
 }
 
 void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)

@@ -138,6 +138,8 @@ Loader::Loader(LoaderDesc const& desc)
     VKW::ResourceRendererProxyDesc resourceRendererProxyDesc;
     resourceRendererProxyDesc.table_ = table_.get();
     resourceRendererProxyDesc.device_ = device_.get();
+    resourceRendererProxyDesc.memoryController_ = memoryController_.get();
+    resourceRendererProxyDesc.resourcesController_ = resourcesController_.get();
     resourceRendererProxyDesc.buffersProvider_ = buffersProvider_.get();
     resourceRendererProxyDesc.imagesProvider_ = imagesProvider_.get();
     resourceRendererProxyDesc.layoutController_ = descriptorLayoutController_.get();

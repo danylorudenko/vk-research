@@ -2,6 +2,7 @@
 #include "ImportTable.hpp"
 #include "Device.hpp"
 #include "Swapchain.hpp"
+#include "memory\MemoryController.hpp"
 #include "buffer\BuffersProvider.hpp"
 #include "image\ImagesProvider.hpp"
 #include "pipeline\DescriptorLayoutController.hpp"
@@ -19,6 +20,8 @@ namespace VKW
 ResourceRendererProxy::ResourceRendererProxy()
     : table_{ nullptr }
     , device_{ nullptr }
+    , memoryController_{ nullptr }
+    , resourcesController_{ nullptr }
     , buffersProvider_{ nullptr }
     , imagesProvider_{ nullptr }
     , layoutController_{ nullptr }
@@ -33,6 +36,8 @@ ResourceRendererProxy::ResourceRendererProxy()
 ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxyDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
+    , memoryController_{ desc.memoryController_ }
+    , resourcesController_{ desc.resourcesController_ }
     , buffersProvider_{ desc.buffersProvider_ }
     , imagesProvider_{ desc.imagesProvider_ }
     , layoutController_{ desc.layoutController_ }
@@ -47,6 +52,8 @@ ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxyDesc const& de
 ResourceRendererProxy::ResourceRendererProxy(ResourceRendererProxy&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
+    , memoryController_{ nullptr }
+    , resourcesController_{ nullptr }
     , buffersProvider_{ nullptr }
     , imagesProvider_{ nullptr }
     , layoutController_{ nullptr }
@@ -62,6 +69,8 @@ ResourceRendererProxy& ResourceRendererProxy::operator=(ResourceRendererProxy&& 
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
+    std::swap(memoryController_, rhs.memoryController_);
+    std::swap(resourcesController_, rhs.resourcesController_);
     std::swap(buffersProvider_, rhs.buffersProvider_);
     std::swap(imagesProvider_, rhs.imagesProvider_);
     std::swap(layoutController_, rhs.layoutController_);
@@ -406,6 +415,22 @@ Framebuffer* ResourceRendererProxy::GetFramebuffer(ProxyFramebufferHandle handle
 {
     FramebufferHandle framebufferHandle = framedDescriptorsHub_->contexts_[context].framebuffers_[handle.id_];
     return framebufferController_->GetFramebuffer(framebufferHandle);
+}
+
+VKW::BufferResource* ResourceRendererProxy::GetResource(VKW::BufferResourceHandle handle)
+{
+    return resourcesController_->GetBuffer(handle);
+}
+
+VKW::ImageResource* ResourceRendererProxy::GetResource(VKW::ImageResourceHandle handle)
+{
+    return resourcesController_->GetImage(handle);
+}
+
+VKW::MemoryPage* ResourceRendererProxy::GetMemoryPage(VKW::BufferResourceHandle handle)
+{
+    VKW::BufferResource* resource = GetResource(handle);
+    return memoryController_->GetPage(resource->memory_.pageHandle_);
 }
 
 }

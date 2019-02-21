@@ -66,6 +66,8 @@ struct ResourceRendererProxyDesc
 {
     ImportTable* table_;
     Device* device_;
+    MemoryController* memoryController_;
+    ResourcesController* resourcesController_;
     BuffersProvider* buffersProvider_;
     ImagesProvider* imagesProvider_;
     DescriptorLayoutController* layoutController_;
@@ -101,6 +103,12 @@ public:
     ProxyFramebufferHandle CreateFramebuffer(ProxyFramebufferDesc const& desc);
     Framebuffer* GetFramebuffer(ProxyFramebufferHandle handle, std::uint32_t context);
 
+    VKW::BufferResource* GetResource(VKW::BufferResourceHandle handle);
+    VKW::ImageResource* GetResource(VKW::ImageResourceHandle handle);
+
+    VKW::MemoryPage* GetMemoryPage(VKW::BufferResourceHandle handle);
+    VKW::MemoryPage* GetMemoryPage(VKW::ImageResourceHandle handle);
+
 
 private:
     struct DescriptorWriteData;
@@ -114,6 +122,8 @@ private:
 
     ImportTable* table_;
     Device* device_;
+    MemoryController* memoryController_;
+    ResourcesController* resourcesController_;
     BuffersProvider* buffersProvider_;
     ImagesProvider* imagesProvider_;
     DescriptorLayoutController* layoutController_;

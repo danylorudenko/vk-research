@@ -104,8 +104,8 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     MemoryRegion memoryRegion;
     memoryController_->ProvideMemoryRegion(regionDesc, memoryRegion);
 
-    MemoryPage const& page = memoryController_->GetPage(memoryRegion.pageHandle_);
-    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, page.deviceMemory_, memoryRegion.offset_));
+    MemoryPage const* page = memoryController_->GetPage(memoryRegion.pageHandle_);
+    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, page->deviceMemory_, memoryRegion.offset_));
 
     BufferResource* resource = new BufferResource{ vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion };
     buffers_.emplace_back(resource);
@@ -171,8 +171,8 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     MemoryRegion memoryRegion;
     memoryController_->ProvideMemoryRegion(memoryDesc, memoryRegion);
 
-    MemoryPage const& page = memoryController_->GetPage(memoryRegion.pageHandle_);
-    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, page.deviceMemory_, memoryRegion.offset_));
+    MemoryPage const* page = memoryController_->GetPage(memoryRegion.pageHandle_);
+    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, page->deviceMemory_, memoryRegion.offset_));
 
     ImageResource* imageResource = new ImageResource{ vkImage, desc.format_, desc.width_, desc.height_, memoryRegion };
     images_.emplace_back(imageResource);

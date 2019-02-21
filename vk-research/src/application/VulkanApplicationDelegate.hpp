@@ -11,11 +11,20 @@
 #include "..\io\IOManager.hpp"
 #include "..\vk_interface\Loader.hpp"
 #include "..\renderer\Root.hpp"
+#include "..\renderer\RootDef.hpp"
+
+struct CustomData
+{
+    Render::RenderItemHandle testRenderItemHandle_;
+};
 
 class VulkanApplicationDelegate
     : public Application::ApplicationDelegate
     , public NonMovable
 {
+public:
+    CustomData customData_;
+
 public:
     VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug);
     

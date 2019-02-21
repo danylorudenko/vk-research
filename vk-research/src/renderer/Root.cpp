@@ -129,6 +129,18 @@ void Root::ReleaseUniformBuffer(UniformBufferHandle handle)
     std::cout << "Attampt to release uniform buffer by id: " << handle.id_ << std::endl;
 }
 
+VKW::BufferResource* Root::GetViewResource(VKW::BufferView* view)
+{
+    VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
+    return resourceProxy_->GetResource(resourceHandle);
+}
+
+VKW::MemoryPage* Root::GetViewMemoryPage(VKW::BufferView* view)
+{
+    VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
+    return resourceProxy_->GetMemoryPage(resourceHandle);
+}
+
 void Root::DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc)
 {
     VKW::ProxyBufferHandle bufferHandle = resourceProxy_->CreateBuffer(desc);
@@ -248,7 +260,6 @@ RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc co
         uniform.hostBufferSize_ = dataSize;
         
         uniform.serverBufferHandle_ = AcquireUniformBuffer(dataSize);
-        UniformBuffer const& buffer = FindUniformBuffer(uniform.serverBufferHandle_);
     }
 
     return RenderItemHandle{ static_cast<std::uint32_t>(pipeline.renderItems_.size() - 1) };
