@@ -129,6 +129,58 @@ void Root::ReleaseUniformBuffer(UniformBufferHandle handle)
     std::cout << "Attampt to release uniform buffer by id: " << handle.id_ << std::endl;
 }
 
+void* Root::MapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
+{
+    UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
+    VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
+    VKW::MemoryPage* memoryPage = GetViewMemoryPage(view);
+
+    VkDeviceMemory deviceMemory = memoryPage->deviceMemory_;
+
+    VKW::ImportTable* table = loader_->table_.get();
+    VkDevice vkDevice = loader_->device_->Handle();
+
+    void* mappedRange = nullptr;
+    // TODO: offsets and size?
+    VK_ASSERT(table->vkMapMemory(vkDevice, deviceMemory, 0, view->size_, VK_FLAGS_NONE, &mappedRange));
+    assert(mappedRange != nullptr && "Can't map uniform buffer.");
+
+    return mappedRange;
+}
+
+void Root::UnmapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
+{
+    UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
+    VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
+    VKW::MemoryPage* memoryPage = GetViewMemoryPage(view);
+
+    VkDeviceMemory deviceMemory = memoryPage->deviceMemory_;
+
+    VKW::ImportTable* table = loader_->table_.get();
+    VkDevice vkDevice = loader_->device_->Handle();
+
+    table->vkUnmapMemory(vkDevice, deviceMemory);
+}
+
+void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
+{
+    UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
+    VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
+    VKW::MemoryPage* page = GetViewMemoryPage(view);
+
+    VKW::ImportTable* table = loader_->table_.get();
+    VkDevice vkDevice = loader_->device_->Handle();
+
+    VkMappedMemoryRange range;
+    range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    range.pNext = nullptr;
+    range.memory = page->deviceMemory_;
+    range.size = view->size_;
+    range.offset = 0;
+    // TODO: offset and size?
+    VK_ASSERT(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
+}
+
 VKW::BufferResource* Root::GetViewResource(VKW::BufferView* view)
 {
     VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;

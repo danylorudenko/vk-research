@@ -116,6 +116,9 @@ public:
     UniformBuffer& FindUniformBuffer(UniformBufferHandle id);
     VKW::BufferView* FindUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
     void ReleaseUniformBuffer(UniformBufferHandle id);
+    void* MapUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
+    void UnmapUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
+    void FlushUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
 
     VKW::BufferResource* GetViewResource(VKW::BufferView* view);
     VKW::MemoryPage* GetViewMemoryPage(VKW::BufferView* view);
@@ -160,6 +163,7 @@ private:
     VKW::PipelineFactory* pipelineFactory_;
 
     VKW::PresentationController* presentationController_;
+    // TODO
     VKW::Worker* mainWorkerTemp_;
 
     std::uint32_t defaultFramebufferWidth_;
