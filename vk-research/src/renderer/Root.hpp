@@ -121,6 +121,7 @@ public:
     void FlushUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
 
     VKW::BufferResource* GetViewResource(VKW::BufferView* view);
+    VKW::MemoryRegion* GetViewMemory(VKW::BufferView* view);
     VKW::MemoryPage* GetViewMemoryPage(VKW::BufferView* view);
 
     void DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc);

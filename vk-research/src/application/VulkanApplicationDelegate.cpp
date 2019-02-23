@@ -109,8 +109,8 @@ void VulkanApplicationDelegate::update()
 
     // HOLY FUCKING SHIT
     Render::UniformBufferHandle uniformHandle = testRenderItem->uniformBuffers_[0].serverBufferHandle_;
-    VKW::BufferView* uniformBufferView = renderRoot_->FindUniformBuffer(uniformHandle, 0);
-    VKW::MemoryPage* memoryPage = renderRoot_->GetViewMemoryPage(uniformBufferView);
+    void* mappedBuffer = renderRoot_->MapUniformBuffer(uniformHandle, 0);
+    renderRoot_->FlushUniformBuffer(uniformHandle, 0);
 
 
 

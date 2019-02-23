@@ -7,7 +7,7 @@ BufferView::BufferView(VkBufferView view, VkFormat format, std::uint64_t offset,
     : handle_{ view }
     , format_{ format }
     , offset_{ offset }
-    , size_{ size_ }
+    , size_{ size }
     , providedBuffer_{ providedBuffer }
 {
 
