@@ -220,7 +220,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorDe
                 case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
                 {
                     ImageView* imageView = imagesProvider_->GetImageView(descriptions[j].frames_[i].imageDesc_.imageViewHandle_);
-                    DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_);
+                    DecorateImageViewWriteDesc(wds, descriptorData[j], imageView->handle_);
                 }
                 break;
                 case VK_DESCRIPTOR_TYPE_SAMPLER:
@@ -350,6 +350,11 @@ BufferView* ResourceRendererProxy::GetBufferView(ProxyBufferHandle handle, std::
 {
     BufferViewHandle bufferViewHandle = framedDescriptorsHub_->contexts_[context].bufferViews_[handle.id_];
     return buffersProvider_->GetView(bufferViewHandle);
+}
+
+BufferViewHandle ResourceRendererProxy::GetBufferViewHandle(ProxyBufferHandle handle, std::uint32_t context)
+{
+    return framedDescriptorsHub_->contexts_[context].bufferViews_[handle.id_];
 }
 
 ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)

@@ -107,10 +107,9 @@ void VulkanApplicationDelegate::update()
     Render::Pipeline& pipeline = renderRoot_->FindPipeline("pipe0");
     Render::RenderItem* testRenderItem = renderRoot_->FindRenderItem(pipeline, customData_.testRenderItemHandle_);
 
-    // HOLY FUCKING SHIT
-    Render::UniformBufferHandle uniformHandle = testRenderItem->uniformBuffers_[0].serverBufferHandle_;
-    void* mappedBuffer = renderRoot_->MapUniformBuffer(uniformHandle, 0);
-    renderRoot_->FlushUniformBuffer(uniformHandle, 0);
+    //Render::UniformBufferHandle uniformHandle = testRenderItem->uniformBuffers_[0].serverBufferHandle_;
+    //void* mappedBuffer = renderRoot_->MapUniformBuffer(uniformHandle, 0);
+    //renderRoot_->FlushUniformBuffer(uniformHandle, 0);
 
 
 
@@ -154,6 +153,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     char constexpr passKey[] = "pass0";
     char constexpr pipeKey[] = "pipe0";
+    char constexpr setLayoutKey[] = "set0";
 
 
     Render::RenderPassDesc passDesc;
@@ -208,8 +208,15 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     vp.scissorXextent_ = width;
     vp.scissorYextent_ = height;
 
-    VKW::PipelineLayoutDesc layoutDesc;
-    layoutDesc.membersCount_ = 0;
+    VKW::DescriptorSetLayoutDesc setLayoutDesc;
+    setLayoutDesc.membersCount_ = 1;
+    setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    setLayoutDesc.membersDesc_[0].binding_ = 0;
+    renderRoot_->DefineSetLayout(setLayoutKey, setLayoutDesc);
+
+    Render::PipelineLayoutDesc layoutDesc;
+    layoutDesc.membersCount_ = 1;
+    layoutDesc.members_[0] = setLayoutKey;
 
     pipelineDesc.inputAssemblyInfo_ = &iaInfo;
     pipelineDesc.vertexInputInfo_ = &vInfo;
@@ -220,14 +227,20 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     
     Render::RenderItemDesc itemDesc;
     itemDesc.vertexCount_ = 3;
-    itemDesc.uniformBuffersCount_ = 1;
-    itemDesc.uniformBuffersDescs[0].name_ = "transform";
-    itemDesc.uniformBuffersDescs[0].size_ = 16;
+    itemDesc.setCount_ = 1;
+    itemDesc.requiredSetsDescs_[0].setLayout_ = setLayoutKey;
+    itemDesc.requiredSetsDescs_[0].setMemberData_[0].uniformBufferSetMemberData_.size_ = 128;
+    //itemDesc.uniformBuffersCount_ = 1;
+    //itemDesc.uniformBuffersDescs[0].name_ = "transform";
+    //itemDesc.uniformBuffersDescs[0].size_ = 16;
 
     auto renderItemHandle = renderRoot_->ConstructRenderItem(pipeKey, itemDesc);
     customData_.testRenderItemHandle_ = renderItemHandle;
 
     pass.AddPipeline(pipeKey);
     renderRoot_->PushPassTemp(passKey);
+
+    // how to write resource descriptor to DescriptorSet
+    //renderRoot_->Defue
 
 }

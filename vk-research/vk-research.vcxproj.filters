@@ -138,16 +138,7 @@
     <ClCompile Include="src\renderer\Root.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\SetLayout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\RendererPipeline.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="include\glm\detail\glm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\RenderItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -345,9 +336,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\RendererPipeline.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\PresentService.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\worker\WorkerFrame.hpp">
@@ -1077,6 +1065,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\UniformBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\RendererDescriptorSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

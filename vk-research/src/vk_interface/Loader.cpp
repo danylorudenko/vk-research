@@ -134,6 +134,16 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
+    VKW::DescriptorSetControllerDesc descriptorSetControllerDesc;
+    descriptorSetControllerDesc.table_ = table_.get();
+    descriptorSetControllerDesc.device_ = device_.get();
+    descriptorSetControllerDesc.buffersProvider_ = buffersProvider_.get();
+    descriptorSetControllerDesc.imagesProvider_ = imagesProvider_.get();
+    descriptorSetControllerDesc.layoutController_ = descriptorLayoutController_.get();
+
+    descriptorSetController_ = std::make_unique<VKW::DescriptorSetController>(descriptorSetControllerDesc);
+
+
 
     VKW::ResourceRendererProxyDesc resourceRendererProxyDesc;
     resourceRendererProxyDesc.table_ = table_.get();

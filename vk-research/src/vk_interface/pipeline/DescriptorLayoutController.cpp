@@ -63,7 +63,7 @@ DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(
     VkDescriptorSetLayoutBinding bindings[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
     for (auto i = 0u; i < desc.membersCount_; ++i) {
         bindings[i].pImmutableSamplers = nullptr;
-        // WARNING: in the future these flags potentially will require some adjustments
+        // TODO: in the future these flags potentially will require some adjustments
         bindings[i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         bindings[i].descriptorCount = 1;
         bindings[i].binding = desc.membersDesc_[i].binding_;
@@ -99,7 +99,7 @@ DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(
     result->membersCount_ = desc.membersCount_;
     for (auto i = 0u; i < desc.membersCount_; ++i) {
         result->membersInfo_[i].type_ = bindings[i].descriptorType;
-        result->membersInfo_[i].binding_ = bindings[i].descriptorType;
+        result->membersInfo_[i].binding_ = bindings[i].binding;
     }
 
     setLayouts_.push_back(result);

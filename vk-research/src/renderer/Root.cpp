@@ -138,8 +138,8 @@ void* Root::MapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 
     VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
     // fuck, buffer view contains no size for buffers with undefined format
-    std::uint32_t const size = view->size_;
-    std::uint32_t const offset = memoryRegion->offset_;
+    auto const size = view->size_;
+    auto const offset = memoryRegion->offset_;
 
     VKW::ImportTable* table = loader_->table_.get();
     VkDevice const vkDevice = loader_->device_->Handle();
@@ -176,8 +176,8 @@ void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     VKW::ImportTable* table = loader_->table_.get();
     VkDevice const vkDevice = loader_->device_->Handle();
     VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
-    std::uint32_t const offset = memoryRegion->offset_;
-    std::uint32_t const size = view->size_;
+    auto const offset = memoryRegion->offset_;
+    auto const size = view->size_;
 
     VkMappedMemoryRange range;
     range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -281,6 +281,13 @@ SetLayout& Root::FindSetLayout(SetLayoutKey const& key)
 
 void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc const& desc)
 {
+    VKW::PipelineLayoutDesc vkwLayoutDesc;
+    vkwLayoutDesc.membersCount_ = desc.layoutDesc_->membersCount_;
+    auto membersCount = vkwLayoutDesc.membersCount_;
+    for (auto i = 0u; i < membersCount; ++i) {
+        vkwLayoutDesc.members_[i] = FindSetLayout(desc.layoutDesc_->members_[0]).vkwSetLayoutHandle_;
+    }
+    
     VKW::GraphicsPipelineDesc vkwDesc;
     vkwDesc.optimized_ = desc.optimized_;
     vkwDesc.inputAssemblyInfo_ = desc.inputAssemblyInfo_;
@@ -291,7 +298,7 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
         vkwDesc.shaderStages_[i] = VKW::ShaderStageInfo{ moduleHandle };
     }
     vkwDesc.viewportInfo_ = desc.viewportInfo_;
-    vkwDesc.layoutDesc_ = desc.layoutDesc_;
+    vkwDesc.layoutDesc_ = &vkwLayoutDesc;
     vkwDesc.renderPass_ = renderPassMap_[desc.renderPass_].VKWRenderPass();
     vkwDesc.depthStencilInfo_ = desc.depthStencilInfo_;
     
@@ -312,20 +319,55 @@ RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc co
 
     item.vertexCount_ = desc.vertexCount_;
     
-    item.uniformBuffersCount_ = desc.uniformBuffersCount_;
-    auto const uniformBuffersCount = desc.uniformBuffersCount_;
-    for (auto i = 0u; i < uniformBuffersCount; ++i) {
+    item.descriptorSetCount_ = desc.setCount_;
+    auto const setCount = desc.setCount_;
+    for (auto i = 0u; i < setCount; ++i) {
         
-        auto& uniformBuffDesc = desc.uniformBuffersDescs[i];
-        auto& uniform = item.uniformBuffers_[i];
+        auto& setDesc = desc.requiredSetsDescs_[i];
+        auto& set = item.descriptorSets_[i];
 
-        std::strcpy(uniform.name_, uniformBuffDesc.name_);
+        SetLayout& setLayout = FindSetLayout(setDesc.setLayout_);
+        VKW::DescriptorSetLayout* vkwSetLayout = layoutController_->GetDescriptorSetLayout(setLayout.vkwSetLayoutHandle_);
+        VKW::ProxySetHandle proxyDescriptorSet = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
+        VKW::ProxyDescriptorDesc descriptorContentDescriptions[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+        // feeeeeeeeeeeew
+        // I need to feel the set for each frame. now i sleep.
 
-        auto const dataSize = uniformBuffDesc.size_;
-        uniform.hostBuffer_ = reinterpret_cast<std::uint8_t*>(malloc(dataSize));
-        uniform.hostBufferSize_ = dataSize;
-        
-        uniform.serverBufferHandle_ = AcquireUniformBuffer(dataSize);
+        auto const setMembersCount = vkwSetLayout->membersCount_;
+        for (auto j = 0u; j < setMembersCount; ++j) {
+            auto& setMember = set.setMembers_[j];
+            auto& descriptorContentDesc = descriptorContentDescriptions[j];
+
+            // TODO
+            setMember.name_[0] = '\0';
+
+            switch (vkwSetLayout->membersInfo_[j].type_) {
+            case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+                auto const& uniformBufferSetMemberData = setDesc.setMemberData_[j].uniformBufferSetMemberData_;
+                auto const uniformBufferSize = uniformBufferSetMemberData.size_;
+
+                UniformBufferSetMember& uniformBufferSetMember = setMember.data_.uniformBuffer_;
+                uniformBufferSetMember.hostBufferSize_ = uniformBufferSize;
+                uniformBufferSetMember.hostBuffer_ = reinterpret_cast<std::uint8_t*>(malloc(uniformBufferSize));
+                uniformBufferSetMember.uniformBufferHandle_ = AcquireUniformBuffer(uniformBufferSize);
+
+                auto const framesCount = resourceProxy_->FramesCount();
+                for (auto frameNum = 0u; frameNum < framesCount; ++frameNum) {
+                    auto& bufferDescriptorDesc = descriptorContentDesc.frames_[frameNum].bufferInfo_;
+
+                    Render::UniformBuffer uniformBuffer = FindUniformBuffer(uniformBufferSetMember.uniformBufferHandle_);
+                    VKW::BufferViewHandle uniformBufferViewHandle = resourceProxy_->GetBufferViewHandle(uniformBuffer.proxyBufferViewHandle_, frameNum);
+                    VKW::BufferView* uniformBufferView = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frameNum);
+                    bufferDescriptorDesc.pureBufferViewHandle_ = uniformBufferViewHandle;
+                    bufferDescriptorDesc.size_ = uniformBufferView->size_;
+                    bufferDescriptorDesc.offset_ = uniformBufferView->offset_;
+                }
+                break;
+            }
+        }
+
+        // Updating the set content
+        resourceProxy_->WriteSet(proxyDescriptorSet, descriptorContentDescriptions);
     }
 
     return RenderItemHandle{ static_cast<std::uint32_t>(pipeline.renderItems_.size() - 1) };
@@ -333,13 +375,13 @@ RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc co
 
 void Root::ReleaseRenderItem(Pipeline& pipeline, RenderItemHandle handle)
 {
-    auto& item = pipeline.renderItems_[handle.id_];
-    auto const uniformBuffersCount = item.uniformBuffersCount_;
-    for (auto i = 0u; i < uniformBuffersCount; ++i) {
-        auto& uniform = item.uniformBuffers_[i];
-        ReleaseUniformBuffer(uniform.serverBufferHandle_);
-        std::free(uniform.hostBuffer_);
-    }
+    //auto& item = pipeline.renderItems_[handle.id_];
+    //auto const uniformBuffersCount = item.uniformBuffersCount_;
+    //for (auto i = 0u; i < uniformBuffersCount; ++i) {
+    //    auto& uniform = item.uniformBuffers_[i];
+    //    ReleaseUniformBuffer(uniform.serverBufferHandle_);
+    //    std::free(uniform.hostBuffer_);
+    //}
 }
 
 RenderItem* Root::FindRenderItem(Pipeline& pipeline, RenderItemHandle handle)

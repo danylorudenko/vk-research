@@ -15,7 +15,7 @@ using ShaderKey = std::string;
 
 struct UniformBufferHandle
 {
-    std::uint64_t id_ = std::numeric_limits<std::uint64_t>::max();
+    std::uint64_t id_;
 };
 
 }

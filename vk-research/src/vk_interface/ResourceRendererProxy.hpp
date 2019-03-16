@@ -96,6 +96,7 @@ public:
 
     ProxyBufferHandle CreateBuffer(BufferViewDesc const& desc);
     BufferView* GetBufferView(ProxyBufferHandle handle, std::uint32_t context);
+    BufferViewHandle GetBufferViewHandle(ProxyBufferHandle handle, std::uint32_t context);
 
     ProxyImageHandle CreateImage(ImageViewDesc const& desc);
     ImageView* GetImageView(ProxyImageHandle handle, std::uint32_t context);

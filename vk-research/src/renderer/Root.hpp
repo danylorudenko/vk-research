@@ -59,6 +59,12 @@ struct ShaderDesc
     VKW::ShaderModuleDesc desc_;
 };
 
+struct PipelineLayoutDesc
+{
+    std::uint32_t membersCount_;
+    SetLayoutKey members_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+};
+
 struct GraphicsPipelineDesc
 {
     bool optimized_;
@@ -72,18 +78,25 @@ struct GraphicsPipelineDesc
     VKW::DepthStencilInfo* depthStencilInfo_;
     // blending info should be here later
 
-    VKW::PipelineLayoutDesc* layoutDesc_;
+    Render::PipelineLayoutDesc* layoutDesc_;
     RenderPassKey renderPass_;
+};
+
+struct UniformBufferSetMemberData
+{
+    std::uint32_t size_;
 };
 
 struct RenderItemDesc
 {
     std::uint32_t vertexCount_;
-    std::uint32_t uniformBuffersCount_;
+    std::uint32_t setCount_;
     struct {
-        char const* name_;
-        std::uint32_t size_;
-    } uniformBuffersDescs[RENDER_ITEM_UNIFORM_MAX_COUNT];
+        SetLayoutKey setLayout_;
+        union {
+            UniformBufferSetMemberData uniformBufferSetMemberData_;
+        } setMemberData_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+    } requiredSetsDescs_[RENDER_ITEM_UNIFORM_MAX_COUNT];
 };
 
 class Root
