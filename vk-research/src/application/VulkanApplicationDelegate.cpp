@@ -2,6 +2,8 @@
 #include "..\vk_interface\Tools.hpp"
 #include "..\renderer\Root.hpp"
 
+#include "..\renderer\Material.hpp"
+
 #include <utility>
 
 VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug)
@@ -66,40 +68,6 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
 void VulkanApplicationDelegate::start()
 {
     FakeParseRendererResources();
-    
-    //auto& device = vulkanLoader_.Device();
-    //
-    //VKW::BufferCreateInfo buffInfo;
-    //buffInfo.size_ = 256;
-    //buffInfo.usage_ = VKW::BufferUsage::VERTEX_INDEX;
-    //
-    //VKW::Buffer buffer = vulkanLoader_.BufferLoader().LoadBuffer(buffInfo);
-    //VKW::Buffer buffer2 = vulkanLoader_.BufferLoader().LoadBuffer(buffInfo);
-    //
-    //\\\\\\\
-    //
-    //auto* worker = vulkanLoader_.WorkersProvider().GetWorker(VKW::WorkerType::GRAPHICS, 0);
-    //auto commandBuffer = worker->StartExecutionFrame();
-    //
-    //
-    //VkBufferCopy copyRegion;
-    //copyRegion.srcOffset = 0;
-    //copyRegion.dstOffset = 0;
-    //copyRegion.size = 256;
-    //
-    //vulkanLoader_.Table().vkCmdCopyBuffer(commandBuffer, buffer.handle_, buffer2.handle_, 1, &copyRegion);
-    //
-    //worker->EndExecutionFrame();
-    //worker->ExecuteFrame();
-    //
-    //vulkanLoader_.Table().vkDeviceWaitIdle(device.Handle());
-    //
-    //
-    //\\\\\\\
-    //
-    //vulkanLoader_.BufferLoader().UnloadBuffer(buffer);
-    //vulkanLoader_.BufferLoader().UnloadBuffer(buffer2);
-
 }
 
 void VulkanApplicationDelegate::update()
@@ -228,17 +196,18 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     Render::RenderItemDesc itemDesc;
     itemDesc.vertexCount_ = 3;
     itemDesc.setCount_ = 1;
-    itemDesc.requiredSetsDescs_[0].setLayout_ = setLayoutKey;
-    itemDesc.requiredSetsDescs_[0].setMemberData_[0].uniformBufferSetMemberData_.size_ = 128;
-    //itemDesc.uniformBuffersCount_ = 1;
-    //itemDesc.uniformBuffersDescs[0].name_ = "transform";
-    //itemDesc.uniformBuffersDescs[0].size_ = 16;
+
+    auto& renderItemSetDesc = itemDesc.requiredSetsDescs_[0];
+    renderItemSetDesc.setLayout_ = setLayoutKey;
+    renderItemSetDesc.setMemberData_[0].uniformBufferSetMemberData_.size_ = 128;
 
     auto renderItemHandle = renderRoot_->ConstructRenderItem(pipeKey, itemDesc);
     customData_.testRenderItemHandle_ = renderItemHandle;
 
     pass.AddPipeline(pipeKey);
     renderRoot_->PushPassTemp(passKey);
+
+    Render::Material test;
 
     // how to write resource descriptor to DescriptorSet
     //renderRoot_->Defue

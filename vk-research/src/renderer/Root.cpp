@@ -359,8 +359,8 @@ RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc co
                     VKW::BufferViewHandle uniformBufferViewHandle = resourceProxy_->GetBufferViewHandle(uniformBuffer.proxyBufferViewHandle_, frameNum);
                     VKW::BufferView* uniformBufferView = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frameNum);
                     bufferDescriptorDesc.pureBufferViewHandle_ = uniformBufferViewHandle;
-                    bufferDescriptorDesc.size_ = uniformBufferView->size_;
-                    bufferDescriptorDesc.offset_ = uniformBufferView->offset_;
+                    bufferDescriptorDesc.size_ = static_cast<std::uint32_t>(uniformBufferView->size_);
+                    bufferDescriptorDesc.offset_ = static_cast<std::uint32_t>(uniformBufferView->offset_);
                 }
                 break;
             }

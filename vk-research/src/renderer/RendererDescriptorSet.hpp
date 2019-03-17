@@ -16,6 +16,14 @@ struct UniformBufferSetMember
     std::uint32_t hostBufferSize_;
 };
 
+struct Texture2DSetMember
+{
+};
+
+struct StorageBufferSetMember
+{
+};
+
 struct DescriptorSet
 {
     Render::SetLayoutKey setLayoutKey_;
@@ -26,8 +34,8 @@ struct DescriptorSet
         char name_[SET_MEMBER_NAME_MAX_LENGTH];
         union {
             UniformBufferSetMember uniformBuffer_;
-            // Texture2D
-            // StorageBuffer
+            Texture2DSetMember texture2D_;
+            StorageBufferSetMember storageBuffer_;
         } data_;
     } setMembers_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
 
