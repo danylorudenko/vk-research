@@ -1076,7 +1076,10 @@
     <ClInclude Include="src\renderer\Material.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\RendererDescriptorSetSlot.hpp">
+    <ClInclude Include="src\renderer\MaterialTemplate.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\RendererDescriptorSetSlotsOwner.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

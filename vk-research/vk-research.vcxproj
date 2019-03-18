@@ -435,9 +435,10 @@
     <ClInclude Include="src\io\IOManager.hpp" />
     <ClInclude Include="src\memory\ByteBuffer.hpp" />
     <ClInclude Include="src\renderer\Material.hpp" />
+    <ClInclude Include="src\renderer\MaterialTemplate.hpp" />
     <ClInclude Include="src\renderer\Pass.hpp" />
     <ClInclude Include="src\renderer\RendererDescriptorSet.hpp" />
-    <ClInclude Include="src\renderer\RendererDescriptorSetSlot.hpp" />
+    <ClInclude Include="src\renderer\RendererDescriptorSetSlotsOwner.hpp" />
     <ClInclude Include="src\renderer\RendererDescriptorSetScope.hpp" />
     <ClInclude Include="src\renderer\RendererPipeline.hpp" />
     <ClInclude Include="src\renderer\RenderItem.hpp" />

@@ -3,20 +3,18 @@
 #include <cstdint>
 #include <limits>
 #include "UniformBuffer.hpp"
-#include "RendererDescriptorSet.hpp"
+#include "RendererDescriptorSetSlotsOwner.hpp"
 
 namespace Render
 {
 
-// TODO
-constexpr std::size_t RENDER_ITEM_UNIFORM_MAX_COUNT = 4;
 
 struct RenderItem
 {
     std::uint32_t vertexCount_;
     std::uint32_t descriptorSetCount_;
     // TODO
-    DescriptorSet descriptorSets_[RENDER_ITEM_UNIFORM_MAX_COUNT];
+    DescriptorSetSlotsOwner<RenderItem> descriptorSetSlots_;
 };
 
 struct RenderItemHandle

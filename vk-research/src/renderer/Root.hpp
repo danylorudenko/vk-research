@@ -154,6 +154,13 @@ public:
     void DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc const& desc);
     Pipeline& FindPipeline(PipelineKey const& key);
 
+    template<typename TSetSlotsOwner>
+    void InitializeSetSlotsOwner(TSetSlotsOwner* owner)
+    {
+        auto& slotsOwner = owner->descriptorSetSlots_;
+
+    }
+
     RenderItemHandle ConstructRenderItem(PipelineKey const& key, RenderItemDesc const& desc);
     RenderItemHandle ConstructRenderItem(Pipeline& pipeline, RenderItemDesc const& desc);
     RenderItem* FindRenderItem(Pipeline& pipeline, RenderItemHandle handle);

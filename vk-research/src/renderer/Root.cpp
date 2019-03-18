@@ -328,10 +328,11 @@ RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc co
 
         SetLayout& setLayout = FindSetLayout(setDesc.setLayout_);
         VKW::DescriptorSetLayout* vkwSetLayout = layoutController_->GetDescriptorSetLayout(setLayout.vkwSetLayoutHandle_);
-        VKW::ProxySetHandle proxyDescriptorSet = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
+        VKW::ProxySetHandle proxyDescriptorSetHandle = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
         VKW::ProxyDescriptorDesc descriptorContentDescriptions[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-        // feeeeeeeeeeeew
-        // I need to feel the set for each frame. now i sleep.
+        
+        set.setLayoutKey_ = setDesc.setLayout_;
+        set.proxyDescriptorSetHandle_ = proxyDescriptorSetHandle;
 
         auto const setMembersCount = vkwSetLayout->membersCount_;
         for (auto j = 0u; j < setMembersCount; ++j) {
@@ -367,7 +368,7 @@ RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc co
         }
 
         // Updating the set content
-        resourceProxy_->WriteSet(proxyDescriptorSet, descriptorContentDescriptions);
+        resourceProxy_->WriteSet(proxyDescriptorSetHandle, descriptorContentDescriptions);
     }
 
     return RenderItemHandle{ static_cast<std::uint32_t>(pipeline.renderItems_.size() - 1) };

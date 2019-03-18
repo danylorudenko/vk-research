@@ -28,7 +28,7 @@ struct DescriptorSet
 {
     Render::SetLayoutKey setLayoutKey_;
     
-    VKW::DescriptorSetHandle vkwDescriptorSetHandle_;
+    VKW::ProxySetHandle proxyDescriptorSetHandle_;
 
     struct {
         char name_[SET_MEMBER_NAME_MAX_LENGTH];
