@@ -8,6 +8,8 @@
 namespace Render
 {
 
+// TODO
+constexpr std::size_t RENDER_ITEM_UNIFORM_MAX_COUNT = 4;
 
 struct RenderItem
 {

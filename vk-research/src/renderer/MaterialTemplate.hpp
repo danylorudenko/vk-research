@@ -2,12 +2,14 @@
 
 #include "RendererDescriptorSetSlotsOwner.hpp"
 
+#include "SetLayout.hpp"
+
 namespace Render
 {
 
 struct MaterialTemplate
 {
-    DescriptorSetSlotsOwner<MaterialTemplate> descriptorSetSlots_; 
+    SetLayoutKey key_;
 };
 
 }

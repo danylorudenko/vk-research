@@ -15,6 +15,8 @@
 #include "..\vk_interface\pipeline\PipelineFactory.hpp"
 #include "..\vk_interface\runtime\PresentationController.hpp"
 
+#include "MaterialTemplate.hpp"
+#include "Material.hpp"
 #include "Pass.hpp"
 #include "SetLayout.hpp"
 #include "RendererPipeline.hpp"
@@ -82,9 +84,29 @@ struct GraphicsPipelineDesc
     RenderPassKey renderPass_;
 };
 
+
+
+struct MaterialTemplateDesc
+{
+    std::uint32_t perPassDataCount_;
+    struct
+    {
+        PipelineKey pipelineKey_;
+
+    } perPassData_; // TODO: sould be an array
+};
+
 struct UniformBufferSetMemberData
 {
     std::uint32_t size_;
+};
+
+struct Texture2DSetMemberData
+{
+};
+
+struct StorageBufferSetMemberData
+{
 };
 
 struct RenderItemDesc
@@ -95,8 +117,10 @@ struct RenderItemDesc
         SetLayoutKey setLayout_;
         union {
             UniformBufferSetMemberData uniformBufferSetMemberData_;
+            Texture2DSetMemberData texture2DSetMemberData_;
+            StorageBufferSetMemberData storageBufferSetMemberData_;
         } setMemberData_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-    } requiredSetsDescs_[RENDER_ITEM_UNIFORM_MAX_COUNT];
+    } requiredSetsDescs_[MaxScopeSets<RenderItem>()];
 };
 
 class Root

@@ -22,7 +22,7 @@ struct DescriptorSetSlotsOwner
     static constexpr DescriptorSetScope ownerScope_ = DescriptorSetSlotOwnerScope<TSlotOwner>();
 
     std::uint32_t slotsCount_;
-    DescriptorSetSlot slots_[MaxSetSlots<TSlotOwner>()];
+    DescriptorSetSlot slots_[MaxScopeSets<TSlotOwner>()];
 };
 
 }

@@ -15,11 +15,11 @@ enum DescriptorSetScope
     DESCRIPTOR_SET_SCOPE_RENDERITEM
 };
 
-static constexpr std::uint32_t SCOPE_MAX_SET_SLOTS_MATERIALTEMPLATE = 15;
-static constexpr std::uint32_t SCOPE_MAX_SET_SLOTS_ROOT = 6;
-static constexpr std::uint32_t SCOPE_MAX_SET_SLOTS_RENDERPASS = 6;
-static constexpr std::uint32_t SCOPE_MAX_SET_SLOTS_MATERIALINSTANCE = 6;
-static constexpr std::uint32_t SCOPE_MAX_SET_SLOTS_RENDERITEM = 6;
+static constexpr std::uint32_t SCOPE_MAX_SETS_MATERIALTEMPLATE = 15;
+static constexpr std::uint32_t SCOPE_MAX_SETS_ROOT = 6;
+static constexpr std::uint32_t SCOPE_MAX_SETS_RENDERPASS = 6;
+static constexpr std::uint32_t SCOPE_MAX_SETS_MATERIALINSTANCE = 6;
+static constexpr std::uint32_t SCOPE_MAX_SETS_RENDERITEM = 6;
 
 
 
@@ -66,33 +66,33 @@ constexpr DescriptorSetScope DescriptorSetSlotOwnerScope<Material>()
 
 
 template<typename TSlotOwner>
-constexpr std::uint32_t MaxSetSlots();
+constexpr std::uint32_t MaxScopeSets();
 
 template<>
-constexpr std::uint32_t MaxSetSlots<Root>()
+constexpr std::uint32_t MaxScopeSets<Root>()
 {
-    return SCOPE_MAX_SET_SLOTS_ROOT;
-}
-
-template<>
-constexpr std::uint32_t MaxSetSlots<Pass>()
-{
-    return SCOPE_MAX_SET_SLOTS_RENDERPASS;
+    return SCOPE_MAX_SETS_ROOT;
 }
 
 template<>
-constexpr std::uint32_t MaxSetSlots<MaterialTemplate>()
+constexpr std::uint32_t MaxScopeSets<Pass>()
 {
-    return SCOPE_MAX_SET_SLOTS_MATERIALTEMPLATE;
+    return SCOPE_MAX_SETS_RENDERPASS;
+}
+
+template<>
+constexpr std::uint32_t MaxScopeSets<MaterialTemplate>()
+{
+    return SCOPE_MAX_SETS_MATERIALTEMPLATE;
 }
 template<>
-constexpr std::uint32_t MaxSetSlots<Material>()
+constexpr std::uint32_t MaxScopeSets<Material>()
 {
-    return SCOPE_MAX_SET_SLOTS_MATERIALINSTANCE;
+    return SCOPE_MAX_SETS_MATERIALINSTANCE;
 }
 template<>
-constexpr std::uint32_t MaxSetSlots<RenderItem>()
+constexpr std::uint32_t MaxScopeSets<RenderItem>()
 {
-    return SCOPE_MAX_SET_SLOTS_RENDERITEM;
+    return SCOPE_MAX_SETS_RENDERITEM;
 }
 }
