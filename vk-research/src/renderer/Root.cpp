@@ -282,34 +282,53 @@ SetLayout& Root::FindSetLayout(SetLayoutKey const& key)
 void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc const& desc)
 {
     VKW::PipelineLayoutDesc vkwLayoutDesc;
-    vkwLayoutDesc.membersCount_ = desc.layoutDesc_->membersCount_;
-    auto membersCount = vkwLayoutDesc.membersCount_;
-    for (auto i = 0u; i < membersCount; ++i) {
+    vkwLayoutDesc.membersCount_ = desc.layoutDesc_->staticMembersCount_ + desc.layoutDesc_->instancedMembersCount_;
+
+    std::uint32_t const membersCount = vkwLayoutDesc.membersCount_;
+    for (std::uint32_t i = 0u; i < membersCount; ++i) {
         vkwLayoutDesc.members_[i] = FindSetLayout(desc.layoutDesc_->members_[0]).vkwSetLayoutHandle_;
     }
-    
+
     VKW::GraphicsPipelineDesc vkwDesc;
     vkwDesc.optimized_ = desc.optimized_;
     vkwDesc.inputAssemblyInfo_ = desc.inputAssemblyInfo_;
     vkwDesc.vertexInputInfo_ = desc.vertexInputInfo_;
     vkwDesc.shaderStagesCount_ = desc.shaderStagesCount_;
-    for (auto i = 0u; i < desc.shaderStagesCount_; ++i) {
-        VKW::ShaderModuleHandle moduleHandle = shaderModuleFactory_->LoadModule(desc.shaderStages_[i].desc_);
-        vkwDesc.shaderStages_[i] = VKW::ShaderStageInfo{ moduleHandle };
+    for (std::uint32_t i = 0u; i < desc.shaderStagesCount_; ++i) {
+        Shader& shader = FindShader(desc.shaderStages_[i].shaderKey_);
+        vkwDesc.shaderStages_[i] = VKW::ShaderStageInfo{ shader.vkwShaderModuleHandle_ };
     }
     vkwDesc.viewportInfo_ = desc.viewportInfo_;
     vkwDesc.layoutDesc_ = &vkwLayoutDesc;
     vkwDesc.renderPass_ = renderPassMap_[desc.renderPass_].VKWRenderPass();
     vkwDesc.depthStencilInfo_ = desc.depthStencilInfo_;
     
-    VKW::PipelineHandle handle = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
-    // TODO: construction not complete
-    pipelineMap_[key] = Pipeline{ handle };
+    VKW::PipelineHandle const vkwPipelineHandle = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
+    VKW::Pipeline const* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
+    VKW::PipelineLayoutHandle const vkwPipelineLayoutHandle = vkwPipeline->layoutHandle;
+
+    Pipeline& pipeline = pipelineMap_[key];
+    pipeline.staticLayoutMembersCount_ = desc.layoutDesc_->staticMembersCount_;
+    pipeline.instancedLayoutMembersCount_ = desc.layoutDesc_->instancedMembersCount_;
+    pipeline.layoutHandle_ = vkwPipelineLayoutHandle;
+    pipeline.pipelineHandle_ = vkwPipelineHandle;
 }
 
 Pipeline& Root::FindPipeline(PipelineKey const& key)
 {
     return pipelineMap_[key];
+}
+
+void Root::DefineMaterialTemplate(MaterialTemplateKey const& key, MaterialTemplateDesc const& desc)
+{
+    // instantiate the struct
+    MaterialTemplate& matetrialTemplate = materialTemplateMap_[key];
+
+    std::uint32_t perPassDataCount = desc.perPassDataCount_;
+    for (std::uint32_t i = 0; i < perPassDataCount; ++i) {
+        MaterialTemplateDesc::PerPassData const& perPassData = desc.perPassData_[i];
+        // HERE
+    }
 }
 
 RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc const& desc)

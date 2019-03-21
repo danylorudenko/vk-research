@@ -272,6 +272,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
     auto* result = new Pipeline{};
     result->vkPipeline_ = vkPipeline;
+    result->layoutHandle = layoutHandle;
 
     pipelines_.emplace_back(result);
 

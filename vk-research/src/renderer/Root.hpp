@@ -15,6 +15,7 @@
 #include "..\vk_interface\pipeline\PipelineFactory.hpp"
 #include "..\vk_interface\runtime\PresentationController.hpp"
 
+#include "Shader.hpp"
 #include "MaterialTemplate.hpp"
 #include "Material.hpp"
 #include "Pass.hpp"
@@ -58,12 +59,13 @@ struct RootDesc
 
 struct ShaderDesc
 {
-    VKW::ShaderModuleDesc desc_;
+    ShaderKey shaderKey_;
 };
 
 struct PipelineLayoutDesc
 {
-    std::uint32_t membersCount_;
+    std::uint32_t staticMembersCount_;
+    std::uint32_t instancedMembersCount_;
     SetLayoutKey members_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
 };
 
@@ -85,15 +87,19 @@ struct GraphicsPipelineDesc
 };
 
 
-
 struct MaterialTemplateDesc
 {
     std::uint32_t perPassDataCount_;
-    struct
+    struct PerPassData 
     {
+        RenderPassKey passKey_;
         PipelineKey pipelineKey_;
+    } perPassData_[MATERIAL_TEMPLATE_PASS_LIMIT];
+};
 
-    } perPassData_; // TODO: sould be an array
+struct MaterialDesc
+{
+
 };
 
 struct UniformBufferSetMemberData
@@ -134,9 +140,12 @@ public:
     using GlobalBuffersMap = std::unordered_map<ResourceKey, VKW::ProxyBufferHandle>;
     using UniformBufferMap = std::unordered_map< std::uint64_t, UniformBuffer >;
 
+    using ShaderMap = std::map<ShaderKey, Shader>;
     using RenderPassMap = std::map<RenderPassKey, Pass>;
     using SetLayoutMap = std::map<SetLayoutKey, SetLayout>;
     using PipelineMap = std::map<PipelineKey, Pipeline>;
+    using MaterialTemplateMap = std::map<MaterialTemplateKey, MaterialTemplate>;
+    using MaterialMap = std::map<MaterialKey, Material>;
 
     using RenderGraphRoot = std::vector<RenderPassKey>;
 
@@ -175,8 +184,17 @@ public:
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
     SetLayout& FindSetLayout(SetLayoutKey const& key);
 
+    void DefineShader(ShaderKey const& key, ShaderDesc const& desc);
+    Shader& FindShader(ShaderKey const& key);
+
     void DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc const& desc);
     Pipeline& FindPipeline(PipelineKey const& key);
+
+    void DefineMaterialTemplate(MaterialTemplateKey const& key, MaterialTemplateDesc const& desc);
+    MaterialTemplate& FindMaterialTemplate(MaterialTemplateKey const& key);
+
+    void DefineMaterial(MaterialKey const& key, MaterialDesc const& desc);
+    Material& FindMaterial(MaterialKey const& key);
 
     template<typename TSetSlotsOwner>
     void InitializeSetSlotsOwner(TSetSlotsOwner* owner)
@@ -219,9 +237,14 @@ private:
     UniformBufferMap uniformBuffers_;
     std::uint64_t nextUniformBufferId_;
 
+    ShaderMap shaderMap_;
+
     RenderPassMap renderPassMap_;
     SetLayoutMap setLayoutMap_;
     PipelineMap pipelineMap_;
+
+    MaterialTemplateMap materialTemplateMap_;
+    MaterialMap materialMap_;
 
 
     RenderGraphRoot renderGraphRootTemp_;

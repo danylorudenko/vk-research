@@ -11,12 +11,12 @@ namespace Render
 
 struct VertexStageProperties
 {
-    ShaderKey shader_;
+    //ShaderKey shader_;
 };
 
 struct FragmentStageProperties
 {
-    ShaderKey shader_;
+    //ShaderKey shader_;
 };
 
 struct PipelineProperties
@@ -27,10 +27,13 @@ struct PipelineProperties
 
 struct Pipeline
 {
-    VKW::PipelineHandle pipelineHandle_;
+    std::uint32_t staticLayoutMembersCount_;
+    std::uint32_t instancedLayoutMembersCount_;
     VKW::PipelineLayoutHandle layoutHandle_;
 
+    VKW::PipelineHandle pipelineHandle_;
     PipelineProperties properties_;
+
     std::vector<RenderItem> renderItems_;
 };
 

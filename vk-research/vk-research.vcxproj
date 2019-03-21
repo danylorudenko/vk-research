@@ -445,6 +445,7 @@
     <ClInclude Include="src\renderer\Root.hpp" />
     <ClInclude Include="src\renderer\RootDef.hpp" />
     <ClInclude Include="src\renderer\SetLayout.hpp" />
+    <ClInclude Include="src\renderer\Shader.hpp" />
     <ClInclude Include="src\renderer\UniformBuffer.hpp" />
     <ClInclude Include="src\system\DynamicLibrary.hpp" />
     <ClInclude Include="src\system\Window.hpp" />

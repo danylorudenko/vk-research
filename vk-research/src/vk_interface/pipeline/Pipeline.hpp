@@ -4,6 +4,8 @@
 #include <limits>
 #include <cstdint>
 
+#include "DescriptorLayout.hpp"
+
 namespace VKW
 {
 
@@ -14,6 +16,7 @@ struct Pipeline
     static std::uint32_t constexpr MAX_VIEWPORTS = 4;
     
     VkPipeline vkPipeline_;
+    PipelineLayoutHandle layoutHandle;
 };
 
 struct PipelineHandle

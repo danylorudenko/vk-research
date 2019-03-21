@@ -2,7 +2,6 @@
 
 #include <string>
 #include <cstdint>
-#include <limits>
 
 namespace Render
 {
@@ -12,6 +11,8 @@ using RenderPassKey = std::string;
 using SetLayoutKey = std::string;
 using PipelineKey = std::string;
 using ShaderKey = std::string;
+using MaterialTemplateKey = std::string;
+using MaterialKey = std::string;
 
 struct UniformBufferHandle
 {
