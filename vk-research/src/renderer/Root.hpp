@@ -65,8 +65,9 @@ struct ShaderDesc
 struct PipelineLayoutDesc
 {
     std::uint32_t staticMembersCount_;
+    SetLayoutKey staticMembers_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     std::uint32_t instancedMembersCount_;
-    SetLayoutKey members_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+    SetLayoutKey instancedsMembers_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
 };
 
 struct GraphicsPipelineDesc
@@ -94,12 +95,8 @@ struct MaterialTemplateDesc
     {
         RenderPassKey passKey_;
         PipelineKey pipelineKey_;
-    } perPassData_[MATERIAL_TEMPLATE_PASS_LIMIT];
-};
-
-struct MaterialDesc
-{
-
+    } 
+    perPassData_[MATERIAL_TEMPLATE_PASS_LIMIT];
 };
 
 struct UniformBufferSetMemberData
@@ -113,6 +110,22 @@ struct Texture2DSetMemberData
 
 struct StorageBufferSetMemberData
 {
+};
+
+struct MaterialDesc
+{
+    MaterialTemplateKey templateKey_;
+    struct PerPassData
+    {
+        union SetData
+        {
+            UniformBufferSetMemberData uniformBuffer_;
+            Texture2DSetMemberData texture2D_;
+            StorageBufferSetMemberData storageBuffer_;
+        } 
+        setData_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+    } 
+    perPassData_[MATERIAL_TEMPLATE_PASS_LIMIT];
 };
 
 struct RenderItemDesc

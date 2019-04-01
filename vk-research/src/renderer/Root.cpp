@@ -284,11 +284,20 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     VKW::PipelineLayoutDesc vkwLayoutDesc;
     vkwLayoutDesc.membersCount_ = desc.layoutDesc_->staticMembersCount_ + desc.layoutDesc_->instancedMembersCount_;
 
-    std::uint32_t const membersCount = vkwLayoutDesc.membersCount_;
-    for (std::uint32_t i = 0u; i < membersCount; ++i) {
-        vkwLayoutDesc.members_[i] = FindSetLayout(desc.layoutDesc_->members_[0]).vkwSetLayoutHandle_;
+    std::uint32_t vkwMembersCounter = 0;
+
+    std::uint32_t const staticMembersCount = desc.layoutDesc_->staticMembersCount_;
+    for (std::uint32_t i = 0; i < staticMembersCount; ++i, ++vkwMembersCounter) {
+        SetLayout const& setLayout = FindSetLayout(desc.layoutDesc_->staticMembers_[i]);
+        vkwLayoutDesc.members_[vkwMembersCounter] = setLayout.vkwSetLayoutHandle_;
     }
 
+    std::uint32_t const instancedMembersCount = desc.layoutDesc_->instancedMembersCount_;
+    for (std::uint32_t i = 0; i < instancedMembersCount; ++i, ++vkwMembersCounter) {
+        SetLayout const& setLayout = FindSetLayout(desc.layoutDesc_->instancedsMembers_[i]);
+        vkwLayoutDesc.members_[vkwMembersCounter] = setLayout.vkwSetLayoutHandle_;
+    }
+    
     VKW::GraphicsPipelineDesc vkwDesc;
     vkwDesc.optimized_ = desc.optimized_;
     vkwDesc.inputAssemblyInfo_ = desc.inputAssemblyInfo_;
@@ -322,13 +331,51 @@ Pipeline& Root::FindPipeline(PipelineKey const& key)
 void Root::DefineMaterialTemplate(MaterialTemplateKey const& key, MaterialTemplateDesc const& desc)
 {
     // instantiate the struct
-    MaterialTemplate& matetrialTemplate = materialTemplateMap_[key];
+    MaterialTemplate& materialTemplate = materialTemplateMap_[key];
+    materialTemplate.perPassDataCount_ = desc.perPassDataCount_;
 
     std::uint32_t perPassDataCount = desc.perPassDataCount_;
     for (std::uint32_t i = 0; i < perPassDataCount; ++i) {
-        MaterialTemplateDesc::PerPassData const& perPassData = desc.perPassData_[i];
-        // HERE
+        MaterialTemplateDesc::PerPassData const& perPassDataDesc = desc.perPassData_[i];
+        MaterialTemplate::PerPassData& perPassData = materialTemplate.perPassData_[i];
+
+        perPassData.passKey_ = perPassDataDesc.passKey_;
+        
+        Pipeline& pipeline = FindPipeline(perPassDataDesc.pipelineKey_);
+        VKW::PipelineLayout* vkwPipelineLayout = layoutController_->GetPipelineLayout(pipeline.layoutHandle_);
+        
+        perPassData.pipelineKey_ = perPassDataDesc.pipelineKey_;
+
+        perPassData.materialLayoutKeysCount_ = pipeline.staticLayoutMembersCount_;
+        perPassData.renderitemLayoutKeysCount_ = pipeline.instancedLayoutMembersCount_;
+
+        std::uint32_t generalLayoutsCounter = 0;
+
+        std::uint32_t const materialKeysCount = pipeline.staticLayoutMembersCount_;
+        for (std::uint32_t j = 0; j < materialKeysCount; ++j, ++generalLayoutsCounter) {
+            perPassData.materialLayoutKeys_[j] = pipeline.staticLayoutKeys_[generalLayoutsCounter];
+        }
+
+        std::uint32_t const instanceKeysCount = pipeline.instancedLayoutMembersCount_;
+        for (std::uint32_t j = 0; j < instanceKeysCount; ++j, ++generalLayoutsCounter) {
+            perPassData.renderitemLayoutKeys_[j] = pipeline.instancedLayoutKeys_[generalLayoutsCounter];
+        }
     }
+}
+
+MaterialTemplate& Root::FindMaterialTemplate(MaterialTemplateKey const& key)
+{
+    return materialTemplateMap_[key];
+}
+
+void Root::DefineMaterial(MaterialKey const& key, MaterialDesc const& desc)
+{
+    MaterialTemplate const& materialTemplate = FindMaterialTemplate(desc.templateKey_);
+}
+
+Material& Root::FindMaterial(MaterialKey const& key)
+{
+    return materialMap_[key];
 }
 
 RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc const& desc)
