@@ -271,7 +271,16 @@ Pass& Root::FindPass(RenderPassKey const& key)
 void Root::DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc)
 {
     VKW::DescriptorSetLayoutHandle handle = layoutController_->CreateDescriptorSetLayout(desc);
-    setLayoutMap_[key] = SetLayout{ handle };
+    SetLayout& set = setLayoutMap_[key];
+    set.vkwSetLayoutHandle_ = handle;
+    set.membersCount_ = desc.membersCount_;
+    
+    VKW::DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(handle);
+    std::uint32_t const membersCount = layout->membersCount_;
+    for (std::uint32_t i = 0; i < membersCount; ++i) {
+        set.membersInfo_[i].type_ = desc.membersDesc_[i].type_;
+        set.membersInfo_[i].binding_ = desc.membersDesc_[i].binding_;
+    }
 }
 
 SetLayout& Root::FindSetLayout(SetLayoutKey const& key)
@@ -370,7 +379,35 @@ MaterialTemplate& Root::FindMaterialTemplate(MaterialTemplateKey const& key)
 
 void Root::DefineMaterial(MaterialKey const& key, MaterialDesc const& desc)
 {
+    Material& material = materialMap_[key];
+
     MaterialTemplate const& materialTemplate = FindMaterialTemplate(desc.templateKey_);
+
+    std::uint32_t const perPassDataCount = materialTemplate.perPassDataCount_;
+    for (std::uint32_t i = 0; perPassDataCount; ++i) {
+        MaterialTemplate::PerPassData const& perPassData = materialTemplate.perPassData_[i];
+
+        std::uint32_t const setLayoutsCount = perPassData.materialLayoutKeysCount_;
+        for (std::uint32_t j = 0; j < setLayoutsCount; ++j) {
+            SetLayoutKey const& setLayoutKey = perPassData.materialLayoutKeys_[j];
+            SetLayout const& setLayout = FindSetLayout(setLayoutKey);
+
+            std::uint32_t const setLayoutMembersCount = setLayout.membersCount_;
+            for (std::uint32_t k = 0; k < setLayoutMembersCount; k++) {
+                SetLayout::Member const& setLayoutMember = setLayout.membersInfo_[k];
+                MaterialDesc::PerPassData::SetData::Member const& setLayoutMemberData = desc.perPassData_[i].setData_[j].members_[k];
+
+                VKW::DescriptorType const memberType = setLayoutMember.type_;
+                switch (memberType) {
+                case VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+                    // hmmmmmm, should we create descriptor set for all frames in place?
+                    // or should we wrap it somehow in a "DescriptorSetOwner" ow some kind?
+                    //this->Set
+                    break;
+                }
+            }
+        }
+    }
 }
 
 Material& Root::FindMaterial(MaterialKey const& key)

@@ -117,13 +117,17 @@ struct MaterialDesc
     MaterialTemplateKey templateKey_;
     struct PerPassData
     {
-        union SetData
+        struct SetData
         {
-            UniformBufferSetMemberData uniformBuffer_;
-            Texture2DSetMemberData texture2D_;
-            StorageBufferSetMemberData storageBuffer_;
-        } 
-        setData_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+            union Member
+            {
+                UniformBufferSetMemberData uniformBuffer_;
+                Texture2DSetMemberData texture2D_;
+                StorageBufferSetMemberData storageBuffer_;
+            } 
+            members_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+        }
+        setData_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     } 
     perPassData_[MATERIAL_TEMPLATE_PASS_LIMIT];
 };
