@@ -16,7 +16,7 @@ struct RenderItem
     std::uint32_t vertexCount_;
     std::uint32_t descriptorSetCount_;
     // TODO
-    DescriptorSetSlotsOwner<RenderItem> descriptorSetSlots_;
+    DescriptorSetsOwner<RenderItem> descriptorSetSlots_;
 };
 
 struct RenderItemHandle

@@ -15,7 +15,7 @@ struct DescriptorSetLayoutMemberInfo
 
 struct DescriptorSetLayout
 {
-    static std::uint32_t constexpr MAX_SET_LAYOUT_MEMBERS = 8;
+    static std::uint32_t constexpr MAX_SET_LAYOUT_MEMBERS = 4;
     
     VkDescriptorSetLayout handle_ = VK_NULL_HANDLE;
     std::uint32_t membersCount_;
@@ -31,7 +31,7 @@ struct DescriptorSetLayoutHandle
 
 struct PipelineLayout
 {
-    static std::uint32_t constexpr MAX_PIPELINE_LAYOUT_MEMBERS = 4;
+    static std::uint32_t constexpr MAX_PIPELINE_LAYOUT_MEMBERS = 6;
 
     VkPipelineLayout handle_ = VK_NULL_HANDLE;
     std::uint32_t membersCount_;

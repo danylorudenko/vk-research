@@ -438,7 +438,7 @@
     <ClInclude Include="src\renderer\MaterialTemplate.hpp" />
     <ClInclude Include="src\renderer\Pass.hpp" />
     <ClInclude Include="src\renderer\RendererDescriptorSet.hpp" />
-    <ClInclude Include="src\renderer\RendererDescriptorSetSlotsOwner.hpp" />
+    <ClInclude Include="src\renderer\RendererDescriptorSetsOwner.hpp" />
     <ClInclude Include="src\renderer\RendererDescriptorSetScope.hpp" />
     <ClInclude Include="src\renderer\RendererPipeline.hpp" />
     <ClInclude Include="src\renderer\RenderItem.hpp" />

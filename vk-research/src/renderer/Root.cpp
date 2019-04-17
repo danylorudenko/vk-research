@@ -376,37 +376,117 @@ MaterialTemplate& Root::FindMaterialTemplate(MaterialTemplateKey const& key)
 {
     return materialTemplateMap_[key];
 }
+//
+//struct DescriptorSet
+//{
+//    VKW::ProxySetHandle setHandle_;
+//};
+//
+//template<typename TSlotOwner>
+//struct DescriptorSetsOwner
+//{
+//    static constexpr DescriptorSetScope ownerScope_ = DescriptorSetSlotOwnerScope<TSlotOwner>();
+//
+//    std::uint32_t slotsCount_;
+//    DescriptorSet slots_[MaxScopeSets<TSlotOwner>()];
+//};
+
+void Root::DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle)
+{
+    UniformBuffer const& uniformBuffer = FindUniformBuffer(bufferHandle);
+
+    std::uint32_t framesCount = resourceProxy_->FramesCount();
+    for (std::uint32_t i = 0; i < framesCount; ++i) {
+        auto& bufferInfo = writeDesc.frames_[i].bufferInfo_;
+        
+        VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, i);
+
+        bufferInfo.pureBufferViewHandle_ = resourceProxy_->GetBufferViewHandle(uniformBuffer.proxyBufferViewHandle_, i);
+        bufferInfo.offset_ = 0;
+        bufferInfo.size_ = view->size_;
+    }
+}
+
+void Root::InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCount, SetLayoutKey const* setLayoutKeys, SetOwnerDesc const* setOwnerDescs)
+{
+    owner.slotsCount_ = setsCount;
+
+    std::uint32_t const setLayoutsCount = setsCount;
+    for (std::uint32_t i = 0; i < setLayoutsCount; ++i) {
+        SetLayout const& setLayout = FindSetLayout(setLayoutKeys[i]);
+
+        VKW::ProxySetHandle proxySet = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
+        owner.slots_[i].setHandle_ = proxySet;
+
+        VKW::ProxyDescriptorWriteDesc descriptorsWriteDescs[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+
+        std::uint32_t const setLayoutMembersCount = setLayout.membersCount_;
+        for (std::uint32_t k = 0; k < setLayoutMembersCount; k++) {
+            SetLayout::Member const& setLayoutMember = setLayout.membersInfo_[k];
+            SetOwnerDesc::Member const& setMemberData = setOwnerDescs[i].members_[k];
+
+            VKW::DescriptorType const memberType = setLayoutMember.type_;
+
+            switch (memberType) {
+            case VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+                UniformBufferHandle uniformBufferHandle = AcquireUniformBuffer(setMemberData.uniformBuffer_.size_);
+                DecorateProxySetWriteDescription(descriptorsWriteDescs[k], k, uniformBufferHandle);
+                break;
+            }
+
+        }
+
+        resourceProxy_->WriteSet(proxySet, descriptorsWriteDescs);
+    }
+    
+}
 
 void Root::DefineMaterial(MaterialKey const& key, MaterialDesc const& desc)
 {
     Material& material = materialMap_[key];
-
     MaterialTemplate const& materialTemplate = FindMaterialTemplate(desc.templateKey_);
+
+    material.templateKey_ = desc.templateKey_;
+    material.perPassDataCount_ = materialTemplate.perPassDataCount_;
 
     std::uint32_t const perPassDataCount = materialTemplate.perPassDataCount_;
     for (std::uint32_t i = 0; perPassDataCount; ++i) {
-        MaterialTemplate::PerPassData const& perPassData = materialTemplate.perPassData_[i];
+        MaterialTemplate::PerPassData const& templatePerPassData = materialTemplate.perPassData_[i];
 
-        std::uint32_t const setLayoutsCount = perPassData.materialLayoutKeysCount_;
-        for (std::uint32_t j = 0; j < setLayoutsCount; ++j) {
-            SetLayoutKey const& setLayoutKey = perPassData.materialLayoutKeys_[j];
-            SetLayout const& setLayout = FindSetLayout(setLayoutKey);
+        std::uint32_t const keysCount = templatePerPassData.materialLayoutKeysCount_;
+        SetLayoutKey const* setLayoutKeys = templatePerPassData.materialLayoutKeys_;
+        SetOwnerDesc const* setOwnerDescs = desc.perPassData_[i].setOwnerDesc_;
 
-            std::uint32_t const setLayoutMembersCount = setLayout.membersCount_;
-            for (std::uint32_t k = 0; k < setLayoutMembersCount; k++) {
-                SetLayout::Member const& setLayoutMember = setLayout.membersInfo_[k];
-                MaterialDesc::PerPassData::SetData::Member const& setLayoutMemberData = desc.perPassData_[i].setData_[j].members_[k];
+        InitializeSetsOwner(material.perPassData_[i].descritorSetsOwner_, keysCount, setLayoutKeys, setOwnerDescs);
 
-                VKW::DescriptorType const memberType = setLayoutMember.type_;
-                switch (memberType) {
-                case VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-                    // hmmmmmm, should we create descriptor set for all frames in place?
-                    // or should we wrap it somehow in a "DescriptorSetOwner" ow some kind?
-                    //this->Set
-                    break;
-                }
-            }
-        }
+        //std::uint32_t const setLayoutsCount = templatePerPassData.materialLayoutKeysCount_;
+        //for (std::uint32_t j = 0; j < setLayoutsCount; ++j) {
+        //    SetLayoutKey const& setLayoutKey = templatePerPassData.materialLayoutKeys_[j];
+        //    SetLayout const& setLayout = FindSetLayout(setLayoutKey);
+        //
+        //    VKW::ProxySetHandle proxySet = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
+        //    materialPerPassData.descritorSetSlots_.slots_[j].setHandle_ = proxySet;
+        //
+        //    VKW::ProxyDescriptorWriteDesc descriptorsWriteDescs[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+        //
+        //    std::uint32_t const setLayoutMembersCount = setLayout.membersCount_;
+        //    for (std::uint32_t k = 0; k < setLayoutMembersCount; k++) {
+        //        SetLayout::Member const& setLayoutMember = setLayout.membersInfo_[k];
+        //        SetOwnerDesc::Member const& setMemberData = desc.perPassData_[i].setData_[j].members_[k];
+        //
+        //        VKW::DescriptorType const memberType = setLayoutMember.type_;
+        //
+        //        switch (memberType) {
+        //        case VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+        //            UniformBufferHandle uniformBufferHandle = AcquireUniformBuffer(setMemberData.uniformBuffer_.size_);
+        //            DecorateProxySetWriteDescription(descriptorsWriteDescs[k], k, uniformBufferHandle);
+        //            break;
+        //        }
+        //        
+        //    }
+        //
+        //    resourceProxy_->WriteSet(proxySet, descriptorsWriteDescs);
+        //}
     }
 }
 
@@ -432,7 +512,7 @@ RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc co
         SetLayout& setLayout = FindSetLayout(setDesc.setLayout_);
         VKW::DescriptorSetLayout* vkwSetLayout = layoutController_->GetDescriptorSetLayout(setLayout.vkwSetLayoutHandle_);
         VKW::ProxySetHandle proxyDescriptorSetHandle = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
-        VKW::ProxyDescriptorDesc descriptorContentDescriptions[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+        VKW::ProxyDescriptorWriteDesc descriptorContentDescriptions[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
         
         set.setLayoutKey_ = setDesc.setLayout_;
         set.proxyDescriptorSetHandle_ = proxyDescriptorSetHandle;

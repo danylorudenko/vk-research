@@ -27,7 +27,7 @@ struct ImageViewDesc;
 
 //////////////////////////////////////
 // descriptions
-struct ProxyDescriptorDesc
+struct ProxyDescriptorWriteDesc
 {
     union {
         struct {
@@ -92,7 +92,7 @@ public:
     ProxyImageHandle RegisterSwapchainImageViews();
 
     ProxySetHandle CreateSet(DescriptorSetLayoutHandle layout);
-    void WriteSet(ProxySetHandle handle, ProxyDescriptorDesc* descriptions);
+    void WriteSet(ProxySetHandle handle, ProxyDescriptorWriteDesc* descriptions);
 
     ProxyBufferHandle CreateBuffer(BufferViewDesc const& desc);
     BufferView* GetBufferView(ProxyBufferHandle handle, std::uint32_t context);

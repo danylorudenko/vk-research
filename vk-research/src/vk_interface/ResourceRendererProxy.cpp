@@ -172,7 +172,7 @@ struct ResourceRendererProxy::DescriptorWriteData
     VkBufferView bufferView;
 };
 
-void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorDesc* descriptions)
+void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWriteDesc* descriptions)
 {
     static DescriptorWriteData descriptorData[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
     static VkWriteDescriptorSet writeDescritorSets[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];

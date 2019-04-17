@@ -112,22 +112,23 @@ struct StorageBufferSetMemberData
 {
 };
 
+struct SetOwnerDesc
+{
+    union Member
+    {
+        UniformBufferSetMemberData uniformBuffer_;
+        Texture2DSetMemberData texture2D_;
+        StorageBufferSetMemberData storageBuffer_;
+    }
+    members_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+};
+
 struct MaterialDesc
 {
     MaterialTemplateKey templateKey_;
     struct PerPassData
     {
-        struct SetData
-        {
-            union Member
-            {
-                UniformBufferSetMemberData uniformBuffer_;
-                Texture2DSetMemberData texture2D_;
-                StorageBufferSetMemberData storageBuffer_;
-            } 
-            members_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-        }
-        setData_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+        SetOwnerDesc setOwnerDesc_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     } 
     perPassData_[MATERIAL_TEMPLATE_PASS_LIMIT];
 };
@@ -143,7 +144,7 @@ struct RenderItemDesc
             Texture2DSetMemberData texture2DSetMemberData_;
             StorageBufferSetMemberData storageBufferSetMemberData_;
         } setMemberData_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-    } requiredSetsDescs_[MaxScopeSets<RenderItem>()];
+    } requiredSetsDescs_[SCOPE_MAX_SETS_RENDERITEM];
 };
 
 class Root
@@ -213,12 +214,6 @@ public:
     void DefineMaterial(MaterialKey const& key, MaterialDesc const& desc);
     Material& FindMaterial(MaterialKey const& key);
 
-    template<typename TSetSlotsOwner>
-    void InitializeSetSlotsOwner(TSetSlotsOwner* owner)
-    {
-        auto& slotsOwner = owner->descriptorSetSlots_;
-
-    }
 
     RenderItemHandle ConstructRenderItem(PipelineKey const& key, RenderItemDesc const& desc);
     RenderItemHandle ConstructRenderItem(Pipeline& pipeline, RenderItemDesc const& desc);
@@ -231,6 +226,15 @@ public:
     void PushPassTemp(RenderPassKey const& key);
 
     void IterateRenderGraph();
+
+private:
+    /*DESCRIPTOR_TYPE_SAMPLED_TEXTURE,
+        DESCRIPTOR_TYPE_SAMPLER,
+        DESCRIPTOR_TYPE_UNIFORM_BUFFER*/
+
+    void DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle);
+
+    void InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCount, SetLayoutKey const* setLayoutKeys, SetOwnerDesc const* setOwnerDescs);
 
 private:
     VKW::Loader* loader_;
