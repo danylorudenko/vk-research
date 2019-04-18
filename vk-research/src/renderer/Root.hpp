@@ -68,7 +68,7 @@ struct PipelineLayoutDesc
     std::uint32_t staticMembersCount_;
     SetLayoutKey staticMembers_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     std::uint32_t instancedMembersCount_;
-    SetLayoutKey instancedsMembers_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+    SetLayoutKey instancedMembers_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
 };
 
 struct GraphicsPipelineDesc
@@ -137,9 +137,6 @@ struct MaterialDesc
 struct RenderItemDesc
 {
     std::uint32_t vertexCount_;
-
-    std::uint32_t setCount_;
-    SetLayoutKey setLayouts_[SCOPE_MAX_SETS_RENDERITEM];
     SetOwnerDesc setOwnerDescs_[SCOPE_MAX_SETS_RENDERITEM];
 };
 

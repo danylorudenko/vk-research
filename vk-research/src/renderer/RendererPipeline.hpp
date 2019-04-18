@@ -28,9 +28,9 @@ struct PipelineProperties
 struct Pipeline
 {
     std::uint32_t staticLayoutMembersCount_;
-    SetLayoutKey staticLayoutKeys_;
+    SetLayoutKey staticLayoutKeys_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     std::uint32_t instancedLayoutMembersCount_;
-    SetLayoutKey instancedLayoutKeys_;
+    SetLayoutKey instancedLayoutKeys_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     VKW::PipelineLayoutHandle layoutHandle_;
 
     VKW::PipelineHandle pipelineHandle_;

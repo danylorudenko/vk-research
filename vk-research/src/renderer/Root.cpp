@@ -306,6 +306,10 @@ void Root::DefineShader(ShaderKey const& key, ShaderDesc const& desc)
 
 void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc const& desc)
 {
+    Pipeline& pipeline = pipelineMap_[key];
+    pipeline.staticLayoutMembersCount_ = desc.layoutDesc_->staticMembersCount_;
+    pipeline.instancedLayoutMembersCount_ = desc.layoutDesc_->instancedMembersCount_;
+    
     VKW::PipelineLayoutDesc vkwLayoutDesc;
     vkwLayoutDesc.membersCount_ = desc.layoutDesc_->staticMembersCount_ + desc.layoutDesc_->instancedMembersCount_;
 
@@ -313,13 +317,15 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
 
     std::uint32_t const staticMembersCount = desc.layoutDesc_->staticMembersCount_;
     for (std::uint32_t i = 0; i < staticMembersCount; ++i, ++vkwMembersCounter) {
+        pipeline.staticLayoutKeys_[i] = desc.layoutDesc_->staticMembers_[i];
         SetLayout const& setLayout = FindSetLayout(desc.layoutDesc_->staticMembers_[i]);
         vkwLayoutDesc.members_[vkwMembersCounter] = setLayout.vkwSetLayoutHandle_;
     }
 
     std::uint32_t const instancedMembersCount = desc.layoutDesc_->instancedMembersCount_;
     for (std::uint32_t i = 0; i < instancedMembersCount; ++i, ++vkwMembersCounter) {
-        SetLayout const& setLayout = FindSetLayout(desc.layoutDesc_->instancedsMembers_[i]);
+        pipeline.instancedLayoutKeys_[i] = desc.layoutDesc_->instancedMembers_[i];
+        SetLayout const& setLayout = FindSetLayout(desc.layoutDesc_->instancedMembers_[i]);
         vkwLayoutDesc.members_[vkwMembersCounter] = setLayout.vkwSetLayoutHandle_;
     }
     
@@ -341,9 +347,7 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     VKW::Pipeline const* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
     VKW::PipelineLayoutHandle const vkwPipelineLayoutHandle = vkwPipeline->layoutHandle;
 
-    Pipeline& pipeline = pipelineMap_[key];
-    pipeline.staticLayoutMembersCount_ = desc.layoutDesc_->staticMembersCount_;
-    pipeline.instancedLayoutMembersCount_ = desc.layoutDesc_->instancedMembersCount_;
+
     pipeline.layoutHandle_ = vkwPipelineLayoutHandle;
     pipeline.pipelineHandle_ = vkwPipelineHandle;
 }
@@ -466,7 +470,7 @@ void Root::DefineMaterial(MaterialKey const& key, MaterialDesc const& desc)
     material.perPassDataCount_ = materialTemplate.perPassDataCount_;
 
     std::uint32_t const perPassDataCount = materialTemplate.perPassDataCount_;
-    for (std::uint32_t i = 0; perPassDataCount; ++i) {
+    for (std::uint32_t i = 0; i < perPassDataCount; ++i) {
         MaterialTemplate::PerPassData const& templatePerPassData = materialTemplate.perPassData_[i];
 
         std::uint32_t const keysCount = templatePerPassData.materialLayoutKeysCount_;
@@ -518,7 +522,7 @@ RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc co
 
     item.vertexCount_ = desc.vertexCount_;
     
-    InitializeSetsOwner(item.descriptorSetsOwner_, desc.setCount_, desc.setLayouts_, desc.setOwnerDescs_);
+    InitializeSetsOwner(item.descriptorSetsOwner_, pipeline.instancedLayoutMembersCount_, pipeline.instancedLayoutKeys_, desc.setOwnerDescs_);
     
 
     return RenderItemHandle{ static_cast<std::uint32_t>(pipeline.renderItems_.size() - 1) };

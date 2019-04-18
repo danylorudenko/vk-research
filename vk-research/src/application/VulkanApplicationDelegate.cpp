@@ -122,6 +122,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     char constexpr passKey[] = "pass0";
     char constexpr pipeKey[] = "pipe0";
     char constexpr setLayoutKey[] = "set0";
+    char constexpr materialTemplateKey[] = "templ0";
+    char constexpr materialKey[] = "mat0";
 
 
     Render::RenderPassDesc passDesc;
@@ -131,21 +133,23 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->DefineRenderPass(passKey, passDesc);
     Render::Pass& pass = renderRoot_->FindPass(passKey);
 
-    VKW::ShaderModuleDesc vertexModuleDesc;
-    vertexModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
-    vertexModuleDesc.shaderPath_ = "shader-src\\test-vertex.spv";
-
-
-    VKW::ShaderModuleDesc fragmentModuleDesc;
-    fragmentModuleDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
-    fragmentModuleDesc.shaderPath_ = "shader-src\\test-frag.spv";
+    Render::ShaderDesc vertexShaderDesc;
+    vertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
+    vertexShaderDesc.relativePath_ = "shader-src\\test-vertex.spv";
     
+    Render::ShaderDesc fragmentShaderDesc;
+    fragmentShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
+    fragmentShaderDesc.relativePath_ = "shader-src\\test-frag.spv";
+
+    renderRoot_->DefineShader("vShader", vertexShaderDesc);
+    renderRoot_->DefineShader("fShader", fragmentShaderDesc);
+
     Render::GraphicsPipelineDesc pipelineDesc;
 
     pipelineDesc.renderPass_ = passKey;
     pipelineDesc.shaderStagesCount_ = 2;
-    //pipelineDesc.shaderStages_[0].desc_ = std::move(vertexModuleDesc);
-    //pipelineDesc.shaderStages_[1].desc_ = std::move(fragmentModuleDesc);
+    pipelineDesc.shaderStages_[0] = "vShader";
+    pipelineDesc.shaderStages_[1] = "fShader";
 
     VKW::InputAssemblyInfo iaInfo;
     iaInfo.primitiveRestartEnable_ = false;
@@ -159,8 +163,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     //vInfo.vertexAttributes_[0].offset_ = 0;
     //vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
 
-    auto const width = (mainWindow_.Width());
-    auto const height = (mainWindow_.Height());
+    std::uint32_t const width = (mainWindow_.Width());
+    std::uint32_t const height = (mainWindow_.Height());
 
     VKW::ViewportInfo vpInfo;
     vpInfo.viewportsCount_ = 1;
@@ -183,8 +187,9 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->DefineSetLayout(setLayoutKey, setLayoutDesc);
 
     Render::PipelineLayoutDesc layoutDesc;
-    //layoutDesc.membersCount_ = 1;
-    //layoutDesc.members_[0] = setLayoutKey;
+    layoutDesc.staticMembersCount_ = 0;
+    layoutDesc.instancedMembersCount_ = 1;
+    layoutDesc.instancedMembers_[0] = setLayoutKey;
 
     pipelineDesc.inputAssemblyInfo_ = &iaInfo;
     pipelineDesc.vertexInputInfo_ = &vInfo;
@@ -195,13 +200,20 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     
     Render::RenderItemDesc itemDesc;
     itemDesc.vertexCount_ = 3;
-    itemDesc.setCount_ = 1;
+    itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 64;
 
-    //auto& renderItemSetDesc = itemDesc.requiredSetsDescs_[0];
-    //renderItemSetDesc.setLayout_ = setLayoutKey;
-    //renderItemSetDesc.setMemberData_[0].uniformBufferSetMemberData_.size_ = 128;
+    Render::MaterialTemplateDesc materialTemplateDesc;
+    materialTemplateDesc.perPassDataCount_ = 1;
+    materialTemplateDesc.perPassData_[0].passKey_ = passKey;
+    materialTemplateDesc.perPassData_[0].pipelineKey_ = pipeKey;
+    renderRoot_->DefineMaterialTemplate(materialTemplateKey, materialTemplateDesc);
 
-    auto renderItemHandle = renderRoot_->ConstructRenderItem(pipeKey, itemDesc);
+    Render::MaterialDesc materialDesc;
+    materialDesc.templateKey_ = materialTemplateKey;
+    renderRoot_->DefineMaterial(materialKey, materialDesc);
+
+
+    Render::RenderItemHandle renderItemHandle = renderRoot_->ConstructRenderItem(pipeKey, itemDesc);
     customData_.testRenderItemHandle_ = renderItemHandle;
 
     pass.AddPipeline(pipeKey);
