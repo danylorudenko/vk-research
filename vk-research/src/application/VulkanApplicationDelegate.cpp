@@ -144,8 +144,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     pipelineDesc.renderPass_ = passKey;
     pipelineDesc.shaderStagesCount_ = 2;
-    pipelineDesc.shaderStages_[0].desc_ = std::move(vertexModuleDesc);
-    pipelineDesc.shaderStages_[1].desc_ = std::move(fragmentModuleDesc);
+    //pipelineDesc.shaderStages_[0].desc_ = std::move(vertexModuleDesc);
+    //pipelineDesc.shaderStages_[1].desc_ = std::move(fragmentModuleDesc);
 
     VKW::InputAssemblyInfo iaInfo;
     iaInfo.primitiveRestartEnable_ = false;
@@ -183,8 +183,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->DefineSetLayout(setLayoutKey, setLayoutDesc);
 
     Render::PipelineLayoutDesc layoutDesc;
-    layoutDesc.membersCount_ = 1;
-    layoutDesc.members_[0] = setLayoutKey;
+    //layoutDesc.membersCount_ = 1;
+    //layoutDesc.members_[0] = setLayoutKey;
 
     pipelineDesc.inputAssemblyInfo_ = &iaInfo;
     pipelineDesc.vertexInputInfo_ = &vInfo;
@@ -197,9 +197,9 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     itemDesc.vertexCount_ = 3;
     itemDesc.setCount_ = 1;
 
-    auto& renderItemSetDesc = itemDesc.requiredSetsDescs_[0];
-    renderItemSetDesc.setLayout_ = setLayoutKey;
-    renderItemSetDesc.setMemberData_[0].uniformBufferSetMemberData_.size_ = 128;
+    //auto& renderItemSetDesc = itemDesc.requiredSetsDescs_[0];
+    //renderItemSetDesc.setLayout_ = setLayoutKey;
+    //renderItemSetDesc.setMemberData_[0].uniformBufferSetMemberData_.size_ = 128;
 
     auto renderItemHandle = renderRoot_->ConstructRenderItem(pipeKey, itemDesc);
     customData_.testRenderItemHandle_ = renderItemHandle;

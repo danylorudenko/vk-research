@@ -59,7 +59,8 @@ struct RootDesc
 
 struct ShaderDesc
 {
-    ShaderKey shaderKey_;
+    VKW::ShaderModuleType type_;
+    std::string relativePath_;
 };
 
 struct PipelineLayoutDesc
@@ -75,7 +76,7 @@ struct GraphicsPipelineDesc
     bool optimized_;
 
     std::uint32_t shaderStagesCount_;
-    ShaderDesc shaderStages_[VKW::Pipeline::MAX_SHADER_STAGES];
+    ShaderKey shaderStages_[VKW::Pipeline::MAX_SHADER_STAGES];
 
     VKW::InputAssemblyInfo* inputAssemblyInfo_;
     VKW::VertexInputInfo* vertexInputInfo_;
@@ -136,15 +137,10 @@ struct MaterialDesc
 struct RenderItemDesc
 {
     std::uint32_t vertexCount_;
+
     std::uint32_t setCount_;
-    struct {
-        SetLayoutKey setLayout_;
-        union {
-            UniformBufferSetMemberData uniformBufferSetMemberData_;
-            Texture2DSetMemberData texture2DSetMemberData_;
-            StorageBufferSetMemberData storageBufferSetMemberData_;
-        } setMemberData_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-    } requiredSetsDescs_[SCOPE_MAX_SETS_RENDERITEM];
+    SetLayoutKey setLayouts_[SCOPE_MAX_SETS_RENDERITEM];
+    SetOwnerDesc setOwnerDescs_[SCOPE_MAX_SETS_RENDERITEM];
 };
 
 class Root
