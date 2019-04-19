@@ -93,6 +93,8 @@ public:
 
     ProxySetHandle CreateSet(DescriptorSetLayoutHandle layout);
     void WriteSet(ProxySetHandle handle, ProxyDescriptorWriteDesc* descriptions);
+    DescriptorSetHandle GetDescriptorSetHandle(ProxySetHandle handle, std::uint32_t context);
+    DescriptorSet* GetDescriptorSet(ProxySetHandle handle, std::uint32_t context);
 
     ProxyBufferHandle CreateBuffer(BufferViewDesc const& desc);
     BufferView* GetBufferView(ProxyBufferHandle handle, std::uint32_t context);
@@ -109,6 +111,9 @@ public:
 
     VKW::MemoryPage* GetMemoryPage(VKW::BufferResourceHandle handle);
     VKW::MemoryPage* GetMemoryPage(VKW::ImageResourceHandle handle);
+
+    void* MapBuffer(VKW::ProxyBufferHandle handle);
+    void FlushBuffer(VKW::ProxyBufferHandle handle);
 
 
 private:

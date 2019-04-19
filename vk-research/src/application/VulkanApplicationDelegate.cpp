@@ -75,9 +75,11 @@ void VulkanApplicationDelegate::update()
     Render::Pipeline& pipeline = renderRoot_->FindPipeline("pipe0");
     Render::RenderWorkItem* testRenderItem = renderRoot_->FindRenderWorkItem(pipeline, customData_.testRenderItemHandle_);
 
-    //Render::UniformBufferHandle uniformHandle = testRenderItem->uniformBuffers_[0].serverBufferHandle_;
-    //void* mappedBuffer = renderRoot_->MapUniformBuffer(uniformHandle, 0);
-    //renderRoot_->FlushUniformBuffer(uniformHandle, 0);
+    // WARNING: 0 frame is always taken
+    //renderRoot_->ResourceProxy()->GetDescriptorSet(testRenderItem->descriptorSetsOwner_.slots_[0].setHandle_, 0);
+
+    // hmmm, I need some kind of "UniformBufferWriterProxy" ????
+    // how to write new data to the uniform buffers???
 
 
 

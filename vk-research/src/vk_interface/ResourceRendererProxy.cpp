@@ -296,6 +296,17 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
     }
 }
 
+DescriptorSetHandle ResourceRendererProxy::GetDescriptorSetHandle(ProxySetHandle handle, std::uint32_t context)
+{
+    return framedDescriptorsHub_->contexts_[context].descriptorSets_[handle.id_];
+}
+
+DescriptorSet* ResourceRendererProxy::GetDescriptorSet(ProxySetHandle handle, std::uint32_t context)
+{
+    DescriptorSetHandle setHandle = framedDescriptorsHub_->contexts_[context].descriptorSets_[handle.id_];
+    return descriptorSetsController_->GetDescriptorSet(setHandle);
+}
+
 void ResourceRendererProxy::DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkImageView view)
 {
     dstInfo.imageInfo.imageView = view;
@@ -436,6 +447,38 @@ VKW::MemoryPage* ResourceRendererProxy::GetMemoryPage(VKW::BufferResourceHandle 
 {
     VKW::BufferResource* resource = GetResource(handle);
     return memoryController_->GetPage(resource->memory_.pageHandle_);
+}
+
+void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle)
+{
+    VKW::BufferView const* view = GetBufferView(handle, 0 /* context */);
+    VKW::BufferResource const* resource = GetResource(view->providedBuffer_->bufferResource_);
+    VKW::MemoryPage const* memoryPage = GetMemoryPage(view->providedBuffer_->bufferResource_);
+
+    std::uint32_t const mappingOffset = resource->memory_.offset_ + view->offset_;
+
+    void* result = nullptr;
+    VK_ASSERT(table_->vkMapMemory(device_->Handle(), memoryPage->deviceMemory_, mappingOffset, view->size_, VK_FLAGS_NONE, &result));
+
+    return result;
+}
+
+void ResourceRendererProxy::FlushBuffer(VKW::ProxyBufferHandle handle)
+{
+    VKW::BufferView const* view = GetBufferView(handle, 0 /* context */);
+    VKW::BufferResource const* resource = GetResource(view->providedBuffer_->bufferResource_);
+    VKW::MemoryPage const* memoryPage = GetMemoryPage(view->providedBuffer_->bufferResource_);
+
+    std::uint32_t const mappingOffset = resource->memory_.offset_ + view->offset_;
+
+    VkMappedMemoryRange range;
+    range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    range.pNext = nullptr;
+    range.memory = memoryPage->deviceMemory_;
+    range.offset = mappingOffset;
+    range.size = view->size_;
+
+    VK_ASSERT(table_->vkFlushMappedMemoryRanges(device_->Handle(), 1, &range));
 }
 
 }

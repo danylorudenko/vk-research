@@ -1,6 +1,7 @@
 #pragma once
 
 #include "..\vk_interface\runtime\DescriptorSet.hpp"
+#include "..\vk_interface\ProxyHandles.hpp"
 #include "RootDef.hpp"
 
 namespace Render
@@ -12,8 +13,6 @@ constexpr std::size_t SET_MEMBER_NAME_MAX_LENGTH = 64;
 struct UniformBufferSetMember
 {
     UniformBufferHandle uniformBufferHandle_;
-    std::uint8_t* hostBuffer_;
-    std::uint32_t hostBufferSize_;
 };
 
 struct Texture2DSetMember

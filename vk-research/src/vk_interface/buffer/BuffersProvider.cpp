@@ -80,13 +80,15 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
     viewInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
     viewInfo.pNext = nullptr;
 
+    std::uint32_t prevOffset = 0;
     for (auto i = 0u; i < buffersCount; ++i) {
         BufferResource const* resource = resourcesController_->GetBuffer(bufferRes);
         viewInfo.flags = VK_FLAGS_NONE;
         viewInfo.buffer = resource->handle_;
         viewInfo.format = format;
         //viewInfo.offset = desc[i].offset_;
-        viewInfo.offset = 0u;
+        viewInfo.offset = prevOffset;
+        prevOffset += desc[i].size_;
         viewInfo.range = desc[i].size_;
 
         if (format != VK_FORMAT_UNDEFINED) {
