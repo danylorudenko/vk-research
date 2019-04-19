@@ -211,9 +211,9 @@ public:
 
     RenderWorkItemHandle ConstructRenderWorkItem(PipelineKey const& key, RenderItemDesc const& desc);
     RenderWorkItemHandle ConstructRenderWorkItem(Pipeline& pipeline, RenderItemDesc const& desc);
-    RenderWorkItem* FindRenderItem(Pipeline& pipeline, RenderWorkItemHandle handle);
-    void ReleaseRenderItem(PipelineKey const& key, RenderWorkItemHandle handle);
-    void ReleaseRenderItem(Pipeline& pipeline, RenderWorkItemHandle handle);
+    RenderWorkItem* FindRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle);
+    void ReleaseRenderWorkItem(PipelineKey const& key, RenderWorkItemHandle handle);
+    void ReleaseRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle);
 
     VKW::ResourceRendererProxy* ResourceProxy() const;
 

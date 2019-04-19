@@ -514,7 +514,7 @@ RenderWorkItemHandle Root::ConstructRenderWorkItem(Pipeline& pipeline, RenderIte
     return RenderWorkItemHandle{ static_cast<std::uint32_t>(pipeline.renderItems_.size() - 1) };
 }
 
-void Root::ReleaseRenderItem(Pipeline& pipeline, RenderWorkItemHandle handle)
+void Root::ReleaseRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle)
 {
     //auto& item = pipeline.renderItems_[handle.id_];
     //auto const uniformBuffersCount = item.uniformBuffersCount_;
@@ -525,7 +525,7 @@ void Root::ReleaseRenderItem(Pipeline& pipeline, RenderWorkItemHandle handle)
     //}
 }
 
-RenderWorkItem* Root::FindRenderItem(Pipeline& pipeline, RenderWorkItemHandle handle)
+RenderWorkItem* Root::FindRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle)
 {
     return &pipeline.renderItems_[handle.id_];
 }
@@ -535,9 +535,9 @@ RenderWorkItemHandle Root::ConstructRenderWorkItem(PipelineKey const& pipelineKe
     return ConstructRenderWorkItem(FindPipeline(pipelineKey), desc);
 }
 
-void Root::ReleaseRenderItem(PipelineKey const& pipelineKey, RenderWorkItemHandle handle)
+void Root::ReleaseRenderWorkItem(PipelineKey const& pipelineKey, RenderWorkItemHandle handle)
 {
-    return ReleaseRenderItem(FindPipeline(pipelineKey), handle);
+    return ReleaseRenderWorkItem(FindPipeline(pipelineKey), handle);
 }
 
 VKW::ResourceRendererProxy* Root::ResourceProxy() const

@@ -73,7 +73,7 @@ void VulkanApplicationDelegate::start()
 void VulkanApplicationDelegate::update()
 {
     Render::Pipeline& pipeline = renderRoot_->FindPipeline("pipe0");
-    Render::RenderWorkItem* testRenderItem = renderRoot_->FindRenderItem(pipeline, customData_.testRenderItemHandle_);
+    Render::RenderWorkItem* testRenderItem = renderRoot_->FindRenderWorkItem(pipeline, customData_.testRenderItemHandle_);
 
     //Render::UniformBufferHandle uniformHandle = testRenderItem->uniformBuffers_[0].serverBufferHandle_;
     //void* mappedBuffer = renderRoot_->MapUniformBuffer(uniformHandle, 0);
