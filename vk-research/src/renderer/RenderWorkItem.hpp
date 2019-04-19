@@ -8,13 +8,13 @@
 namespace Render
 {
 
-struct RenderItem
+struct RenderWorkItem
 {
     std::uint32_t vertexCount_;
     DescriptorSetsOwner descriptorSetsOwner_;
 };
 
-struct RenderItemHandle
+struct RenderWorkItemHandle
 {
     std::uint32_t id_ = std::numeric_limits<std::uint32_t>::max();
 };

@@ -4,7 +4,7 @@
 #include "..\vk_interface\pipeline\Pipeline.hpp"
 #include "..\vk_interface\pipeline\DescriptorLayout.hpp"
 #include "RootDef.hpp"
-#include "RenderItem.hpp"
+#include "RenderWorkItem.hpp"
 
 namespace Render
 {
@@ -36,7 +36,7 @@ struct Pipeline
     VKW::PipelineHandle pipelineHandle_;
     PipelineProperties properties_;
 
-    std::vector<RenderItem> renderItems_;
+    std::vector<RenderWorkItem> renderItems_;
 };
 
 }

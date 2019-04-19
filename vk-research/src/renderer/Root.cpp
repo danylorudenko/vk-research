@@ -396,20 +396,6 @@ MaterialTemplate& Root::FindMaterialTemplate(MaterialTemplateKey const& key)
 {
     return materialTemplateMap_[key];
 }
-//
-//struct DescriptorSet
-//{
-//    VKW::ProxySetHandle setHandle_;
-//};
-//
-//template<typename TSlotOwner>
-//struct DescriptorSetsOwner
-//{
-//    static constexpr DescriptorSetScope ownerScope_ = DescriptorSetSlotOwnerScope<TSlotOwner>();
-//
-//    std::uint32_t slotsCount_;
-//    DescriptorSet slots_[MaxScopeSets<TSlotOwner>()];
-//};
 
 void Root::DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle)
 {
@@ -515,20 +501,20 @@ Material& Root::FindMaterial(MaterialKey const& key)
     return materialMap_[key];
 }
 
-RenderItemHandle Root::ConstructRenderItem(Pipeline& pipeline, RenderItemDesc const& desc)
+RenderWorkItemHandle Root::ConstructRenderWorkItem(Pipeline& pipeline, RenderItemDesc const& desc)
 {
     pipeline.renderItems_.emplace_back();
-    RenderItem& item = pipeline.renderItems_.back();
+    RenderWorkItem& item = pipeline.renderItems_.back();
 
     item.vertexCount_ = desc.vertexCount_;
     
     InitializeSetsOwner(item.descriptorSetsOwner_, pipeline.instancedLayoutMembersCount_, pipeline.instancedLayoutKeys_, desc.setOwnerDescs_);
     
 
-    return RenderItemHandle{ static_cast<std::uint32_t>(pipeline.renderItems_.size() - 1) };
+    return RenderWorkItemHandle{ static_cast<std::uint32_t>(pipeline.renderItems_.size() - 1) };
 }
 
-void Root::ReleaseRenderItem(Pipeline& pipeline, RenderItemHandle handle)
+void Root::ReleaseRenderItem(Pipeline& pipeline, RenderWorkItemHandle handle)
 {
     //auto& item = pipeline.renderItems_[handle.id_];
     //auto const uniformBuffersCount = item.uniformBuffersCount_;
@@ -539,17 +525,17 @@ void Root::ReleaseRenderItem(Pipeline& pipeline, RenderItemHandle handle)
     //}
 }
 
-RenderItem* Root::FindRenderItem(Pipeline& pipeline, RenderItemHandle handle)
+RenderWorkItem* Root::FindRenderItem(Pipeline& pipeline, RenderWorkItemHandle handle)
 {
     return &pipeline.renderItems_[handle.id_];
 }
 
-RenderItemHandle Root::ConstructRenderItem(PipelineKey const& pipelineKey, RenderItemDesc const& desc)
+RenderWorkItemHandle Root::ConstructRenderWorkItem(PipelineKey const& pipelineKey, RenderItemDesc const& desc)
 {
-    return ConstructRenderItem(FindPipeline(pipelineKey), desc);
+    return ConstructRenderWorkItem(FindPipeline(pipelineKey), desc);
 }
 
-void Root::ReleaseRenderItem(PipelineKey const& pipelineKey, RenderItemHandle handle)
+void Root::ReleaseRenderItem(PipelineKey const& pipelineKey, RenderWorkItemHandle handle)
 {
     return ReleaseRenderItem(FindPipeline(pipelineKey), handle);
 }

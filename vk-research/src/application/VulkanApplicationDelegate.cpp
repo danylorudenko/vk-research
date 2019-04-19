@@ -73,7 +73,7 @@ void VulkanApplicationDelegate::start()
 void VulkanApplicationDelegate::update()
 {
     Render::Pipeline& pipeline = renderRoot_->FindPipeline("pipe0");
-    Render::RenderItem* testRenderItem = renderRoot_->FindRenderItem(pipeline, customData_.testRenderItemHandle_);
+    Render::RenderWorkItem* testRenderItem = renderRoot_->FindRenderItem(pipeline, customData_.testRenderItemHandle_);
 
     //Render::UniformBufferHandle uniformHandle = testRenderItem->uniformBuffers_[0].serverBufferHandle_;
     //void* mappedBuffer = renderRoot_->MapUniformBuffer(uniformHandle, 0);
@@ -168,7 +168,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     VKW::ViewportInfo vpInfo;
     vpInfo.viewportsCount_ = 1;
-    auto& vp = vpInfo.viewports_[0];
+    VKW::ViewportInfo::Viewport& vp = vpInfo.viewports_[0];
     vp.x_ = 0.0f;
     vp.y_ = 0.0f;
     vp.width_ = static_cast<float>(width);
@@ -213,13 +213,11 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->DefineMaterial(materialKey, materialDesc);
 
 
-    Render::RenderItemHandle renderItemHandle = renderRoot_->ConstructRenderItem(pipeKey, itemDesc);
+    Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(pipeKey, itemDesc);
     customData_.testRenderItemHandle_ = renderItemHandle;
 
     pass.AddPipeline(pipeKey);
     renderRoot_->PushPassTemp(passKey);
-
-    Render::Material test;
 
     // how to write resource descriptor to DescriptorSet
     //renderRoot_->Defue

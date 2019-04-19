@@ -172,8 +172,8 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
 void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
     std::uint32_t const pipelinesCount = static_cast<std::uint32_t>(pipelines_.size());
-    for (auto i = 0u; i < pipelinesCount; ++i) {
-        auto& pipeline = root_->FindPipeline(pipelines_[i]);
+    for (std::uint32_t i = 0u; i < pipelinesCount; ++i) {
+        Pipeline& pipeline = root_->FindPipeline(pipelines_[i]);
         VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(pipeline.pipelineHandle_);
 
         VkCommandBuffer const commandBuffer = commandReciever->commandBuffer_;
@@ -185,7 +185,8 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
         auto& renderItems = pipeline.renderItems_;
         auto const renderItemsCount = static_cast<std::uint32_t>(renderItems.size());
         for (auto i = 0u; i < renderItemsCount; ++i) {
-            auto& renderItem = renderItems[i];
+            RenderWorkItem& renderItem = renderItems[i];
+            
             table_->vkCmdDraw(commandBuffer, renderItem.vertexCount_, 1, 0, 0);
         }
         

@@ -22,7 +22,7 @@
 #include "SetLayout.hpp"
 #include "RendererPipeline.hpp"
 #include "UniformBuffer.hpp"
-#include "RenderItem.hpp"
+#include "RenderWorkItem.hpp"
 
 namespace VKW
 {
@@ -206,13 +206,14 @@ public:
 
     void DefineMaterial(MaterialKey const& key, MaterialDesc const& desc);
     Material& FindMaterial(MaterialKey const& key);
+    void RegisterMaterial(MaterialKey const& key);
 
 
-    RenderItemHandle ConstructRenderItem(PipelineKey const& key, RenderItemDesc const& desc);
-    RenderItemHandle ConstructRenderItem(Pipeline& pipeline, RenderItemDesc const& desc);
-    RenderItem* FindRenderItem(Pipeline& pipeline, RenderItemHandle handle);
-    void ReleaseRenderItem(PipelineKey const& key, RenderItemHandle handle);
-    void ReleaseRenderItem(Pipeline& pipeline, RenderItemHandle handle);
+    RenderWorkItemHandle ConstructRenderWorkItem(PipelineKey const& key, RenderItemDesc const& desc);
+    RenderWorkItemHandle ConstructRenderWorkItem(Pipeline& pipeline, RenderItemDesc const& desc);
+    RenderWorkItem* FindRenderItem(Pipeline& pipeline, RenderWorkItemHandle handle);
+    void ReleaseRenderItem(PipelineKey const& key, RenderWorkItemHandle handle);
+    void ReleaseRenderItem(Pipeline& pipeline, RenderWorkItemHandle handle);
 
     VKW::ResourceRendererProxy* ResourceProxy() const;
 

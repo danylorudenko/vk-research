@@ -15,7 +15,7 @@
 
 struct CustomData
 {
-    Render::RenderItemHandle testRenderItemHandle_;
+    Render::RenderWorkItemHandle testRenderItemHandle_;
 };
 
 class VulkanApplicationDelegate

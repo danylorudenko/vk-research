@@ -54,7 +54,7 @@ struct InputAssemblyInfo
 struct ViewportInfo
 {
     std::uint32_t viewportsCount_;
-    struct {
+    struct Viewport {
         float x_;
         float y_;
         float width_;
@@ -66,7 +66,8 @@ struct ViewportInfo
         std::int32_t scissorYoffset_;
         std::uint32_t scissorXextent_;
         std::uint32_t scissorYextent_;
-    } viewports_[Pipeline::MAX_VIEWPORTS];
+    } 
+    viewports_[Pipeline::MAX_VIEWPORTS];
 };
 
 struct DepthStencilInfo

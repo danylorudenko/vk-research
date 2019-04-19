@@ -1061,9 +1061,6 @@
     <ClInclude Include="include\glm\vector_relational.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\RenderItem.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\renderer\UniformBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1083,6 +1080,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\RendererDescriptorSetsOwner.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\RenderWorkItem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
