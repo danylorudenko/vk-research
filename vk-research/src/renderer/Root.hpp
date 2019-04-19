@@ -211,6 +211,7 @@ public:
 
     RenderWorkItemHandle ConstructRenderWorkItem(PipelineKey const& key, RenderItemDesc const& desc);
     RenderWorkItemHandle ConstructRenderWorkItem(Pipeline& pipeline, RenderItemDesc const& desc);
+    RenderWorkItem* FindRenderWorkItem(PipelineKey const& key, RenderWorkItemHandle handle);
     RenderWorkItem* FindRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle);
     void ReleaseRenderWorkItem(PipelineKey const& key, RenderWorkItemHandle handle);
     void ReleaseRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle);

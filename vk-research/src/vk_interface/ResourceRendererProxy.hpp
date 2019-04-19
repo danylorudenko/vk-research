@@ -112,8 +112,8 @@ public:
     VKW::MemoryPage* GetMemoryPage(VKW::BufferResourceHandle handle);
     VKW::MemoryPage* GetMemoryPage(VKW::ImageResourceHandle handle);
 
-    void* MapBuffer(VKW::ProxyBufferHandle handle);
-    void FlushBuffer(VKW::ProxyBufferHandle handle);
+    void* MapBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context);
+    void FlushBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context);
 
 
 private:

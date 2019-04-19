@@ -449,13 +449,13 @@ VKW::MemoryPage* ResourceRendererProxy::GetMemoryPage(VKW::BufferResourceHandle 
     return memoryController_->GetPage(resource->memory_.pageHandle_);
 }
 
-void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle)
+void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)
 {
-    VKW::BufferView const* view = GetBufferView(handle, 0 /* context */);
+    VKW::BufferView const* view = GetBufferView(handle, context);
     VKW::BufferResource const* resource = GetResource(view->providedBuffer_->bufferResource_);
     VKW::MemoryPage const* memoryPage = GetMemoryPage(view->providedBuffer_->bufferResource_);
 
-    std::uint32_t const mappingOffset = resource->memory_.offset_ + view->offset_;
+    std::uint64_t const mappingOffset = resource->memory_.offset_ + view->offset_;
 
     void* result = nullptr;
     VK_ASSERT(table_->vkMapMemory(device_->Handle(), memoryPage->deviceMemory_, mappingOffset, view->size_, VK_FLAGS_NONE, &result));
@@ -463,13 +463,13 @@ void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle)
     return result;
 }
 
-void ResourceRendererProxy::FlushBuffer(VKW::ProxyBufferHandle handle)
+void ResourceRendererProxy::FlushBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)
 {
-    VKW::BufferView const* view = GetBufferView(handle, 0 /* context */);
+    VKW::BufferView const* view = GetBufferView(handle, context);
     VKW::BufferResource const* resource = GetResource(view->providedBuffer_->bufferResource_);
     VKW::MemoryPage const* memoryPage = GetMemoryPage(view->providedBuffer_->bufferResource_);
 
-    std::uint32_t const mappingOffset = resource->memory_.offset_ + view->offset_;
+    std::uint64_t const mappingOffset = resource->memory_.offset_ + view->offset_;
 
     VkMappedMemoryRange range;
     range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;

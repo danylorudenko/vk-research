@@ -137,9 +137,8 @@ void* Root::MapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
 
     VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
-    // fuck, buffer view contains no size for buffers with undefined format
-    auto const size = view->size_;
-    auto const offset = memoryRegion->offset_;
+    std::uint64_t const offset = memoryRegion->offset_ + view->offset_;
+    std::uint64_t const size = view->size_;
 
     VKW::ImportTable* table = loader_->table_.get();
     VkDevice const vkDevice = loader_->device_->Handle();
@@ -176,8 +175,8 @@ void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     VKW::ImportTable* table = loader_->table_.get();
     VkDevice const vkDevice = loader_->device_->Handle();
     VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
-    auto const offset = memoryRegion->offset_;
-    auto const size = view->size_;
+    std::uint64_t const offset = memoryRegion->offset_ + view->offset_;
+    std::uint64_t const size = view->size_;
 
     VkMappedMemoryRange range;
     range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -422,7 +421,8 @@ void Root::InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCou
         SetLayout const& setLayout = FindSetLayout(setLayoutKeys[i]);
 
         VKW::ProxySetHandle proxySet = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
-        owner.slots_[i].setHandle_ = proxySet;
+        owner.slots_[i].descriptorSet_.setLayoutKey_ = setLayoutKeys[i];
+        owner.slots_[i].descriptorSet_.proxyDescriptorSetHandle_ = proxySet;
 
         VKW::ProxyDescriptorWriteDesc descriptorsWriteDescs[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
 
@@ -437,6 +437,7 @@ void Root::InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCou
             case VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
                 UniformBufferHandle uniformBufferHandle = AcquireUniformBuffer(setMemberData.uniformBuffer_.size_);
                 DecorateProxySetWriteDescription(descriptorsWriteDescs[k], k, uniformBufferHandle);
+                owner.slots_[i].descriptorSet_.setMembers_[k].data_.uniformBuffer_.uniformBufferHandle_ = uniformBufferHandle;
                 break;
             }
 
@@ -523,6 +524,11 @@ void Root::ReleaseRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle
     //    ReleaseUniformBuffer(uniform.serverBufferHandle_);
     //    std::free(uniform.hostBuffer_);
     //}
+}
+
+RenderWorkItem* Root::FindRenderWorkItem(PipelineKey const& key, RenderWorkItemHandle handle)
+{
+    return &FindPipeline(key).renderItems_[handle.id_];
 }
 
 RenderWorkItem* Root::FindRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle)

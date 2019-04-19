@@ -12,10 +12,11 @@
 #include "..\vk_interface\Loader.hpp"
 #include "..\renderer\Root.hpp"
 #include "..\renderer\RootDef.hpp"
+#include "..\renderer\UniformBufferWriterProxy.hpp"
 
 struct CustomData
 {
-    Render::RenderWorkItemHandle testRenderItemHandle_;
+    Render::UniformBufferWriterProxy uniformProxy_;
 };
 
 class VulkanApplicationDelegate

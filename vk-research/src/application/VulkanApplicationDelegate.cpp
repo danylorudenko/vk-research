@@ -73,7 +73,11 @@ void VulkanApplicationDelegate::start()
 void VulkanApplicationDelegate::update()
 {
     Render::Pipeline& pipeline = renderRoot_->FindPipeline("pipe0");
-    Render::RenderWorkItem* testRenderItem = renderRoot_->FindRenderWorkItem(pipeline, customData_.testRenderItemHandle_);
+
+    if (customData_.uniformProxy_.IsMapped(0)) {
+        void* ptr = customData_.uniformProxy_.MappedPtr(0);
+    }
+    //Render::RenderWorkItem* testRenderItem = renderRoot_->FindRenderWorkItem(pipeline, customData_.testRenderItemHandle_);
 
     // WARNING: 0 frame is always taken
     //renderRoot_->ResourceProxy()->GetDescriptorSet(testRenderItem->descriptorSetsOwner_.slots_[0].setHandle_, 0);
@@ -83,7 +87,7 @@ void VulkanApplicationDelegate::update()
 
 
 
-    std::cout << "NANI" << std::endl;
+    //std::cout << "NANI" << std::endl;
     renderRoot_->IterateRenderGraph();
 }
 
@@ -216,7 +220,11 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 
     Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(pipeKey, itemDesc);
-    customData_.testRenderItemHandle_ = renderItemHandle;
+    Render::RenderWorkItem* item = renderRoot_->FindRenderWorkItem(pipeKey, renderItemHandle);
+    customData_.uniformProxy_ = Render::UniformBufferWriterProxy(renderRoot_.get(), item, 0, 0);
+    customData_.uniformProxy_.MapForWrite(0);
+    // TODO
+    //customData_.uniformProxy_.MapForWrite(1);
 
     pass.AddPipeline(pipeKey);
     renderRoot_->PushPassTemp(passKey);
