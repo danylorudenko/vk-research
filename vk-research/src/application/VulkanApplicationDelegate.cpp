@@ -78,7 +78,16 @@ void VulkanApplicationDelegate::update()
     //
 
     Render::UniformBufferWriterProxy& proxy = customData_.uniformProxy_;
-    void* ptr = proxy.IsMapped(context) ? proxy.MappedPtr(context) : proxy.MapForWrite(context);
+
+    void* ptr = nullptr;
+    bool const isMapped = proxy.IsMapped(context);
+    if(!isMapped)
+        ptr = proxy.MapForWrite(context);
+    else
+        ptr = proxy.MappedPtr(context);
+
+
+    //void* ptr = proxy.IsMapped(context) ? proxy.MappedPtr(context) : proxy.MapForWrite(context);
     *reinterpret_cast<int*>(ptr) = 1677645; 
 
     //

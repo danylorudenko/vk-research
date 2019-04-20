@@ -23,8 +23,8 @@ public:
 
     ~UniformBufferWriterProxy();
 
-    bool IsMapped(std::uint32_t context) const { return mappedBufferPtr_[context] != nullptr; }
-    void* MappedPtr(std::uint32_t context) const { return mappedBufferPtr_[context]; }
+    bool IsMapped(std::uint32_t context) const;
+    void* MappedPtr(std::uint32_t context) const;
 
     void* MapForWrite(std::uint32_t context);
     void Flush(std::uint32_t context) const;
