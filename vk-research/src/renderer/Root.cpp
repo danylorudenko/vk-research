@@ -556,9 +556,13 @@ void Root::PushPassTemp(RenderPassKey const& key)
     renderGraphRootTemp_.emplace_back(key);
 }
 
-void Root::IterateRenderGraph()
+VKW::PresentationContext Root::AcquireNextPresentationContext()
 {
-    VKW::PresentationContext const presentationContext = presentationController_->AcquireNewPresentationContext();
+    return presentationController_->AcquireNewPresentationContext();
+}
+
+void Root::IterateRenderGraph(VKW::PresentationContext const& presentationContext)
+{
     std::uint32_t const contextId = presentationContext.contextId_;
 
     auto commandReciever = mainWorkerTemp_->StartExecutionFrame(contextId);

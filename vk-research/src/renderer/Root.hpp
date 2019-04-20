@@ -220,7 +220,8 @@ public:
 
     void PushPassTemp(RenderPassKey const& key);
 
-    void IterateRenderGraph();
+    VKW::PresentationContext AcquireNextPresentationContext();
+    void IterateRenderGraph(VKW::PresentationContext const& presentationContext);
 
 private:
     /*DESCRIPTOR_TYPE_SAMPLED_TEXTURE,

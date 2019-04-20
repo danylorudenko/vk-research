@@ -72,28 +72,23 @@ void VulkanApplicationDelegate::start()
 
 void VulkanApplicationDelegate::update()
 {
-    Render::Pipeline& pipeline = renderRoot_->FindPipeline("pipe0");
+    VKW::PresentationContext presentationContext = renderRoot_->AcquireNextPresentationContext();
+    std::uint32_t context = presentationContext.contextId_;
+    ////////////////////////////////////////////////////
+    //
 
-    if (customData_.uniformProxy_.IsMapped(0)) {
-        void* ptr = customData_.uniformProxy_.MappedPtr(0);
-    }
-    //Render::RenderWorkItem* testRenderItem = renderRoot_->FindRenderWorkItem(pipeline, customData_.testRenderItemHandle_);
+    Render::UniformBufferWriterProxy& proxy = customData_.uniformProxy_;
+    void* ptr = proxy.IsMapped(context) ? proxy.MappedPtr(context) : proxy.MapForWrite(context);
+    *reinterpret_cast<int*>(ptr) = 1677645; 
 
-    // WARNING: 0 frame is always taken
-    //renderRoot_->ResourceProxy()->GetDescriptorSet(testRenderItem->descriptorSetsOwner_.slots_[0].setHandle_, 0);
-
-    // hmmm, I need some kind of "UniformBufferWriterProxy" ????
-    // how to write new data to the uniform buffers???
-
-
-
-    //std::cout << "NANI" << std::endl;
-    renderRoot_->IterateRenderGraph();
+    //
+    ////////////////////////////////////////////////////
+    renderRoot_->IterateRenderGraph(presentationContext);
 }
 
 void VulkanApplicationDelegate::shutdown()
 {
-
+    
 }
 
 void VulkanApplicationDelegate::FakeParseRendererResources()
