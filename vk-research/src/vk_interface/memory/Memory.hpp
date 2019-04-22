@@ -26,9 +26,9 @@ enum MemoryAccessBits
 {
     NONE = 0,
     GPU_LOCAL = 1,
-    CPU_READBACK = 2,
-    CPU_WRITE = 4,
-    CPU_COHERENT = 8,
+    CPU_READBACK = 1 << 1,
+    CPU_WRITE = 1 << 2,
+    CPU_COHERENT = 1 << 3,
 };
 
 struct MemoryPage
@@ -39,6 +39,7 @@ struct MemoryPage
     VkMemoryPropertyFlags propertyFlags_ = VK_FLAGS_NONE;
     MemoryAccessBits accessFlags_;
     MemoryUsage usage_;
+    void* mappedMemoryPtr_;
 
     std::uint32_t bindCount_ = 0;
     VkDeviceSize nextFreeOffset_ = 0;

@@ -195,6 +195,12 @@ MemoryPageHandle MemoryController::AllocPage(MemoryAccessBits accessFlags, Memor
     VkDeviceMemory deviceMemory = VK_NULL_HANDLE;
     VK_ASSERT(table_->vkAllocateMemory(device_->Handle(), &info, nullptr, &deviceMemory));
 
+
+    void* mappedMemory = nullptr;
+    if (memoryFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+        VK_ASSERT(table_->vkMapMemory(device_->Handle(), deviceMemory, 0, VK_WHOLE_SIZE, VK_FLAGS_NONE, &mappedMemory));
+    }
+
     MemoryPage* memory = new MemoryPage{};
     memory->deviceMemory_ = deviceMemory;
     memory->size_ = info.allocationSize;
@@ -202,6 +208,7 @@ MemoryPageHandle MemoryController::AllocPage(MemoryAccessBits accessFlags, Memor
     memory->propertyFlags_ = memoryTypes[typeIndex].propertyFlags;
     memory->accessFlags_ = accessFlags;
     memory->usage_ = usage;
+    memory->mappedMemoryPtr_ = mappedMemory;
     
     memory->bindCount_ = 0;
     memory->nextFreeOffset_ = 0;

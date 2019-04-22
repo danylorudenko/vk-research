@@ -131,38 +131,48 @@ void Root::ReleaseUniformBuffer(UniformBufferHandle handle)
 
 void* Root::MapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 {
+    // In the current implementation uniform buffer memory (aka HOST_VISIBLE memory)
+    // is persistently-mapped, so the only thing we need is mapped memory ptr + offset for the resource.
+
     UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
     VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
     VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
 
-    VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
     std::uint64_t const offset = memoryRegion->offset_ + view->offset_;
     std::uint64_t const size = view->size_;
 
-    VKW::ImportTable* table = loader_->table_.get();
-    VkDevice const vkDevice = loader_->device_->Handle();
+    return (reinterpret_cast<std::uint8_t*>(memoryPage->mappedMemoryPtr_) + (offset + size));
 
-    void* mappedRange = nullptr;
-    VK_ASSERT(table->vkMapMemory(vkDevice, deviceMemory, offset, size, VK_FLAGS_NONE, &mappedRange));
-    assert(mappedRange != nullptr && "Can't map uniform buffer.");
 
-    return mappedRange;
+    //VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
+    //
+    //VKW::ImportTable* table = loader_->table_.get();
+    //VkDevice const vkDevice = loader_->device_->Handle();
+    //
+    //void* mappedRange = nullptr;
+    //VK_ASSERT(table->vkMapMemory(vkDevice, deviceMemory, offset, size, VK_FLAGS_NONE, &mappedRange));
+    //assert(mappedRange != nullptr && "Can't map uniform buffer.");
+    //
+    //return mappedRange;
 }
 
 void Root::UnmapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 {
-    UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
-    VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
-    VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    // In the current implementation uniform buffer's memory (aka HOST_VISIBLE memory)
+    // is persistently mapped, so it can't be unmapped.
 
-    VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
-
-    VKW::ImportTable* table = loader_->table_.get();
-    VkDevice const vkDevice = loader_->device_->Handle();
-
-    table->vkUnmapMemory(vkDevice, deviceMemory);
+    //UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
+    //VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
+    //VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
+    //VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    //
+    //VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
+    //
+    //VKW::ImportTable* table = loader_->table_.get();
+    //VkDevice const vkDevice = loader_->device_->Handle();
+    //
+    //table->vkUnmapMemory(vkDevice, deviceMemory);
 }
 
 void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
@@ -171,6 +181,9 @@ void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
     VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+
+    if(memoryPage->propertyFlags_ & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+        return;
 
     VKW::ImportTable* table = loader_->table_.get();
     VkDevice const vkDevice = loader_->device_->Handle();

@@ -87,8 +87,17 @@ void VulkanApplicationDelegate::update()
         ptr = proxy.MappedPtr(context);
 
 
-    //void* ptr = proxy.IsMapped(context) ? proxy.MappedPtr(context) : proxy.MapForWrite(context);
-    *reinterpret_cast<int*>(ptr) = 1677645; 
+    struct TestUniform {
+        float x;
+        float y;
+        float z;
+    } uniformData;
+
+    uniformData.x = 0.0f;
+    uniformData.y = 0.0f;
+    uniformData.z = 0.0f;
+
+    std::memcpy(ptr, &uniformData, sizeof(TestUniform));
 
     //
     ////////////////////////////////////////////////////
