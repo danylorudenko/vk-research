@@ -179,6 +179,12 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
         VkCommandBuffer const commandBuffer = commandReciever->commandBuffer_;
         table_->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkwPipeline->vkPipeline_);
         
+        std::uint32_t const materialBindsCount = pipeline.staticLayoutMembersCount_;
+        for (std::uint32_t i = 0; i < materialBindsCount; ++i) {
+            // hmmm, where are the materials?)
+        }
+
+
         // temporaty testing zalepa
         // TODO
 
