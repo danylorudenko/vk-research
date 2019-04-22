@@ -64,27 +64,27 @@ MemoryPage* MemoryController::GetPage(MemoryPageHandle handle)
 
 void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
 {
-    MemoryAccess accessFlags = MemoryAccess::NONE;
+    MemoryAccessBits accessFlags = MemoryAccessBits::NONE;
 
     switch (desc.usage_)
     {
     case MemoryUsage::VERTEX_INDEX:
-        accessFlags = BitwiseEnumOR32(MemoryAccess::GPU_LOCAL, accessFlags);
+        accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
         break;
     case MemoryUsage::UPLOAD_BUFFER:
-        accessFlags = BitwiseEnumOR32(MemoryAccess::CPU_WRITE, accessFlags);
+        accessFlags = BitwiseEnumOR32(MemoryAccessBits::CPU_WRITE, accessFlags);
         break;
     case MemoryUsage::UNIFORM:
-        accessFlags = BitwiseEnumOR32(MemoryAccess::CPU_WRITE, accessFlags);
+        accessFlags = BitwiseEnumOR32(MemoryAccessBits::CPU_WRITE, accessFlags);
         break;
     case MemoryUsage::SAMPLE_TEXTURE:
-        accessFlags = BitwiseEnumOR32(MemoryAccess::GPU_LOCAL, accessFlags);
+        accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
         break;
     case MemoryUsage::DEPTH_STENCIL_ATTACHMENT:
-        accessFlags = BitwiseEnumOR32(MemoryAccess::GPU_LOCAL, accessFlags);
+        accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
         break;
     case MemoryUsage::COLOR_ATTACHMENT:
-        accessFlags = BitwiseEnumOR32(MemoryAccess::GPU_LOCAL, accessFlags);
+        accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
         break;
     default:
         assert(false && "Unsupported MemoryUsage");
@@ -156,20 +156,20 @@ void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
     region.offset_ = 0;
 }
 
-MemoryPageHandle MemoryController::AllocPage(MemoryAccess accessFlags, MemoryUsage usage, std::uint64_t size)
+MemoryPageHandle MemoryController::AllocPage(MemoryAccessBits accessFlags, MemoryUsage usage, std::uint64_t size)
 {    
     VkMemoryPropertyFlags memoryFlags = VK_FLAGS_NONE;
 
-    if (accessFlags & MemoryAccess::CPU_COHERENT)
+    if (accessFlags & MemoryAccessBits::CPU_COHERENT)
         memoryFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
-    if (accessFlags & MemoryAccess::GPU_LOCAL)
+    if (accessFlags & MemoryAccessBits::GPU_LOCAL)
         memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-    if (accessFlags & MemoryAccess::CPU_WRITE)
+    if (accessFlags & MemoryAccessBits::CPU_WRITE)
         memoryFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
     
-    if (accessFlags & MemoryAccess::CPU_READBACK)
+    if (accessFlags & MemoryAccessBits::CPU_READBACK)
         memoryFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
     
     auto const memoryTypesCount = device_->Properties().memoryProperties.memoryTypeCount;

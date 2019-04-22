@@ -22,7 +22,7 @@ enum MemoryUsage
     MAX = END
 };
 
-enum MemoryAccess
+enum MemoryAccessBits
 {
     NONE = 0,
     GPU_LOCAL = 1,
@@ -37,7 +37,7 @@ struct MemoryPage
     VkDeviceSize size_ = 0;
     std::uint32_t memoryTypeId_ = std::numeric_limits<std::uint32_t>::max();
     VkMemoryPropertyFlags propertyFlags_ = VK_FLAGS_NONE;
-    MemoryAccess accessFlags_;
+    MemoryAccessBits accessFlags_;
     MemoryUsage usage_;
 
     std::uint32_t bindCount_ = 0;

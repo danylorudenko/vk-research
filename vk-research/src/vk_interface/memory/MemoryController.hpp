@@ -47,7 +47,7 @@ public:
     MemoryPage* GetPage(MemoryPageHandle handle);
 
 private:
-    MemoryPageHandle AllocPage(MemoryAccess access, MemoryUsage usage, std::uint64_t size);
+    MemoryPageHandle AllocPage(MemoryAccessBits access, MemoryUsage usage, std::uint64_t size);
     void FreePage(MemoryPageHandle pageIndex);
 
     void GetNextFreePageRegion(MemoryPageHandle page, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
