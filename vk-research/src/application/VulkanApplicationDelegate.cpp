@@ -93,11 +93,13 @@ void VulkanApplicationDelegate::update()
         float z;
     } uniformData;
 
-    uniformData.x = 0.0f + context * 0.2f;
-    uniformData.y = 0.0f;
-    uniformData.z = 0.0f;
+    uniformData.x = 1.0f;
+    uniformData.y = 100.0f;
+    uniformData.z = 1.0f;
 
     std::memcpy(ptr, &uniformData, sizeof(TestUniform));
+
+    proxy.Flush(context);
 
     //
     ////////////////////////////////////////////////////
