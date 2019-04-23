@@ -48,7 +48,7 @@ public:
         , freeDataHandle_{ 0 }
         , maxObjects_{ dataCount }
     {
-        if (dataCount_ == 0)
+        if (dataCount == 0)
             return;
         
         storage_ = std::malloc(sizeof(T) * dataCount);
