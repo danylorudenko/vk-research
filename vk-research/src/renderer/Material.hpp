@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MaterialTemplate.hpp"
 #include "RendererDescriptorSetsOwner.hpp"
 #include "RootDef.hpp"
 

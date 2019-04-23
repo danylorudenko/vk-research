@@ -93,7 +93,7 @@ void VulkanApplicationDelegate::update()
         float z;
     } uniformData;
 
-    uniformData.x = 0.0f;
+    uniformData.x = 0.0f + context * 0.2f;
     uniformData.y = 0.0f;
     uniformData.z = 0.0f;
 
@@ -239,7 +239,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     // TODO
     //customData_.uniformProxy_.MapForWrite(1);
 
-    pass.AddPipeline(pipeKey);
+    renderRoot_->RegisterMaterial(materialKey);
     renderRoot_->PushPassTemp(passKey);
 
     // how to write resource descriptor to DescriptorSet

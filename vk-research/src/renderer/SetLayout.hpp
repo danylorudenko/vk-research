@@ -1,6 +1,7 @@
 #pragma once
 
 #include "..\vk_interface\pipeline\DescriptorLayout.hpp"
+#include "..\vk_interface\pipeline\DescriptorLayoutController.hpp"
 
 namespace Render
 {

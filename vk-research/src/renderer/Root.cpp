@@ -262,6 +262,7 @@ void Root::DefineRenderPass(RenderPassKey const& key, RenderPassDesc const& desc
     passDesc.proxy_ = resourceProxy_;
     passDesc.renderPassController_ = renderPassController_;
     passDesc.pipelineFactory_ = pipelineFactory_;
+    passDesc.descriptorLayoutController_ = loader_->descriptorLayoutController_.get();
     passDesc.framedDescriptorsHub_ = framedDescriptorsHub_;
     passDesc.imagesProvider_ = imagesProvider_;
     passDesc.width_ = defaultFramebufferWidth_;
@@ -517,7 +518,17 @@ Material& Root::FindMaterial(MaterialKey const& key)
 
 void Root::RegisterMaterial(MaterialKey const& key)
 {
+    Material& material = materialMap_[key];
+    MaterialTemplate const& materialTemplate = materialTemplateMap_[material.templateKey_];
+    std::uint32_t materialPassCount = material.perPassDataCount_;
+    for (std::uint32_t i = 0; i < materialPassCount; ++i) {
+        PipelineKey const& pipelineKey = materialTemplate.perPassData_[i].pipelineKey_;
+        Material::PerPassData* perPassData = material.perPassData_ + i;
 
+        Pass& pass = renderPassMap_[materialTemplate.perPassData_[i].passKey_];
+        pass.RegisterMaterialData(perPassData, pipelineKey);
+
+    }
 }
 
 RenderWorkItemHandle Root::ConstructRenderWorkItem(Pipeline& pipeline, RenderItemDesc const& desc)

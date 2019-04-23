@@ -3,6 +3,7 @@
 #include "..\class_features\NonCopyable.hpp"
 #include "..\vk_interface\pipeline\RenderPassController.hpp"
 #include "..\vk_interface\ResourceRendererProxy.hpp"
+#include "Material.hpp"
 #include "RootDef.hpp"
 
 namespace VKW
@@ -12,6 +13,7 @@ class Device;
 class ResourceRendererProxy;
 class RenderPassController;
 class PipelineFactory;
+class DescriptorLayoutController;
 class Worker;
 struct WorkerFrameCommandReciever;
 struct FramedDescriptorsHub;
@@ -33,6 +35,7 @@ struct PassDesc
     VKW::ResourceRendererProxy* proxy_;
     VKW::RenderPassController* renderPassController_;
     VKW::PipelineFactory* pipelineFactory_;
+    VKW::DescriptorLayoutController* descriptorLayoutController_;
     VKW::FramedDescriptorsHub* framedDescriptorsHub_;
     VKW::ImagesProvider* imagesProvider_;
 
@@ -61,13 +64,16 @@ public:
     void Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever);
     void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever);
 
-    void AddPipeline(PipelineKey const& pipeline);
+    void RegisterMaterialData(Material::PerPassData* perPassData, PipelineKey const& pipelineKey);
 
 private:
     struct MaterialDelegatedData
     {
+        MaterialDelegatedData(Material::PerPassData* materialPerPassData, PipelineKey const& pipelineKey)
+            : materialPerPassData_{ materialPerPassData }, pipelineKey_{ pipelineKey } { }
+
+        Material::PerPassData* materialPerPassData_;
         PipelineKey pipelineKey_;
-        MaterialKey materialKey_;
     };
 
 
@@ -79,6 +85,7 @@ private:
     VKW::ResourceRendererProxy* resourceProxy_;
     VKW::RenderPassController* renderPassController_;
     VKW::PipelineFactory* pipelineFactory_;
+    VKW::DescriptorLayoutController* descriptorLayoutController_;
 
     VKW::RenderPassHandle vkRenderPass_;
     VKW::ProxyFramebufferHandle framebuffer_;

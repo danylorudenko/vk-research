@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SetLayout.hpp"
+#include "RootDef.hpp"
 
 namespace Render
 {
