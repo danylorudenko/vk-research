@@ -171,17 +171,23 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
 
 void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
-    std::uint32_t const pipelinesCount = static_cast<std::uint32_t>(pipelines_.size());
-    for (std::uint32_t i = 0u; i < pipelinesCount; ++i) {
-        Pipeline& pipeline = root_->FindPipeline(pipelines_[i]);
+    std::uint32_t const materialsCount = static_cast<std::uint32_t>(materialDelegatedData_.size());
+    for (std::uint32_t i = 0u; i < materialsCount; ++i) {
+        Pipeline& pipeline = root_->FindPipeline(materialDelegatedData_[i].pipelineKey_);
         VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(pipeline.pipelineHandle_);
 
         VkCommandBuffer const commandBuffer = commandReciever->commandBuffer_;
         table_->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkwPipeline->vkPipeline_);
         
+        Material& material = root_->FindMaterial(materialDelegatedData_[i].materialKey_);
         std::uint32_t const materialBindsCount = pipeline.staticLayoutMembersCount_;
         for (std::uint32_t i = 0; i < materialBindsCount; ++i) {
-            // hmmm, where are the materials?)
+            // hmmmmmm, how to choose between per-pass data?
+            // The solution can be the following algorythm:
+            // 1)   to create all materials before passes;
+            // 2)   create passes and form rendergraph;
+            // 3)   register Materials in the rendergraph (provided needed data for each renderpass)
+            material.perPassData_[0].descritorSetsOwner_.
         }
 
 

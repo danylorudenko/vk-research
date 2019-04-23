@@ -206,7 +206,7 @@ public:
 
     void DefineMaterial(MaterialKey const& key, MaterialDesc const& desc);
     Material& FindMaterial(MaterialKey const& key);
-    //void RegisterMaterial(MaterialKey const& key);
+    void RegisterMaterial(MaterialKey const& key);
 
 
     RenderWorkItemHandle ConstructRenderWorkItem(PipelineKey const& key, RenderItemDesc const& desc);

@@ -515,6 +515,11 @@ Material& Root::FindMaterial(MaterialKey const& key)
     return materialMap_[key];
 }
 
+void Root::RegisterMaterial(MaterialKey const& key)
+{
+
+}
+
 RenderWorkItemHandle Root::ConstructRenderWorkItem(Pipeline& pipeline, RenderItemDesc const& desc)
 {
     pipeline.renderItems_.emplace_back();

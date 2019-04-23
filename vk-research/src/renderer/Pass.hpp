@@ -64,6 +64,13 @@ public:
     void AddPipeline(PipelineKey const& pipeline);
 
 private:
+    struct MaterialDelegatedData
+    {
+        PipelineKey pipelineKey_;
+        MaterialKey materialKey_;
+    };
+
+
     Root* root_;
 
     VKW::ImportTable* table_;
@@ -78,7 +85,7 @@ private:
     std::uint32_t width_;
     std::uint32_t height_;
 
-    std::vector<PipelineKey> pipelines_; 
+    std::vector<MaterialDelegatedData> materialDelegatedData_; 
 };
 
 }
