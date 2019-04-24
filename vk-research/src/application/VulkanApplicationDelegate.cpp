@@ -70,6 +70,8 @@ void VulkanApplicationDelegate::start()
     FakeParseRendererResources();
 }
 
+float testcounter = 0.0f;
+
 void VulkanApplicationDelegate::update()
 {
     VKW::PresentationContext presentationContext = renderRoot_->AcquireNextPresentationContext();
@@ -93,9 +95,10 @@ void VulkanApplicationDelegate::update()
         float z;
     } uniformData;
 
-    uniformData.x = 1.0f;
-    uniformData.y = 100.0f;
-    uniformData.z = 1.0f;
+    testcounter += testcounter < 2.0f ? 0.01f : -4.0f;
+    uniformData.x = testcounter;
+    uniformData.y = 0.0f;
+    uniformData.z = 0.0f;
 
     std::memcpy(ptr, &uniformData, sizeof(TestUniform));
 

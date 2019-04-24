@@ -140,9 +140,9 @@ void* Root::MapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
 
     std::uint64_t const offset = memoryRegion->offset_ + view->offset_;
-    std::uint64_t const size = view->size_;
+    //std::uint64_t const size = view->size_;
 
-    return (reinterpret_cast<std::uint8_t*>(memoryPage->mappedMemoryPtr_) + (offset + size));
+    return (reinterpret_cast<std::uint8_t*>(memoryPage->mappedMemoryPtr_) + offset);
 
 
     //VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
