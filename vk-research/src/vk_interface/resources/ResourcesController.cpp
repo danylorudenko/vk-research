@@ -67,7 +67,7 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     vkBufferCreateInfo.pQueueFamilyIndices = nullptr;
     vkBufferCreateInfo.size = desc.size_;
     vkBufferCreateInfo.flags = VK_FLAGS_NONE;
-    vkBufferCreateInfo.usage = VK_FLAGS_NONE; // temp, assigned below
+    vkBufferCreateInfo.usage = VK_FLAGS_NONE; // temp value, assigned below
 
 
     MemoryPageRegionDesc regionDesc;

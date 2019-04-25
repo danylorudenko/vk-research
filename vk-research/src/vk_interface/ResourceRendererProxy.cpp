@@ -336,23 +336,38 @@ void ResourceRendererProxy::DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, D
 
 ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferViewDesc const& decs)
 {
-    auto const framesCount = framedDescriptorsHub_->framesCount_;
+    std::uint32_t const framesCount = framedDescriptorsHub_->framesCount_;
     auto const id = framedDescriptorsHub_->bufferViewsNextId_++;
 
     BufferViewDesc viewDescs[FramedDescriptorsHub::MAX_FRAMES_COUNT];
     BufferViewHandle views[FramedDescriptorsHub::MAX_FRAMES_COUNT];
 
+    bool framedResource = false;
+    switch (decs.usage_) {
+    case BufferUsage::UNIFORM:
+        framedResource = true;
+    }
 
-    for (auto i = 0u; i < framesCount; ++i) {
+    std::uint32_t const resourceFrames = framedResource ? framesCount : 1;
+    for (std::uint32_t i = 0u; i < resourceFrames; ++i) {
         viewDescs[i] = decs;
     }
     
-    buffersProvider_->AcquireViews(framesCount, viewDescs, views);
+    buffersProvider_->AcquireViews(resourceFrames, viewDescs, views);
 
-    for (auto i = 0u; i < framesCount; ++i) {
-        assert(framedDescriptorsHub_->contexts_[i].bufferViews_.size() == id && "Unsyncronized write to FramedDescriptors::bufferViews_.");
-        framedDescriptorsHub_->contexts_[i].bufferViews_.emplace_back(views[i]);
+    if (framedResource) {
+        for (auto i = 0u; i < framesCount; ++i) {
+            assert(framedDescriptorsHub_->contexts_[i].bufferViews_.size() == id && "Unsyncronized write to FramedDescriptors::bufferViews_.");
+            framedDescriptorsHub_->contexts_[i].bufferViews_.emplace_back(views[i]);
+        }
     }
+    else {
+        for (auto i = 0u; i < framesCount; ++i) {
+            assert(framedDescriptorsHub_->contexts_[i].bufferViews_.size() == id && "Unsyncronized write to FramedDescriptors::bufferViews_.");
+            framedDescriptorsHub_->contexts_[i].bufferViews_.emplace_back(views[0]); // we need only one buffer view instance if we have non-framed buffer
+        }
+    }
+    
 
     return ProxyBufferHandle{ id };
 }

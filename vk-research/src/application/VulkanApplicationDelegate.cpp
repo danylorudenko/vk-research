@@ -77,10 +77,9 @@ std::chrono::high_resolution_clock::time_point prevTime;
 
 void VulkanApplicationDelegate::update()
 {
-    auto currTime = std::chrono::high_resolution_clock::now();
-    auto frameTime = currTime - prevTime;
-    prevTime = currTime;
-
+    //auto currTime = std::chrono::high_resolution_clock::now();
+    //auto frameTime = currTime - prevTime;
+    //prevTime = currTime;
     //std::cout << std::chrono::duration_cast<std::chrono::microseconds>(frameTime).count() << std::endl;
 
 
@@ -91,13 +90,7 @@ void VulkanApplicationDelegate::update()
 
     Render::UniformBufferWriterProxy& proxy = customData_.uniformProxy_;
 
-    void* ptr = nullptr;
-    bool const isMapped = proxy.IsMapped(context);
-    if(!isMapped)
-        ptr = proxy.MapForWrite(context);
-    else
-        ptr = proxy.MappedPtr(context);
-
+    void* ptr = proxy.IsMapped(context) ? proxy.MappedPtr(context) : proxy.MapForWrite(context);
 
     struct TestUniform {
         float x;
@@ -153,11 +146,33 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     //renderRoot_->DefineGlobalImage("attchmnt2", imageDesc);
 
+    char constexpr uploadBufferKey[] = "uppl0";
     char constexpr passKey[] = "pass0";
     char constexpr pipeKey[] = "pipe0";
     char constexpr setLayoutKey[] = "set0";
     char constexpr materialTemplateKey[] = "templ0";
     char constexpr materialKey[] = "mat0";
+
+    struct TestVertex
+    {
+        float x;
+        float y;
+        float z;
+    };
+
+    TestVertex vertexData[3] = {
+        { -0.5, 0.5, 0.0 },
+        { 0.5, 0.5, 0.0 },
+        { 0.0, -0.5, 0.0 }
+    };
+
+    VKW::BufferViewDesc uploadVertexBufferDecs;
+    uploadVertexBufferDecs.format_ = VK_FORMAT_UNDEFINED;
+    uploadVertexBufferDecs.size_ = sizeof(vertexData);
+    uploadVertexBufferDecs.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
+    renderRoot_->DefineGlobalBuffer(uploadBufferKey, uploadVertexBufferDecs);
+
+
 
 
     Render::RenderPassDesc passDesc;

@@ -56,7 +56,7 @@ Swapchain::Swapchain(SwapchainDesc const& desc)
     swapchainInfo.clipped = VK_FALSE;
     swapchainInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     swapchainInfo.flags = VK_FLAGS_NONE;
-    swapchainInfo.presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+    swapchainInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
     swapchainInfo.preTransform = surface_->SurfaceCapabilities().currentTransform;
     swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
     
