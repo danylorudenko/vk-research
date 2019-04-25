@@ -72,10 +72,10 @@ void Worker::EndExecutionFrame(std::uint32_t contextId)
     currentFrame.End();
 }
 
-WorkerFrameCompleteSemaphore Worker::ExecuteFrame(std::uint32_t contextId, VkSemaphore waitSemaphore)
+WorkerFrameCompleteSemaphore Worker::ExecuteFrame(std::uint32_t contextId, VkSemaphore waitSemaphore, bool signaling)
 {
     WorkerFrame& currentFrame = executionFrames_[contextId];
-    return currentFrame.Execute(queue_, waitSemaphore);
+    return currentFrame.Execute(queue_, waitSemaphore, signaling);
 }
 
 VkQueue Worker::QueueHandle() const

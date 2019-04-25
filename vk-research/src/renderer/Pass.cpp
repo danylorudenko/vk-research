@@ -226,6 +226,12 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
                 vkSetsToBind[k] = vkwSet->handle_;
             }
 
+            VKW::BufferView* vertexBufferView = root_->FindGlobalBuffer(renderItem.vertexBufferKey_, contextId);
+            VKW::BufferResource* vertexBuffer = resourceProxy_->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
+
+            VkBuffer vkBuffer = vertexBuffer->handle_;
+            VkDeviceSize offset = vertexBufferView->offset_;
+            table_->vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkBuffer, &offset);
             table_->vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, 0, renderItemSetsCount, vkSetsToBind, 0, nullptr);
             table_->vkCmdDraw(commandBuffer, renderItem.vertexCount_, 1, 0, 0);
         }

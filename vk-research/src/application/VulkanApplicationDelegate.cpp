@@ -217,10 +217,10 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     VKW::VertexInputInfo vInfo;
     vInfo.binding_ = 0;
     vInfo.stride_ = 0;
-    vInfo.vertexAttributesCount_ = 0;
-    //vInfo.vertexAttributes_[0].location_ = 0;
-    //vInfo.vertexAttributes_[0].offset_ = 0;
-    //vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
+    vInfo.vertexAttributesCount_ = 1;
+    vInfo.vertexAttributes_[0].location_ = 0;
+    vInfo.vertexAttributes_[0].offset_ = 0;
+    vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
 
     std::uint32_t const width = (mainWindow_.Width());
     std::uint32_t const height = (mainWindow_.Height());
@@ -257,10 +257,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     renderRoot_->DefineGraphicsPipeline(pipeKey, pipelineDesc);
     
-    Render::RenderItemDesc itemDesc;
-    itemDesc.vertexCount_ = 3;
-    itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 64;
-
+    
     Render::MaterialTemplateDesc materialTemplateDesc;
     materialTemplateDesc.perPassDataCount_ = 1;
     materialTemplateDesc.perPassData_[0].passKey_ = passKey;
@@ -271,6 +268,11 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     materialDesc.templateKey_ = materialTemplateKey;
     renderRoot_->DefineMaterial(materialKey, materialDesc);
 
+
+    Render::RenderItemDesc itemDesc;
+    itemDesc.vertexBufferKey_ = vertexBufferKey;
+    itemDesc.vertexCount_ = 3;
+    itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 64;
 
     Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(pipeKey, itemDesc);
     Render::RenderWorkItem* item = renderRoot_->FindRenderWorkItem(pipeKey, renderItemHandle);

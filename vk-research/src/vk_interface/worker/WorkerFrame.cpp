@@ -84,7 +84,7 @@ void WorkerFrame::End()
     table_->vkEndCommandBuffer(commandBuffer_);
 }
 
-WorkerFrameCompleteSemaphore WorkerFrame::Execute(VkQueue queue, VkSemaphore waitSemaphore)
+WorkerFrameCompleteSemaphore WorkerFrame::Execute(VkQueue queue, VkSemaphore waitSemaphore, bool signaling)
 {
     VkFlags waitStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
@@ -96,8 +96,8 @@ WorkerFrameCompleteSemaphore WorkerFrame::Execute(VkQueue queue, VkSemaphore wai
     submitInfo.pWaitDstStageMask = waitSemaphore == VK_NULL_HANDLE ? nullptr : &waitStageFlags;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer_;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &frameCompleteSemaphore_;
+    submitInfo.signalSemaphoreCount = signaling ? 1 : 0;
+    submitInfo.pSignalSemaphores = signaling ? &frameCompleteSemaphore_ : nullptr;
 
     ResetFence();
     inExecution_ = true;

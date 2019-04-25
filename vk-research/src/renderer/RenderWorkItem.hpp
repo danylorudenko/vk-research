@@ -4,12 +4,14 @@
 #include <limits>
 #include "UniformBuffer.hpp"
 #include "RendererDescriptorSetsOwner.hpp"
+#include "RootDef.hpp"
 
 namespace Render
 {
 
 struct RenderWorkItem
 {
+    ResourceKey vertexBufferKey_;
     std::uint32_t vertexCount_;
     DescriptorSetsOwner descriptorSetsOwner_;
 };

@@ -149,6 +149,7 @@ public:
 
     PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
 
+    PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers = nullptr;
     PFN_vkCmdBindPipeline vkCmdBindPipeline = nullptr;
     PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets = nullptr;
     PFN_vkCmdPushConstants vkCmdPushConstants = nullptr;

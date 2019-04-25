@@ -572,6 +572,7 @@ RenderWorkItemHandle Root::ConstructRenderWorkItem(Pipeline& pipeline, RenderIte
     pipeline.renderItems_.emplace_back();
     RenderWorkItem& item = pipeline.renderItems_.back();
 
+    item.vertexBufferKey_ = desc.vertexBufferKey_;
     item.vertexCount_ = desc.vertexCount_;
     
     InitializeSetsOwner(item.descriptorSetsOwner_, pipeline.instancedLayoutMembersCount_, pipeline.instancedLayoutKeys_, desc.setOwnerDescs_);
@@ -630,7 +631,7 @@ void Root::CopyBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint3
 
     mainWorkerTemp_->EndExecutionFrame(context);
 
-    mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE);
+    mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
 
     VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle());
 }

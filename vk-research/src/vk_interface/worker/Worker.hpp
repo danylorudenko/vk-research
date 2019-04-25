@@ -56,7 +56,7 @@ public:
 
     WorkerFrameCommandReciever StartExecutionFrame(std::uint32_t contextId);
     void EndExecutionFrame(std::uint32_t contextId);
-    WorkerFrameCompleteSemaphore ExecuteFrame(std::uint32_t contextId, VkSemaphore waitSemaphore);
+    WorkerFrameCompleteSemaphore ExecuteFrame(std::uint32_t contextId, VkSemaphore waitSemaphore, bool signaling = true);
 
 
 private:

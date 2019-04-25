@@ -124,10 +124,9 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
         vertexInputState.pNext = nullptr;
         vertexInputState.flags = VK_FLAGS_NONE;
 
-        auto const attrCount = desc.vertexInputInfo_->vertexAttributesCount_;
-        // TODO
-        //vertexInputState.vertexBindingDescriptionCount = 1;
-        vertexInputState.vertexBindingDescriptionCount = 0;
+        std::uint32_t const attrCount = desc.vertexInputInfo_->vertexAttributesCount_;
+
+        vertexInputState.vertexBindingDescriptionCount = attrCount > 0 ? 1 : 0;
         vertexInputState.vertexAttributeDescriptionCount = attrCount;
 
         inputBindingsInfo[0].binding = desc.vertexInputInfo_->binding_;
@@ -135,7 +134,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
         inputBindingsInfo[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
         for (auto i = 0u; i < attrCount; ++i) {
-            auto const& sourceVertexInfo = desc.vertexInputInfo_->vertexAttributes_[i];
+            VKW::VertexInputInfo::Attribute const& sourceVertexInfo = desc.vertexInputInfo_->vertexAttributes_[i];
             inputAttributesInfo[i].binding = i;
             inputAttributesInfo[i].location = sourceVertexInfo.location_;
             inputAttributesInfo[i].offset = sourceVertexInfo.offset_;
