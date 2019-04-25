@@ -172,6 +172,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     uploadVertexBufferDecs.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
     renderRoot_->DefineGlobalBuffer(uploadBufferKey, uploadVertexBufferDecs);
 
+    void* mappedUploadBuffer = renderRoot_->MapBuffer(uploadBufferKey, 0);
+
 
 
 

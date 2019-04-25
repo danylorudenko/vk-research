@@ -177,6 +177,9 @@ public:
     void UnmapUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
     void FlushUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
 
+    void* MapBuffer(ResourceKey const& key, std::uint32_t frame);
+    void FlushBuffer(ResourceKey const& key, std::uint32_t frame);
+
     VKW::BufferResource* GetViewResource(VKW::BufferView* view);
     VKW::MemoryRegion* GetViewMemory(VKW::BufferView* view);
     VKW::MemoryPage* GetViewMemoryPage(VKW::BufferView* view);
