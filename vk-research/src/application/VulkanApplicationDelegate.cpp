@@ -185,7 +185,6 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 
 
-
     Render::RenderPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0] = Render::Root::SWAPCHAIN_IMAGE_KEY; // we need swapchain reference here
