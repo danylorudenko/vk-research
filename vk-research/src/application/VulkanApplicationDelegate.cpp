@@ -5,6 +5,7 @@
 #include "..\renderer\Material.hpp"
 
 #include <utility>
+#include <chrono>
 
 VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug)
     : mainWindow_ {
@@ -72,8 +73,17 @@ void VulkanApplicationDelegate::start()
 
 float testcounter = 0.0f;
 
+std::chrono::high_resolution_clock::time_point prevTime;
+
 void VulkanApplicationDelegate::update()
 {
+    auto currTime = std::chrono::high_resolution_clock::now();
+    auto frameTime = currTime - prevTime;
+    prevTime = currTime;
+
+    //std::cout << std::chrono::duration_cast<std::chrono::microseconds>(frameTime).count() << std::endl;
+
+
     VKW::PresentationContext presentationContext = renderRoot_->AcquireNextPresentationContext();
     std::uint32_t context = presentationContext.contextId_;
     ////////////////////////////////////////////////////
@@ -95,7 +105,7 @@ void VulkanApplicationDelegate::update()
         float z;
     } uniformData;
 
-    testcounter += testcounter < 2.0f ? 0.01f : -4.0f;
+    testcounter += testcounter < 2.0f ? 0.001f : -4.0f;
     uniformData.x = testcounter;
     uniformData.y = 0.0f;
     uniformData.z = 0.0f;
