@@ -219,6 +219,8 @@ public:
     void ReleaseRenderWorkItem(PipelineKey const& key, RenderWorkItemHandle handle);
     void ReleaseRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle);
 
+    void CopyBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
+
     VKW::ResourceRendererProxy* ResourceProxy() const;
 
     void PushPassTemp(RenderPassKey const& key);

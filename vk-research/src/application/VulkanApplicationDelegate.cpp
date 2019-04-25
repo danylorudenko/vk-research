@@ -147,6 +147,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     //renderRoot_->DefineGlobalImage("attchmnt2", imageDesc);
 
     char constexpr uploadBufferKey[] = "uppl0";
+    char constexpr vertexBufferKey[] = "vert0";
     char constexpr passKey[] = "pass0";
     char constexpr pipeKey[] = "pipe0";
     char constexpr setLayoutKey[] = "set0";
@@ -166,13 +167,20 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
         { 0.0, -0.5, 0.0 }
     };
 
-    VKW::BufferViewDesc uploadVertexBufferDecs;
-    uploadVertexBufferDecs.format_ = VK_FORMAT_UNDEFINED;
-    uploadVertexBufferDecs.size_ = sizeof(vertexData);
-    uploadVertexBufferDecs.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
-    renderRoot_->DefineGlobalBuffer(uploadBufferKey, uploadVertexBufferDecs);
+    VKW::BufferViewDesc bufferDecs;
+    bufferDecs.format_ = VK_FORMAT_UNDEFINED;
+    bufferDecs.size_ = sizeof(vertexData);
+    bufferDecs.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
+    renderRoot_->DefineGlobalBuffer(uploadBufferKey, bufferDecs);
+
+    bufferDecs.usage_ = VKW::BufferUsage::VERTEX_INDEX;
+    renderRoot_->DefineGlobalBuffer(vertexBufferKey, bufferDecs);
 
     void* mappedUploadBuffer = renderRoot_->MapBuffer(uploadBufferKey, 0);
+    std::memcpy(mappedUploadBuffer, vertexData, sizeof(vertexData));
+    renderRoot_->FlushBuffer(uploadBufferKey, 0);
+
+    renderRoot_->CopyBuffer(uploadBufferKey, vertexBufferKey, 0);
 
 
 

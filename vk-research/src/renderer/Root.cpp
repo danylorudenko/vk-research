@@ -611,6 +611,30 @@ void Root::ReleaseRenderWorkItem(PipelineKey const& pipelineKey, RenderWorkItemH
     return ReleaseRenderWorkItem(FindPipeline(pipelineKey), handle);
 }
 
+void Root::CopyBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context)
+{
+    VKW::BufferView* srcView = FindGlobalBuffer(src, context);
+    VKW::BufferView* dstView = FindGlobalBuffer(dst, context);
+    
+    VKW::BufferResource* srcBuffer = resourceProxy_->GetResource(srcView->providedBuffer_->bufferResource_);
+    VKW::BufferResource* dstBuffer = resourceProxy_->GetResource(dstView->providedBuffer_->bufferResource_);
+    
+    VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
+
+    VkBufferCopy copyInfo;
+    copyInfo.srcOffset = srcView->offset_;
+    copyInfo.dstOffset = dstView->offset_;
+    copyInfo.size = srcView->size_;
+
+    VulkanFuncTable()->vkCmdCopyBuffer(commandReciever.commandBuffer_, srcBuffer->handle_, dstBuffer->handle_, 1, &copyInfo);
+
+    mainWorkerTemp_->EndExecutionFrame(context);
+
+    mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE);
+
+    VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle());
+}
+
 VKW::ResourceRendererProxy* Root::ResourceProxy() const
 {
     return resourceProxy_;

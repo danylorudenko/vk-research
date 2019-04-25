@@ -76,7 +76,7 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     {
     case BufferUsage::VERTEX_INDEX:
         regionDesc.usage_ = MemoryUsage::VERTEX_INDEX;
-        vkBufferCreateInfo.usage |= (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        vkBufferCreateInfo.usage |= (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
         break;
     case BufferUsage::UNIFORM:
         regionDesc.usage_ = MemoryUsage::UNIFORM;
