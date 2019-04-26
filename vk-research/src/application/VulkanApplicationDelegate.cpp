@@ -216,7 +216,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     VKW::VertexInputInfo vInfo;
     vInfo.binding_ = 0;
-    vInfo.stride_ = 0;
+    vInfo.stride_ = sizeof(TestVertex);
     vInfo.vertexAttributesCount_ = 1;
     vInfo.vertexAttributes_[0].location_ = 0;
     vInfo.vertexAttributes_[0].offset_ = 0;
