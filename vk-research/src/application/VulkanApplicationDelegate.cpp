@@ -7,6 +7,10 @@
 #include <utility>
 #include <chrono>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug)
     : mainWindow_ {
         instance,
@@ -71,9 +75,11 @@ void VulkanApplicationDelegate::start()
     FakeParseRendererResources();
 }
 
+//std::chrono::high_resolution_clock::time_point prevTime;
 float testcounter = 0.0f;
+glm::mat4 trans_mat = glm::mat4(1.0f);
+float cam_view_angle = 60.0f;
 
-std::chrono::high_resolution_clock::time_point prevTime;
 
 void VulkanApplicationDelegate::update()
 {
@@ -98,12 +104,16 @@ void VulkanApplicationDelegate::update()
         float z;
     } uniformData;
 
+    //trans_mat = glm::rotate(trans_mat, testcounter, glm::vec3{ 0.0f, 0.0f, 1.0f }); this is ok!
+
+    
+
     testcounter += testcounter < 2.0f ? 0.001f : -4.0f;
     uniformData.x = testcounter;
     uniformData.y = 0.0f;
     uniformData.z = 0.0f;
 
-    std::memcpy(ptr, &uniformData, sizeof(TestUniform));
+    std::memcpy(ptr, glm::value_ptr(trans_mat), sizeof(trans_mat));
 
     proxy.Flush(context);
 
