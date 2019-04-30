@@ -113,7 +113,8 @@ void VulkanApplicationDelegate::update()
     uniformData.y = 0.0f;
     uniformData.z = 0.0f;
 
-    std::memcpy(ptr, glm::value_ptr(trans_mat), sizeof(trans_mat));
+    //std::memcpy(ptr, glm::value_ptr(trans_mat), sizeof(trans_mat));
+    std::memcpy(ptr, &uniformData, sizeof(uniformData));
 
     proxy.Flush(context);
 
