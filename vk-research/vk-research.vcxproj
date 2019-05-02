@@ -142,6 +142,7 @@
     <ClCompile Include="src\renderer\UniformBufferWriterProxy.cpp" />
     <ClCompile Include="src\system\DynamicLibrary.cpp" />
     <ClCompile Include="src\system\Window.cpp" />
+    <ClCompile Include="src\transform\TransformationSystem.cpp" />
     <ClCompile Include="src\vk_interface\buffer\BuffersProvider.cpp" />
     <ClCompile Include="src\vk_interface\buffer\BufferView.cpp" />
     <ClCompile Include="src\vk_interface\Device.cpp" />
@@ -451,6 +452,8 @@
     <ClInclude Include="src\renderer\UniformBufferWriterProxy.hpp" />
     <ClInclude Include="src\system\DynamicLibrary.hpp" />
     <ClInclude Include="src\system\Window.hpp" />
+    <ClInclude Include="src\transform\TansformComponent.hpp" />
+    <ClInclude Include="src\transform\TransformationSystem.hpp" />
     <ClInclude Include="src\vk_interface\buffer\BuffersProvider.hpp" />
     <ClInclude Include="src\vk_interface\buffer\BufferView.hpp" />
     <ClInclude Include="src\vk_interface\buffer\ProvidedBuffer.hpp" />
