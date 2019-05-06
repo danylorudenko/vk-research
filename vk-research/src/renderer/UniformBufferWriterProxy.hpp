@@ -27,6 +27,7 @@ public:
     void* MappedPtr(std::uint32_t context) const;
 
     void* MapForWrite(std::uint32_t context);
+    void MapAllContexts();
     void Flush(std::uint32_t context) const;
     void FlushUnmap(std::uint32_t context);
 

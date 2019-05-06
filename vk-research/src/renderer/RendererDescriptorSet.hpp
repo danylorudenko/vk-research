@@ -29,14 +29,16 @@ struct DescriptorSet
     
     VKW::ProxySetHandle proxyDescriptorSetHandle_;
 
-    struct {
+    struct DescriptorSetMember
+    {
         char name_[SET_MEMBER_NAME_MAX_LENGTH];
         union {
             UniformBufferSetMember uniformBuffer_;
             Texture2DSetMember texture2D_;
             StorageBufferSetMember storageBuffer_;
         } data_;
-    } setMembers_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+    } 
+    setMembers_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
 
 };
 

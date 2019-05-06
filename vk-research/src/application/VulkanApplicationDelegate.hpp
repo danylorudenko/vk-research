@@ -13,10 +13,12 @@
 #include "..\renderer\Root.hpp"
 #include "..\renderer\RootDef.hpp"
 #include "..\renderer\UniformBufferWriterProxy.hpp"
+#include "..\transform\TransformationSystem.hpp"
 
 struct CustomData
 {
     Render::UniformBufferWriterProxy uniformProxy_;
+    Transform::TransformComponent* transformComponent_;
 };
 
 class VulkanApplicationDelegate
@@ -40,8 +42,12 @@ public:
 private:
     Window mainWindow_;
     IOManager ioManager_;
+
     std::unique_ptr<VKW::Loader> vulkanLoader_;
     std::unique_ptr<Render::Root> renderRoot_;
+
+    Transform::TransformationSystem transformationSystem_;
+    
 
     // TODO
     void FakeParseRendererResources();

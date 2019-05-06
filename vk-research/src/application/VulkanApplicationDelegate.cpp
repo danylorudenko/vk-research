@@ -3,13 +3,12 @@
 #include "..\renderer\Root.hpp"
 
 #include "..\renderer\Material.hpp"
+#include "..\transform\TansformComponent.hpp"
 
 #include <utility>
 #include <chrono>
 
-#include <glm\glm.hpp>
 #include <glm\gtc\quaternion.hpp>
-#include <glm\gtc\type_ptr.hpp>
 
 VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug)
     : mainWindow_ {
@@ -83,6 +82,8 @@ float cam_view_angle = 60.0f;
 
 void VulkanApplicationDelegate::update()
 {
+    ////////////////////////////////////////////////////
+    // Frame time measurement
     //auto currTime = std::chrono::high_resolution_clock::now();
     //auto frameTime = currTime - prevTime;
     //prevTime = currTime;
@@ -94,32 +95,13 @@ void VulkanApplicationDelegate::update()
     ////////////////////////////////////////////////////
     //
 
-    Render::UniformBufferWriterProxy& proxy = customData_.uniformProxy_;
-
-    void* ptr = proxy.IsMapped(context) ? proxy.MappedPtr(context) : proxy.MapForWrite(context);
-
-    struct TestUniform {
-        float x;
-        float y;
-        float z;
-    } uniformData;
-
-    //trans_mat = glm::rotate(trans_mat, testcounter, glm::vec3{ 0.0f, 0.0f, 1.0f }); this is ok!
-
+    customData_.transformComponent_->scale_ = glm::vec3(0.5f);
+    customData_.transformComponent_->position_ = glm::vec3(0.0f, 0.0f, 2.0f);
     
-
-    testcounter += testcounter < 2.0f ? 0.001f : -4.0f;
-    uniformData.x = testcounter;
-    uniformData.y = 0.0f;
-    uniformData.z = 0.0f;
-
-    //std::memcpy(ptr, glm::value_ptr(trans_mat), sizeof(trans_mat));
-    std::memcpy(ptr, &uniformData, sizeof(uniformData));
-
-    proxy.Flush(context);
 
     //
     ////////////////////////////////////////////////////
+    transformationSystem_.Update(context, glm::vec3(0.0f), glm::vec3(0.0f), 60.0f);
     renderRoot_->IterateRenderGraph(presentationContext);
 }
 
@@ -288,13 +270,12 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(pipeKey, itemDesc);
     Render::RenderWorkItem* item = renderRoot_->FindRenderWorkItem(pipeKey, renderItemHandle);
     customData_.uniformProxy_ = Render::UniformBufferWriterProxy(renderRoot_.get(), item, 0, 0);
-    customData_.uniformProxy_.MapForWrite(0);
-    // TODO
-    //customData_.uniformProxy_.MapForWrite(1);
+
 
     renderRoot_->RegisterMaterial(materialKey);
     renderRoot_->PushPassTemp(passKey);
 
+    customData_.transformComponent_ = transformationSystem_.CreateTransformComponent(nullptr, &customData_.uniformProxy_);
     // how to write resource descriptor to DescriptorSet
     //renderRoot_->Defue
 

@@ -2,20 +2,13 @@
 
 layout(location = 0) in vec3 v_pos;
 
-layout (set=0, binding=0) uniform OffsetUniform
+layout (set=0, binding=0) uniform TransformUniform
 {
-	vec3 offset;
-} offsetUniform;
+	mat4 mvp_mat;
+} transformUniform;
 
-
-//const vec3 verts[3] = vec3[3](
-//	vec3(-0.5, 0.5, 0.0),
-//	vec3(0.5, 0.5, 0.0),
-//	vec3(0.0, -0.5, 0.0)
-//);
 
 void main()
 {
-	//gl_Position = vec4(verts[gl_VertexIndex] + offsetUniform.offset, 1.0f);
-	gl_Position = vec4(v_pos + offsetUniform.offset, 1.0f);
+	gl_Position = transformUniform.mvp_mat * vec4(v_pos, 1.0);
 }
