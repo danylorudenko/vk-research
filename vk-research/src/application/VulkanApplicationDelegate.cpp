@@ -76,8 +76,6 @@ void VulkanApplicationDelegate::start()
 
 //std::chrono::high_resolution_clock::time_point prevTime;
 float testcounter = 0.0f;
-glm::mat4 trans_mat = glm::mat4(1.0f);
-float cam_view_angle = 60.0f;
 
 
 void VulkanApplicationDelegate::update()
@@ -95,8 +93,10 @@ void VulkanApplicationDelegate::update()
     ////////////////////////////////////////////////////
     //
 
-    customData_.transformComponent_->scale_ = glm::vec3(0.5f);
-    customData_.transformComponent_->position_ = glm::vec3(0.0f, 0.0f, 2.0f);
+    testcounter += 0.01f;
+    //customData_.transformComponent_->scale_ = glm::vec3(0.5f);
+    customData_.transformComponent_->position_ = glm::vec3(0.0f, 0.0f, -2.0f);
+    //customData_.transformComponent_->orientation_.z = glm::degrees(testcounter);
     
 
     //
@@ -155,7 +155,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     };
 
     TestVertex vertexData[3] = {
-        { -0.5, 0.5, 0.0 },
+        { 0.0, 0.0, 0.0 },
         { 0.5, 0.5, 0.0 },
         { 0.0, -0.5, 0.0 }
     };

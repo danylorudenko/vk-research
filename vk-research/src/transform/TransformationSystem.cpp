@@ -31,7 +31,7 @@ void TransformationSystem::Update(std::uint32_t context, glm::vec3 const& camera
     view_mat = glm::rotate(view_mat, cameraEuler.x, glm::vec3(1.0f, 0.0f, 0.0f));
     view_mat = glm::rotate(view_mat, cameraEuler.z, glm::vec3(0.0f, 0.0f, 1.0f));
 
-    glm::mat4 perspective_mat = glm::perspective(glm::radians(cameraFowDegrees), 1.0f, 0.1f, 2000.0f);
+    glm::mat4 perspective_mat = glm::perspective(glm::radians(cameraFowDegrees), 800.0f / 600.0f, 0.1f, 2000.0f);
     
     std::uint64_t const componentsCount = static_cast<std::uint64_t>(components_.size());
     for (std::uint64_t i = 0; i < componentsCount; ++i) {
@@ -58,7 +58,7 @@ TransformComponent* TransformationSystem::CreateTransformComponent(TransformComp
     TransformComponent* component = new TransformComponent;
     component->parent_ = parent;
     component->position_ = glm::vec3(0.0f, 0.0f, 0.0f);
-    component->orientation_ = glm::vec3(0.0f, 0.0f, 1.0f);
+    component->orientation_ = glm::vec3(0.0f, 0.0f, 0.0f);
     component->scale_ = glm::vec3(1.0f, 1.0f, 1.0f);
     if (uniformProxy != nullptr) {
         component->uniformProxy_ = *uniformProxy;

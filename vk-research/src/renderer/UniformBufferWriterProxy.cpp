@@ -52,7 +52,8 @@ void* UniformBufferWriterProxy::MapForWrite(std::uint32_t context)
 
 void UniformBufferWriterProxy::MapAllContexts()
 {
-    for (std::uint32_t i = 0; i < VKW::FramedDescriptorsHub::MAX_FRAMES_COUNT; ++i) {
+    std::uint32_t const framesCount = root_->ResourceProxy()->FramesCount();
+    for (std::uint32_t i = 0; i < framesCount; ++i) {
         mappedBufferPtr_[i] = root_->MapUniformBuffer(uniformBufferHandle_, i);
     }
 }
