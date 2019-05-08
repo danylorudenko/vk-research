@@ -1,13 +1,13 @@
 #version 450 core
 
-layout(set=0, binding=0) uniform TestBuffer
-{
-	float testBufferElement;
-} testBuffer;
+layout(location = 0) in vec3 out_v_norm;
 
 layout(location = 0) out vec4 finalColor;
 
+const vec3 light_vec = vec3(1.0, 0.0, 0.0);
+
 void main()
 {
-	finalColor = vec4(1.0, 0.5, 0.3, testBuffer.testBufferElement);
+	float ndotl = dot(out_v_norm, light_vec);
+	finalColor = vec4(vec3(ndotl), 1.0);
 }

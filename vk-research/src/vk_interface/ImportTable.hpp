@@ -150,6 +150,7 @@ public:
     PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
 
     PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers = nullptr;
+    PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer = nullptr;
     PFN_vkCmdBindPipeline vkCmdBindPipeline = nullptr;
     PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets = nullptr;
     PFN_vkCmdPushConstants vkCmdPushConstants = nullptr;
@@ -159,6 +160,7 @@ public:
     PFN_vkCmdBeginRenderPass vkCmdBeginRenderPass = nullptr;
     PFN_vkCmdEndRenderPass vkCmdEndRenderPass = nullptr;
     PFN_vkCmdDraw vkCmdDraw = nullptr;
+    PFN_vkCmdDrawIndexed vkCmdDrawIndexed = nullptr;
 
 };
 

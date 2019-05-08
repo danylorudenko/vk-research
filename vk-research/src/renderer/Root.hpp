@@ -137,7 +137,9 @@ struct MaterialDesc
 struct RenderItemDesc
 {
     ResourceKey vertexBufferKey_;
+    ResourceKey indexBufferKey_;
     std::uint32_t vertexCount_;
+    std::uint32_t indexCount_;
     SetOwnerDesc setOwnerDescs_[SCOPE_MAX_SETS_RENDERITEM];
 };
 

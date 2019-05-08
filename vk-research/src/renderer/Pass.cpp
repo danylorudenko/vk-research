@@ -226,14 +226,36 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
                 vkSetsToBind[k] = vkwSet->handle_;
             }
 
-            VKW::BufferView* vertexBufferView = root_->FindGlobalBuffer(renderItem.vertexBufferKey_, contextId);
-            VKW::BufferResource* vertexBuffer = resourceProxy_->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
-
-            VkBuffer vkBuffer = vertexBuffer->handle_;
-            VkDeviceSize offset = vertexBufferView->offset_;
-            table_->vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkBuffer, &offset);
             table_->vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, 0, renderItemSetsCount, vkSetsToBind, 0, nullptr);
-            table_->vkCmdDraw(commandBuffer, renderItem.vertexCount_, 1, 0, 0);
+
+            assert(renderItem.vertexCount_ >= 0 && "Pass: renderItem.vertexCount < 0");
+            assert(renderItem.indexCount_ >= 0 && "Pass: renderItem.indexCount < 0");
+            if (renderItem.vertexCount_ > 0) {
+                VKW::BufferView* vertexBufferView = root_->FindGlobalBuffer(renderItem.vertexBufferKey_, contextId);
+                VKW::BufferResource* vertexBuffer = resourceProxy_->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
+
+                VkBuffer vkBuffer = vertexBuffer->handle_;
+                VkDeviceSize offset = vertexBufferView->offset_ + vertexBuffer->memory_.offset_;
+                table_->vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkBuffer, &offset);
+            }
+
+            if (renderItem.indexCount_ > 0) {
+                VKW::BufferView* indexBufferView = root_->FindGlobalBuffer(renderItem.indexBufferKey_, contextId);
+                VKW::BufferResource* indexBuffer = resourceProxy_->GetResource(indexBufferView->providedBuffer_->bufferResource_);
+
+                VkBuffer vkBuffer = indexBuffer->handle_;
+                VkDeviceSize offset = indexBufferView->offset_ + indexBuffer->memory_.offset_;
+                table_->vkCmdBindIndexBuffer(commandBuffer, vkBuffer, offset, VK_INDEX_TYPE_UINT32);
+            }
+            
+            
+            if (renderItem.indexCount_ > 0) {
+                table_->vkCmdDrawIndexed(commandBuffer, renderItem.indexCount_, 1, 0, 0, 0);
+            }
+            else {
+                table_->vkCmdDraw(commandBuffer, renderItem.vertexCount_, 1, 0, 0);
+            }
+            
         }
         
     }

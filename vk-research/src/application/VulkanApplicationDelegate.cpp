@@ -94,9 +94,10 @@ void VulkanApplicationDelegate::update()
     //
 
     testcounter += 0.01f;
-    //customData_.transformComponent_->scale_ = glm::vec3(0.5f);
+    customData_.transformComponent_->scale_ = glm::vec3(5.0f);
     customData_.transformComponent_->position_ = glm::vec3(0.0f, 0.0f, -2.0f);
-    //customData_.transformComponent_->orientation_.z = glm::degrees(testcounter);
+    customData_.transformComponent_->orientation_.z = glm::degrees(testcounter);
+    customData_.transformComponent_->orientation_.y = glm::degrees(testcounter * 1.1f);
     
 
     //
@@ -141,40 +142,52 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     char constexpr uploadBufferKey[] = "uppl0";
     char constexpr vertexBufferKey[] = "vert0";
+    char constexpr indexBufferKey[] = "ind0";
     char constexpr passKey[] = "pass0";
     char constexpr pipeKey[] = "pipe0";
     char constexpr setLayoutKey[] = "set0";
     char constexpr materialTemplateKey[] = "templ0";
     char constexpr materialKey[] = "mat0";
 
+    Data::ModelMesh testMesh = ioManager_.ReadModelMesh("LFS\\dragon.model");
+
     struct TestVertex
     {
         float x;
         float y;
         float z;
+
+        float nx;
+        float ny;
+        float nz;
     };
 
-    TestVertex vertexData[3] = {
-        { 0.0, 0.0, 0.0 },
-        { 0.5, 0.5, 0.0 },
-        { 0.0, -0.5, 0.0 }
-    };
+    std::uint32_t const vertexDataSizeBytes = static_cast<std::uint32_t>(testMesh.vertexData_.size());
+    std::uint32_t const indexDataSizeBytes = static_cast<std::uint32_t>(testMesh.indexData_.size());
+    std::uint32_t const requiredUploadBufferSize = vertexDataSizeBytes > indexDataSizeBytes ? vertexDataSizeBytes : indexDataSizeBytes;
 
     VKW::BufferViewDesc bufferDecs;
     bufferDecs.format_ = VK_FORMAT_UNDEFINED;
-    bufferDecs.size_ = sizeof(vertexData);
+    bufferDecs.size_ = requiredUploadBufferSize;
     bufferDecs.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
     renderRoot_->DefineGlobalBuffer(uploadBufferKey, bufferDecs);
 
+    bufferDecs.size_ = vertexDataSizeBytes;
     bufferDecs.usage_ = VKW::BufferUsage::VERTEX_INDEX;
     renderRoot_->DefineGlobalBuffer(vertexBufferKey, bufferDecs);
 
+    bufferDecs.size_ = indexDataSizeBytes;
+    renderRoot_->DefineGlobalBuffer(indexBufferKey, bufferDecs);
+
 
     void* mappedUploadBuffer = renderRoot_->MapBuffer(uploadBufferKey, 0);
-    std::memcpy(mappedUploadBuffer, vertexData, sizeof(vertexData));
+    std::memcpy(mappedUploadBuffer, testMesh.vertexData_.data(), vertexDataSizeBytes);
     renderRoot_->FlushBuffer(uploadBufferKey, 0);
-
     renderRoot_->CopyBuffer(uploadBufferKey, vertexBufferKey, 0);
+
+    std::memcpy(mappedUploadBuffer, testMesh.indexData_.data(), indexDataSizeBytes);
+    renderRoot_->FlushBuffer(uploadBufferKey, 0);
+    renderRoot_->CopyBuffer(uploadBufferKey, indexBufferKey, 0);
 
 
 
@@ -191,7 +204,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     
     Render::ShaderDesc fragmentShaderDesc;
     fragmentShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
-    fragmentShaderDesc.relativePath_ = "shader-src\\test-frag.spv";
+    fragmentShaderDesc.relativePath_ = "shader-src\\test-frag-uniform.spv";
 
     renderRoot_->DefineShader("vShader", vertexShaderDesc);
     renderRoot_->DefineShader("fShader", fragmentShaderDesc);
@@ -210,10 +223,13 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     VKW::VertexInputInfo vInfo;
     vInfo.binding_ = 0;
     vInfo.stride_ = sizeof(TestVertex);
-    vInfo.vertexAttributesCount_ = 1;
+    vInfo.vertexAttributesCount_ = 2;
     vInfo.vertexAttributes_[0].location_ = 0;
     vInfo.vertexAttributes_[0].offset_ = 0;
     vInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
+    vInfo.vertexAttributes_[1].location_ = 1;
+    vInfo.vertexAttributes_[1].offset_ = sizeof(float) * 3;
+    vInfo.vertexAttributes_[1].format_ = VK_FORMAT_R32G32B32_SFLOAT;
 
     std::uint32_t const width = (mainWindow_.Width());
     std::uint32_t const height = (mainWindow_.Height());
@@ -264,7 +280,10 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     Render::RenderItemDesc itemDesc;
     itemDesc.vertexBufferKey_ = vertexBufferKey;
-    itemDesc.vertexCount_ = 3;
+    itemDesc.indexBufferKey_ = indexBufferKey;
+    itemDesc.vertexCount_ = vertexDataSizeBytes / sizeof(TestVertex);
+    itemDesc.indexCount_ = indexDataSizeBytes / sizeof(std::uint32_t);
+
     itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 64;
 
     Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(pipeKey, itemDesc);

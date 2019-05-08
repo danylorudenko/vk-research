@@ -12,7 +12,9 @@ namespace Render
 struct RenderWorkItem
 {
     ResourceKey vertexBufferKey_;
+    ResourceKey indexBufferKey_;
     std::uint32_t vertexCount_;
+    std::uint32_t indexCount_;
     DescriptorSetsOwner descriptorSetsOwner_;
 };
 

@@ -135,7 +135,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
         for (auto i = 0u; i < attrCount; ++i) {
             VKW::VertexInputInfo::Attribute const& sourceVertexInfo = desc.vertexInputInfo_->vertexAttributes_[i];
-            inputAttributesInfo[i].binding = i;
+            inputAttributesInfo[i].binding = desc.vertexInputInfo_->binding_;
             inputAttributesInfo[i].location = sourceVertexInfo.location_;
             inputAttributesInfo[i].offset = sourceVertexInfo.offset_;
             inputAttributesInfo[i].format = sourceVertexInfo.format_;

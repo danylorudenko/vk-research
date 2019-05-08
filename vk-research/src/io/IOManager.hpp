@@ -1,8 +1,7 @@
 #pragma once
 
 #include "..\class_features\NonCopyable.hpp"
-
-#include <cstdint>
+#include "..\data\ModelMesh.hpp"
 
 class ByteBuffer;
 
@@ -15,6 +14,9 @@ public:
     IOManager& operator=(IOManager&& rhs);
 
     std::uint64_t ReadFileToBuffer(char const* path, ByteBuffer& buffer);
+
+    Data::ModelMesh ReadModelMesh(char const* path);
+    
 
     ~IOManager();
 
