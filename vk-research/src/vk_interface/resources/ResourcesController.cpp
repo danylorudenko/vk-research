@@ -147,6 +147,8 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
         memoryDesc.usage_ = MemoryUsage::COLOR_ATTACHMENT;
         break;
 
+    case ImageUsage::DEPTH:
+    case ImageUsage::STENCIL:
     case ImageUsage::DEPTH_STENCIL:
         info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
         memoryDesc.usage_ = MemoryUsage::DEPTH_STENCIL_ATTACHMENT;

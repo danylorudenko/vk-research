@@ -3,7 +3,7 @@
 #include "RendererDescriptorSet.hpp"
 #include "RenderWorkItem.hpp"
 #include "RootDef.hpp"
-#include "..\vk_interface\runtime\FramedDescriptorsHub.hpp"
+#include "..\vk_interface\VkInterfaceConstants.hpp"
 
 namespace Render
 {
@@ -33,7 +33,7 @@ public:
 
 private:
     Root* root_;
-    void* mappedBufferPtr_[VKW::FramedDescriptorsHub::MAX_FRAMES_COUNT];
+    void* mappedBufferPtr_[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
     UniformBufferHandle uniformBufferHandle_;
 };
 

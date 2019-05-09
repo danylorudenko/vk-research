@@ -26,6 +26,8 @@ enum class ImageUsage
 {
     TEXTURE,
     RENDER_TARGET,
+    DEPTH,
+    STENCIL,
     DEPTH_STENCIL,
     SWAP_CHAIN_RENDER_TARGET
 };

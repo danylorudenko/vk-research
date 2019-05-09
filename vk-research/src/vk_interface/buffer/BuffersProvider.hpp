@@ -41,7 +41,6 @@ public:
     BuffersProvider(BuffersProvider&& rhs);
     BuffersProvider& operator=(BuffersProvider&& rhs);
     
-    // Should not recieve BufferResourceHandle as a parameter: it is provider's responisbility to create resources if needed.
     void AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferViewHandle* results);
     void ReleaseViews(std::uint32_t buffersCount, BufferViewHandle const* handles);
 

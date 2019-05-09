@@ -3,6 +3,7 @@
 #include "..\ImportTable.hpp"
 #include "..\Swapchain.hpp"
 #include "..\resources\ResourcesController.hpp"
+#include "..\VkInterfaceConstants.hpp"
 
 #include <utility>
 #include <algorithm>
@@ -130,63 +131,84 @@ ImageViewHandle ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDes
     return ImageViewHandle{ imageView };
 }
 
-ImageViewHandle ImagesProvider::AcquireImageView(ImageViewDesc const& desc)
+void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs, ImageViewHandle* results)
 {
-    ImageDesc imageDesc;
-    imageDesc.format_ = desc.format_;
-    imageDesc.width_ = desc.width_;
-    imageDesc.height_ = desc.height_;
-    imageDesc.usage_ = desc.usage_;
+    for (std::uint32_t i = 0; i < count; ++i) {
+        ImageDesc imageDesc;
+        imageDesc.format_ = descs[i].format_;
+        imageDesc.width_ = descs[i].width_;
+        imageDesc.height_ = descs[i].height_;
+        imageDesc.usage_ = descs[i].usage_;
+        ImageResourceHandle imageResourceHandle = resourcesController_->CreateImage(imageDesc);
+        ImageResource* imageResource = resourcesController_->GetImage(imageResourceHandle);
 
-    ImageResourceHandle imageResourceHandle = resourcesController_->CreateImage(imageDesc);
-    ImageResource* imageResource = resourcesController_->GetImage(imageResourceHandle);
+        VkImageAspectFlags aspectFlags;
+        switch (descs[i].usage_) {
+        case ImageUsage::RENDER_TARGET:
+        case ImageUsage::SWAP_CHAIN_RENDER_TARGET:
+        case ImageUsage::TEXTURE:
+            aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+            break;
+        case ImageUsage::DEPTH:
+            aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
+            break;
+        case ImageUsage::STENCIL:
+            aspectFlags = VK_IMAGE_ASPECT_STENCIL_BIT;
+            break;
+        case ImageUsage::DEPTH_STENCIL:
+            aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+            break;
+        }
 
-    VkImageViewCreateInfo viewInfo;
-    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    viewInfo.pNext = nullptr;
-    viewInfo.image = imageResource->handle_;
-    viewInfo.format = desc.format_;
-    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
-    viewInfo.flags = VK_FLAGS_NONE;
-    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    viewInfo.subresourceRange.baseArrayLayer = 0;
-    viewInfo.subresourceRange.baseMipLevel = 0;
-    viewInfo.subresourceRange.layerCount = 1;
-    viewInfo.subresourceRange.levelCount = 1;
+        VkImageViewCreateInfo viewInfo;
+        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.pNext = nullptr;
+        viewInfo.image = imageResource->handle_;
+        viewInfo.format = descs[i].format_;
+        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+        viewInfo.flags = VK_FLAGS_NONE;
+        viewInfo.subresourceRange.aspectMask = aspectFlags;
+        viewInfo.subresourceRange.baseArrayLayer = 0;
+        viewInfo.subresourceRange.baseMipLevel = 0;
+        viewInfo.subresourceRange.layerCount = 1;
+        viewInfo.subresourceRange.levelCount = 1;
 
-    VkImageView vkView = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkView));
+        VkImageView vkView = VK_NULL_HANDLE;
+        VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkView));
 
-    ImageView* imageView = new ImageView{ vkView, viewInfo.format, viewInfo.viewType, viewInfo.subresourceRange, imageResourceHandle };
-    
-    ImageViewContainer container;
-    container.view_ = imageView;
+        ImageView* imageView = new ImageView{ vkView, viewInfo.format, viewInfo.viewType, viewInfo.subresourceRange, imageResourceHandle };
 
-    imageViewContainers_.emplace_back(container);
+        ImageViewContainer container;
+        container.view_ = imageView;
 
-    return ImageViewHandle{ imageView };
+        imageViewContainers_.emplace_back(container);
+
+        results[i].view_ = imageView;
+    }
 }
 
-void ImagesProvider::ReleaseImage(ImageViewHandle handle)
+void ImagesProvider::ReleaseImageViews(std::uint32_t count, ImageViewHandle* handles)
 {
-    auto imageViewContIt = std::find_if(
-        imageViewContainers_.begin(), 
-        imageViewContainers_.end(),
-        [handle](ImageViewContainer const& container) {
-            return container.view_ == handle.view_;
+    for (std::uint32_t i = 0; i < count; ++i) {
+        auto imageViewContIt = std::find_if(
+            imageViewContainers_.begin(),
+            imageViewContainers_.end(),
+            [handles, i](ImageViewContainer const& container) {
+            return container.view_ == handles[i].view_;
         });
 
-    assert(imageViewContIt != imageViewContainers_.end() && "Can't release ImageView.");
+        assert(imageViewContIt != imageViewContainers_.end() && "Can't release ImageView.");
 
-    ImageView* imageView = imageViewContIt->view_;
-    ImageResourceHandle imageResource = imageView->resource_;
-    table_->vkDestroyImageView(device_->Handle(), imageView->handle_, nullptr);
-    delete imageView;
+        ImageView* imageView = imageViewContIt->view_;
+        ImageResourceHandle imageResource = imageView->resource_;
+        table_->vkDestroyImageView(device_->Handle(), imageView->handle_, nullptr);
+        delete imageView;
 
-    resourcesController_->FreeImage(imageResource);
+        resourcesController_->FreeImage(imageResource);
 
-    imageViewContainers_.erase(imageViewContIt);
+        imageViewContainers_.erase(imageViewContIt);
+    }
 }
 
 }

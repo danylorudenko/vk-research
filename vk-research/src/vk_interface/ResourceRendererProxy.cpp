@@ -194,7 +194,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
     if (framedSet) {
         auto const framesCount = framedDescriptorsHub_->framesCount_;
         
-        DescriptorSet* framedSets[FramedDescriptorsHub::MAX_FRAMES_COUNT];
+        DescriptorSet* framedSets[CONSTANTS::MAX_FRAMES_BUFFERING];
         framedSets[0] = firstFrameSet;
 
         for (auto i = 1u; i < framesCount; ++i) {
@@ -336,17 +336,16 @@ void ResourceRendererProxy::DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, D
 
 ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferViewDesc const& decs)
 {
-    std::uint32_t const framesCount = framedDescriptorsHub_->framesCount_;
-    auto const id = framedDescriptorsHub_->bufferViewsNextId_++;
-
-    BufferViewDesc viewDescs[FramedDescriptorsHub::MAX_FRAMES_COUNT];
-    BufferViewHandle views[FramedDescriptorsHub::MAX_FRAMES_COUNT];
+    BufferViewDesc viewDescs[CONSTANTS::MAX_FRAMES_BUFFERING];
+    BufferViewHandle views[CONSTANTS::MAX_FRAMES_BUFFERING];
 
     bool framedResource = false;
     switch (decs.usage_) {
     case BufferUsage::UNIFORM:
         framedResource = true;
     }
+
+    std::uint32_t const framesCount = framedDescriptorsHub_->framesCount_;
 
     std::uint32_t const resourceFrames = framedResource ? framesCount : 1;
     for (std::uint32_t i = 0u; i < resourceFrames; ++i) {
@@ -355,21 +354,21 @@ ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferViewDesc const& decs
     
     buffersProvider_->AcquireViews(resourceFrames, viewDescs, views);
 
+    auto const proxyId = framedDescriptorsHub_->bufferViewsNextId_++;
     if (framedResource) {
         for (auto i = 0u; i < framesCount; ++i) {
-            assert(framedDescriptorsHub_->contexts_[i].bufferViews_.size() == id && "Unsyncronized write to FramedDescriptors::bufferViews_.");
+            assert(framedDescriptorsHub_->contexts_[i].bufferViews_.size() == proxyId && "Unsyncronized write to FramedDescriptors::bufferViews_.");
             framedDescriptorsHub_->contexts_[i].bufferViews_.emplace_back(views[i]);
         }
     }
     else {
         for (auto i = 0u; i < framesCount; ++i) {
-            assert(framedDescriptorsHub_->contexts_[i].bufferViews_.size() == id && "Unsyncronized write to FramedDescriptors::bufferViews_.");
+            assert(framedDescriptorsHub_->contexts_[i].bufferViews_.size() == proxyId && "Unsyncronized write to FramedDescriptors::bufferViews_.");
             framedDescriptorsHub_->contexts_[i].bufferViews_.emplace_back(views[0]); // we need only one buffer view instance if we have non-framed buffer
         }
     }
     
-
-    return ProxyBufferHandle{ id };
+    return ProxyBufferHandle{ proxyId };
 }
 
 BufferView* ResourceRendererProxy::GetBufferView(ProxyBufferHandle handle, std::uint32_t context)
@@ -385,16 +384,41 @@ BufferViewHandle ResourceRendererProxy::GetBufferViewHandle(ProxyBufferHandle ha
 
 ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
 {
-    ImageViewHandle imageHandle = imagesProvider_->AcquireImageView(desc);
+    ImageViewDesc imageViewDescs[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+    ImageViewHandle imageViewHandles[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+    
+    bool framedResource = false;
+    switch (desc.usage_) {
+    case VKW::ImageUsage::RENDER_TARGET:
+    case VKW::ImageUsage::DEPTH:
+    case VKW::ImageUsage::STENCIL:
+    case VKW::ImageUsage::DEPTH_STENCIL:
+        framedResource = true;
+    }
 
-    auto const id = framedDescriptorsHub_->imageViewsNextId_++;
-    auto const framesCount = framedDescriptorsHub_->framesCount_;
-    for (auto i = 0u; i < framesCount; ++i) {
-        assert(framedDescriptorsHub_->contexts_[i].imageViews_.size() == id && "Unsyncronized write to FramedDescriptors::bufferViews_.");
-        framedDescriptorsHub_->contexts_[i].imageViews_.emplace_back(imageHandle);
+    std::uint32_t const framesCount = framedDescriptorsHub_->framesCount_;
+    std::uint32_t const requiredImagesCount = framedResource ? framesCount : 1;
+    for (std::uint32_t i = 0; i < requiredImagesCount; ++i) {
+        imageViewDescs[i] = desc;
+    }
+
+    imagesProvider_->AcquireImageViews(requiredImagesCount, imageViewDescs, imageViewHandles);
+    
+    auto const proxyId = framedDescriptorsHub_->imageViewsNextId_++;
+    if (framedResource) {
+        for (std::uint32_t i = 0u; i < framesCount; ++i) {
+            assert(framedDescriptorsHub_->contexts_[i].imageViews_.size() == proxyId && "Unsyncronized write to FramedDescriptors::bufferViews_.");
+            framedDescriptorsHub_->contexts_[i].imageViews_.emplace_back(imageViewHandles[i]);
+        }
+    }
+    else {
+        for (std::uint32_t i = 0u; i < framesCount; ++i) {
+            assert(framedDescriptorsHub_->contexts_[i].imageViews_.size() == proxyId && "Unsyncronized write to FramedDescriptors::bufferViews_.");
+            framedDescriptorsHub_->contexts_[i].imageViews_.emplace_back(imageViewHandles[0]);
+        }
     }
     
-    return ProxyImageHandle{ id };
+    return ProxyImageHandle{ proxyId };
 }
 
 ImageView* ResourceRendererProxy::GetImageView(ProxyImageHandle handle, std::uint32_t context)

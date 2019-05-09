@@ -1,7 +1,6 @@
 #pragma once
 
 #include "..\class_features\NonCopyable.hpp"
-#include "runtime\FramedDescriptorsHub.hpp"
 #include "pipeline\DescriptorLayout.hpp"
 #include "resources\ResourcesController.hpp"
 #include "buffer\BufferView.hpp"
@@ -22,6 +21,7 @@ class FramebufferController;
 
 struct BufferViewDesc;
 struct ImageViewDesc;
+struct FramedDescriptorsHub;
 
 
 
@@ -45,7 +45,7 @@ struct ProxyDescriptorWriteDesc
             std::uint32_t offset_;
             std::uint32_t size_;
         } bufferInfo_;
-    } frames_[FramedDescriptorsHub::MAX_FRAMES_COUNT];
+    } frames_[CONSTANTS::MAX_FRAMES_BUFFERING];
 };
 
 struct ProxyFramebufferDesc

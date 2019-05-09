@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "..\VkInterfaceConstants.hpp"
 #include "..\buffer\BufferView.hpp"
 #include "..\image\ImageView.hpp"
 #include "..\runtime\DescriptorSet.hpp"
@@ -20,7 +21,7 @@ struct FramedDescriptors
 
 struct FramedDescriptorsHub
 {
-    static std::uint32_t constexpr MAX_FRAMES_COUNT = 3;
+    static std::uint32_t constexpr MAX_FRAMES_COUNT = CONSTANTS::MAX_FRAMES_BUFFERING;
 
     std::uint32_t framesCount_ = 0;
 

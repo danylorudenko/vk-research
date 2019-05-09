@@ -52,8 +52,8 @@ public:
     ImagesProvider& operator=(ImagesProvider&& rhs);
 
     ImageViewHandle RegisterSwapchainImageView(SwapchainImageViewDesc const& desc);
-    ImageViewHandle AcquireImageView(ImageViewDesc const& desc);
-    void ReleaseImage(ImageViewHandle handle);
+    void AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs, ImageViewHandle* results);
+    void ReleaseImageViews(std::uint32_t count, ImageViewHandle* handles);
 
     ImageView* GetImageView(ImageViewHandle handle);
 

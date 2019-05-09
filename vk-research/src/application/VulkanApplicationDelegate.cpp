@@ -148,6 +148,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     char constexpr setLayoutKey[] = "set0";
     char constexpr materialTemplateKey[] = "templ0";
     char constexpr materialKey[] = "mat0";
+    char constexpr depthBufferKey[] = "dpth0";
 
     Data::ModelMesh testMesh = ioManager_.ReadModelMesh("LFS\\dragon.model");
 
@@ -190,6 +191,12 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->CopyBuffer(uploadBufferKey, indexBufferKey, 0);
 
 
+    VKW::ImageViewDesc depthBufferDesc;
+    depthBufferDesc.usage_ = VKW::ImageUsage::DEPTH;
+    depthBufferDesc.format_ = VK_FORMAT_D16_UNORM;
+    depthBufferDesc.width_ = mainWindow_.Width();
+    depthBufferDesc.height_ = mainWindow_.Height();
+    renderRoot_->DefineGlobalImage(depthBufferKey, depthBufferDesc);
 
     Render::RenderPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;

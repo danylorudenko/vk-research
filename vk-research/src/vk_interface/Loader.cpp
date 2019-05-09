@@ -1,5 +1,6 @@
 #include "Loader.hpp"
 #include <iostream>
+#include "VkInterfaceConstants.hpp"
 
 
 namespace VKW
@@ -102,7 +103,7 @@ Loader::Loader(LoaderDesc const& desc)
 
 
     framedDescriptorsHub_ = std::make_unique<VKW::FramedDescriptorsHub>();
-    assert(swapchain_->ImageCount() <= FramedDescriptorsHub::MAX_FRAMES_COUNT);
+    assert(swapchain_->ImageCount() <= CONSTANTS::MAX_FRAMES_BUFFERING);
     framedDescriptorsHub_->framesCount_ = swapchain_->ImageCount();
 
 
