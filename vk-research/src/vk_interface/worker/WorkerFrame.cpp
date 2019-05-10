@@ -81,12 +81,12 @@ WorkerFrameCommandReciever WorkerFrame::Begin()
 
 void WorkerFrame::End()
 {
-    table_->vkEndCommandBuffer(commandBuffer_);
+    VK_ASSERT(table_->vkEndCommandBuffer(commandBuffer_));
 }
 
 WorkerFrameCompleteSemaphore WorkerFrame::Execute(VkQueue queue, VkSemaphore waitSemaphore, bool signaling)
 {
-    VkFlags waitStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    VkFlags waitStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
     VkSubmitInfo submitInfo;
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

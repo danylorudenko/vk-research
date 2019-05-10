@@ -635,7 +635,7 @@ void Root::CopyBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint3
 
     mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
 
-    VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle());
+    VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
 }
 
 VKW::ResourceRendererProxy* Root::ResourceProxy() const
