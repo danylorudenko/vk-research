@@ -95,7 +95,7 @@ void VulkanApplicationDelegate::update()
 
     testcounter += 0.01f;
     customData_.transformComponent_->scale_ = glm::vec3(5.0f);
-    customData_.transformComponent_->position_ = glm::vec3(0.0f, 0.0f, -2.0f);
+    customData_.transformComponent_->position_ = glm::vec3(0.0f, 0.0f, -1.0f);
     customData_.transformComponent_->orientation_.z = glm::degrees(testcounter);
     customData_.transformComponent_->orientation_.y = glm::degrees(testcounter * 1.1f);
     
@@ -201,6 +201,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     Render::RenderPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0] = Render::Root::SWAPCHAIN_IMAGE_KEY; // we need swapchain reference here
+    passDesc.depthStencilAttachment_ = depthBufferKey;
 
     renderRoot_->DefineRenderPass(passKey, passDesc);
     Render::Pass& pass = renderRoot_->FindPass(passKey);
@@ -255,6 +256,14 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     vp.scissorXextent_ = width;
     vp.scissorYextent_ = height;
 
+    VKW::DepthStencilInfo dsInfo;
+    dsInfo.depthTestEnabled_ = true;
+    dsInfo.depthWriteEnabled_ = true;
+    dsInfo.depthCompareOp_ = VK_COMPARE_OP_LESS;
+    dsInfo.stencilTestEnabled_ = false;
+    dsInfo.backStencilState_ = {};
+    dsInfo.frontStencilState_ = {};
+
     VKW::DescriptorSetLayoutDesc setLayoutDesc;
     setLayoutDesc.membersCount_ = 1;
     setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -269,6 +278,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     pipelineDesc.inputAssemblyInfo_ = &iaInfo;
     pipelineDesc.vertexInputInfo_ = &vInfo;
     pipelineDesc.viewportInfo_ = &vpInfo;
+    pipelineDesc.depthStencilInfo_ = &dsInfo;
     pipelineDesc.layoutDesc_ = &layoutDesc;
 
     renderRoot_->DefineGraphicsPipeline(pipeKey, pipelineDesc);

@@ -447,8 +447,8 @@ ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebuffer
         ImageViewHandle* depthStancilAttachmentHandle = nullptr;
         if (renderPass->depthStencilAttachmentInfo_.usage_ == RENDER_PASS_ATTACHMENT_USAGE_DEPTH_STENCIL) {
             ProxyImageHandle* depthStencilProxyHandle = desc.depthStencilAttachment_;
-            assert(depthStancilAttachmentHandle != nullptr && "ResourceRendererProxy::CreateFramebuffer: null depth stencil attachment handle!)");
             depthStancilAttachmentHandle = &frameResources.imageViews_[depthStencilProxyHandle->id_];
+            assert(depthStancilAttachmentHandle != nullptr && "ResourceRendererProxy::CreateFramebuffer: null depth stencil attachment handle!)");
         }
 
         FramebufferDesc vkFBDesc;

@@ -148,12 +148,14 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
         val.color.float32[3] = 1.0f;
     }
 
+    std::uint32_t attachmentsCount = pass->colorAttachmentsCount_;
+
     if (pass->depthStencilAttachmentInfo_.usage_ == VKW::RENDER_PASS_ATTACHMENT_USAGE_DEPTH_STENCIL) {
-        clearValues[colorAttachmentsCount].depthStencil.depth = 0.0f;
+        clearValues[colorAttachmentsCount].depthStencil.depth = 1.0f;
         clearValues[colorAttachmentsCount].depthStencil.stencil = 0;
+        ++attachmentsCount;
     }
 
-    std::uint32_t const attachmentsCount = pass->colorAttachmentsCount_ + pass->depthStencilAttachmentInfo_.usage_ == VKW::RENDER_PASS_ATTACHMENT_USAGE_NONE ? 0 : 1;
 
     VkRenderPassBeginInfo beginInfo;
     beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;

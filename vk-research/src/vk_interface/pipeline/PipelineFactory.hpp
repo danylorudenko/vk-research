@@ -74,8 +74,6 @@ struct DepthStencilInfo
 {
     bool depthTestEnabled_;
     bool depthWriteEnabled_;
-    float minDepthBound_;
-    float maxDepthBound_;
     VkCompareOp depthCompareOp_;
 
     bool stencilTestEnabled_;

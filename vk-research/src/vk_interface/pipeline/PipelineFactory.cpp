@@ -204,8 +204,8 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
         rasterizationInfo.polygonMode = VK_POLYGON_MODE_FILL;
         rasterizationInfo.cullMode = VK_CULL_MODE_BACK_BIT;
         // TODO
-        //rasterizationInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
-        rasterizationInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        rasterizationInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        //rasterizationInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizationInfo.depthBiasEnable = VK_FALSE;
         rasterizationInfo.depthBiasConstantFactor = 0.0f;
         rasterizationInfo.depthBiasClamp = 0.0f;
@@ -233,6 +233,25 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
     graphicsPipelineInfo.pMultisampleState = &multisampleInfo;
 
+
+
+    static VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+    {
+        depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        depthStencilInfo.pNext = nullptr;
+        depthStencilInfo.flags = VK_FLAGS_NONE;
+        depthStencilInfo.depthTestEnable = desc.depthStencilInfo_->depthTestEnabled_ ? VK_TRUE : VK_FALSE;
+        depthStencilInfo.depthWriteEnable = desc.depthStencilInfo_->depthWriteEnabled_ ? VK_TRUE : VK_FALSE;
+        depthStencilInfo.depthCompareOp = desc.depthStencilInfo_->depthCompareOp_;
+        depthStencilInfo.depthBoundsTestEnable = false;
+        depthStencilInfo.stencilTestEnable = desc.depthStencilInfo_->stencilTestEnabled_ ? VK_TRUE : VK_FALSE;
+        depthStencilInfo.front = desc.depthStencilInfo_->frontStencilState_;
+        depthStencilInfo.back = desc.depthStencilInfo_->backStencilState_;
+        depthStencilInfo.minDepthBounds = 0.0f;
+        depthStencilInfo.maxDepthBounds = 0.0f;
+    }
+
+    graphicsPipelineInfo.pDepthStencilState = &depthStencilInfo;
 
 
     static VkPipelineColorBlendStateCreateInfo colorBlendInfo;
