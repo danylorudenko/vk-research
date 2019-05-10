@@ -627,7 +627,7 @@ void Root::CopyBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint3
     VkBufferCopy copyInfo;
     copyInfo.srcOffset = srcView->offset_;
     copyInfo.dstOffset = dstView->offset_;
-    copyInfo.size = srcView->size_;
+    copyInfo.size = dstView->size_;
 
     VulkanFuncTable()->vkCmdCopyBuffer(commandReciever.commandBuffer_, srcBuffer->handle_, dstBuffer->handle_, 1, &copyInfo);
 
