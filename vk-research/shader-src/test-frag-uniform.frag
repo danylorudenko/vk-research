@@ -10,6 +10,7 @@ const float lambertian = 1.0 / 3.14;
 
 void main()
 {
-	float ndotl = dot(out_v_norm, light_vec);
-	finalColor = vec4(vec3(ndotl * lambertian), 1.0);
+	vec3 normN = normalize(out_v_norm);
+	float ndotl = dot(normN, light_vec);
+	finalColor = vec4(vec3(ndotl), 1.0);
 }
