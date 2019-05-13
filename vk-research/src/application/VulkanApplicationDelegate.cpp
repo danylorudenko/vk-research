@@ -10,6 +10,8 @@
 
 #include <glm\gtc\quaternion.hpp>
 
+#include <imgui/imgui.h>
+
 VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug)
     : mainWindow_ {
         instance,
@@ -71,6 +73,7 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
 
 void VulkanApplicationDelegate::start()
 {
+    InitImGui();
     FakeParseRendererResources();
 }
 
@@ -105,6 +108,9 @@ void VulkanApplicationDelegate::update()
     ////////////////////////////////////////////////////
     transformationSystem_.Update(context, glm::vec3(0.0f), glm::vec3(0.0f), 60.0f);
     renderRoot_->IterateRenderGraph(presentationContext);
+
+
+    /////////////////////
 }
 
 void VulkanApplicationDelegate::shutdown()
@@ -316,4 +322,24 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     // how to write resource descriptor to DescriptorSet
     //renderRoot_->Defue
 
+}
+
+void VulkanApplicationDelegate::InitImGui()
+{
+    static char const* IMGUI_TEXTURE = "imgui";
+    
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags = ImGuiConfigFlags_None;
+    
+    int width = 0, height = 0;
+    unsigned char* textureData = nullptr;
+    io.Fonts->GetTexDataAsRGBA32(&textureData, &width, &height);
+
+    VKW::ImageViewDesc imageDesc;
+    imageDesc.width_ = width;
+    imageDesc.height_ = height;
+    imageDesc.format_ = VK_FORMAT_R8G8B8A8_UNORM;
+    imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
+    renderRoot_->DefineGlobalImage(IMGUI_TEXTURE, imageDesc);
 }

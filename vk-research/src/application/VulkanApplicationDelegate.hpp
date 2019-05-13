@@ -51,4 +51,5 @@ private:
 
     // TODO
     void FakeParseRendererResources();
+    void InitImGui();
 };
