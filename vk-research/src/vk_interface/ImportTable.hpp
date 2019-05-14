@@ -148,6 +148,7 @@ public:
     PFN_vkDestroyFramebuffer vkDestroyFramebuffer = nullptr;
 
     PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
+    PFN_vkCmdCopyBufferToImage vkCmdCopyBufferToImage = nullptr;
 
     PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers = nullptr;
     PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer = nullptr;
@@ -156,6 +157,8 @@ public:
     PFN_vkCmdPushConstants vkCmdPushConstants = nullptr;
 
     PFN_vkCmdDispatch vkCmdDispatch = nullptr;
+
+    PFN_vkCmdPipelineBarrier vkCmdPipelineBarrier = nullptr;
 
     PFN_vkCmdBeginRenderPass vkCmdBeginRenderPass = nullptr;
     PFN_vkCmdEndRenderPass vkCmdEndRenderPass = nullptr;

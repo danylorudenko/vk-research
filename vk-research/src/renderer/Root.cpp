@@ -614,7 +614,7 @@ void Root::ReleaseRenderWorkItem(PipelineKey const& pipelineKey, RenderWorkItemH
     return ReleaseRenderWorkItem(FindPipeline(pipelineKey), handle);
 }
 
-void Root::CopyBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context)
+void Root::CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context)
 {
     VKW::BufferView* srcView = FindGlobalBuffer(src, context);
     VKW::BufferView* dstView = FindGlobalBuffer(dst, context);
@@ -629,7 +629,112 @@ void Root::CopyBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint3
     copyInfo.dstOffset = dstView->offset_;
     copyInfo.size = dstView->size_;
 
+    VkBufferMemoryBarrier barriers[2];
+
+    VkBufferMemoryBarrier& srcBarrier = barriers[0];
+    srcBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    srcBarrier.pNext = nullptr;
+    srcBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+    srcBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    srcBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    srcBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    srcBarrier.buffer = srcBuffer->handle_;
+    srcBarrier.offset = srcView->offset_;
+    srcBarrier.size = srcView->size_;
+
+    VkBufferMemoryBarrier& dstBarrier = barriers[1];
+    dstBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    dstBarrier.pNext = nullptr;
+    dstBarrier.srcAccessMask = VK_FLAGS_NONE;
+    dstBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    dstBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    dstBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    dstBarrier.buffer = srcBuffer->handle_;
+    dstBarrier.offset = srcView->offset_;
+    dstBarrier.size = srcView->size_;
+
+    
+
+    VulkanFuncTable()->vkCmdPipelineBarrier(
+        commandReciever.commandBuffer_,
+        VK_PIPELINE_STAGE_HOST_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_FLAGS_NONE,
+        0, nullptr,
+        2, barriers,
+        0, nullptr);
+
     VulkanFuncTable()->vkCmdCopyBuffer(commandReciever.commandBuffer_, srcBuffer->handle_, dstBuffer->handle_, 1, &copyInfo);
+
+    mainWorkerTemp_->EndExecutionFrame(context);
+
+    mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
+
+    VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
+}
+
+void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context)
+{
+    VKW::BufferView* srcView = FindGlobalBuffer(src, context);
+    VKW::ImageView* dstView = FindGlobalImage(dst, context);
+
+    VKW::BufferResource* srcBuffer = resourceProxy_->GetResource(srcView->providedBuffer_->bufferResource_);
+    VKW::ImageResource* dstImage = resourceProxy_->GetResource(dstView->resource_);
+
+    VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
+    
+    VkBufferImageCopy copyInfo;
+    copyInfo.bufferOffset = srcView->offset_;
+    copyInfo.bufferRowLength = dstImage->width_;
+    copyInfo.bufferImageHeight = dstImage->height_;
+    copyInfo.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copyInfo.imageSubresource.mipLevel = 0;
+    copyInfo.imageSubresource.baseArrayLayer = 0;
+    copyInfo.imageSubresource.layerCount = 1;
+    copyInfo.imageOffset.x = 0;
+    copyInfo.imageOffset.y = 0;
+    copyInfo.imageOffset.z = 0;
+    copyInfo.imageExtent.width = dstImage->width_;
+    copyInfo.imageExtent.height = dstImage->height_;
+    copyInfo.imageExtent.depth = 1;
+
+    VkBufferMemoryBarrier srcBufferBarrier;
+    srcBufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    srcBufferBarrier.pNext = nullptr;
+    srcBufferBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+    srcBufferBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    srcBufferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    srcBufferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    srcBufferBarrier.buffer = srcBuffer->handle_;
+    srcBufferBarrier.offset = srcView->offset_;
+    srcBufferBarrier.size = srcView->size_;
+
+    VkImageMemoryBarrier dstImageBarrier;
+    dstImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    dstImageBarrier.pNext = nullptr;
+    dstImageBarrier.srcAccessMask = VK_FLAGS_NONE;
+    dstImageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    dstImageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    dstImageBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    dstImageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    dstImageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    dstImageBarrier.image = dstImage->handle_;
+    dstImageBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    dstImageBarrier.subresourceRange.baseArrayLayer = 0;
+    dstImageBarrier.subresourceRange.layerCount = 1;
+    dstImageBarrier.subresourceRange.baseMipLevel = 0;
+    dstImageBarrier.subresourceRange.levelCount = 1;
+
+    VulkanFuncTable()->vkCmdPipelineBarrier(
+        commandReciever.commandBuffer_,
+        VK_PIPELINE_STAGE_HOST_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_FLAGS_NONE,
+        0, nullptr,
+        1, &srcBufferBarrier,
+        1, &dstImageBarrier);
+                                                                                                                     // WARNING, WE NEED TRANSITION TO THIS LAYOUT
+    VulkanFuncTable()->vkCmdCopyBufferToImage(commandReciever.commandBuffer_, srcBuffer->handle_, dstImage->handle_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyInfo);
 
     mainWorkerTemp_->EndExecutionFrame(context);
 

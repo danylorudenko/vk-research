@@ -191,11 +191,11 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     void* mappedUploadBuffer = renderRoot_->MapBuffer(uploadBufferKey, 0);
     std::memcpy(mappedUploadBuffer, testMesh.vertexData_.data(), vertexDataSizeBytes);
     renderRoot_->FlushBuffer(uploadBufferKey, 0);
-    renderRoot_->CopyBuffer(uploadBufferKey, vertexBufferKey, 0);
+    renderRoot_->CopyStagingBufferToGPUBuffer(uploadBufferKey, vertexBufferKey, 0);
 
     std::memcpy(mappedUploadBuffer, testMesh.indexData_.data(), indexDataSizeBytes);
     renderRoot_->FlushBuffer(uploadBufferKey, 0);
-    renderRoot_->CopyBuffer(uploadBufferKey, indexBufferKey, 0);
+    renderRoot_->CopyStagingBufferToGPUBuffer(uploadBufferKey, indexBufferKey, 0);
 
 
     VKW::ImageViewDesc depthBufferDesc;
@@ -327,6 +327,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 void VulkanApplicationDelegate::InitImGui()
 {
     static char const* IMGUI_TEXTURE = "imgui";
+    static char const* IMGUI_TEXTURE_STAGING_BUFFER = "s_img";
     
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -342,4 +343,12 @@ void VulkanApplicationDelegate::InitImGui()
     imageDesc.format_ = VK_FORMAT_R8G8B8A8_UNORM;
     imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
     renderRoot_->DefineGlobalImage(IMGUI_TEXTURE, imageDesc);
+
+    VKW::BufferViewDesc stagingBufferDesc;
+    stagingBufferDesc.format_ = VK_FORMAT_UNDEFINED;
+    stagingBufferDesc.size_ = width * height * 32;
+    stagingBufferDesc.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
+    renderRoot_->DefineGlobalBuffer(IMGUI_TEXTURE_STAGING_BUFFER, stagingBufferDesc);
+
+    renderRoot_->CopyStagingBufferToGPUTexture(IMGUI_TEXTURE_STAGING_BUFFER, IMGUI_TEXTURE, 0);
 }
