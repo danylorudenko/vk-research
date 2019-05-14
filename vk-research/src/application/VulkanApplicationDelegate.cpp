@@ -95,6 +95,8 @@ void VulkanApplicationDelegate::update()
     std::uint32_t context = presentationContext.contextId_;
     ////////////////////////////////////////////////////
     //
+    ImGui::NewFrame();
+
 
     testcounter += 0.01f;
     customData_.transformComponent_->scale_ = glm::vec3(3.0f);
@@ -111,6 +113,10 @@ void VulkanApplicationDelegate::update()
 
 
     /////////////////////
+
+    ImGui::EndFrame();
+    ImGui::Render();
+    ImDrawData* imguiDrawData = ImGui::GetDrawData();
 }
 
 void VulkanApplicationDelegate::shutdown()
@@ -351,4 +357,14 @@ void VulkanApplicationDelegate::InitImGui()
     renderRoot_->DefineGlobalBuffer(IMGUI_TEXTURE_STAGING_BUFFER, stagingBufferDesc);
 
     renderRoot_->CopyStagingBufferToGPUTexture(IMGUI_TEXTURE_STAGING_BUFFER, IMGUI_TEXTURE, 0);
+
+    // hmm, I should have either^
+    // 1) separate worker for imgui stuff
+    // 2) pass for imgui
+    //vulkanLoader_->workersProvider_->
+}
+
+void VulkanApplicationDelegate::RenderImGui(std::uint32_t context)
+{
+    
 }

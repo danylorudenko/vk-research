@@ -52,4 +52,5 @@ private:
     // TODO
     void FakeParseRendererResources();
     void InitImGui();
+    void RenderImGui(std::uint32_t context);
 };
