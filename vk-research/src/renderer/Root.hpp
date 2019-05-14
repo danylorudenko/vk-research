@@ -232,7 +232,9 @@ public:
     
 
     VKW::PresentationContext AcquireNextPresentationContext();
+    void BeginRenderGraph(VKW::PresentationContext const& presentationContext);
     void IterateRenderGraph(VKW::PresentationContext const& presentationContext);
+    void EndRenderGraph(VKW::PresentationContext const& presentationContext);
 
 private:
     /*DESCRIPTOR_TYPE_SAMPLED_TEXTURE,

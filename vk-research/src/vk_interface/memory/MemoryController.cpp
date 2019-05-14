@@ -95,7 +95,7 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
     std::uint32_t validAllocation = INVALID_ALLOCATION;
     auto const allocationsCount = allocations_.size();
     for (auto i = 0u; i < allocationsCount; ++i) {
-        auto const page = allocations_[i];
+        auto const& page = allocations_[i];
         auto const accessValid = (page->accessFlags_ & accessFlags) == accessFlags;
         auto const sizeValid = desc.size_ <= (page->size_ - page->nextFreeOffset_);
         auto const usageValid = desc.usage_ == page->usage_;

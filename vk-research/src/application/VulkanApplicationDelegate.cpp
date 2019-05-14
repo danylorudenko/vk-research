@@ -12,7 +12,7 @@
 
 #include <imgui/imgui.h>
 
-VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, bool vkDebug)
+VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, std::uint32_t buffering, bool vkDebug, bool imguiEnabled)
     : mainWindow_ {
         instance,
         title,
@@ -21,11 +21,12 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
         "VulkanRenderWindow",
         VulkanApplicationDelegate::WinProc,
         this }
+    , imguiEnabled_{ imguiEnabled }
 {
     VKW::LoaderDesc loaderDesc;
     loaderDesc.hInstance_ = instance; 
     loaderDesc.hwnd_ = mainWindow_.NativeHandle();
-    loaderDesc.bufferingCount_ = 2;
+    loaderDesc.bufferingCount_ = buffering;
     loaderDesc.ioManager_ = &ioManager_;
     loaderDesc.debug_ = vkDebug;
 
@@ -73,7 +74,9 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
 
 void VulkanApplicationDelegate::start()
 {
-    InitImGui();
+    if (imguiEnabled_)
+        InitImGui();
+
     FakeParseRendererResources();
 }
 
@@ -95,7 +98,8 @@ void VulkanApplicationDelegate::update()
     std::uint32_t context = presentationContext.contextId_;
     ////////////////////////////////////////////////////
     //
-    ImGui::NewFrame();
+    if (imguiEnabled_)
+        ImGui::NewFrame();
 
 
     testcounter += 0.01f;
@@ -114,9 +118,11 @@ void VulkanApplicationDelegate::update()
 
     /////////////////////
 
-    ImGui::EndFrame();
-    ImGui::Render();
-    ImDrawData* imguiDrawData = ImGui::GetDrawData();
+    if (imguiEnabled_) {
+        ImGui::EndFrame();
+        ImGui::Render();
+        ImDrawData* imguiDrawData = ImGui::GetDrawData();
+    }
 }
 
 void VulkanApplicationDelegate::shutdown()
