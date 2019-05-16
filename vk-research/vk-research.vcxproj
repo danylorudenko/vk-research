@@ -135,6 +135,7 @@
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\application\Application.cpp" />
+    <ClCompile Include="src\application\ImGuiHelper.cpp" />
     <ClCompile Include="src\application\VulkanApplicationDelegate.cpp" />
     <ClCompile Include="src\class_features\ContinuousDataStorage.cpp" />
     <ClCompile Include="src\io\IOManager.cpp" />
@@ -439,6 +440,7 @@
     <ClInclude Include="include\vulkan\vulkan_xlib.h" />
     <ClInclude Include="include\vulkan\vulkan_xlib_xrandr.h" />
     <ClInclude Include="src\application\Application.hpp" />
+    <ClInclude Include="src\application\ImGuiHelper.hpp" />
     <ClInclude Include="src\application\VulkanApplicationDelegate.hpp" />
     <ClInclude Include="src\class_features\NonCopyable.hpp" />
     <ClInclude Include="src\class_features\NonMovable.hpp" />
