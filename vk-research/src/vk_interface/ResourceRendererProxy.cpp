@@ -342,6 +342,7 @@ ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferViewDesc const& decs
     bool framedResource = false;
     switch (decs.usage_) {
     case BufferUsage::UNIFORM:
+    case BufferUsage::VERTEX_INDEX_WRITABLE:
         framedResource = true;
     }
 

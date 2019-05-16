@@ -49,6 +49,10 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     rootDesc.defaultFramebufferHeight_ = vulkanLoader_->swapchain_->Height();
 
     renderRoot_ = std::make_unique<Render::Root>(rootDesc);
+
+    ImGuiHelperDesc imguiHelperDesc;
+    imguiHelperDesc.root_ = renderRoot_.get();
+    imguiHelper_ = std::make_unique<ImGuiHelper>(imguiHelperDesc);
 }
 
 VulkanApplicationDelegate::~VulkanApplicationDelegate()
@@ -223,7 +227,6 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     passDesc.depthStencilAttachment_ = depthBufferKey;
 
     renderRoot_->DefineRenderPass(passKey, passDesc);
-    Render::Pass& pass = renderRoot_->FindPass(passKey);
 
     Render::ShaderDesc vertexShaderDesc;
     vertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
@@ -314,7 +317,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->DefineMaterial(materialKey, materialDesc);
 
 
-    Render::RenderItemDesc itemDesc;
+    Render::RenderWorkItemDesc itemDesc;
     itemDesc.vertexBufferKey_ = vertexBufferKey;
     itemDesc.indexBufferKey_ = indexBufferKey;
     itemDesc.vertexCount_ = vertexDataSizeBytes / sizeof(TestVertex);
@@ -338,8 +341,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 void VulkanApplicationDelegate::InitImGui()
 {
-    
-    
+    imguiHelper_->Init(mainWindow_.Width(), mainWindow_.Height());
 }
 
 void VulkanApplicationDelegate::RenderImGui(std::uint32_t context)

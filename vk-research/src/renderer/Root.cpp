@@ -567,7 +567,7 @@ void Root::RegisterMaterial(MaterialKey const& key)
     }
 }
 
-RenderWorkItemHandle Root::ConstructRenderWorkItem(Pipeline& pipeline, RenderItemDesc const& desc)
+RenderWorkItemHandle Root::ConstructRenderWorkItem(Pipeline& pipeline, RenderWorkItemDesc const& desc)
 {
     pipeline.renderItems_.emplace_back();
     RenderWorkItem& item = pipeline.renderItems_.back();
@@ -604,7 +604,7 @@ RenderWorkItem* Root::FindRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandl
     return &pipeline.renderItems_[handle.id_];
 }
 
-RenderWorkItemHandle Root::ConstructRenderWorkItem(PipelineKey const& pipelineKey, RenderItemDesc const& desc)
+RenderWorkItemHandle Root::ConstructRenderWorkItem(PipelineKey const& pipelineKey, RenderWorkItemDesc const& desc)
 {
     return ConstructRenderWorkItem(FindPipeline(pipelineKey), desc);
 }

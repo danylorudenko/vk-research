@@ -134,7 +134,7 @@ struct MaterialDesc
     perPassData_[MATERIAL_TEMPLATE_PASS_LIMIT];
 };
 
-struct RenderItemDesc
+struct RenderWorkItemDesc
 {
     ResourceKey vertexBufferKey_;
     ResourceKey indexBufferKey_;
@@ -215,8 +215,8 @@ public:
     void RegisterMaterial(MaterialKey const& key);
 
 
-    RenderWorkItemHandle ConstructRenderWorkItem(PipelineKey const& key, RenderItemDesc const& desc);
-    RenderWorkItemHandle ConstructRenderWorkItem(Pipeline& pipeline, RenderItemDesc const& desc);
+    RenderWorkItemHandle ConstructRenderWorkItem(PipelineKey const& key, RenderWorkItemDesc const& desc);
+    RenderWorkItemHandle ConstructRenderWorkItem(Pipeline& pipeline, RenderWorkItemDesc const& desc);
     RenderWorkItem* FindRenderWorkItem(PipelineKey const& key, RenderWorkItemHandle handle);
     RenderWorkItem* FindRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle);
     void ReleaseRenderWorkItem(PipelineKey const& key, RenderWorkItemHandle handle);

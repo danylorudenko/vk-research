@@ -14,21 +14,21 @@ char const* ImGuiHelper::IMGUI_PASS_KEY = "impss";
 char const* ImGuiHelper::IMGUI_VERT_SHADER_KEY = "imvs";
 char const* ImGuiHelper::IMGUI_FRAG_SHADER_KEY = "imfs";
 
+char const* ImGuiHelper::IMGUI_VERTEX_BUFFER_KEY = "imvt";
+char const* ImGuiHelper::IMGUI_INDEX_BUFFER_KEY = "imin";
+
 ImGuiHelper::ImGuiHelper()
     : root_{ nullptr }
-    , mainWorkItem_{}
 {
 }
 
 ImGuiHelper::ImGuiHelper(ImGuiHelperDesc const& desc)
     : root_{ desc.root_ }
-    , mainWorkItem_{}
 {
 }
 
 ImGuiHelper::ImGuiHelper(ImGuiHelper&& rhs)
     : root_{ nullptr }
-    , mainWorkItem_{}
 {
     operator=(std::move(rhs));
 }
@@ -36,9 +36,14 @@ ImGuiHelper::ImGuiHelper(ImGuiHelper&& rhs)
 ImGuiHelper& ImGuiHelper::operator=(ImGuiHelper&& rhs)
 {
     std::swap(root_, rhs.root_);
-    std::swap(mainWorkItem_, rhs.mainWorkItem_);
+    std::swap(mainRenderWorkItem_, rhs.mainRenderWorkItem_);
 
     return *this;
+}
+
+ImGuiHelper::~ImGuiHelper()
+{
+    // hmmmmmmmm
 }
 
 void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight)
@@ -72,10 +77,6 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0] = Render::Root::SWAPCHAIN_IMAGE_KEY;
 
-    root_->DefineRenderPass(IMGUI_PASS_KEY, passDesc);
-
-    Render::Pass& pass = root_->FindPass(IMGUI_PASS_KEY);
-
     Render::ShaderDesc vertexShaderDesc;
     vertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
     vertexShaderDesc.relativePath_ = "shader-src\\imgui.vert.spv";
@@ -84,15 +85,12 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     fragmentShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
     fragmentShaderDesc.relativePath_ = "shader-src\\imgui.frag.spv";
 
-    root_->DefineShader(IMGUI_VERT_SHADER_KEY, vertexShaderDesc);
-    root_->DefineShader(IMGUI_FRAG_SHADER_KEY, fragmentShaderDesc);
-
     Render::GraphicsPipelineDesc pipelineDesc;
 
     pipelineDesc.renderPass_ = IMGUI_PASS_KEY;
     pipelineDesc.shaderStagesCount_ = 2;
-    pipelineDesc.shaderStages_[0] = "vShader";
-    pipelineDesc.shaderStages_[1] = "fShader";
+    pipelineDesc.shaderStages_[0] = IMGUI_VERT_SHADER_KEY;
+    pipelineDesc.shaderStages_[1] = IMGUI_FRAG_SHADER_KEY;
 
     VKW::InputAssemblyInfo iaInfo;
     iaInfo.primitiveRestartEnable_ = false;
@@ -140,10 +138,8 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     setLayoutDesc.membersDesc_[0].type_ = VKW::DescriptorType::DESCRIPTOR_TYPE_SAMPLED_TEXTURE;
     setLayoutDesc.membersDesc_[0].binding_ = 0;
 
-    root_->DefineSetLayout(IMGUI_SET_LAYOUT_KEY, setLayoutDesc);
-
     Render::PipelineLayoutDesc layoutDesc;
-    layoutDesc.staticMembersCount_ = 0;
+    layoutDesc.staticMembersCount_ = 1;
     layoutDesc.staticMembers_[0] = IMGUI_SET_LAYOUT_KEY;
     layoutDesc.instancedMembersCount_ = 0;
 
@@ -153,10 +149,45 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     pipelineDesc.depthStencilInfo_ = &dsInfo;
     pipelineDesc.layoutDesc_ = &layoutDesc;
 
+    VKW::BufferViewDesc vertexBufferDesc;
+    vertexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX_WRITABLE;
+    vertexBufferDesc.size_ = IMGUI_VERTEX_BUFFER_SIZE;
+    vertexBufferDesc.format_ = VK_FORMAT_UNDEFINED;
+
+    VKW::BufferViewDesc indexBufferDesc;
+    indexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX_WRITABLE;
+    indexBufferDesc.size_ = IMGUI_INDEX_BUFFER_SIZE;
+    indexBufferDesc.format_ = VK_FORMAT_UNDEFINED;
+
+    Render::RenderWorkItemDesc renderWorkItemDesc;
+    renderWorkItemDesc.vertexCount_ = 0;
+    renderWorkItemDesc.vertexBufferKey_ = IMGUI_VERTEX_BUFFER_KEY;
+    renderWorkItemDesc.indexCount_ = 0;
+    renderWorkItemDesc.indexBufferKey_ = IMGUI_INDEX_BUFFER_KEY;
+
+
+    root_->DefineRenderPass(IMGUI_PASS_KEY, passDesc);
+    root_->DefineShader(IMGUI_VERT_SHADER_KEY, vertexShaderDesc);
+    root_->DefineShader(IMGUI_FRAG_SHADER_KEY, fragmentShaderDesc);
+    root_->DefineSetLayout(IMGUI_SET_LAYOUT_KEY, setLayoutDesc);
     root_->DefineGraphicsPipeline(IMGUI_PIPELINE_KEY, pipelineDesc);
+    root_->DefineGlobalBuffer(IMGUI_INDEX_BUFFER_KEY, indexBufferDesc);
+    root_->DefineGlobalBuffer(IMGUI_VERTEX_BUFFER_KEY, vertexBufferDesc);
+    mainRenderWorkItem_ =  root_->ConstructRenderWorkItem(IMGUI_PIPELINE_KEY, renderWorkItemDesc);
 }
 
 void ImGuiHelper::BeginFrame(std::uint32_t context)
 {
+    ImGui::NewFrame();
+}
 
+void ImGuiHelper::EndFrame(std::uint32_t context)
+{
+    ImGui::EndFrame();
+}
+
+void ImGuiHelper::Render(std::uint32_t context)
+{
+    ImGui::Render();
+    ImDrawData* data = ImGui::GetDrawData();
 }

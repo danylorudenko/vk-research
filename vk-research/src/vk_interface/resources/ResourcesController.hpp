@@ -12,6 +12,7 @@ namespace VKW
 enum class BufferUsage
 {
     VERTEX_INDEX,
+    VERTEX_INDEX_WRITABLE,
     UNIFORM,
     UPLOAD_BUFFER
 };

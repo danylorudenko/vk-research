@@ -207,15 +207,9 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
             
         }
 
-        //typedef void (VKAPI_PTR *PFN_vkCmdBindDescriptorSets)(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t firstSet, 
-        //uint32_t descriptorSetCount, const VkDescriptorSet* pDescriptorSets, uint32_t dynamicOffsetCount, const uint32_t* pDynamicOffsets);
-        
         if (materialBindsCount > 0)
             table_->vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, 0, materialBindsCount, vkSetsToBind, 0, nullptr);
 
-
-        // temporaty testing zalepa
-        // TODO
 
         auto& renderItems = pipeline.renderItems_;
 

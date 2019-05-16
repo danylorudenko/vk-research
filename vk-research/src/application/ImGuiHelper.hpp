@@ -41,7 +41,14 @@ private:
     static char const* IMGUI_VERT_SHADER_KEY;
     static char const* IMGUI_FRAG_SHADER_KEY;
 
+    static char const* IMGUI_VERTEX_BUFFER_KEY;
+    static char const* IMGUI_INDEX_BUFFER_KEY;
+
+    static constexpr std::uint32_t IMGUI_VERTEX_BUFFER_SIZE = 20 * 4096;
+    static constexpr std::uint32_t IMGUI_INDEX_BUFFER_SIZE = 4 * 2048;
+
 
     Render::Root* root_;
-    Render::RenderWorkItem mainWorkItem_;
+    Render::RenderWorkItemHandle mainRenderWorkItem_;
+    
 };

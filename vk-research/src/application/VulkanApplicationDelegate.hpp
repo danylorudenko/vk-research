@@ -14,6 +14,7 @@
 #include "..\renderer\RootDef.hpp"
 #include "..\renderer\UniformBufferWriterProxy.hpp"
 #include "..\transform\TransformationSystem.hpp"
+#include "ImGuiHelper.hpp"
 
 struct CustomData
 {
@@ -49,7 +50,9 @@ private:
 
     std::unique_ptr<VKW::Loader> vulkanLoader_;
     std::unique_ptr<Render::Root> renderRoot_;
+    std::unique_ptr<ImGuiHelper> imguiHelper_;
     bool imguiEnabled_;
+
 
     Transform::TransformationSystem transformationSystem_;
     
