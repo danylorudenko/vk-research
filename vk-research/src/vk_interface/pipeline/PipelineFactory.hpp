@@ -81,6 +81,12 @@ struct DepthStencilInfo
     VkStencilOpState backStencilState_;
 };
 
+enum PipelineDynamicStatesFlags
+{
+    PIPELINE_DYNAMIC_STATE_VIEWPORT = 1,
+    PIPELINE_DYNAMIC_STATE_SCISSOR = 1 << 1,
+};
+
 struct GraphicsPipelineDesc
 {
     bool optimized_;
@@ -92,6 +98,7 @@ struct GraphicsPipelineDesc
     VertexInputInfo* vertexInputInfo_;
     ViewportInfo* viewportInfo_;
     DepthStencilInfo* depthStencilInfo_;
+    PipelineDynamicStatesFlags dynamicStatesFlags_;
     // blending info should be here later
     
     PipelineLayoutDesc* layoutDesc_;

@@ -71,6 +71,7 @@ struct PipelineLayoutDesc
     SetLayoutKey instancedMembers_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
 };
 
+
 struct GraphicsPipelineDesc
 {
     bool optimized_;
@@ -82,6 +83,7 @@ struct GraphicsPipelineDesc
     VKW::VertexInputInfo* vertexInputInfo_;
     VKW::ViewportInfo* viewportInfo_;
     VKW::DepthStencilInfo* depthStencilInfo_;
+    PipelineDynamicStatesFlags dynamicStateFlags_;
     // blending info should be here later
 
     Render::PipelineLayoutDesc* layoutDesc_;

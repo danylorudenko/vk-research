@@ -283,6 +283,14 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     }
 
     graphicsPipelineInfo.pColorBlendState = &colorBlendInfo;
+
+
+    static VkPipelineDynamicStateCreateInfo dynamicStateInfo;
+    {
+        I STOPPED HERE
+    }
+
+    graphicsPipelineInfo.pDynamicState = dynamicStateInfo.dynamicStateCount > 0 ? &dynamicStateInfo : nullptr;
     
 
     VkPipeline vkPipeline = VK_NULL_HANDLE;

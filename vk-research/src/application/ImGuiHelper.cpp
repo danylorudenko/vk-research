@@ -71,6 +71,8 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
 
     root_->CopyStagingBufferToGPUTexture(IMGUI_TEXTURE_STAGING_BUFFER_KEY, IMGUI_TEXTURE_KEY, 0);
 
+    io.Fonts->SetTexID(IMGUI_TEXTURE_KEY);
+
 
 
     Render::RenderPassDesc passDesc;
@@ -190,4 +192,31 @@ void ImGuiHelper::Render(std::uint32_t context)
 {
     ImGui::Render();
     ImDrawData* data = ImGui::GetDrawData();
+
+    std::int32_t const totalVertexSizeBytes = data->TotalVtxCount * sizeof(ImDrawVert);
+    std::int32_t const totalIndexSizeBytes = data->TotalIdxCount * sizeof(ImDrawIdx);
+
+    assert(totalVertexSizeBytes <= IMGUI_VERTEX_BUFFER_SIZE && "ImGui vertex buffer overflows allocated space.");
+    assert(totalIndexSizeBytes <= IMGUI_INDEX_BUFFER_SIZE && "ImGui vertex buffer overflows allocated space.");
+
+    std::int32_t const cmdListsCount = data->CmdListsCount;
+    for (std::int32_t i = 0; i < cmdListsCount; ++i) {
+        ImDrawList const* drawList = data->CmdLists[0];
+        ImVector<ImDrawVert> const& vertexBuffer = drawList->VtxBuffer;
+        ImVector<ImDrawIdx> const& indexBuffer = drawList->IdxBuffer;
+        ImVector<ImDrawCmd> const& cmdBuffer = drawList->CmdBuffer;
+
+        std::int32_t const commandsCount = cmdBuffer.size();
+        for (std::int32_t cmdI = 0; cmdI < commandsCount; cmdI) {
+            ImDrawCmd const& drawCmd = cmdBuffer[cmdI];
+            if (drawCmd.UserCallback != nullptr) {
+                drawCmd.UserCallback(drawList, &drawCmd);
+            }
+            else {
+
+            }
+        }
+    }
+
+
 }
