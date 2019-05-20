@@ -81,6 +81,9 @@ struct DepthStencilInfo
     VkStencilOpState backStencilState_;
 };
 
+// 8 in spec without wierd extensions. don't think i gonna need more
+std::uint32_t constexpr PIPELINE_DYNAMIC_STATES_MAX = 8;
+
 enum PipelineDynamicStatesFlags
 {
     PIPELINE_DYNAMIC_STATE_VIEWPORT = 1,
@@ -98,7 +101,7 @@ struct GraphicsPipelineDesc
     VertexInputInfo* vertexInputInfo_;
     ViewportInfo* viewportInfo_;
     DepthStencilInfo* depthStencilInfo_;
-    PipelineDynamicStatesFlags dynamicStatesFlags_;
+    std::uint32_t dynamicStatesFlags_; // PipelineDynamicStateFlags
     // blending info should be here later
     
     PipelineLayoutDesc* layoutDesc_;

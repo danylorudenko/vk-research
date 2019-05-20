@@ -2,7 +2,6 @@
 #include "..\renderer\Root.hpp"
 
 #include <utility>
-#include <imgui/imgui.h>
 
 char const* ImGuiHelper::IMGUI_TEXTURE_KEY = "imtex";
 char const* ImGuiHelper::IMGUI_TEXTURE_STAGING_BUFFER_KEY = "imupb";
@@ -71,7 +70,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
 
     root_->CopyStagingBufferToGPUTexture(IMGUI_TEXTURE_STAGING_BUFFER_KEY, IMGUI_TEXTURE_KEY, 0);
 
-    io.Fonts->SetTexID(IMGUI_TEXTURE_KEY);
+    io.Fonts->SetTexID((ImTextureID)IMGUI_TEXTURE_KEY);
 
 
 
@@ -141,15 +140,16 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     setLayoutDesc.membersDesc_[0].binding_ = 0;
 
     Render::PipelineLayoutDesc layoutDesc;
-    layoutDesc.staticMembersCount_ = 1;
-    layoutDesc.staticMembers_[0] = IMGUI_SET_LAYOUT_KEY;
-    layoutDesc.instancedMembersCount_ = 0;
+    layoutDesc.staticMembersCount_ = 0;
+    layoutDesc.instancedMembersCount_ = 1;
+    layoutDesc.instancedMembers_[0] = IMGUI_SET_LAYOUT_KEY;
 
     pipelineDesc.inputAssemblyInfo_ = &iaInfo;
     pipelineDesc.vertexInputInfo_ = &vInfo;
     pipelineDesc.viewportInfo_ = &vpInfo;
     pipelineDesc.depthStencilInfo_ = &dsInfo;
     pipelineDesc.layoutDesc_ = &layoutDesc;
+    pipelineDesc.dynamicStateFlags_ = VKW::PIPELINE_DYNAMIC_STATE_VIEWPORT | VKW::PIPELINE_DYNAMIC_STATE_SCISSOR;
 
     VKW::BufferViewDesc vertexBufferDesc;
     vertexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX_WRITABLE;
@@ -166,6 +166,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     renderWorkItemDesc.vertexBufferKey_ = IMGUI_VERTEX_BUFFER_KEY;
     renderWorkItemDesc.indexCount_ = 0;
     renderWorkItemDesc.indexBufferKey_ = IMGUI_INDEX_BUFFER_KEY;
+    renderWorkItemDesc.setOwnerDescs_->members_[0].texture2D_.textureKey_ = IMGUI_TEXTURE_KEY;
 
 
     root_->DefineRenderPass(IMGUI_PASS_KEY, passDesc);

@@ -70,7 +70,7 @@ DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(
         switch (desc.membersDesc_[i].type_)
         {
         case DescriptorType::DESCRIPTOR_TYPE_SAMPLED_TEXTURE:
-            bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+            bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;;
             break;
         case DescriptorType::DESCRIPTOR_TYPE_SAMPLER:
             bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;

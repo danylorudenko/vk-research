@@ -83,7 +83,7 @@ struct GraphicsPipelineDesc
     VKW::VertexInputInfo* vertexInputInfo_;
     VKW::ViewportInfo* viewportInfo_;
     VKW::DepthStencilInfo* depthStencilInfo_;
-    PipelineDynamicStatesFlags dynamicStateFlags_;
+    std::uint32_t dynamicStateFlags_;  // VKW::PipelineDynamicStateFlags
     // blending info should be here later
 
     Render::PipelineLayoutDesc* layoutDesc_;
@@ -109,6 +109,7 @@ struct UniformBufferSetMemberData
 
 struct Texture2DSetMemberData
 {
+    ResourceKey imageKey_;
 };
 
 struct StorageBufferSetMemberData
@@ -244,6 +245,7 @@ private:
         DESCRIPTOR_TYPE_UNIFORM_BUFFER*/
 
     void DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle);
+    void DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VKW::ImageView* imageView);
 
     void InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCount, SetLayoutKey const* setLayoutKeys, SetOwnerDesc const* setOwnerDescs);
 

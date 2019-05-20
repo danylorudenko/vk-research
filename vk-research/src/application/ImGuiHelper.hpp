@@ -2,6 +2,7 @@
 
 #include "..\class_features\NonCopyable.hpp"
 #include "..\renderer\RenderWorkItem.hpp"
+#include <imgui\imgui.h>
 
 namespace Render
 {

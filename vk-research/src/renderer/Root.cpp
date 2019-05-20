@@ -463,6 +463,11 @@ void Root::DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& write
     }
 }
 
+void Root::DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VKW::ImageView* imageView)
+{
+
+}
+
 void Root::InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCount, SetLayoutKey const* setLayoutKeys, SetOwnerDesc const* setOwnerDescs)
 {
     owner.slotsCount_ = setsCount;
@@ -489,6 +494,12 @@ void Root::InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCou
                 UniformBufferHandle uniformBufferHandle = AcquireUniformBuffer(setMemberData.uniformBuffer_.size_);
                 DecorateProxySetWriteDescription(descriptorsWriteDescs[k], k, uniformBufferHandle);
                 owner.slots_[i].descriptorSet_.setMembers_[k].data_.uniformBuffer_.uniformBufferHandle_ = uniformBufferHandle;
+                break;
+
+            case VKW::DESCRIPTOR_TYPE_SAMPLED_TEXTURE:
+                VKW::ImageView* image = FindGlobalImage(setMemberData.texture2D_.textureKey_);
+                
+
                 break;
             }
 

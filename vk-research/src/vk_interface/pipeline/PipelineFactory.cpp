@@ -286,8 +286,18 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
 
     static VkPipelineDynamicStateCreateInfo dynamicStateInfo;
+    static VkDynamicState dynamicStates[PIPELINE_DYNAMIC_STATES_MAX];
     {
-        I STOPPED HERE
+        dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+        dynamicStateInfo.pNext = nullptr;
+        dynamicStateInfo.flags = VK_FLAGS_NONE;
+        dynamicStateInfo.dynamicStateCount = 0;
+        dynamicStateInfo.pDynamicStates = dynamicStates;
+
+        if (desc.dynamicStatesFlags_ & PIPELINE_DYNAMIC_STATE_VIEWPORT)
+            dynamicStates[dynamicStateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_VIEWPORT;
+        if (desc.dynamicStatesFlags_ & PIPELINE_DYNAMIC_STATE_SCISSOR)
+            dynamicStates[dynamicStateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_SCISSOR;
     }
 
     graphicsPipelineInfo.pDynamicState = dynamicStateInfo.dynamicStateCount > 0 ? &dynamicStateInfo : nullptr;

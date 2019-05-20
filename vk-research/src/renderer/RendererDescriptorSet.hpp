@@ -17,6 +17,7 @@ struct UniformBufferSetMember
 
 struct Texture2DSetMember
 {
+    ResourceKey textureKey_;
 };
 
 struct StorageBufferSetMember
