@@ -136,7 +136,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
 
     VKW::DescriptorSetLayoutDesc setLayoutDesc;
     setLayoutDesc.membersCount_ = 1;
-    setLayoutDesc.membersDesc_[0].type_ = VKW::DescriptorType::DESCRIPTOR_TYPE_SAMPLED_TEXTURE;
+    setLayoutDesc.membersDesc_[0].type_ = VKW::DescriptorType::DESCRIPTOR_TYPE_TEXTURE;
     setLayoutDesc.membersDesc_[0].binding_ = 0;
 
     Render::PipelineLayoutDesc layoutDesc;
@@ -166,7 +166,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     renderWorkItemDesc.vertexBufferKey_ = IMGUI_VERTEX_BUFFER_KEY;
     renderWorkItemDesc.indexCount_ = 0;
     renderWorkItemDesc.indexBufferKey_ = IMGUI_INDEX_BUFFER_KEY;
-    renderWorkItemDesc.setOwnerDescs_->members_[0].texture2D_.textureKey_ = IMGUI_TEXTURE_KEY;
+    renderWorkItemDesc.setOwnerDescs_->members_[0].texture2D_.imageKey_ = IMGUI_TEXTURE_KEY;
 
 
     root_->DefineRenderPass(IMGUI_PASS_KEY, passDesc);

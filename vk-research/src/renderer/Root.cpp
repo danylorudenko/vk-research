@@ -447,25 +447,35 @@ MaterialTemplate& Root::FindMaterialTemplate(MaterialTemplateKey const& key)
     return materialTemplateMap_[key];
 }
 
-void Root::DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle)
+void Root::Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle)
 {
     UniformBuffer const& uniformBuffer = FindUniformBuffer(bufferHandle);
 
     std::uint32_t framesCount = resourceProxy_->FramesCount();
     for (std::uint32_t i = 0; i < framesCount; ++i) {
-        auto& bufferInfo = writeDesc.frames_[i].bufferInfo_;
+        VKW::ProxyDescriptorWriteDesc::Union::PureBufferDesc& pureBufferDesc = writeDesc.frames_[i].pureBufferDesc_;
         
         VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, i);
 
-        bufferInfo.pureBufferViewHandle_ = resourceProxy_->GetBufferViewHandle(uniformBuffer.proxyBufferViewHandle_, i);
-        bufferInfo.offset_ = 0;
-        bufferInfo.size_ = static_cast<std::uint32_t>(view->size_);
+        pureBufferDesc.pureBufferViewHandle_ = resourceProxy_->GetBufferViewHandle(uniformBuffer.proxyBufferViewHandle_, i);
+        pureBufferDesc.offset_ = 0;
+        pureBufferDesc.size_ = static_cast<std::uint32_t>(view->size_);
     }
 }
 
-void Root::DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VKW::ImageView* imageView)
+void Root::Decorate_VKWProxyDescriptorWriteDesc_Texture(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VKW::ProxyImageHandle proxyImageHandle)
 {
+    std::uint32_t const framesCount = resourceProxy_->FramesCount();
+    for (std::uint32_t i = 0; i < framesCount; ++i) {
+        VKW::ProxyDescriptorWriteDesc::Union::ImageDesc& imageDesc = writeDesc.frames_[i].imageDesc_;
 
+        VKW::ImageViewHandle imageViewHandle = resourceProxy_->GetImageViewHandle(proxyImageHandle, i);
+        
+        imageDesc.imageViewHandle_ = imageViewHandle;
+        imageDesc.sampler_ = resourceProxy_->GetDefaultSampler();
+        imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
+        I AM HERE
+    }
 }
 
 void Root::InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCount, SetLayoutKey const* setLayoutKeys, SetOwnerDesc const* setOwnerDescs)
@@ -492,14 +502,14 @@ void Root::InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCou
             switch (memberType) {
             case VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
                 UniformBufferHandle uniformBufferHandle = AcquireUniformBuffer(setMemberData.uniformBuffer_.size_);
-                DecorateProxySetWriteDescription(descriptorsWriteDescs[k], k, uniformBufferHandle);
+                Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(descriptorsWriteDescs[k], k, uniformBufferHandle);
                 owner.slots_[i].descriptorSet_.setMembers_[k].data_.uniformBuffer_.uniformBufferHandle_ = uniformBufferHandle;
                 break;
 
-            case VKW::DESCRIPTOR_TYPE_SAMPLED_TEXTURE:
-                VKW::ImageView* image = FindGlobalImage(setMemberData.texture2D_.textureKey_);
-                
-
+            case VKW::DESCRIPTOR_TYPE_TEXTURE:
+                VKW::ProxyImageHandle imageProxyHandle = FindGlobalImage(setMemberData.texture2D_.imageKey_);
+                Decorate_VKWProxyDescriptorWriteDesc_Texture(descriptorsWriteDescs[k], k, imageProxyHandle);
+                owner.slots_[i].descriptorSet_.setMembers_[k].data_.texture2D_.textureKey_ = setMemberData.texture2D_.imageKey_;
                 break;
             }
 
@@ -548,7 +558,7 @@ void Root::DefineMaterial(MaterialKey const& key, MaterialDesc const& desc)
         //        switch (memberType) {
         //        case VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
         //            UniformBufferHandle uniformBufferHandle = AcquireUniformBuffer(setMemberData.uniformBuffer_.size_);
-        //            DecorateProxySetWriteDescription(descriptorsWriteDescs[k], k, uniformBufferHandle);
+        //            Decorate_VKWProxyDescriptorWriteDesc(descriptorsWriteDescs[k], k, uniformBufferHandle);
         //            break;
         //        }
         //        

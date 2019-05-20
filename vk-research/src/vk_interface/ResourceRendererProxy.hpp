@@ -29,23 +29,28 @@ struct FramedDescriptorsHub;
 // descriptions
 struct ProxyDescriptorWriteDesc
 {
-    union {
-        struct {
+    union Union 
+    {
+        struct ImageDesc 
+        {
             ImageViewHandle imageViewHandle_;
             VkSampler sampler_;
             ImageUsage usage_;
-        } imageDesc_;
+        } 
+        imageDesc_;
 
-        struct {
+        struct BufferViewDesc 
+        {
             BufferViewHandle bufferViewHandle_;
         } bufferView_;
 
-        struct {
+        struct PureBufferDesc {
             BufferViewHandle pureBufferViewHandle_;
             std::uint32_t offset_;
             std::uint32_t size_;
-        } bufferInfo_;
-    } frames_[CONSTANTS::MAX_FRAMES_BUFFERING];
+        } pureBufferDesc_;
+    } 
+    frames_[CONSTANTS::MAX_FRAMES_BUFFERING];
 };
 
 struct ProxyFramebufferDesc
@@ -101,7 +106,10 @@ public:
     BufferViewHandle GetBufferViewHandle(ProxyBufferHandle handle, std::uint32_t context);
 
     ProxyImageHandle CreateImage(ImageViewDesc const& desc);
+    ImageViewHandle GetImageViewHandle(ProxyImageHandle handle, std::uint32_t context);
     ImageView* GetImageView(ProxyImageHandle handle, std::uint32_t context);
+
+    VkSampler GetDefaultSampler();
 
     ProxyFramebufferHandle CreateFramebuffer(ProxyFramebufferDesc const& desc);
     Framebuffer* GetFramebuffer(ProxyFramebufferHandle handle, std::uint32_t context);

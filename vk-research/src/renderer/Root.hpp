@@ -240,12 +240,12 @@ public:
     void EndRenderGraph(VKW::PresentationContext const& presentationContext);
 
 private:
-    /*DESCRIPTOR_TYPE_SAMPLED_TEXTURE,
+    /*DESCRIPTOR_TYPE_TEXTURE,
         DESCRIPTOR_TYPE_SAMPLER,
         DESCRIPTOR_TYPE_UNIFORM_BUFFER*/
 
-    void DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle);
-    void DecorateProxySetWriteDescription(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VKW::ImageView* imageView);
+    void Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle);
+    void Decorate_VKWProxyDescriptorWriteDesc_Texture(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VKW::ProxyImageHandle imageView);
 
     void InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCount, SetLayoutKey const* setLayoutKeys, SetOwnerDesc const* setOwnerDescs);
 

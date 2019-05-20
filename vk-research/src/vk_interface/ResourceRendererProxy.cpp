@@ -422,10 +422,20 @@ ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
     return ProxyImageHandle{ proxyId };
 }
 
+ImageViewHandle ResourceRendererProxy::GetImageViewHandle(ProxyImageHandle handle, std::uint32_t context)
+{
+    return framedDescriptorsHub_->contexts_[context].imageViews_[handle.id_];
+}
+
 ImageView* ResourceRendererProxy::GetImageView(ProxyImageHandle handle, std::uint32_t context)
 {
     ImageViewHandle imageViewHandle = framedDescriptorsHub_->contexts_[context].imageViews_[handle.id_];
     return imagesProvider_->GetImageView(imageViewHandle);
+}
+
+VkSampler ResourceRendererProxy::GetDefaultSampler()
+{
+    return imagesProvider_->DefaultSamplerHandle();
 }
 
 ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebufferDesc const& desc)

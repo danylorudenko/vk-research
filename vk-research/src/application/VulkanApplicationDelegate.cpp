@@ -139,7 +139,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     //VKW::DescriptorSetLayoutDesc setLayoutDesc;
     //setLayoutDesc.membersCount_ = 3;
     //
-    //setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_SAMPLED_TEXTURE;
+    //setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
     //setLayoutDesc.membersDesc_[0].binding_ = 0;
     //
     //setLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
