@@ -118,7 +118,7 @@ struct StorageBufferSetMemberData
 
 struct SetOwnerDesc
 {
-    union Member
+    struct Member
     {
         UniformBufferSetMemberData uniformBuffer_;
         Texture2DSetMemberData texture2D_;

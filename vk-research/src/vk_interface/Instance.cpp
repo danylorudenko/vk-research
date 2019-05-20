@@ -1,9 +1,12 @@
 #include <utility>
 #include <algorithm>
 #include <string>
+#include <sstream>
 
 #include "Instance.hpp"
 #include "Tools.hpp"
+
+
 
 namespace VKW
 {
@@ -292,12 +295,18 @@ VkBool32 Instance::DebugCallback(
         break;
     }
 
-    std::cout 
+    std::stringstream stringstream;
+
+    stringstream 
         << std::endl << "DEBUG_LAYER"
         << std::endl << "Message type: " << flagsString
         << std::endl << "Layer prefix: " << layerPrefix
         << std::endl << "Message: " << msg
         << std::endl << "Object type: " << objTypeStr << ", id: (" << object << ")" << std::endl << std::endl;
+
+    auto str = stringstream.str();
+    std::cerr << str;
+    OutputDebugStringA(str.c_str());
 
     return VK_FALSE;
 }

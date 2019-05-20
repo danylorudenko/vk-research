@@ -474,7 +474,6 @@ void Root::Decorate_VKWProxyDescriptorWriteDesc_Texture(VKW::ProxyDescriptorWrit
         imageDesc.imageViewHandle_ = imageViewHandle;
         imageDesc.sampler_ = resourceProxy_->GetDefaultSampler();
         imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
-        I AM HERE
     }
 }
 

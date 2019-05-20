@@ -33,11 +33,13 @@ struct DescriptorSet
     struct DescriptorSetMember
     {
         char name_[SET_MEMBER_NAME_MAX_LENGTH];
-        union {
+        struct Data 
+        {
             UniformBufferSetMember uniformBuffer_;
             Texture2DSetMember texture2D_;
             StorageBufferSetMember storageBuffer_;
-        } data_;
+        } 
+        data_;
     } 
     setMembers_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
 

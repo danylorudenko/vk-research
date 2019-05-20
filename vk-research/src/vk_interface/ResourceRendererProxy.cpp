@@ -125,7 +125,7 @@ ProxySetHandle ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout
             framedSet = true;
             break;
 
-        case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+        case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
         case VK_DESCRIPTOR_TYPE_SAMPLER:
             break;
 
@@ -217,7 +217,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
                 wds.descriptorType = layout->membersInfo_[j].type_;
                 // actual data for descriptors goes next
                 switch (wds.descriptorType) {
-                case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+                case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
                 {
                     ImageView* imageView = imagesProvider_->GetImageView(descriptions[j].frames_[i].imageDesc_.imageViewHandle_);
                     DecorateImageViewWriteDesc(wds, descriptorData[j], imageView->handle_);
@@ -231,7 +231,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
                 break;
                 case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
                 {
-                    auto& bufferInfo = descriptions[j].frames_[i].bufferInfo_;
+                    auto& bufferInfo = descriptions[j].frames_[i].pureBufferDesc_;
                     BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
                     DecorateBufferWriteDesc(wds, descriptorData[j], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
                 }
@@ -263,10 +263,13 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
             wds.descriptorType = layout->membersInfo_[i].type_;
             // actual data for descriptors goes next
             switch (wds.descriptorType) {
-            case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+            case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
             {
                 ImageView* imageView = imagesProvider_->GetImageView(descriptions[i].frames_[0].imageDesc_.imageViewHandle_);
+                VkSampler sampler = descriptions[i].frames_[0].imageDesc_.sampler_;
+
                 DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_);
+                DecorateSamplerWriteDesc(wds, descriptorData[i], sampler);
             }
             break;
             case VK_DESCRIPTOR_TYPE_SAMPLER:
@@ -277,7 +280,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
             break;
             case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
             {
-                auto& bufferInfo = descriptions[i].frames_[0].bufferInfo_;
+                auto& bufferInfo = descriptions[i].frames_[0].pureBufferDesc_;
                 BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
                 DecorateBufferWriteDesc(wds, descriptorData[i], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
             }
