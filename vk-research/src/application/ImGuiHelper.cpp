@@ -189,7 +189,7 @@ void ImGuiHelper::EndFrame(std::uint32_t context)
     ImGui::EndFrame();
 }
 
-void ImGuiHelper::Render(std::uint32_t context)
+void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever)
 {
     ImGui::Render();
     ImDrawData* data = ImGui::GetDrawData();
@@ -207,6 +207,23 @@ void ImGuiHelper::Render(std::uint32_t context)
         ImVector<ImDrawIdx> const& indexBuffer = drawList->IdxBuffer;
         ImVector<ImDrawCmd> const& cmdBuffer = drawList->CmdBuffer;
 
+        void* mappedVertexBuffer = root_->MapBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
+        std::memcpy(mappedVertexBuffer, vertexBuffer.Data, vertexBuffer.size() * sizeof(ImDrawVert));
+        root_->FlushBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
+
+        void* mappedIndexBuffer = root_->MapBuffer(IMGUI_INDEX_BUFFER_KEY, context);
+        std::memcpy(mappedIndexBuffer, indexBuffer.Data, indexBuffer.size() * sizeof(ImDrawIdx));
+        root_->FlushBuffer(IMGUI_INDEX_BUFFER_KEY, context);
+
+        //struct ImDrawCmd
+        //{
+        //    unsigned int    ElemCount;              // Number of indices (multiple of 3) to be rendered as triangles. Vertices are stored in the callee ImDrawList's vtx_buffer[] array, indices in idx_buffer[].
+        //    ImVec4          ClipRect;               // Clipping rectangle (x1, y1, x2, y2). Subtract ImDrawData->DisplayPos to get clipping rectangle in "viewport" coordinates
+        //    ImTextureID     TextureId;              // User-provided texture ID. Set by user in ImfontAtlas::SetTexID() for fonts or passed to Image*() functions. Ignore if never using images or multiple fonts atlas.
+        //    ImDrawCallback  UserCallback;           // If != NULL, call the function instead of rendering the vertices. clip_rect and texture_id will be set normally.
+        //    void*           UserCallbackData;       // The draw callback code can access this.
+        //};
+
         std::int32_t const commandsCount = cmdBuffer.size();
         for (std::int32_t cmdI = 0; cmdI < commandsCount; cmdI) {
             ImDrawCmd const& drawCmd = cmdBuffer[cmdI];
@@ -214,10 +231,25 @@ void ImGuiHelper::Render(std::uint32_t context)
                 drawCmd.UserCallback(drawList, &drawCmd);
             }
             else {
-
+                DrawFunc(context, commandReciever, drawCmd);
             }
         }
     }
+}
 
+void ImGuiHelper::DrawFunc(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever, ImDrawCmd const& cmd)
+{
+    VKW::ImportTable* table = root_->VulkanFuncTable();
 
+    VKW::BufferView* vertexBufferView = root_->FindGlobalBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
+    VKW::BufferResource* vertexBufferResource = root_->ResourceProxy()->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
+
+    VKW::BufferView* indexBufferView = root_->FindGlobalBuffer(IMGUI_INDEX_BUFFER_KEY, context);
+    VKW::BufferResource* indexBufferResource = root_->ResourceProxy()->GetResource(indexBufferView->providedBuffer_->bufferResource_);
+
+    Render::Pass& pass = root_->FindPass(IMGUI_PASS_KEY);
+
+    pass.Begin(context, &commandReciever);
+    pass.Render(context, &commandReciever);
+    pass.End(context, &commandReciever);
 }

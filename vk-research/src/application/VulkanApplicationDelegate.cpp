@@ -117,16 +117,16 @@ void VulkanApplicationDelegate::update()
     //
     ////////////////////////////////////////////////////
     transformationSystem_.Update(context, glm::vec3(0.0f), glm::vec3(0.0f), 60.0f);
-    renderRoot_->IterateRenderGraph(presentationContext);
 
-
-    /////////////////////
+    VKW::WorkerFrameCommandReciever commandReciever = renderRoot_->BeginRenderGraph(presentationContext);
+    renderRoot_->IterateRenderGraph(presentationContext, commandReciever);
 
     if (imguiEnabled_) {
-        ImGui::EndFrame();
-        ImGui::Render();
-        ImDrawData* imguiDrawData = ImGui::GetDrawData();
+        imguiHelper_->EndFrame(context);
+        imguiHelper_->Render(context, commandReciever);
     }
+
+    renderRoot_->EndRenderGraph(presentationContext);
 }
 
 void VulkanApplicationDelegate::shutdown()

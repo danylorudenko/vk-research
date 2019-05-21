@@ -2,6 +2,7 @@
 
 #include "..\class_features\NonCopyable.hpp"
 #include "..\renderer\RenderWorkItem.hpp"
+#include "..\vk_interface\worker\WorkerFrame.hpp"
 #include <imgui\imgui.h>
 
 namespace Render
@@ -28,8 +29,10 @@ public:
     void Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight);
     void BeginFrame(std::uint32_t context);
     void EndFrame(std::uint32_t context);
-    void Render(std::uint32_t context);
+    void Render(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever);
 
+private:
+    void DrawFunc(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever, ImDrawCmd const& cmd);
 
 private:
     static char const* IMGUI_TEXTURE_KEY;

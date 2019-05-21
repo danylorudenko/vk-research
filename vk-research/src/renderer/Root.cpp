@@ -779,11 +779,14 @@ VKW::PresentationContext Root::AcquireNextPresentationContext()
     return presentationController_->AcquireNewPresentationContext();
 }
 
-void Root::IterateRenderGraph(VKW::PresentationContext const& presentationContext)
+VKW::WorkerFrameCommandReciever Root::BeginRenderGraph(VKW::PresentationContext const& presentationContext)
 {
-    std::uint32_t const contextId = presentationContext.contextId_;
+    return mainWorkerTemp_->StartExecutionFrame(presentationContext.contextId_);
+}
 
-    auto commandReciever = mainWorkerTemp_->StartExecutionFrame(contextId);
+void Root::IterateRenderGraph(VKW::PresentationContext const& presentationContext, VKW::WorkerFrameCommandReciever& commandReciever)
+{
+    std::uint32_t contextId = presentationContext.contextId_;
 
     std::uint32_t const passCount = static_cast<std::uint32_t>(renderGraphRootTemp_.size());
     for (auto i = 0u; i < passCount; ++i) {
@@ -795,6 +798,18 @@ void Root::IterateRenderGraph(VKW::PresentationContext const& presentationContex
 
     mainWorkerTemp_->EndExecutionFrame(contextId);
     auto renderingCompleteSemaphore = mainWorkerTemp_->ExecuteFrame(contextId, presentationContext.contextPresentationCompleteSemaphore_);
+
+    presentationController_->PresentContextId(contextId, renderingCompleteSemaphore);
+}
+
+void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext)
+{
+    std::uint32_t const contextId = presentationContext.contextId_;
+
+    mainWorkerTemp_->EndExecutionFrame(contextId);
+    VKW::WorkerFrameCompleteSemaphore renderingCompleteSemaphore = mainWorkerTemp_->ExecuteFrame(
+        contextId, 
+        presentationContext.contextPresentationCompleteSemaphore_);
 
     presentationController_->PresentContextId(contextId, renderingCompleteSemaphore);
 }

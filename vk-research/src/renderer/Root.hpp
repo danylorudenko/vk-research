@@ -235,8 +235,8 @@ public:
     
 
     VKW::PresentationContext AcquireNextPresentationContext();
-    void BeginRenderGraph(VKW::PresentationContext const& presentationContext);
-    void IterateRenderGraph(VKW::PresentationContext const& presentationContext);
+    VKW::WorkerFrameCommandReciever BeginRenderGraph(VKW::PresentationContext const& presentationContext);
+    void IterateRenderGraph(VKW::PresentationContext const& presentationContext, VKW::WorkerFrameCommandReciever& commandReciever);
     void EndRenderGraph(VKW::PresentationContext const& presentationContext);
 
 private:
