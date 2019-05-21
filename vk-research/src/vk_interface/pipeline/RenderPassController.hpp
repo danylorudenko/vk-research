@@ -17,6 +17,7 @@ class ResourcesController;
 struct RenderPassAttachmentDesc
 {
     VkFormat format_;
+    VKW::RenderPassAttachmentUsage usage_;
 };
 
 

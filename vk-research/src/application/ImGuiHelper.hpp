@@ -41,6 +41,8 @@ private:
     static char const* IMGUI_SET_LAYOUT_KEY;
     static char const* IMGUI_PIPELINE_KEY;
     static char const* IMGUI_PASS_KEY;
+    static char const* IMGUI_MATERIAL_TEMPLATE_KEY;
+    static char const* IMGUI_MATERIAL_KEY;
 
     static char const* IMGUI_VERT_SHADER_KEY;
     static char const* IMGUI_FRAG_SHADER_KEY;

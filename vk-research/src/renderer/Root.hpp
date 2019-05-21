@@ -37,7 +37,12 @@ namespace Render
 struct RenderPassDesc
 {
     std::uint32_t colorAttachmentsCount_;
-    ResourceKey colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
+    struct ColorAttachment
+    {
+        ResourceKey resourceKey_;
+        VKW::RenderPassAttachmentUsage usage_;
+    }
+    colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
     ResourceKey depthStencilAttachment_;
 };
 

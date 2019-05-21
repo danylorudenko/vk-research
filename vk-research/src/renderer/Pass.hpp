@@ -43,7 +43,12 @@ struct PassDesc
     std::uint32_t height_;
 
     std::uint32_t colorAttachmentCount_;
-    VKW::ProxyImageHandle colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
+    struct ColorAttachment
+    {
+        VKW::ProxyImageHandle handle_;
+        VKW::RenderPassAttachmentUsage usage_;
+    }
+    colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
     VKW::ProxyImageHandle* depthStencilAttachment_;
     
 };

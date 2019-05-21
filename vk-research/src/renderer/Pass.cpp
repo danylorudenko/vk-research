@@ -48,9 +48,10 @@ Pass::Pass(PassDesc const& desc)
     vkRenderPassDesc.colorAttachmentsCount_ = colorAttachmentCount;
     for (auto i = 0u; i < colorAttachmentCount; ++i) {
 
-        VKW::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.colorAttachments_[i].id_];
+        VKW::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.colorAttachments_[i].handle_.id_];
         VKW::ImageView* imageView = desc.imagesProvider_->GetImageView(imageViewHandle);
         colorAttachmentDescs[i].format_ = imageView->format_;
+        colorAttachmentDescs[i].usage_ = desc.colorAttachments_[i].usage_;
     }
 
     vkRenderPassDesc.colorAttachments_ = colorAttachmentDescs;
@@ -76,7 +77,7 @@ Pass::Pass(PassDesc const& desc)
     framebufferProxyDesc.height_ = desc.height_;
 
     for (auto j = 0u; j < desc.colorAttachmentCount_; ++j) {
-        framebufferProxyDesc.colorAttachments_[j] = desc.colorAttachments_[j];
+        framebufferProxyDesc.colorAttachments_[j] = desc.colorAttachments_[j].handle_;
     }
 
     framebufferProxyDesc.depthStencilAttachment_ = desc.depthStencilAttachment_;

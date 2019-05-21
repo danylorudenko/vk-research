@@ -9,6 +9,8 @@ char const* ImGuiHelper::IMGUI_TEXTURE_STAGING_BUFFER_KEY = "imupb";
 char const* ImGuiHelper::IMGUI_SET_LAYOUT_KEY = "imlyt";
 char const* ImGuiHelper::IMGUI_PIPELINE_KEY = "imppl";
 char const* ImGuiHelper::IMGUI_PASS_KEY = "impss";
+char const* ImGuiHelper::IMGUI_MATERIAL_TEMPLATE_KEY = "immt";
+char const* ImGuiHelper::IMGUI_MATERIAL_KEY = "imml";
 
 char const* ImGuiHelper::IMGUI_VERT_SHADER_KEY = "imvs";
 char const* ImGuiHelper::IMGUI_FRAG_SHADER_KEY = "imfs";
@@ -50,6 +52,8 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags = ImGuiConfigFlags_None;
+    io.DisplaySize.x = static_cast<float>(viewportWidth);
+    io.DisplaySize.y = static_cast<float>(viewportHeight);
 
     int imguiAtlasWidth = 0, imguiAtlasHeight = 0;
     unsigned char* textureData = nullptr;
@@ -76,7 +80,8 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
 
     Render::RenderPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
-    passDesc.colorAttachments_[0] = Render::Root::SWAPCHAIN_IMAGE_KEY;
+    passDesc.colorAttachments_[0].resourceKey_ = Render::Root::SWAPCHAIN_IMAGE_KEY;
+    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE;
 
     Render::ShaderDesc vertexShaderDesc;
     vertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
@@ -168,14 +173,28 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     renderWorkItemDesc.indexBufferKey_ = IMGUI_INDEX_BUFFER_KEY;
     renderWorkItemDesc.setOwnerDescs_->members_[0].texture2D_.imageKey_ = IMGUI_TEXTURE_KEY;
 
+    Render::MaterialTemplateDesc materialTemplateDesc;
+    materialTemplateDesc.perPassDataCount_ = 1;
+    materialTemplateDesc.perPassData_[0].passKey_ = IMGUI_PASS_KEY;
+    materialTemplateDesc.perPassData_[0].pipelineKey_ = IMGUI_PIPELINE_KEY;
+
+    Render::MaterialDesc materialDesc;
+    materialDesc.templateKey_ = IMGUI_MATERIAL_TEMPLATE_KEY;
+
 
     root_->DefineRenderPass(IMGUI_PASS_KEY, passDesc);
     root_->DefineShader(IMGUI_VERT_SHADER_KEY, vertexShaderDesc);
     root_->DefineShader(IMGUI_FRAG_SHADER_KEY, fragmentShaderDesc);
     root_->DefineSetLayout(IMGUI_SET_LAYOUT_KEY, setLayoutDesc);
     root_->DefineGraphicsPipeline(IMGUI_PIPELINE_KEY, pipelineDesc);
+    root_->DefineMaterialTemplate(IMGUI_MATERIAL_TEMPLATE_KEY, materialTemplateDesc);
+    root_->DefineMaterial(IMGUI_MATERIAL_KEY, materialDesc);
     root_->DefineGlobalBuffer(IMGUI_INDEX_BUFFER_KEY, indexBufferDesc);
     root_->DefineGlobalBuffer(IMGUI_VERTEX_BUFFER_KEY, vertexBufferDesc);
+
+    root_->RegisterMaterial(IMGUI_MATERIAL_KEY);
+    root_->PushPassTemp(IMGUI_PASS_KEY);
+
     mainRenderWorkItem_ =  root_->ConstructRenderWorkItem(IMGUI_PIPELINE_KEY, renderWorkItemDesc);
 }
 
@@ -225,7 +244,7 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
         //};
 
         std::int32_t const commandsCount = cmdBuffer.size();
-        for (std::int32_t cmdI = 0; cmdI < commandsCount; cmdI) {
+        for (std::int32_t cmdI = 0; cmdI < commandsCount; ++cmdI) {
             ImDrawCmd const& drawCmd = cmdBuffer[cmdI];
             if (drawCmd.UserCallback != nullptr) {
                 drawCmd.UserCallback(drawList, &drawCmd);

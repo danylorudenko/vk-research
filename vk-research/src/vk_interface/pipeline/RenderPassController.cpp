@@ -42,7 +42,7 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
 
     assert(desc.colorAttachmentsCount_ <= RenderPass::MAX_COLOR_ATTACHMENTS && "Maximum number color attachments supported is RenderPass::MAX_COLOR_ATTACHMENTS.");
 
-    static VkAttachmentDescription attachmentDescriptions[RenderPass::MAX_ATTACHMENTS];
+    static VkAttachmentDescription vkAttachmentDescriptions[RenderPass::MAX_ATTACHMENTS];
     static VkAttachmentReference colorAttachmentReferences[RenderPass::MAX_COLOR_ATTACHMENTS];
 
     std::uint32_t const allAttachmentsCount = desc.colorAttachmentsCount_ + (desc.depthStencilAttachment_ != nullptr ? 1 : 0);
@@ -50,18 +50,22 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
     for (auto i = 0u; i < desc.colorAttachmentsCount_; ++i) {
 
         colorAttachmentsInfo[i].format_ = desc.colorAttachments_[i].format_;
-        colorAttachmentsInfo[i].usage_ = RENDER_PASS_ATTACHMENT_USAGE_COLOR;
+        colorAttachmentsInfo[i].usage_ = desc.colorAttachments_[i].usage_;
+        assert(colorAttachmentsInfo[i].usage_ != RENDER_PASS_ATTACHMENT_USAGE_NONE && "Attachment usage was not specified!");
 
-        auto& attachment = attachmentDescriptions[i];
-        attachment.format = desc.colorAttachments_[i].format_;
-        attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-        attachment.flags = VK_FLAGS_NONE;
-        attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        auto& vkAttachment = vkAttachmentDescriptions[i];
+        vkAttachment.format = desc.colorAttachments_[i].format_;
+        if (colorAttachmentsInfo[i].usage_ == RENDER_PASS_ATTACHMENT_USAGE_COLOR)
+            vkAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        if (colorAttachmentsInfo[i].usage_ == RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE)
+            vkAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+        vkAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        vkAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        vkAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        vkAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        vkAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        vkAttachment.flags = VK_FLAGS_NONE;
+        vkAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
         auto& colorReference = colorAttachmentReferences[i];
         colorReference.attachment = i;
@@ -70,7 +74,7 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
 
     VkAttachmentReference depthStencilReference;
     if (desc.depthStencilAttachment_) {
-        auto& depthStencilAttachment = attachmentDescriptions[desc.colorAttachmentsCount_];
+        auto& depthStencilAttachment = vkAttachmentDescriptions[desc.colorAttachmentsCount_];
         depthStencilAttachment.format = desc.depthStencilAttachment_->format_;
         depthStencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depthStencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -127,7 +131,7 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
     rpInfo.pDependencies = dependencies;
     rpInfo.flags = VK_FLAGS_NONE;
     rpInfo.attachmentCount = allAttachmentsCount;
-    rpInfo.pAttachments = attachmentDescriptions;
+    rpInfo.pAttachments = vkAttachmentDescriptions;
     rpInfo.subpassCount = 1;
     rpInfo.pSubpasses = &spInfo;
     

@@ -42,7 +42,7 @@ public:
 
 private:
     void InitImGui();
-    void RenderImGui(std::uint32_t context);
+    void TestImGui(std::uint32_t context);
 
 private:
     Window mainWindow_;

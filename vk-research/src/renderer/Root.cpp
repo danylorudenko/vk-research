@@ -305,7 +305,8 @@ void Root::DefineRenderPass(RenderPassKey const& key, RenderPassDesc const& desc
     passDesc.height_ = defaultFramebufferHeight_;
     passDesc.colorAttachmentCount_ = desc.colorAttachmentsCount_;
     for (auto i = 0u; i < passDesc.colorAttachmentCount_; ++i) {
-        passDesc.colorAttachments_[i] = globalImages_[desc.colorAttachments_[i]];
+        passDesc.colorAttachments_[i].handle_ = globalImages_[desc.colorAttachments_[i].resourceKey_];
+        passDesc.colorAttachments_[i].usage_ = desc.colorAttachments_[i].usage_;
     }
     passDesc.depthStencilAttachment_ = desc.depthStencilAttachment_.size() > 0 ? &globalImages_[desc.depthStencilAttachment_] : nullptr;
 
@@ -795,11 +796,6 @@ void Root::IterateRenderGraph(VKW::PresentationContext const& presentationContex
         pass.Render(contextId, &commandReciever);
         pass.End(contextId, &commandReciever);
     }
-
-    mainWorkerTemp_->EndExecutionFrame(contextId);
-    auto renderingCompleteSemaphore = mainWorkerTemp_->ExecuteFrame(contextId, presentationContext.contextPresentationCompleteSemaphore_);
-
-    presentationController_->PresentContextId(contextId, renderingCompleteSemaphore);
 }
 
 void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext)
