@@ -247,7 +247,7 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
             
             
             if (renderItem.indexCount_ > 0) {
-                table_->vkCmdDrawIndexed(commandBuffer, renderItem.indexCount_, 1, 0, 0, 0);
+                table_->vkCmdDrawIndexed(commandBuffer, renderItem.indexCount_, 1, renderItem.baseIndex_, 0, 0);
             }
             else if (renderItem.vertexCount_ > 0) {
                 table_->vkCmdDraw(commandBuffer, renderItem.vertexCount_, 1, 0, 0);

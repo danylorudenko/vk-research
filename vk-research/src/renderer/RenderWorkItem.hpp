@@ -15,6 +15,7 @@ struct RenderWorkItem
     ResourceKey indexBufferKey_;
     std::uint32_t vertexCount_;
     std::uint32_t indexCount_;
+    std::uint32_t baseIndex_;
     DescriptorSetsOwner descriptorSetsOwner_;
 };
 

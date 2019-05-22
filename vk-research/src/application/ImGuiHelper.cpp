@@ -172,6 +172,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     renderWorkItemDesc.vertexBufferKey_ = IMGUI_VERTEX_BUFFER_KEY;
     renderWorkItemDesc.indexCount_ = 0;
     renderWorkItemDesc.indexBufferKey_ = IMGUI_INDEX_BUFFER_KEY;
+    renderWorkItemDesc.baseIndex_ = 0;
     renderWorkItemDesc.setOwnerDescs_->members_[0].texture2D_.imageKey_ = IMGUI_TEXTURE_KEY;
 
     Render::MaterialTemplateDesc materialTemplateDesc;

@@ -598,6 +598,7 @@ RenderWorkItemHandle Root::ConstructRenderWorkItem(Pipeline& pipeline, RenderWor
     item.indexBufferKey_ = desc.indexBufferKey_;
     item.vertexCount_ = desc.vertexCount_;
     item.indexCount_ = desc.indexCount_;
+    item.baseIndex_ = desc.baseIndex_;
     
     InitializeSetsOwner(item.descriptorSetsOwner_, pipeline.instancedLayoutMembersCount_, pipeline.instancedLayoutKeys_, desc.setOwnerDescs_);
     
