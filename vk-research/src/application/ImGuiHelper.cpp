@@ -81,7 +81,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     Render::RenderPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0].resourceKey_ = Render::Root::SWAPCHAIN_IMAGE_KEY;
-    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE;
+    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE_PRESENT;
 
     Render::ShaderDesc vertexShaderDesc;
     vertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
@@ -193,7 +193,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     root_->DefineGlobalBuffer(IMGUI_VERTEX_BUFFER_KEY, vertexBufferDesc);
 
     root_->RegisterMaterial(IMGUI_MATERIAL_KEY);
-    root_->PushPassTemp(IMGUI_PASS_KEY);
+    //root_->PushPassTemp(IMGUI_PASS_KEY); NONONONONO, we gonna process our pass ourselves
 
     mainRenderWorkItem_ =  root_->ConstructRenderWorkItem(IMGUI_PIPELINE_KEY, renderWorkItemDesc);
 }
@@ -234,14 +234,9 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
         std::memcpy(mappedIndexBuffer, indexBuffer.Data, indexBuffer.size() * sizeof(ImDrawIdx));
         root_->FlushBuffer(IMGUI_INDEX_BUFFER_KEY, context);
 
-        //struct ImDrawCmd
-        //{
-        //    unsigned int    ElemCount;              // Number of indices (multiple of 3) to be rendered as triangles. Vertices are stored in the callee ImDrawList's vtx_buffer[] array, indices in idx_buffer[].
-        //    ImVec4          ClipRect;               // Clipping rectangle (x1, y1, x2, y2). Subtract ImDrawData->DisplayPos to get clipping rectangle in "viewport" coordinates
-        //    ImTextureID     TextureId;              // User-provided texture ID. Set by user in ImfontAtlas::SetTexID() for fonts or passed to Image*() functions. Ignore if never using images or multiple fonts atlas.
-        //    ImDrawCallback  UserCallback;           // If != NULL, call the function instead of rendering the vertices. clip_rect and texture_id will be set normally.
-        //    void*           UserCallbackData;       // The draw callback code can access this.
-        //};
+        Render::Pass& pass = root_->FindPass(IMGUI_PASS_KEY);
+
+        pass.Begin(context, &commandReciever);
 
         std::int32_t const commandsCount = cmdBuffer.size();
         for (std::int32_t cmdI = 0; cmdI < commandsCount; ++cmdI) {
@@ -253,22 +248,13 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
                 DrawFunc(context, commandReciever, drawCmd);
             }
         }
+
+        pass.End(context, &commandReciever);
     }
 }
 
 void ImGuiHelper::DrawFunc(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever, ImDrawCmd const& cmd)
 {
-    VKW::ImportTable* table = root_->VulkanFuncTable();
-
-    VKW::BufferView* vertexBufferView = root_->FindGlobalBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
-    VKW::BufferResource* vertexBufferResource = root_->ResourceProxy()->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
-
-    VKW::BufferView* indexBufferView = root_->FindGlobalBuffer(IMGUI_INDEX_BUFFER_KEY, context);
-    VKW::BufferResource* indexBufferResource = root_->ResourceProxy()->GetResource(indexBufferView->providedBuffer_->bufferResource_);
-
     Render::Pass& pass = root_->FindPass(IMGUI_PASS_KEY);
-
-    pass.Begin(context, &commandReciever);
     pass.Render(context, &commandReciever);
-    pass.End(context, &commandReciever);
 }

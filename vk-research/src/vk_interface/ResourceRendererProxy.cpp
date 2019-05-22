@@ -314,6 +314,7 @@ void ResourceRendererProxy::DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst
 {
     dstInfo.imageInfo.imageView = view;
     dst.pImageInfo = &dstInfo.imageInfo;
+    dstInfo.imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 }
 
 void ResourceRendererProxy::DecorateSamplerWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkSampler sampler)

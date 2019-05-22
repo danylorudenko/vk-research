@@ -41,6 +41,10 @@ DescriptorSetController::DescriptorSetController(DescriptorSetControllerDesc con
             64u
         },
         {
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            64u
+        },
+        {
             VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             256u
         }

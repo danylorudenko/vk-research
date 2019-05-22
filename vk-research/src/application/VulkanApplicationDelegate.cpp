@@ -78,10 +78,10 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
 
 void VulkanApplicationDelegate::start()
 {
+    FakeParseRendererResources();
+
     if (imguiEnabled_)
         InitImGui();
-
-    FakeParseRendererResources();
 }
 
 //std::chrono::high_resolution_clock::time_point prevTime;
@@ -227,7 +227,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     Render::RenderPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0].resourceKey_ = Render::Root::SWAPCHAIN_IMAGE_KEY; // we need swapchain reference here
-    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR;
+    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_CLEAR;
     passDesc.depthStencilAttachment_ = depthBufferKey;
 
     renderRoot_->DefineRenderPass(passKey, passDesc);

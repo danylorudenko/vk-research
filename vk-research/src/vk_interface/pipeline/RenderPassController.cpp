@@ -55,15 +55,34 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
 
         auto& vkAttachment = vkAttachmentDescriptions[i];
         vkAttachment.format = desc.colorAttachments_[i].format_;
-        if (colorAttachmentsInfo[i].usage_ == RENDER_PASS_ATTACHMENT_USAGE_COLOR)
+
+        switch (colorAttachmentsInfo[i].usage_) {
+        case RENDER_PASS_ATTACHMENT_USAGE_COLOR_CLEAR:
             vkAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        if (colorAttachmentsInfo[i].usage_ == RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE)
+            vkAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            vkAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            vkAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            break;
+
+        case RENDER_PASS_ATTACHMENT_USAGE_COLOR_CLEAR_PRESENT:
+            vkAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            vkAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            vkAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            vkAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            break;
+
+        case RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE_PRESENT:
             vkAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+            vkAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            vkAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            vkAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            break;
+
+        default:
+            assert(false && "RENDER_PASS_ATTACHMENT_USAGE_ not supported for color attachments.");
+        }
         vkAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        vkAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         vkAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        vkAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        vkAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
         vkAttachment.flags = VK_FLAGS_NONE;
         vkAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
