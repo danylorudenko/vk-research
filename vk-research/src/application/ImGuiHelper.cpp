@@ -2,6 +2,7 @@
 #include "..\renderer\Root.hpp"
 
 #include <utility>
+#include <cstdint>
 
 char const* ImGuiHelper::IMGUI_TEXTURE_KEY = "imtex";
 char const* ImGuiHelper::IMGUI_TEXTURE_STAGING_BUFFER_KEY = "imupb";
@@ -219,6 +220,13 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
     assert(totalVertexSizeBytes <= IMGUI_VERTEX_BUFFER_SIZE && "ImGui vertex buffer overflows allocated space.");
     assert(totalIndexSizeBytes <= IMGUI_INDEX_BUFFER_SIZE && "ImGui vertex buffer overflows allocated space.");
 
+    std::uint32_t verticesCount = 0;
+    void* mappedVertexBuffer = root_->MapBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
+
+    std::uint32_t indiciesCount = 0;
+    void* mappedIndexBuffer = root_->MapBuffer(IMGUI_INDEX_BUFFER_KEY, context);
+
+
     std::int32_t const cmdListsCount = data->CmdListsCount;
     for (std::int32_t i = 0; i < cmdListsCount; ++i) {
         ImDrawList const* drawList = data->CmdLists[0];
@@ -226,13 +234,15 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
         ImVector<ImDrawIdx> const& indexBuffer = drawList->IdxBuffer;
         ImVector<ImDrawCmd> const& cmdBuffer = drawList->CmdBuffer;
 
-        void* mappedVertexBuffer = root_->MapBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
-        std::memcpy(mappedVertexBuffer, vertexBuffer.Data, vertexBuffer.size() * sizeof(ImDrawVert));
-        root_->FlushBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
+        std::uint32_t const vertexBytesCount = vertexBuffer.size() * sizeof(ImDrawVert);
+        std::memcpy(mappedVertexBuffer, vertexBuffer.Data, vertexBytesCount);
+        mappedVertexBuffer = reinterpret_cast<std::uint8_t*>(mappedVertexBuffer) + vertexBytesCount;
+        verticesCount += vertexBuffer.size();
 
-        void* mappedIndexBuffer = root_->MapBuffer(IMGUI_INDEX_BUFFER_KEY, context);
-        std::memcpy(mappedIndexBuffer, indexBuffer.Data, indexBuffer.size() * sizeof(ImDrawIdx));
-        root_->FlushBuffer(IMGUI_INDEX_BUFFER_KEY, context);
+        std::uint32_t const indexBytesCount = indexBuffer.size() * sizeof(ImDrawIdx);
+        std::memcpy(mappedIndexBuffer, indexBuffer.Data, indexBytesCount);
+        mappedIndexBuffer = reinterpret_cast<std::uint8_t*>(mappedIndexBuffer) + indexBytesCount;
+        indiciesCount += indexBuffer.size();
 
         Render::Pass& pass = root_->FindPass(IMGUI_PASS_KEY);
 
@@ -251,6 +261,13 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
 
         pass.End(context, &commandReciever);
     }
+
+    root_->FlushBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
+    root_->FlushBuffer(IMGUI_INDEX_BUFFER_KEY, context);
+
+    Render::RenderWorkItem* renderWorkItem = root_->FindRenderWorkItem(IMGUI_PIPELINE_KEY, mainRenderWorkItem_);
+    renderWorkItem->indexCount_ = indiciesCount;
+    renderWorkItem->vertexCount_ = verticesCount;
 }
 
 void ImGuiHelper::DrawFunc(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever, ImDrawCmd const& cmd)
