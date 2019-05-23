@@ -326,7 +326,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     itemDesc.indexBufferKey_ = indexBufferKey;
     itemDesc.vertexCount_ = vertexDataSizeBytes / sizeof(TestVertex);
     itemDesc.indexCount_ = indexDataSizeBytes / sizeof(std::uint32_t);
-    itemDesc.baseIndex_ = 0;
+    itemDesc.indexBindOffset_ = 0;
 
     itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 64;
 

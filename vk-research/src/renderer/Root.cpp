@@ -401,6 +401,8 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
 
     pipeline.layoutHandle_ = vkwPipelineLayoutHandle;
     pipeline.pipelineHandle_ = vkwPipelineHandle;
+
+    pipeline.properties_.pipelineDynamicStateFlags_ = desc.dynamicStateFlags_;
 }
 
 Pipeline& Root::FindPipeline(PipelineKey const& key)
@@ -598,7 +600,7 @@ RenderWorkItemHandle Root::ConstructRenderWorkItem(Pipeline& pipeline, RenderWor
     item.indexBufferKey_ = desc.indexBufferKey_;
     item.vertexCount_ = desc.vertexCount_;
     item.indexCount_ = desc.indexCount_;
-    item.baseIndex_ = desc.baseIndex_;
+    item.indexBindOffset_ = desc.indexBindOffset_;
     
     InitializeSetsOwner(item.descriptorSetsOwner_, pipeline.instancedLayoutMembersCount_, pipeline.instancedLayoutKeys_, desc.setOwnerDescs_);
     

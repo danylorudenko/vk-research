@@ -180,6 +180,17 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
     std::uint32_t const materialsCount = static_cast<std::uint32_t>(materialDelegatedData_.size());
     for (std::uint32_t i = 0u; i < materialsCount; ++i) {
         Pipeline& pipeline = root_->FindPipeline(materialDelegatedData_[i].pipelineKey_);
+        if (pipeline.properties_.pipelineDynamicStateFlags_ & VKW::PIPELINE_DYNAMIC_STATE_VIEWPORT) {
+            VkViewport viewport;
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = static_cast<float>(width_);
+            viewport.height = static_cast<float>(height_);
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            table_->vkCmdSetViewport(commandReciever->commandBuffer_, 0, 1, &viewport);
+        }
+
         VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(pipeline.pipelineHandle_);
         VKW::PipelineLayout const* vkwPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwPipeline->layoutHandle);
         VkPipelineLayout const vkPipelineLayout = vkwPipelineLayout->handle_;
@@ -242,12 +253,12 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
 
                 VkBuffer vkBuffer = indexBuffer->handle_;
                 VkDeviceSize offset = indexBufferView->offset_ + indexBuffer->memory_.offset_;
-                table_->vkCmdBindIndexBuffer(commandBuffer, vkBuffer, offset, VK_INDEX_TYPE_UINT32);
+                table_->vkCmdBindIndexBuffer(commandBuffer, vkBuffer, offset + renderItem.indexBindOffset_ * sizeof(std::uint32_t), VK_INDEX_TYPE_UINT32);
             }
             
             
             if (renderItem.indexCount_ > 0) {
-                table_->vkCmdDrawIndexed(commandBuffer, renderItem.indexCount_, 1, renderItem.baseIndex_, 0, 0);
+                table_->vkCmdDrawIndexed(commandBuffer, renderItem.indexCount_, 1, 0, 0, 0);
             }
             else if (renderItem.vertexCount_ > 0) {
                 table_->vkCmdDraw(commandBuffer, renderItem.vertexCount_, 1, 0, 0);

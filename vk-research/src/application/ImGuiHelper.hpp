@@ -32,9 +32,6 @@ public:
     void Render(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever);
 
 private:
-    void DrawFunc(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever, ImDrawCmd const& cmd);
-
-private:
     static char const* IMGUI_TEXTURE_KEY;
     static char const* IMGUI_TEXTURE_STAGING_BUFFER_KEY;
 

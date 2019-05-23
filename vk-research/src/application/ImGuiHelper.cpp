@@ -95,6 +95,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     Render::GraphicsPipelineDesc pipelineDesc;
 
     pipelineDesc.renderPass_ = IMGUI_PASS_KEY;
+    pipelineDesc.dynamicStateFlags_ = 
     pipelineDesc.shaderStagesCount_ = 2;
     pipelineDesc.shaderStages_[0] = IMGUI_VERT_SHADER_KEY;
     pipelineDesc.shaderStages_[1] = IMGUI_FRAG_SHADER_KEY;
@@ -155,7 +156,8 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     pipelineDesc.viewportInfo_ = &vpInfo;
     pipelineDesc.depthStencilInfo_ = &dsInfo;
     pipelineDesc.layoutDesc_ = &layoutDesc;
-    pipelineDesc.dynamicStateFlags_ = VKW::PIPELINE_DYNAMIC_STATE_VIEWPORT | VKW::PIPELINE_DYNAMIC_STATE_SCISSOR;
+    //pipelineDesc.dynamicStateFlags_ = VKW::PIPELINE_DYNAMIC_STATE_VIEWPORT | VKW::PIPELINE_DYNAMIC_STATE_SCISSOR;
+    pipelineDesc.dynamicStateFlags_ = VK_FLAGS_NONE;
 
     VKW::BufferViewDesc vertexBufferDesc;
     vertexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX_WRITABLE;
@@ -172,7 +174,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     renderWorkItemDesc.vertexBufferKey_ = IMGUI_VERTEX_BUFFER_KEY;
     renderWorkItemDesc.indexCount_ = 0;
     renderWorkItemDesc.indexBufferKey_ = IMGUI_INDEX_BUFFER_KEY;
-    renderWorkItemDesc.baseIndex_ = 0;
+    renderWorkItemDesc.indexBindOffset_ = 0;
     renderWorkItemDesc.setOwnerDescs_->members_[0].texture2D_.imageKey_ = IMGUI_TEXTURE_KEY;
 
     Render::MaterialTemplateDesc materialTemplateDesc;
@@ -219,14 +221,15 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
     std::int32_t const totalIndexSizeBytes = data->TotalIdxCount * sizeof(ImDrawIdx);
 
     assert(totalVertexSizeBytes <= IMGUI_VERTEX_BUFFER_SIZE && "ImGui vertex buffer overflows allocated space.");
-    assert(totalIndexSizeBytes <= IMGUI_INDEX_BUFFER_SIZE && "ImGui vertex buffer overflows allocated space.");
+    assert(totalIndexSizeBytes <= IMGUI_INDEX_BUFFER_SIZE && "ImGui index buffer overflows allocated space.");
 
-    std::uint32_t verticesCount = 0;
     void* mappedVertexBuffer = root_->MapBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
-
-    std::uint32_t indiciesCount = 0;
     void* mappedIndexBuffer = root_->MapBuffer(IMGUI_INDEX_BUFFER_KEY, context);
+    std::uint32_t indexBindOffset = 0;
+    Render::RenderWorkItem* renderWorkItem = root_->FindRenderWorkItem(IMGUI_PIPELINE_KEY, mainRenderWorkItem_);
 
+    Render::Pass& pass = root_->FindPass(IMGUI_PASS_KEY);
+    pass.Begin(context, &commandReciever);
 
     std::int32_t const cmdListsCount = data->CmdListsCount;
     for (std::int32_t i = 0; i < cmdListsCount; ++i) {
@@ -238,16 +241,15 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
         std::uint32_t const vertexBytesCount = vertexBuffer.size() * sizeof(ImDrawVert);
         std::memcpy(mappedVertexBuffer, vertexBuffer.Data, vertexBytesCount);
         mappedVertexBuffer = reinterpret_cast<std::uint8_t*>(mappedVertexBuffer) + vertexBytesCount;
-        verticesCount += vertexBuffer.size();
+        std::uint32_t verticesCountBytes = vertexBuffer.size();
 
         std::uint32_t const indexBytesCount = indexBuffer.size() * sizeof(ImDrawIdx);
         std::memcpy(mappedIndexBuffer, indexBuffer.Data, indexBytesCount);
         mappedIndexBuffer = reinterpret_cast<std::uint8_t*>(mappedIndexBuffer) + indexBytesCount;
-        indiciesCount += indexBuffer.size();
+        indexBindOffset += indexBuffer.size();
 
-        Render::Pass& pass = root_->FindPass(IMGUI_PASS_KEY);
-
-        pass.Begin(context, &commandReciever);
+        renderWorkItem->indexBindOffset_ = indexBindOffset;
+        renderWorkItem->vertexCount_ = vertexBuffer.size();
 
         std::int32_t const commandsCount = cmdBuffer.size();
         for (std::int32_t cmdI = 0; cmdI < commandsCount; ++cmdI) {
@@ -256,23 +258,17 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
                 drawCmd.UserCallback(drawList, &drawCmd);
             }
             else {
-                DrawFunc(context, commandReciever, drawCmd);
+                // drawCmd.TextureId // can be safely ingored, since we don't use multiple fonts or images
+                renderWorkItem->indexCount_ = drawCmd.ElemCount;
+                //drawCmd.
+                pass.Render(context, &commandReciever); // this needs attention
             }
         }
-
-        pass.End(context, &commandReciever);
     }
+
+    pass.End(context, &commandReciever);
 
     root_->FlushBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
     root_->FlushBuffer(IMGUI_INDEX_BUFFER_KEY, context);
-
-    Render::RenderWorkItem* renderWorkItem = root_->FindRenderWorkItem(IMGUI_PIPELINE_KEY, mainRenderWorkItem_);
-    renderWorkItem->indexCount_ = indiciesCount;
-    renderWorkItem->vertexCount_ = verticesCount;
 }
 
-void ImGuiHelper::DrawFunc(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever, ImDrawCmd const& cmd)
-{
-    Render::Pass& pass = root_->FindPass(IMGUI_PASS_KEY);
-    pass.Render(context, &commandReciever);
-}

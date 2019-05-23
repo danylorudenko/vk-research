@@ -148,7 +148,7 @@ struct RenderWorkItemDesc
     ResourceKey indexBufferKey_;
     std::uint32_t vertexCount_;
     std::uint32_t indexCount_;
-    std::uint32_t baseIndex_;
+    std::uint32_t indexBindOffset_;
     SetOwnerDesc setOwnerDescs_[SCOPE_MAX_SETS_RENDERITEM];
 };
 

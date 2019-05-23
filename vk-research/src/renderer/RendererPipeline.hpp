@@ -21,6 +21,7 @@ struct FragmentStageProperties
 
 struct PipelineProperties
 {
+    std::uint32_t pipelineDynamicStateFlags_; // VKW::PipelineDynamicStatesFlags
     VertexStageProperties vertexProperties_;
     FragmentStageProperties fragmentProperties_;
 };

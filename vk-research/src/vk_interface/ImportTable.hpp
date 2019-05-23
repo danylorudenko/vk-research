@@ -155,6 +155,8 @@ public:
     PFN_vkCmdBindPipeline vkCmdBindPipeline = nullptr;
     PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets = nullptr;
     PFN_vkCmdPushConstants vkCmdPushConstants = nullptr;
+    PFN_vkCmdSetViewport vkCmdSetViewport = nullptr;
+    PFN_vkCmdSetScissor vkCmdSetScissor = nullptr;
 
     PFN_vkCmdDispatch vkCmdDispatch = nullptr;
 
