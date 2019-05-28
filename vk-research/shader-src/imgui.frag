@@ -9,5 +9,5 @@ layout(set = 0, binding = 0) uniform sampler2D textureAtlas;
 
 void main()
 {
-	finalColor = in_color * texture(textureAtlas, in_uv);
+	finalColor = in_color * texture(textureAtlas, in_uv).x;
 }

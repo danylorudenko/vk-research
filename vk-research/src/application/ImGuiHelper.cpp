@@ -56,25 +56,26 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     io.DisplaySize.x = static_cast<float>(viewportWidth);
     io.DisplaySize.y = static_cast<float>(viewportHeight);
 
-    int imguiAtlasWidth = 0, imguiAtlasHeight = 0;
+    int imguiAtlasWidth = 0, imguiAtlasHeight, imguiPixelBytes = 0;
     unsigned char* textureData = nullptr;
-    io.Fonts->GetTexDataAsRGBA32(&textureData, &imguiAtlasWidth, &imguiAtlasHeight);
+    io.Fonts->GetTexDataAsAlpha8(&textureData, &imguiAtlasWidth, &imguiAtlasHeight, &imguiPixelBytes);
+    assert(imguiPixelBytes == 1 && "ImGuiHelper: bytesPerPixel > 1, something went wrong");
 
     VKW::ImageViewDesc imageDesc;
     imageDesc.width_ = imguiAtlasWidth;
     imageDesc.height_ = imguiAtlasHeight;
-    imageDesc.format_ = VK_FORMAT_R8G8B8A8_UNORM;
+    imageDesc.format_ = VK_FORMAT_R8_UNORM;
     imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
     root_->DefineGlobalImage(IMGUI_TEXTURE_KEY, imageDesc);
 
     VKW::BufferViewDesc stagingBufferDesc;
     stagingBufferDesc.format_ = VK_FORMAT_UNDEFINED;
-    stagingBufferDesc.size_ = imguiAtlasWidth * imguiAtlasHeight * 4;
+    stagingBufferDesc.size_ = imguiAtlasWidth * imguiAtlasHeight * imguiPixelBytes;
     stagingBufferDesc.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
     root_->DefineGlobalBuffer(IMGUI_TEXTURE_STAGING_BUFFER_KEY, stagingBufferDesc);
 
     void* stagingBufferPtr = root_->MapBuffer(IMGUI_TEXTURE_STAGING_BUFFER_KEY, 0);
-    std::memcpy(stagingBufferPtr, textureData, imguiAtlasWidth * imguiAtlasHeight * 4);
+    std::memcpy(stagingBufferPtr, textureData, imguiAtlasWidth * imguiAtlasHeight * imguiPixelBytes);
     root_->FlushBuffer(IMGUI_TEXTURE_STAGING_BUFFER_KEY, 0);
 
     root_->CopyStagingBufferToGPUTexture(IMGUI_TEXTURE_STAGING_BUFFER_KEY, IMGUI_TEXTURE_KEY, 0);
