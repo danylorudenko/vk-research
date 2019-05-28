@@ -195,7 +195,7 @@ void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
     range.pNext = nullptr;
     range.memory = deviceMemory;
-    range.size = size;
+    range.size = VK_WHOLE_SIZE;
     range.offset = offset;
     VK_ASSERT(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
 }
@@ -231,7 +231,7 @@ void Root::FlushBuffer(ResourceKey const& key, std::uint32_t frame)
     range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
     range.pNext = nullptr;
     range.memory = deviceMemory;
-    range.size = size;
+    range.size = VK_WHOLE_SIZE;
     range.offset = offset;
     VK_ASSERT(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
 }
@@ -760,6 +760,62 @@ void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey con
         1, &dstImageBarrier);
                                                                                                                      // WARNING, WE NEED TRANSITION TO THIS LAYOUT
     VulkanFuncTable()->vkCmdCopyBufferToImage(commandReciever.commandBuffer_, srcBuffer->handle_, dstImage->handle_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyInfo);
+
+    mainWorkerTemp_->EndExecutionFrame(context);
+
+    mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
+
+    VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
+}
+
+void Root::ImagePipelineLayoutBarrier(ResourceKey const& image, VKW::ImageUsage usage, std::uint32_t context)
+{
+    VKW::ImageView* imageView = FindGlobalImage(image, context);
+    VKW::ImageResource* imageResource = resourceProxy_->GetResource(imageView->resource_);
+
+    VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
+
+    VkPipelineStageFlags const srcPipelineStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    VkPipelineStageFlags const dstPipelineStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+
+    VkImageMemoryBarrier dstImageBarrier;
+    dstImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    dstImageBarrier.pNext = nullptr;
+    dstImageBarrier.srcAccessMask = VK_FLAGS_NONE;
+    dstImageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+    switch (usage)
+    {
+    case VKW::ImageUsage::TEXTURE:
+        dstImageBarrier.dstAccessMask = VK_FLAGS_NONE;
+        dstImageBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        break;
+    case VKW::ImageUsage::RENDER_TARGET:
+        dstImageBarrier.dstAccessMask = VK_FLAGS_NONE;
+        dstImageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        break;
+    default:
+        assert(false && "Other image usages are not supported by this barrier implementation.");
+    }
+    
+
+    dstImageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    dstImageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    dstImageBarrier.image = imageResource->handle_;
+    dstImageBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    dstImageBarrier.subresourceRange.baseArrayLayer = 0;
+    dstImageBarrier.subresourceRange.layerCount = 1;
+    dstImageBarrier.subresourceRange.baseMipLevel = 0;
+    dstImageBarrier.subresourceRange.levelCount = 1;
+
+    VulkanFuncTable()->vkCmdPipelineBarrier(
+        commandReciever.commandBuffer_,
+        srcPipelineStage,
+        dstPipelineStage,
+        VK_FLAGS_NONE,
+        0, nullptr,
+        0, nullptr,
+        1, &dstImageBarrier);
 
     mainWorkerTemp_->EndExecutionFrame(context);
 

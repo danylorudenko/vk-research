@@ -29,8 +29,7 @@ enum class ImageUsage
     RENDER_TARGET,
     DEPTH,
     STENCIL,
-    DEPTH_STENCIL,
-    SWAP_CHAIN_RENDER_TARGET
+    DEPTH_STENCIL
 };
 
 struct ImageDesc

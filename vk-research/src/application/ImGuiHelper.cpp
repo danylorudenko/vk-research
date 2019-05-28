@@ -69,11 +69,16 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
 
     VKW::BufferViewDesc stagingBufferDesc;
     stagingBufferDesc.format_ = VK_FORMAT_UNDEFINED;
-    stagingBufferDesc.size_ = imguiAtlasWidth * imguiAtlasHeight * 32;
+    stagingBufferDesc.size_ = imguiAtlasWidth * imguiAtlasHeight * 4;
     stagingBufferDesc.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
     root_->DefineGlobalBuffer(IMGUI_TEXTURE_STAGING_BUFFER_KEY, stagingBufferDesc);
 
+    void* stagingBufferPtr = root_->MapBuffer(IMGUI_TEXTURE_STAGING_BUFFER_KEY, 0);
+    std::memcpy(stagingBufferPtr, textureData, imguiAtlasWidth * imguiAtlasHeight * 4);
+    root_->FlushBuffer(IMGUI_TEXTURE_STAGING_BUFFER_KEY, 0);
+
     root_->CopyStagingBufferToGPUTexture(IMGUI_TEXTURE_STAGING_BUFFER_KEY, IMGUI_TEXTURE_KEY, 0);
+    root_->ImagePipelineLayoutBarrier(IMGUI_TEXTURE_KEY, VKW::ImageUsage::TEXTURE, 0);
 
     io.Fonts->SetTexID((ImTextureID)IMGUI_TEXTURE_KEY);
 

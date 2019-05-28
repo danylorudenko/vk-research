@@ -145,7 +145,6 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
         VkImageAspectFlags aspectFlags;
         switch (descs[i].usage_) {
         case ImageUsage::RENDER_TARGET:
-        case ImageUsage::SWAP_CHAIN_RENDER_TARGET:
         case ImageUsage::TEXTURE:
             aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
             break;

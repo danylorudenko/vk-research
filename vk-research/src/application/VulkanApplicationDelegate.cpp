@@ -108,7 +108,7 @@ void VulkanApplicationDelegate::update()
 
     testcounter += 0.01f;
     customData_.transformComponent_->scale_ = glm::vec3(3.0f);
-    customData_.transformComponent_->position_ = glm::vec3(0.0f, 0.5f, -1.0f);
+    customData_.transformComponent_->position_ = glm::vec3(-0.5f, 0.0f, -1.0f);
     //customData_.transformComponent_->orientation_.z = glm::degrees(testcounter);
     customData_.transformComponent_->orientation_.z = glm::degrees(3.14f);
     customData_.transformComponent_->orientation_.y = glm::degrees(testcounter * 1.1f);

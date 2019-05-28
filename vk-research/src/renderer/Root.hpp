@@ -234,6 +234,8 @@ public:
     void CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
     void CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
 
+    void ImagePipelineLayoutBarrier(ResourceKey const& image, VKW::ImageUsage layout, std::uint32_t context);
+
     VKW::ResourceRendererProxy* ResourceProxy() const;
 
     void PushPassTemp(RenderPassKey const& key);

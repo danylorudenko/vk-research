@@ -530,7 +530,7 @@ void ResourceRendererProxy::FlushBuffer(VKW::ProxyBufferHandle handle, std::uint
     range.pNext = nullptr;
     range.memory = memoryPage->deviceMemory_;
     range.offset = mappingOffset;
-    range.size = view->size_;
+    range.size = VK_WHOLE_SIZE;
 
     VK_ASSERT(table_->vkFlushMappedMemoryRanges(device_->Handle(), 1, &range));
 }
