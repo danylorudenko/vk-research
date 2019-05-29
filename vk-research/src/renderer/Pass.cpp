@@ -227,7 +227,7 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
 
         std::uint32_t const renderItemsCount = static_cast<std::uint32_t>(renderItems.size());
         for (std::uint32_t j = 0u; j < renderItemsCount; ++j) {
-            RenderWorkItem& renderItem = renderItems[i];
+            RenderWorkItem& renderItem = renderItems[j];
             std::uint32_t const renderItemSetsCount = renderItem.descriptorSetsOwner_.slotsCount_;
             for (std::uint32_t k = 0; k < renderItemsCount; ++k) {
                 VKW::DescriptorSet* vkwSet = resourceProxy_->GetDescriptorSet(renderItem.descriptorSetsOwner_.slots_[k].descriptorSet_.proxyDescriptorSetHandle_, contextId);
