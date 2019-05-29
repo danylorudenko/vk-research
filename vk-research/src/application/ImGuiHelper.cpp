@@ -247,15 +247,15 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
         std::uint32_t const vertexBytesCount = vertexBuffer.size() * sizeof(ImDrawVert);
         std::memcpy(mappedVertexBuffer, vertexBuffer.Data, vertexBytesCount);
         mappedVertexBuffer = reinterpret_cast<std::uint8_t*>(mappedVertexBuffer) + vertexBytesCount;
-        std::uint32_t verticesCountBytes = vertexBuffer.size();
 
         std::uint32_t const indexBytesCount = indexBuffer.size() * sizeof(ImDrawIdx);
         std::memcpy(mappedIndexBuffer, indexBuffer.Data, indexBytesCount);
         mappedIndexBuffer = reinterpret_cast<std::uint8_t*>(mappedIndexBuffer) + indexBytesCount;
-        indexBindOffset += indexBuffer.size();
 
         renderWorkItem->indexBindOffset_ = indexBindOffset;
         renderWorkItem->vertexCount_ = vertexBuffer.size();
+
+        indexBindOffset += indexBuffer.size();
 
         std::int32_t const commandsCount = cmdBuffer.size();
         for (std::int32_t cmdI = 0; cmdI < commandsCount; ++cmdI) {
