@@ -18,5 +18,5 @@ void main()
 {
 	out_uv = in_uv;
 	out_color = in_color;
-	gl_Position = vec4(in_pos.xy, 0.0, 1.0);
+	gl_Position = vec4(in_pos.x / 800.0, in_pos.y / 600.0, 0.0, 1.0);
 }
