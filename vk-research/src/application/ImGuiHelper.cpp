@@ -199,8 +199,8 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     root_->DefineGraphicsPipeline(IMGUI_PIPELINE_KEY, pipelineDesc);
     root_->DefineMaterialTemplate(IMGUI_MATERIAL_TEMPLATE_KEY, materialTemplateDesc);
     root_->DefineMaterial(IMGUI_MATERIAL_KEY, materialDesc);
-    root_->DefineGlobalBuffer(IMGUI_INDEX_BUFFER_KEY, indexBufferDesc);
     root_->DefineGlobalBuffer(IMGUI_VERTEX_BUFFER_KEY, vertexBufferDesc);
+    root_->DefineGlobalBuffer(IMGUI_INDEX_BUFFER_KEY, indexBufferDesc);
 
     root_->RegisterMaterial(IMGUI_MATERIAL_KEY);
     //root_->PushPassTemp(IMGUI_PASS_KEY); NONONONONO, we gonna process our pass ourselves
@@ -266,8 +266,7 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
             else {
                 // drawCmd.TextureId // can be safely ingored, since we don't use multiple fonts or images
                 renderWorkItem->indexCount_ = drawCmd.ElemCount;
-                //drawCmd.
-                pass.Render(context, &commandReciever); // this needs attention
+                pass.Render(context, &commandReciever);
             }
         }
     }

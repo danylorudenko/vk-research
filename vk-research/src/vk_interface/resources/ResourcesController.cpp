@@ -81,6 +81,7 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     case BufferUsage::VERTEX_INDEX_WRITABLE:
         regionDesc.usage_ = MemoryUsage::UPLOAD_BUFFER;
         vkBufferCreateInfo.usage |= (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        break;
     case BufferUsage::UNIFORM:
         regionDesc.usage_ = MemoryUsage::UNIFORM;
         vkBufferCreateInfo.usage |= (VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);

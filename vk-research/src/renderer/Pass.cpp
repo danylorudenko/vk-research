@@ -243,7 +243,7 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
                 VKW::BufferResource* vertexBuffer = resourceProxy_->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
 
                 VkBuffer vkBuffer = vertexBuffer->handle_;
-                VkDeviceSize offset = vertexBufferView->offset_ + vertexBuffer->memory_.offset_;
+                VkDeviceSize offset = vertexBufferView->offset_;
                 table_->vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkBuffer, &offset);
             }
 
@@ -252,7 +252,7 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
                 VKW::BufferResource* indexBuffer = resourceProxy_->GetResource(indexBufferView->providedBuffer_->bufferResource_);
 
                 VkBuffer vkBuffer = indexBuffer->handle_;
-                VkDeviceSize offset = indexBufferView->offset_ + indexBuffer->memory_.offset_;
+                VkDeviceSize offset = indexBufferView->offset_;
                 table_->vkCmdBindIndexBuffer(commandBuffer, vkBuffer, offset + renderItem.indexBindOffset_ * sizeof(std::uint32_t), VK_INDEX_TYPE_UINT32);
             }
             
