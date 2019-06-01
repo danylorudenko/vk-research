@@ -2,6 +2,7 @@
 
 #include "..\class_features\NonCopyable.hpp"
 #include "..\renderer\RenderWorkItem.hpp"
+#include "..\renderer\UniformBufferWriterProxy.hpp"
 #include "..\vk_interface\worker\WorkerFrame.hpp"
 #include <imgui\imgui.h>
 
@@ -35,7 +36,8 @@ private:
     static char const* IMGUI_TEXTURE_KEY;
     static char const* IMGUI_TEXTURE_STAGING_BUFFER_KEY;
 
-    static char const* IMGUI_SET_LAYOUT_KEY;
+    static char const* IMGUI_MATERIAL_SET_LAYOUT_KEY;
+    static char const* IMGUI_ITEM_SET_LAYOUT_KEY;
     static char const* IMGUI_PIPELINE_KEY;
     static char const* IMGUI_PASS_KEY;
     static char const* IMGUI_MATERIAL_TEMPLATE_KEY;
@@ -53,5 +55,6 @@ private:
 
     Render::Root* root_;
     Render::RenderWorkItemHandle mainRenderWorkItem_;
+    Render::UniformBufferWriterProxy uniformBufferProxy_;
     
 };

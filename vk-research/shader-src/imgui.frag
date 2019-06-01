@@ -6,6 +6,10 @@ layout(location = 1) in vec4 in_color;
 layout(location = 0) out vec4 finalColor;
 
 layout(set = 0, binding = 0) uniform sampler2D textureAtlas;
+layout(set = 1, binding = 0) uniform TransformBuffer
+{
+	mat4 test;
+} transform;
 
 void main()
 {

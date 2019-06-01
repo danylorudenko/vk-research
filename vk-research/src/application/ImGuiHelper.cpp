@@ -7,7 +7,8 @@
 char const* ImGuiHelper::IMGUI_TEXTURE_KEY = "imtex";
 char const* ImGuiHelper::IMGUI_TEXTURE_STAGING_BUFFER_KEY = "imupb";
 
-char const* ImGuiHelper::IMGUI_SET_LAYOUT_KEY = "imlyt";
+char const* ImGuiHelper::IMGUI_MATERIAL_SET_LAYOUT_KEY = "immlt";
+char const* ImGuiHelper::IMGUI_ITEM_SET_LAYOUT_KEY = "imlyt";
 char const* ImGuiHelper::IMGUI_PIPELINE_KEY = "imppl";
 char const* ImGuiHelper::IMGUI_PASS_KEY = "impss";
 char const* ImGuiHelper::IMGUI_MATERIAL_TEMPLATE_KEY = "immt";
@@ -147,15 +148,21 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     dsInfo.frontStencilState_ = {};
 
 
-    VKW::DescriptorSetLayoutDesc setLayoutDesc;
-    setLayoutDesc.membersCount_ = 1;
-    setLayoutDesc.membersDesc_[0].type_ = VKW::DescriptorType::DESCRIPTOR_TYPE_TEXTURE;
-    setLayoutDesc.membersDesc_[0].binding_ = 0;
+    VKW::DescriptorSetLayoutDesc materialSetLayoutDesc;
+    materialSetLayoutDesc.membersCount_ = 1;
+    materialSetLayoutDesc.membersDesc_[0].type_ = VKW::DescriptorType::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    materialSetLayoutDesc.membersDesc_[0].binding_ = 0;
+
+    VKW::DescriptorSetLayoutDesc itemSetLayoutDesc;
+    itemSetLayoutDesc.membersCount_ = 1;
+    itemSetLayoutDesc.membersDesc_[0].type_ = VKW::DescriptorType::DESCRIPTOR_TYPE_TEXTURE;
+    itemSetLayoutDesc.membersDesc_[0].binding_ = 0;
 
     Render::PipelineLayoutDesc layoutDesc;
-    layoutDesc.staticMembersCount_ = 0;
+    layoutDesc.staticMembersCount_ = 1;
+    layoutDesc.staticMembers_[0] = IMGUI_MATERIAL_SET_LAYOUT_KEY;
     layoutDesc.instancedMembersCount_ = 1;
-    layoutDesc.instancedMembers_[0] = IMGUI_SET_LAYOUT_KEY;
+    layoutDesc.instancedMembers_[0] = IMGUI_ITEM_SET_LAYOUT_KEY;
 
     pipelineDesc.inputAssemblyInfo_ = &iaInfo;
     pipelineDesc.vertexInputInfo_ = &vInfo;
@@ -190,12 +197,14 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
 
     Render::MaterialDesc materialDesc;
     materialDesc.templateKey_ = IMGUI_MATERIAL_TEMPLATE_KEY;
+    materialDesc.perPassData_[0].setOwnerDesc_->members_[0].uniformBuffer_.size_ = 256;
 
 
     root_->DefineRenderPass(IMGUI_PASS_KEY, passDesc);
     root_->DefineShader(IMGUI_VERT_SHADER_KEY, vertexShaderDesc);
     root_->DefineShader(IMGUI_FRAG_SHADER_KEY, fragmentShaderDesc);
-    root_->DefineSetLayout(IMGUI_SET_LAYOUT_KEY, setLayoutDesc);
+    root_->DefineSetLayout(IMGUI_ITEM_SET_LAYOUT_KEY, itemSetLayoutDesc);
+    root_->DefineSetLayout(IMGUI_MATERIAL_SET_LAYOUT_KEY, itemSetLayoutDesc);
     root_->DefineGraphicsPipeline(IMGUI_PIPELINE_KEY, pipelineDesc);
     root_->DefineMaterialTemplate(IMGUI_MATERIAL_TEMPLATE_KEY, materialTemplateDesc);
     root_->DefineMaterial(IMGUI_MATERIAL_KEY, materialDesc);
@@ -204,6 +213,10 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
 
     root_->RegisterMaterial(IMGUI_MATERIAL_KEY);
     //root_->PushPassTemp(IMGUI_PASS_KEY); NONONONONO, we gonna process our pass ourselves
+
+    Render::Material& material = root_->FindMaterial(IMGUI_MATERIAL_KEY);
+    Render::UniformBufferWriterProxy{root_, material.perPassData_[0].descritorSetsOwner_.slots_[0].descriptorSet_.setMembers_[0].data_.uniformBuffer_.uniformBufferHandle_ };
+
 
     mainRenderWorkItem_ =  root_->ConstructRenderWorkItem(IMGUI_PIPELINE_KEY, renderWorkItemDesc);
 }
