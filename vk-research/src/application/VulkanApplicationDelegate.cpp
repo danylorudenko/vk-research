@@ -364,16 +364,19 @@ static void HelpMarker(const char* desc)
 
 void VulkanApplicationDelegate::TestImGui(std::uint32_t context)
 {
-    IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
+    if (imguiEnabled_) {
+        IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
 
-    static char buf[256];
-    static float f = 0.0f;
+        static char buf[256];
+        static float f = 0.0f;
 
-    ImGui::Text("Hello, world %d", 123);
-    if (ImGui::Button("Save"))
-    {
-        // do stuff
+        ImGui::Text("Hello, world %d", 123);
+        if (ImGui::Button("Save"))
+        {
+            // do stuff
+        }
+        ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
+        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
     }
-    ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+    
 }
