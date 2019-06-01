@@ -222,6 +222,8 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
 {
     ImGui::Render();
     ImDrawData* data = ImGui::GetDrawData();
+    auto& pos = data->DisplayPos;
+    auto& size = data->DisplaySize;
 
     std::int32_t const totalVertexSizeBytes = data->TotalVtxCount * sizeof(ImDrawVert);
     std::int32_t const totalIndexSizeBytes = data->TotalIdxCount * sizeof(ImDrawIdx);
@@ -252,10 +254,9 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
         std::memcpy(mappedIndexBuffer, indexBuffer.Data, indexBytesCount);
         mappedIndexBuffer = reinterpret_cast<std::uint8_t*>(mappedIndexBuffer) + indexBytesCount;
 
-        renderWorkItem->indexBindOffset_ = indexBindOffset;
         renderWorkItem->vertexCount_ = vertexBuffer.size();
 
-        indexBindOffset += indexBuffer.size();
+        std::uint32_t indiciesRendered = 0;
 
         std::int32_t const commandsCount = cmdBuffer.size();
         for (std::int32_t cmdI = 0; cmdI < commandsCount; ++cmdI) {
@@ -266,9 +267,13 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
             else {
                 // drawCmd.TextureId // can be safely ingored, since we don't use multiple fonts or images
                 renderWorkItem->indexCount_ = drawCmd.ElemCount;
+                renderWorkItem->indexBindOffset_ = indexBindOffset + indiciesRendered;
                 pass.Render(context, &commandReciever);
+                indiciesRendered += drawCmd.ElemCount;
             }
         }
+
+        indexBindOffset += indexBuffer.size();
     }
 
     pass.End(context, &commandReciever);
