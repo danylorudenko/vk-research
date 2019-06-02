@@ -62,7 +62,6 @@ TransformComponent* TransformationSystem::CreateTransformComponent(TransformComp
     component->scale_ = glm::vec3(1.0f, 1.0f, 1.0f);
     if (uniformProxy != nullptr) {
         component->uniformProxy_ = *uniformProxy;
-        component->uniformProxy_.MapAllContexts();
     }
 
     components_.emplace_back(component);

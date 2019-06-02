@@ -55,6 +55,6 @@ private:
 
     Render::Root* root_;
     Render::RenderWorkItemHandle mainRenderWorkItem_;
-    Render::UniformBufferWriterProxy uniformBufferProxy_;
+    Render::UniformBufferWriterProxy transformUniformBufferProxy_;
     
 };

@@ -4,6 +4,7 @@
 
 namespace Render
 {
+
 UniformBufferWriterProxy::UniformBufferWriterProxy()
     : root_{ nullptr }
     , mappedBufferPtr_{ nullptr, nullptr, nullptr }
@@ -16,6 +17,7 @@ UniformBufferWriterProxy::UniformBufferWriterProxy(Root* root, UniformBufferHand
     , mappedBufferPtr_{ nullptr, nullptr, nullptr }
     , uniformBufferHandle_{ item }
 {
+    MapAllContexts();
 }
 
 UniformBufferWriterProxy::UniformBufferWriterProxy(Root* root, RenderWorkItem* item, std::uint32_t setId, std::uint32_t setMemberId)
@@ -24,7 +26,17 @@ UniformBufferWriterProxy::UniformBufferWriterProxy(Root* root, RenderWorkItem* i
     , uniformBufferHandle_{}
 {
     uniformBufferHandle_ = item->descriptorSetsOwner_.slots_[setId].descriptorSet_.setMembers_[setMemberId].data_.uniformBuffer_.uniformBufferHandle_;
-    
+    MapAllContexts();
+}
+
+UniformBufferWriterProxy::UniformBufferWriterProxy(Root* root, MaterialKey const& materialKey, std::uint32_t passId, std::uint32_t setId, std::uint32_t setMemberId)
+    : root_{ root }
+    , mappedBufferPtr_{ nullptr, nullptr, nullptr }
+    , uniformBufferHandle_{}
+{
+    Material const& material = root_->FindMaterial(materialKey);
+    uniformBufferHandle_ = material.perPassData_[passId].descritorSetsOwner_.slots_[setId].descriptorSet_.setMembers_[setMemberId].data_.uniformBuffer_.uniformBufferHandle_;
+    MapAllContexts();
 }
 
 UniformBufferWriterProxy::UniformBufferWriterProxy(UniformBufferWriterProxy const& rhs) = default;

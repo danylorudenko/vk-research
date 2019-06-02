@@ -1,6 +1,9 @@
 #include "ImGuiHelper.hpp"
 #include "..\renderer\Root.hpp"
 
+#include <glm\vec2.hpp>
+#include <glm\gtc\type_ptr.hpp>
+
 #include <utility>
 #include <cstdint>
 
@@ -204,7 +207,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     root_->DefineShader(IMGUI_VERT_SHADER_KEY, vertexShaderDesc);
     root_->DefineShader(IMGUI_FRAG_SHADER_KEY, fragmentShaderDesc);
     root_->DefineSetLayout(IMGUI_ITEM_SET_LAYOUT_KEY, itemSetLayoutDesc);
-    root_->DefineSetLayout(IMGUI_MATERIAL_SET_LAYOUT_KEY, itemSetLayoutDesc);
+    root_->DefineSetLayout(IMGUI_MATERIAL_SET_LAYOUT_KEY, materialSetLayoutDesc);
     root_->DefineGraphicsPipeline(IMGUI_PIPELINE_KEY, pipelineDesc);
     root_->DefineMaterialTemplate(IMGUI_MATERIAL_TEMPLATE_KEY, materialTemplateDesc);
     root_->DefineMaterial(IMGUI_MATERIAL_KEY, materialDesc);
@@ -215,10 +218,10 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     //root_->PushPassTemp(IMGUI_PASS_KEY); NONONONONO, we gonna process our pass ourselves
 
     Render::Material& material = root_->FindMaterial(IMGUI_MATERIAL_KEY);
-    Render::UniformBufferWriterProxy{root_, material.perPassData_[0].descritorSetsOwner_.slots_[0].descriptorSet_.setMembers_[0].data_.uniformBuffer_.uniformBufferHandle_ };
+    transformUniformBufferProxy_ = Render::UniformBufferWriterProxy{ root_, IMGUI_MATERIAL_KEY, 0, 0, 0 };
 
 
-    mainRenderWorkItem_ =  root_->ConstructRenderWorkItem(IMGUI_PIPELINE_KEY, renderWorkItemDesc);
+    mainRenderWorkItem_ = root_->ConstructRenderWorkItem(IMGUI_PIPELINE_KEY, renderWorkItemDesc);
 }
 
 void ImGuiHelper::BeginFrame(std::uint32_t context)
@@ -235,8 +238,16 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
 {
     ImGui::Render();
     ImDrawData* data = ImGui::GetDrawData();
-    auto& pos = data->DisplayPos;
-    auto& size = data->DisplaySize;
+
+    ImVec2 imDisplayPos = data->DisplayPos;
+    ImVec2 imDisplaySize = data->DisplaySize;
+
+    glm::vec2 displayPos{ imDisplayPos.x, imDisplayPos.y };
+    glm::vec2 displaySize{ imDisplaySize.x, imDisplaySize.y };
+    
+    std::uint8_t* transformUniformPtr = transformUniformBufferProxy_.MappedPtr<std::uint8_t>(context);
+    std::memcpy(transformUniformPtr, glm::value_ptr(displayPos), sizeof(displayPos));
+    std::memcpy(transformUniformPtr + sizeof(displayPos), glm::value_ptr(displaySize), sizeof(displaySize));
 
     std::int32_t const totalVertexSizeBytes = data->TotalVtxCount * sizeof(ImDrawVert);
     std::int32_t const totalIndexSizeBytes = data->TotalIdxCount * sizeof(ImDrawIdx);
