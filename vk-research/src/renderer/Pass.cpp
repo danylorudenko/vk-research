@@ -233,8 +233,8 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
                 VKW::DescriptorSet* vkwSet = resourceProxy_->GetDescriptorSet(renderItem.descriptorSetsOwner_.slots_[k].descriptorSet_.proxyDescriptorSetHandle_, contextId);
                 vkSetsToBind[k] = vkwSet->handle_;
             }
-
-            table_->vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, 0, renderItemSetsCount, vkSetsToBind, 0, nullptr);
+            //                                                                                              //first descriptor
+            table_->vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, materialBindsCount, renderItemSetsCount, vkSetsToBind, 0, nullptr);
 
             assert(renderItem.vertexCount_ >= 0 && "Pass: renderItem.vertexCount < 0");
             assert(renderItem.indexCount_ >= 0 && "Pass: renderItem.indexCount < 0");
