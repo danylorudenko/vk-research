@@ -89,7 +89,7 @@ struct GraphicsPipelineDesc
     VKW::ViewportInfo* viewportInfo_;
     VKW::DepthStencilInfo* depthStencilInfo_;
     std::uint32_t dynamicStateFlags_;  // VKW::PipelineDynamicStateFlags
-    // blending info should be here later
+    std::uint32_t blendingState_; // VKW::PipelineBlendingState
 
     Render::PipelineLayoutDesc* layoutDesc_;
     RenderPassKey renderPass_;

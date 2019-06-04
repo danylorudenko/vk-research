@@ -393,6 +393,7 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     vkwDesc.renderPass_ = renderPassMap_[desc.renderPass_].VKWRenderPass();
     vkwDesc.depthStencilInfo_ = desc.depthStencilInfo_;
     vkwDesc.dynamicStatesFlags_ = desc.dynamicStateFlags_;
+    vkwDesc.blendingState_ = desc.blendingState_;
     
     VKW::PipelineHandle const vkwPipelineHandle = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
     VKW::Pipeline const* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);

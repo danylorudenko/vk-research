@@ -59,7 +59,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     io.ConfigFlags = ImGuiConfigFlags_None;
     io.DisplaySize.x = static_cast<float>(viewportWidth);
     io.DisplaySize.y = static_cast<float>(viewportHeight);
-    io.FontGlobalScale = 2.0f;
+    io.FontGlobalScale = 5.0f;
 
     int imguiAtlasWidth = 0, imguiAtlasHeight, imguiPixelBytes = 0;
     unsigned char* textureData = nullptr;

@@ -86,8 +86,17 @@ std::uint32_t constexpr PIPELINE_DYNAMIC_STATES_MAX = 8;
 
 enum PipelineDynamicStatesFlags
 {
-    PIPELINE_DYNAMIC_STATE_VIEWPORT = 1,
-    PIPELINE_DYNAMIC_STATE_SCISSOR = 1 << 1,
+    PIPELINE_DYNAMIC_STATE_NONE         = 0,
+    PIPELINE_DYNAMIC_STATE_VIEWPORT     = 1 << 0,
+    PIPELINE_DYNAMIC_STATE_SCISSOR      = 1 << 1,
+};
+
+enum PipelineBlendingState
+{
+    PIPELINE_BLENDING_NONE              = 0,
+    PIPELINE_BLENDING_ADDITIVE          = 1 << 0,
+    PIPELINE_BLENDING_SRC_ALPHA_DST_ONE = 1 << 1,
+    PIPELINE_BLENDING_SRC_ONE_DST_ALPHA = 1 << 2
 };
 
 struct GraphicsPipelineDesc
@@ -102,7 +111,7 @@ struct GraphicsPipelineDesc
     ViewportInfo* viewportInfo_;
     DepthStencilInfo* depthStencilInfo_;
     std::uint32_t dynamicStatesFlags_; // PipelineDynamicStateFlags
-    // blending info should be here later
+    std::uint32_t blendingState_; // PipelineBlendingState
     
     PipelineLayoutDesc* layoutDesc_;
     RenderPassHandle renderPass_;
