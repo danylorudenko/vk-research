@@ -59,7 +59,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     io.ConfigFlags = ImGuiConfigFlags_None;
     io.DisplaySize.x = static_cast<float>(viewportWidth);
     io.DisplaySize.y = static_cast<float>(viewportHeight);
-    io.FontGlobalScale = 5.0f;
+    io.FontGlobalScale = 2.5f;
 
     int imguiAtlasWidth = 0, imguiAtlasHeight, imguiPixelBytes = 0;
     unsigned char* textureData = nullptr;
@@ -175,6 +175,7 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
     pipelineDesc.layoutDesc_ = &layoutDesc;
     //pipelineDesc.dynamicStateFlags_ = VKW::PIPELINE_DYNAMIC_STATE_VIEWPORT | VKW::PIPELINE_DYNAMIC_STATE_SCISSOR;
     pipelineDesc.dynamicStateFlags_ = VK_FLAGS_NONE;
+    pipelineDesc.blendingState_ = VKW::PIPELINE_BLENDING_SRC_ALPHA_DST_ONE;
 
     VKW::BufferViewDesc vertexBufferDesc;
     vertexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX_WRITABLE;

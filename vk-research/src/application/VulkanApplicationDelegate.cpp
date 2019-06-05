@@ -306,6 +306,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     pipelineDesc.viewportInfo_ = &vpInfo;
     pipelineDesc.depthStencilInfo_ = &dsInfo;
     pipelineDesc.layoutDesc_ = &layoutDesc;
+    pipelineDesc.dynamicStateFlags_ = VK_FLAGS_NONE;
+    pipelineDesc.blendingState_ = VKW::PIPELINE_BLENDING_NONE;
 
     renderRoot_->DefineGraphicsPipeline(pipeKey, pipelineDesc);
     

@@ -276,15 +276,28 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
             primerState.alphaBlendOp = VK_BLEND_OP_MAX;
             break;
         case PIPELINE_BLENDING_SRC_ALPHA_DST_ONE:
-            HERE
+            primerState.blendEnable = VK_TRUE;
+            primerState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+            primerState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+            primerState.colorBlendOp = VK_BLEND_OP_ADD;
+            primerState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            primerState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            primerState.alphaBlendOp = VK_BLEND_OP_MAX;
             break;
         case PIPELINE_BLENDING_SRC_ONE_DST_ALPHA:
+            primerState.blendEnable = VK_TRUE;
+            primerState.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+            primerState.dstColorBlendFactor = VK_BLEND_FACTOR_DST_ALPHA;
+            primerState.colorBlendOp = VK_BLEND_OP_ADD;
+            primerState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            primerState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            primerState.alphaBlendOp = VK_BLEND_OP_MAX;
             break;
 
         default:
             primerState.blendEnable = VK_FALSE;
             primerState.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-            primerState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            primerState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
             primerState.colorBlendOp = VK_BLEND_OP_ADD; // don't care
             primerState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
             primerState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
@@ -299,19 +312,8 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
         colorBlendInfo.attachmentCount = attachmentCount;
         for (std::uint32_t i = 0u; i < attachmentCount; ++i) {
-            VkPipelineColorBlendAttachmentState& info = colorBlendAttachmentInfo[i];
-            info.blendEnable = VK_FALSE;
-            info.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-            info.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-            info.colorBlendOp = VK_BLEND_OP_ADD; // don't care
-            info.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-            info.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-            info.alphaBlendOp = VK_BLEND_OP_ADD; // don't care
-            info.colorWriteMask = 
-                VK_COLOR_COMPONENT_R_BIT | 
-                VK_COLOR_COMPONENT_G_BIT |
-                VK_COLOR_COMPONENT_B_BIT |
-                VK_COLOR_COMPONENT_A_BIT;
+            VkPipelineColorBlendAttachmentState& blendState = colorBlendAttachmentInfo[i];
+            blendState = primerState;
         }
         colorBlendInfo.pAttachments = colorBlendAttachmentInfo;
     }
