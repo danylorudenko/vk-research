@@ -7,6 +7,7 @@
 
 #include "..\system\Window.hpp"
 #include "..\system\DynamicLibrary.hpp"
+#include "..\input\InputSystem.hpp"
 
 #include "..\io\IOManager.hpp"
 #include "..\vk_interface\Loader.hpp"
@@ -46,6 +47,7 @@ private:
 
 private:
     Window mainWindow_;
+    InputSystem inputSystem_;
     IOManager ioManager_;
 
     std::unique_ptr<VKW::Loader> vulkanLoader_;

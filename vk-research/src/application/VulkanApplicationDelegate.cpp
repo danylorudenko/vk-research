@@ -139,33 +139,6 @@ void VulkanApplicationDelegate::shutdown()
 
 void VulkanApplicationDelegate::FakeParseRendererResources()
 {
-    //VKW::DescriptorSetLayoutDesc setLayoutDesc;
-    //setLayoutDesc.membersCount_ = 3;
-    //
-    //setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
-    //setLayoutDesc.membersDesc_[0].binding_ = 0;
-    //
-    //setLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    //setLayoutDesc.membersDesc_[1].binding_ = 1;
-    //
-    //setLayoutDesc.membersDesc_[2].type_ = VKW::DESCRIPTOR_TYPE_SAMPLER;
-    //setLayoutDesc.membersDesc_[2].binding_ = 2;
-    //
-    //renderRoot_->DefineSetLayout("layout0", setLayoutDesc);
-
-
-    //VKW::ImageViewDesc imageDesc;
-    //imageDesc.format_ = VK_FORMAT_R8G8B8A8_UNORM;
-    //imageDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
-    //imageDesc.width_ = 1024;
-    //imageDesc.height_ = 1024;
-    //
-    //renderRoot_->DefineGlobalImage("attchmnt0", imageDesc);
-
-    //renderRoot_->DefineGlobalImage("attchmnt1", imageDesc);
-
-    //renderRoot_->DefineGlobalImage("attchmnt2", imageDesc);
-
     char constexpr uploadBufferKey[] = "uppl0";
     char constexpr vertexBufferKey[] = "vert0";
     char constexpr indexBufferKey[] = "ind0";

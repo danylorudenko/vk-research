@@ -138,6 +138,7 @@
     <ClCompile Include="src\application\ImGuiHelper.cpp" />
     <ClCompile Include="src\application\VulkanApplicationDelegate.cpp" />
     <ClCompile Include="src\class_features\ContinuousDataStorage.cpp" />
+    <ClCompile Include="src\input\InputSystem.cpp" />
     <ClCompile Include="src\io\IOManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory\ByteBuffer.cpp" />
@@ -446,6 +447,7 @@
     <ClInclude Include="src\class_features\NonMovable.hpp" />
     <ClInclude Include="src\class_features\ContinuousDataStorage.hpp" />
     <ClInclude Include="src\data\ModelMesh.hpp" />
+    <ClInclude Include="src\input\InputSystem.hpp" />
     <ClInclude Include="src\io\IOManager.hpp" />
     <ClInclude Include="src\memory\ByteBuffer.hpp" />
     <ClInclude Include="src\renderer\Material.hpp" />
