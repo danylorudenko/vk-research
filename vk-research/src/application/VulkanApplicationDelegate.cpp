@@ -21,6 +21,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
         "VulkanRenderWindow",
         VulkanApplicationDelegate::WinProc,
         this }
+    , inputSystem_{ mainWindow_.NativeHandle() }
     , imguiEnabled_{ imguiEnabled }
 {
     VKW::LoaderDesc loaderDesc;
@@ -66,6 +67,9 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
     
     switch (message)
     {
+    case WM_INPUT:
+        std::cout << "receiving raw input" << std::endl;
+        break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
