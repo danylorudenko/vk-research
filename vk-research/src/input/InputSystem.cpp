@@ -124,8 +124,27 @@ void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)
     RAWINPUT* rawInput = (RAWINPUT*)data;
     RAWINPUTHEADER& header = rawInput->header;
     if (header.dwType == RIM_TYPEMOUSE) {
-        // handle mouse input?
         RAWMOUSE& mouse = rawInput->data.mouse;
+        if(mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
+            mouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Left;
+
+        if(mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
+            mouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Right;
+
+        if(mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
+            mouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Middle;
+
+        if(mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
+            mouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Left);
+
+        if (mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
+            mouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Right);
+
+        if (mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
+            mouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Middle);
+
+        mouseState_.xDelta_ = static_cast<float>(mouse.lLastX);
+        mouseState_.yDelta_ = static_cast<float>(mouse.lLastY);
     }
     else if (header.dwType == RIM_TYPEKEYBOARD) {
         // handle keyboard input?
