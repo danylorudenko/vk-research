@@ -1,4 +1,5 @@
 #include "InputSystem.hpp"
+#include "Keyboard.hpp"
 #include <utility>
 #include <cstdint>
 #include <iostream>
@@ -51,7 +52,7 @@ InputSystem::InputSystem(HWND windowHandle)
     if (mouseConnected) {
         rawDevices[rawDevicesCount].usUsagePage = 1;
         rawDevices[rawDevicesCount].usUsage = 2;
-        rawDevices[rawDevicesCount].dwFlags = RIDEV_NOLEGACY;
+        rawDevices[rawDevicesCount].dwFlags = 0;
         rawDevices[rawDevicesCount].hwndTarget = windowHandle; // TODO: let's check how that works
 
         rawDevicesCount += 1;
@@ -60,7 +61,7 @@ InputSystem::InputSystem(HWND windowHandle)
     if (keyboardConnected) {
         rawDevices[rawDevicesCount].usUsagePage = 1;
         rawDevices[rawDevicesCount].usUsage = 6;
-        rawDevices[rawDevicesCount].dwFlags = RIDEV_NOLEGACY;
+        rawDevices[rawDevicesCount].dwFlags = 0;
         rawDevices[rawDevicesCount].hwndTarget = windowHandle; // TODO: let's check how that works
 
         rawDevicesCount += 1;
@@ -94,13 +95,6 @@ InputSystem::~InputSystem()
 
 void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)
 {
-    UINT code = GET_RAWINPUT_CODE_WPARAM(wparam);
-    if (code != RIM_INPUTSINK) {
-        std::cout << 
-            "InputSystem::ProcessSystemInput: GET_RAWINPUT_CODE_WPARAM returned not RIM_INPUTSINK, "
-            "so we recieved WM_INPUT message while we are not it foreground, that's wierd!" << std::endl;
-    }
-
     UINT dataSize = 0;
 
     UINT result = GetRawInputData((HRAWINPUT)lparam, RID_INPUT, NULL, &dataSize, sizeof(RAWINPUTHEADER));
@@ -143,12 +137,16 @@ void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)
         if (mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
             mouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Middle);
 
+        if (mouse.usButtonFlags & RI_MOUSE_WHEEL)
+            mouseState_.mouseWheelDelta_ = static_cast<float>(mouse.usButtonData);
+
         mouseState_.xDelta_ = static_cast<float>(mouse.lLastX);
         mouseState_.yDelta_ = static_cast<float>(mouse.lLastY);
     }
     else if (header.dwType == RIM_TYPEKEYBOARD) {
         // handle keyboard input?
         RAWKEYBOARD& keyboard = rawInput->data.keyboard;
+        Keys key = VKeyToKeys(keyboard.VKey);
     }
 
     if (data != NULL)

@@ -41,6 +41,8 @@ public:
 
     static LRESULT CALLBACK WinProc(HWND handle, UINT message, WPARAM wparam, LPARAM lparam);
 
+    InputSystem& GetInputSystem();
+
 private:
     void InitImGui();
     void TestImGui(std::uint32_t context);

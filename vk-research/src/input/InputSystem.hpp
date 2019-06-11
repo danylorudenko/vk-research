@@ -23,6 +23,7 @@ private:
         std::uint32_t mouseButtonStates_;
         float xDelta_;
         float yDelta_;
+        float mouseWheelDelta_;
     }
     mouseState_;
 

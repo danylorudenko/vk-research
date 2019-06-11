@@ -68,8 +68,15 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
     switch (message)
     {
     case WM_INPUT:
-        std::cout << "receiving raw input" << std::endl;
-        break;
+    {
+        UINT code = GET_RAWINPUT_CODE_WPARAM(wparam);
+        LRESULT result;
+        if (code == RIM_INPUTSINK || code == RIM_INPUT)
+            result = ::DefWindowProc(handle, message, wparam, lparam);
+
+        appDelegate->GetInputSystem().ProcessSystemInput(handle, wparam, lparam);
+        return result;
+    }
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
@@ -78,6 +85,11 @@ LRESULT VulkanApplicationDelegate::WinProc(HWND handle, UINT message, WPARAM wpa
     }
     
     return ::DefWindowProc(handle, message, wparam, lparam);
+}
+
+InputSystem& VulkanApplicationDelegate::GetInputSystem()
+{
+    return inputSystem_;
 }
 
 void VulkanApplicationDelegate::start()
