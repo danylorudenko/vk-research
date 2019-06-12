@@ -52,6 +52,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     renderRoot_ = std::make_unique<Render::Root>(rootDesc);
 
     ImGuiHelperDesc imguiHelperDesc;
+    imguiHelperDesc.window_ = &mainWindow_;
     imguiHelperDesc.root_ = renderRoot_.get();
     imguiHelper_ = std::make_unique<ImGuiHelper>(imguiHelperDesc);
 }
@@ -119,7 +120,7 @@ void VulkanApplicationDelegate::update()
     ////////////////////////////////////////////////////
     //
     if (imguiEnabled_)
-        ImGui::NewFrame();
+        imguiHelper_->BeginFrame(context);
 
 
     testcounter += 0.01f;
@@ -337,7 +338,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 void VulkanApplicationDelegate::InitImGui()
 {
-    imguiHelper_->Init(mainWindow_.Width(), mainWindow_.Height());
+    imguiHelper_->Init();
 }
 
 static void HelpMarker(const char* desc)

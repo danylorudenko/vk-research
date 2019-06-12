@@ -6,6 +6,8 @@
 #include "..\vk_interface\worker\WorkerFrame.hpp"
 #include <imgui\imgui.h>
 
+class Window;
+class InputSystem;
 namespace Render
 {
 class Root;
@@ -13,6 +15,8 @@ class Root;
 
 struct ImGuiHelperDesc
 {
+    Window* window_;
+    InputSystem* inputSystem_;
     Render::Root* root_;
 };
 
@@ -27,7 +31,7 @@ public:
 
     ~ImGuiHelper();
 
-    void Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight);
+    void Init();
     void BeginFrame(std::uint32_t context);
     void EndFrame(std::uint32_t context);
     void Render(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever);
@@ -52,7 +56,8 @@ private:
     static constexpr std::uint32_t IMGUI_VERTEX_BUFFER_SIZE = sizeof(ImDrawVert) * 2048;
     static constexpr std::uint32_t IMGUI_INDEX_BUFFER_SIZE = sizeof(ImDrawIdx) * 2048;
 
-
+    Window* window_;
+    InputSystem* inputSystem_;
     Render::Root* root_;
     Render::RenderWorkItemHandle mainRenderWorkItem_;
     Render::UniformBufferWriterProxy transformUniformBufferProxy_;

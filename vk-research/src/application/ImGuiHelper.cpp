@@ -1,4 +1,5 @@
 #include "ImGuiHelper.hpp"
+#include "..\system\Window.hpp"
 #include "..\renderer\Root.hpp"
 
 #include <glm\vec2.hpp>
@@ -6,6 +7,8 @@
 
 #include <utility>
 #include <cstdint>
+
+#include <Windows.h>
 
 char const* ImGuiHelper::IMGUI_TEXTURE_KEY = "imtex";
 char const* ImGuiHelper::IMGUI_TEXTURE_STAGING_BUFFER_KEY = "imupb";
@@ -29,7 +32,9 @@ ImGuiHelper::ImGuiHelper()
 }
 
 ImGuiHelper::ImGuiHelper(ImGuiHelperDesc const& desc)
-    : root_{ desc.root_ }
+    : window_{ desc.window_ }
+    , inputSystem_{ desc.inputSystem_ }
+    , root_{ desc.root_ }
 {
 }
 
@@ -41,6 +46,8 @@ ImGuiHelper::ImGuiHelper(ImGuiHelper&& rhs)
 
 ImGuiHelper& ImGuiHelper::operator=(ImGuiHelper&& rhs)
 {
+    std::swap(window_, rhs.window_);
+    std::swap(inputSystem_, rhs.inputSystem_)
     std::swap(root_, rhs.root_);
     std::swap(mainRenderWorkItem_, rhs.mainRenderWorkItem_);
 
@@ -52,8 +59,11 @@ ImGuiHelper::~ImGuiHelper()
     // hmmmmmmmm
 }
 
-void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight)
+void ImGuiHelper::Init()
 {
+    std::uint32_t viewportWidth = window_->Height(); 
+    std::uint32_t viewportHeight = window_->Width();
+    
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags = ImGuiConfigFlags_None;
@@ -228,6 +238,19 @@ void ImGuiHelper::Init(std::uint32_t viewportWidth, std::uint32_t viewportHeight
 
 void ImGuiHelper::BeginFrame(std::uint32_t context)
 {
+    ImGuiIO& io = ImGui::GetIO();
+    io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+
+    HWND activeWindow = ::GetForegroundWindow();
+    if (activeWindow == window_->NativeHandle()) {
+        POINT pos;
+        if (::GetCursorPos(&pos) && ::ScreenToClient(activeWindow, &pos)) {
+            io.MousePos = ImVec2((float)pos.x, (float)pos.y);
+        }
+    }
+
+    io.MouseClicked[0] = inputSystem_->GetMouseState().
+
     ImGui::NewFrame();
 }
 

@@ -6,16 +6,6 @@
 
 class InputSystem
 {
-public:
-    InputSystem();
-    InputSystem(HWND windowHandle);
-    InputSystem(InputSystem&& rhs);
-    InputSystem& operator=(InputSystem&& rhs);
-
-    ~InputSystem();
-
-    void ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam);
-
 private:
     struct MouseState
     {
@@ -32,6 +22,22 @@ private:
 
     }
     keyboardState_;
+
+
+public:
+    InputSystem();
+    InputSystem(HWND windowHandle);
+    InputSystem(InputSystem&& rhs);
+    InputSystem& operator=(InputSystem&& rhs);
+
+    ~InputSystem();
+
+    void ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam);
+
+    MouseState const& GetMouseState() const;
+    bool GetLeftMouseButtonPressed() const;
+    bool GetRightMouseButtonPressed() const;
+    bool GetMiddleMouseButtonPressed() const;
 
 };
 

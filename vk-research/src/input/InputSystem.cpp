@@ -93,6 +93,26 @@ InputSystem::~InputSystem()
     
 }
 
+InputSystem::MouseState const& InputSystem::GetMouseState() const
+{
+    return mouseState_;
+}
+
+bool InputSystem::GetLeftMouseButtonPressed() const
+{
+    return mouseState_.mouseButtonStates_ & 1 << (int)MouseState::Left;
+}
+
+bool InputSystem::GetRightMouseButtonPressed() const
+{
+    return mouseState_.mouseButtonStates_ & 1 << (int)MouseState::Right;
+}
+
+bool InputSystem::GetMiddleMouseButtonPressed() const
+{
+    return mouseState_.mouseButtonStates_ & 1 << (int)MouseState::Middle;
+}
+
 void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)
 {
     UINT dataSize = 0;
