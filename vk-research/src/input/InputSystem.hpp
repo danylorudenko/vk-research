@@ -14,14 +14,18 @@ private:
         float xDelta_;
         float yDelta_;
         float mouseWheelDelta_;
-    }
-    mouseState_;
+    };
 
     struct KeyboardState
     {
 
-    }
-    keyboardState_;
+    };
+
+    MouseState pendingMouseState_;
+    MouseState mouseState_;
+    MouseState prevMouseState_;
+
+    KeyboardState keyboardState_;
 
 
 public:
@@ -32,12 +36,22 @@ public:
 
     ~InputSystem();
 
+    void Update();
+
     void ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam);
 
     MouseState const& GetMouseState() const;
+
     bool GetLeftMouseButtonPressed() const;
     bool GetRightMouseButtonPressed() const;
     bool GetMiddleMouseButtonPressed() const;
+    bool GetLeftMouseButtonJustPressed() const;
+    bool GetRightMouseButtonJustPressed() const;
+    bool GetMiddleMouseButtonJustPressed() const;
+    bool GetLeftMouseButtonJustReleased() const;
+    bool GetRightMouseButtonJustReleased () const;
+    bool GetMiddleMouseButtonJustReleased() const;
+
 
 };
 

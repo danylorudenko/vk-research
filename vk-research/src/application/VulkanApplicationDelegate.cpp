@@ -53,6 +53,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
 
     ImGuiHelperDesc imguiHelperDesc;
     imguiHelperDesc.window_ = &mainWindow_;
+    imguiHelperDesc.inputSystem_ = &inputSystem_;
     imguiHelperDesc.root_ = renderRoot_.get();
     imguiHelper_ = std::make_unique<ImGuiHelper>(imguiHelperDesc);
 }
@@ -113,7 +114,7 @@ void VulkanApplicationDelegate::update()
     //auto frameTime = currTime - prevTime;
     //prevTime = currTime;
     //std::cout << std::chrono::duration_cast<std::chrono::microseconds>(frameTime).count() << std::endl;
-
+    inputSystem_.Update();
 
     VKW::PresentationContext presentationContext = renderRoot_->AcquireNextPresentationContext();
     std::uint32_t context = presentationContext.contextId_;

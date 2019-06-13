@@ -2,6 +2,7 @@
 #include "Keyboard.hpp"
 #include <utility>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 
 InputSystem::InputSystem()
@@ -113,6 +114,49 @@ bool InputSystem::GetMiddleMouseButtonPressed() const
     return mouseState_.mouseButtonStates_ & 1 << (int)MouseState::Middle;
 }
 
+bool InputSystem::GetLeftMouseButtonJustPressed() const
+{
+    bool prevValue = prevMouseState_.mouseButtonStates_ & 1 << (int)MouseState::Left;
+    return !prevValue && GetLeftMouseButtonPressed();
+}
+
+bool InputSystem::GetRightMouseButtonJustPressed() const
+{
+    bool prevValue = prevMouseState_.mouseButtonStates_ & 1 << (int)MouseState::Right;
+    return !prevValue && GetRightMouseButtonPressed();
+}
+
+bool InputSystem::GetMiddleMouseButtonJustPressed() const
+{
+    bool prevValue = prevMouseState_.mouseButtonStates_ & 1 << (int)MouseState::Left;
+    return !prevValue && GetMiddleMouseButtonPressed();
+}
+
+bool InputSystem::GetLeftMouseButtonJustReleased() const
+{
+    bool prevValue = prevMouseState_.mouseButtonStates_ & 1 << (int)MouseState::Left;
+    return prevValue && !GetLeftMouseButtonPressed();
+}
+
+bool InputSystem::GetRightMouseButtonJustReleased() const
+{
+    bool prevValue = prevMouseState_.mouseButtonStates_ & 1 << (int)MouseState::Right;
+    return prevValue && !GetRightMouseButtonPressed();
+}
+
+bool InputSystem::GetMiddleMouseButtonJustReleased() const
+{
+    bool prevValue = prevMouseState_.mouseButtonStates_ & 1 << (int)MouseState::Left;
+    return prevValue && !GetMiddleMouseButtonPressed();
+}
+
+void InputSystem::Update()
+{
+    prevMouseState_ = mouseState_;
+    mouseState_ = pendingMouseState_;
+    std::memset(&pendingMouseState_, 0, sizeof(MouseState));
+}
+
 void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)
 {
     UINT dataSize = 0;
@@ -140,28 +184,28 @@ void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)
     if (header.dwType == RIM_TYPEMOUSE) {
         RAWMOUSE& mouse = rawInput->data.mouse;
         if(mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
-            mouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Left;
+            pendingMouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Left;
 
         if(mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
-            mouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Right;
+            pendingMouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Right;
 
         if(mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
-            mouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Middle;
+            pendingMouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Middle;
 
         if(mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
-            mouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Left);
+            pendingMouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Left);
 
         if (mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
-            mouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Right);
+            pendingMouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Right);
 
         if (mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
-            mouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Middle);
+            pendingMouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Middle);
 
         if (mouse.usButtonFlags & RI_MOUSE_WHEEL)
-            mouseState_.mouseWheelDelta_ = static_cast<float>(mouse.usButtonData);
+            pendingMouseState_.mouseWheelDelta_ = static_cast<float>(mouse.usButtonData);
 
-        mouseState_.xDelta_ = static_cast<float>(mouse.lLastX);
-        mouseState_.yDelta_ = static_cast<float>(mouse.lLastY);
+        pendingMouseState_.xDelta_ = static_cast<float>(mouse.lLastX);
+        pendingMouseState_.yDelta_ = static_cast<float>(mouse.lLastY);
     }
     else if (header.dwType == RIM_TYPEKEYBOARD) {
         // handle keyboard input?

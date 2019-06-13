@@ -1,4 +1,5 @@
 #include "ImGuiHelper.hpp"
+#include "..\input\InputSystem.hpp"
 #include "..\system\Window.hpp"
 #include "..\renderer\Root.hpp"
 
@@ -47,7 +48,7 @@ ImGuiHelper::ImGuiHelper(ImGuiHelper&& rhs)
 ImGuiHelper& ImGuiHelper::operator=(ImGuiHelper&& rhs)
 {
     std::swap(window_, rhs.window_);
-    std::swap(inputSystem_, rhs.inputSystem_)
+    std::swap(inputSystem_, rhs.inputSystem_);
     std::swap(root_, rhs.root_);
     std::swap(mainRenderWorkItem_, rhs.mainRenderWorkItem_);
 
@@ -249,7 +250,15 @@ void ImGuiHelper::BeginFrame(std::uint32_t context)
         }
     }
 
-    io.MouseClicked[0] = inputSystem_->GetMouseState().
+    io.MouseDown[0] = inputSystem_->GetLeftMouseButtonPressed();
+    io.MouseDown[1] = inputSystem_->GetRightMouseButtonPressed();
+    io.MouseDown[2] = inputSystem_->GetMiddleMouseButtonPressed();
+
+    io.MouseReleased[0] = inputSystem_->GetLeftMouseButtonJustReleased();
+    io.MouseReleased[1] = inputSystem_->GetRightMouseButtonJustReleased();
+    io.MouseReleased[2] = inputSystem_->GetMiddleMouseButtonJustReleased();
+
+    
 
     ImGui::NewFrame();
 }
