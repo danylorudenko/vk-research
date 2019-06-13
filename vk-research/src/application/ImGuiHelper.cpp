@@ -258,8 +258,6 @@ void ImGuiHelper::BeginFrame(std::uint32_t context)
     io.MouseReleased[1] = inputSystem_->GetRightMouseButtonJustReleased();
     io.MouseReleased[2] = inputSystem_->GetMiddleMouseButtonJustReleased();
 
-    
-
     ImGui::NewFrame();
 }
 

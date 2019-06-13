@@ -17,5 +17,9 @@ void main()
 {
 	out_uv = in_uv;
 	out_color = in_color;
-	gl_Position = vec4(in_pos.x / transform.screenSize.x, in_pos.y / transform.screenSize.y, 0.0, 1.0);
+	
+	vec2 scale = vec2(2.0 / transform.screenSize.x, 2.0 / transform.screenSize.y);
+	vec2 translate = vec2(-1.0 - transform.pos.x * scale.x, -1.0 - transform.pos.y * scale.y);
+	
+	gl_Position = vec4(in_pos.x * scale.x + translate.x, in_pos.y * scale.y + translate.y, 0.0, 1.0);
 }
