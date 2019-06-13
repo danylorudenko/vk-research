@@ -128,7 +128,7 @@ bool InputSystem::GetRightMouseButtonJustPressed() const
 
 bool InputSystem::GetMiddleMouseButtonJustPressed() const
 {
-    bool prevValue = prevMouseState_.mouseButtonStates_ & 1 << (int)MouseState::Left;
+    bool prevValue = prevMouseState_.mouseButtonStates_ & 1 << (int)MouseState::Middle;
     return !prevValue && GetMiddleMouseButtonPressed();
 }
 
@@ -146,7 +146,7 @@ bool InputSystem::GetRightMouseButtonJustReleased() const
 
 bool InputSystem::GetMiddleMouseButtonJustReleased() const
 {
-    bool prevValue = prevMouseState_.mouseButtonStates_ & 1 << (int)MouseState::Left;
+    bool prevValue = prevMouseState_.mouseButtonStates_ & 1 << (int)MouseState::Middle;
     return prevValue && !GetMiddleMouseButtonPressed();
 }
 
