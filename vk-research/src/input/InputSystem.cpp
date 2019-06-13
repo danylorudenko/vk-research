@@ -154,7 +154,6 @@ void InputSystem::Update()
 {
     prevMouseState_ = mouseState_;
     mouseState_ = pendingMouseState_;
-    std::memset(&pendingMouseState_, 0, sizeof(MouseState));
 }
 
 void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)

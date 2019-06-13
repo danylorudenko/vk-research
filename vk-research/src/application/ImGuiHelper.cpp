@@ -70,7 +70,8 @@ void ImGuiHelper::Init()
     io.ConfigFlags = ImGuiConfigFlags_None;
     io.DisplaySize.x = static_cast<float>(viewportWidth);
     io.DisplaySize.y = static_cast<float>(viewportHeight);
-    io.FontGlobalScale = 2.5f;
+    //io.FontGlobalScale = 2.5f;
+    io.IniFilename = nullptr;
 
     int imguiAtlasWidth = 0, imguiAtlasHeight, imguiPixelBytes = 0;
     unsigned char* textureData = nullptr;
@@ -254,9 +255,9 @@ void ImGuiHelper::BeginFrame(std::uint32_t context)
     io.MouseDown[1] = inputSystem_->GetRightMouseButtonPressed();
     io.MouseDown[2] = inputSystem_->GetMiddleMouseButtonPressed();
 
-    io.MouseReleased[0] = inputSystem_->GetLeftMouseButtonJustReleased();
-    io.MouseReleased[1] = inputSystem_->GetRightMouseButtonJustReleased();
-    io.MouseReleased[2] = inputSystem_->GetMiddleMouseButtonJustReleased();
+    //io.MouseReleased[0] = inputSystem_->GetLeftMouseButtonJustReleased();
+    //io.MouseReleased[1] = inputSystem_->GetRightMouseButtonJustReleased();
+    //io.MouseReleased[2] = inputSystem_->GetMiddleMouseButtonJustReleased();
 
     ImGui::NewFrame();
 }
