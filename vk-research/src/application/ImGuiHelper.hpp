@@ -53,8 +53,8 @@ private:
     static char const* IMGUI_VERTEX_BUFFER_KEY;
     static char const* IMGUI_INDEX_BUFFER_KEY;
 
-    static constexpr std::uint32_t IMGUI_VERTEX_BUFFER_SIZE = sizeof(ImDrawVert) * 2048;
-    static constexpr std::uint32_t IMGUI_INDEX_BUFFER_SIZE = sizeof(ImDrawIdx) * 2048;
+    static constexpr std::uint32_t IMGUI_VERTEX_BUFFER_SIZE = sizeof(ImDrawVert) * 2048 * 16;
+    static constexpr std::uint32_t IMGUI_INDEX_BUFFER_SIZE = sizeof(ImDrawIdx) * 2048 * 16;
 
     Window* window_;
     InputSystem* inputSystem_;

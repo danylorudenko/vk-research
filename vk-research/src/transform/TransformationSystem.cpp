@@ -25,13 +25,13 @@ TransformationSystem& TransformationSystem::operator=(TransformationSystem&& rhs
 
 TransformationSystem::~TransformationSystem() = default;
 
-void TransformationSystem::Update(std::uint32_t context, glm::vec3 const& cameraPos, glm::vec3 const& cameraEuler, float cameraFowDegrees)
+void TransformationSystem::Update(std::uint32_t context, TransformSystemCameraData& cameraData)
 {
-    glm::mat4 view_mat = glm::translate(glm::mat4(1.0f), -cameraPos);
-    view_mat = glm::rotate(view_mat, cameraEuler.x, glm::vec3(1.0f, 0.0f, 0.0f));
-    view_mat = glm::rotate(view_mat, cameraEuler.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 view_mat = glm::translate(glm::mat4(1.0f), -cameraData.cameraPos);
+    view_mat = glm::rotate(view_mat, cameraData.cameraEuler.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    view_mat = glm::rotate(view_mat, cameraData.cameraEuler.z, glm::vec3(0.0f, 0.0f, 1.0f));
 
-    glm::mat4 perspective_mat = glm::perspective(glm::radians(cameraFowDegrees), 800.0f / 600.0f, 0.1f, 1000.0f);
+    glm::mat4 perspective_mat = glm::perspective(glm::radians(cameraData.cameraFowDegrees), cameraData.width / cameraData.height, 0.1f, 1000.0f);
     
     std::uint64_t const componentsCount = static_cast<std::uint64_t>(components_.size());
     for (std::uint64_t i = 0; i < componentsCount; ++i) {

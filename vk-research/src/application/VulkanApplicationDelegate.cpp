@@ -134,7 +134,14 @@ void VulkanApplicationDelegate::update()
 
     //
     ////////////////////////////////////////////////////
-    transformationSystem_.Update(context, glm::vec3(0.0f), glm::vec3(0.0f), 60.0f);
+    Transform::TransformSystemCameraData cameraData;
+    cameraData.cameraPos = glm::vec3(0.0f);
+    cameraData.cameraEuler = glm::vec3(0.0f);
+    cameraData.cameraFowDegrees = 60.0f;
+    cameraData.width = (float)mainWindow_.Width();
+    cameraData.height = (float)mainWindow_.Height();
+
+    transformationSystem_.Update(context, cameraData);
 
     VKW::WorkerFrameCommandReciever commandReciever = renderRoot_->BeginRenderGraph(presentationContext);
     renderRoot_->IterateRenderGraph(presentationContext, commandReciever);
@@ -342,34 +349,23 @@ void VulkanApplicationDelegate::InitImGui()
     imguiHelper_->Init();
 }
 
-static void HelpMarker(const char* desc)
-{
-    ImGui::TextDisabled("(?)");
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(desc);
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
-}
-
 void VulkanApplicationDelegate::TestImGui(std::uint32_t context)
 {
     if (imguiEnabled_) {
-        IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
-
-        static char buf[256];
-        static float f = 0.0f;
-
-        ImGui::Text("Hello, world %d", 123);
-        if (ImGui::Button("Save"))
-        {
-            // do stuff
-        }
-        ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+        //IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
+        //
+        //static char buf[256];
+        //static float f = 0.0f;
+        //
+        //ImGui::Text("Hello, world %d", 123);
+        //if (ImGui::Button("Save"))
+        //{
+        //    // do stuff
+        //}
+        //ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
+        //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+        static bool p_open = true;
+        ImGui::ShowDemoWindow(&p_open);
     }
     
 }

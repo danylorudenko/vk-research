@@ -62,8 +62,8 @@ ImGuiHelper::~ImGuiHelper()
 
 void ImGuiHelper::Init()
 {
-    std::uint32_t viewportWidth = window_->Height(); 
-    std::uint32_t viewportHeight = window_->Width();
+    std::uint32_t viewportWidth = window_->Width(); 
+    std::uint32_t viewportHeight = window_->Height();
     
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();

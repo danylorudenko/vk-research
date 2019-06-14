@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <glm\fwd.hpp>
+#include <glm\vec3.hpp>
 #include "..\class_features\NonCopyable.hpp"
 
 namespace Render
@@ -18,6 +18,15 @@ namespace Transform
 struct TransformComponent;
 
 
+struct TransformSystemCameraData
+{
+    glm::vec3 cameraPos; 
+    glm::vec3 cameraEuler;
+    float cameraFowDegrees;
+    float width;
+    float height;
+};
+
 class TransformationSystem
     : public NonCopyable
 {
@@ -29,7 +38,7 @@ public:
     ~TransformationSystem();
 
     TransformComponent* CreateTransformComponent(TransformComponent* parent, Render::UniformBufferWriterProxy* uniformProxy);
-    void Update(std::uint32_t context, glm::vec3 const& cameraPos, glm::vec3 const& cameraEuler, float cameraFowDegrees);
+    void Update(std::uint32_t context, TransformSystemCameraData& cameraData);
 
 
 private:
