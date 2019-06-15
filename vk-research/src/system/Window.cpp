@@ -78,7 +78,11 @@ Window::Window(HINSTANCE instance, char const* title, std::uint32_t width, std::
     , userData_{ userData }
 {
     if (windowClass_) {
-        handle_ = ::CreateWindow(windowClass_.Name().c_str(), title_.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width_, height_, nullptr, nullptr, instance, nullptr);
+        DWORD additionalStyles = WS_OVERLAPPEDWINDOW;
+        additionalStyles ^= WS_MAXIMIZEBOX;
+        additionalStyles ^= WS_SIZEBOX;
+
+        handle_ = ::CreateWindow(windowClass_.Name().c_str(), title_.c_str(), additionalStyles, CW_USEDEFAULT, CW_USEDEFAULT, width_, height_, nullptr, nullptr, instance, nullptr);
 
         if (handle_) {
             ::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(userData_));

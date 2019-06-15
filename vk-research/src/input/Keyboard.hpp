@@ -4,7 +4,7 @@
 
 enum class Keys
 {
-    A,
+    A = 0,
     B,
     C,
     D,

@@ -75,8 +75,6 @@ InputSystem::InputSystem(HWND windowHandle)
 
     if (list != NULL)
         std::free(list);
-
-    std::cout << "InputSystem: END TAG." << std::endl;
 }
 
 InputSystem::InputSystem(InputSystem&& rhs)

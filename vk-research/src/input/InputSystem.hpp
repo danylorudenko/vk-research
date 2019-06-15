@@ -1,6 +1,7 @@
 #pragma once
 
 #include "..\class_features\NonCopyable.hpp"
+#include "Keyboard.hpp"
 #include <cstdint>
 #include <Windows.h>
 
@@ -18,13 +19,14 @@ private:
 
     struct KeyboardState
     {
-
+        Keys keys[(int)Keys::END];
     };
 
     MouseState pendingMouseState_;
     MouseState mouseState_;
     MouseState prevMouseState_;
 
+    KeyboardState prevKeyboardState_;
     KeyboardState keyboardState_;
 
 
