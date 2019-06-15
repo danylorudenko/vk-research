@@ -31,6 +31,7 @@ enum class Keys
     Y,
     Z,
     Escape,
+    Space,
     F1,
     F2,
     F3,
@@ -87,6 +88,7 @@ enum class Keys
     Insert,
     Home,
     End,
+    Delete,
     PageUp,
     PageDown,
     END,
@@ -94,4 +96,6 @@ enum class Keys
 };
 
 Keys VKeyToKeys(std::uint32_t vKey);
+
+std::uint32_t KeysToVKey(Keys key);
 

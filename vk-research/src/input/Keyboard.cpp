@@ -100,6 +100,8 @@ Keys VKeyToKeys(std::uint32_t vKey)
         return Keys::Y;
     case 0x5A:
         return Keys::Z;
+    case VK_SPACE:
+        return Keys::Space;
 
     case VK_F1:
         return Keys::F1;
@@ -177,11 +179,202 @@ Keys VKeyToKeys(std::uint32_t vKey)
         return Keys::Home;
     case VK_END:
         return Keys::End;
+    case VK_DELETE:
+        return Keys::Delete;
     case VK_PRIOR:
         return Keys::PageUp;
     case VK_NEXT:
         return Keys::PageDown;
     default:
         return Keys::END;
+    }
+}
+
+std::uint32_t KeysToVKey(Keys key)
+{
+    switch (key)
+    {
+    case Keys::Num0:
+        return 0x30;
+    case Keys::Num1:
+        return 0x31;
+    case Keys::Num2:
+        return 0x32;
+    case Keys::Num3:
+        return 0x33;
+    case Keys::Num4:
+        return 0x34;
+    case Keys::Num5:
+        return 0x35;
+    case Keys::Num6:
+        return 0x36;
+    case Keys::Num7:
+        return 0x37;
+    case Keys::Num8:
+        return 0x38;
+    case Keys::Num9:
+        return 0x39;
+
+    case Keys::NumPad0:
+        return VK_NUMPAD0;
+    case Keys::NumPad1:
+        return VK_NUMPAD1;
+    case Keys::NumPad2:
+        return VK_NUMPAD2;
+    case Keys::NumPad3:
+        return VK_NUMPAD3;
+    case Keys::NumPad4:
+        return VK_NUMPAD4;
+    case Keys::NumPad5:
+        return VK_NUMPAD5;
+    case Keys::NumPad6:
+        return VK_NUMPAD6;
+    case Keys::NumPad7:
+        return VK_NUMPAD7;
+    case Keys::NumPad8:
+        return VK_NUMPAD8;
+    case Keys::NumPad9:
+        return VK_NUMPAD9;
+
+
+    case Keys::A:
+        return 0x41;
+    case Keys::B:
+        return 0x42;
+    case Keys::C:
+        return 0x43;
+    case Keys::D:
+        return 0x44;
+    case Keys::E:
+        return 0x45;
+    case Keys::F:
+        return 0x46;
+    case Keys::G:
+        return 0x47;
+    case Keys::H:
+        return 0x48;
+    case Keys::I:
+        return 0x49;
+    case Keys::J:
+        return 0x4A;
+    case Keys::K:
+        return 0x4B;
+    case Keys::L:
+        return 0x4C;
+    case Keys::M:
+        return 0x4D;
+    case Keys::N:
+        return 0x4E;
+    case Keys::O:
+        return 0x4F;
+    case Keys::P:
+        return 0x50;
+    case Keys::Q:
+        return 0x51;
+    case Keys::R:
+        return 0x52;
+    case Keys::S:
+        return 0x53;
+    case Keys::T:
+        return 0x54;
+    case Keys::U:
+        return 0x55;
+    case Keys::V:
+        return 0x56;
+    case Keys::W:
+        return 0x57;
+    case Keys::X:
+        return 0x58;
+    case Keys::Y:
+        return 0x59;
+    case Keys::Z:
+        return 0x5A;
+    case Keys::Space:
+        return VK_SPACE;
+
+    case Keys::F1:
+        return VK_F1;
+    case Keys::F2:
+        return VK_F2;
+    case Keys::F3:
+        return VK_F3;
+    case Keys::F4:
+        return VK_F4;
+    case Keys::F5:
+        return VK_F5;
+    case Keys::F6:
+        return VK_F6;
+    case Keys::F7:
+        return VK_F7;
+    case Keys::F8:
+        return VK_F8;
+    case Keys::F9:
+        return VK_F9;
+    case Keys::F10:
+        return VK_F10;
+    case Keys::F11:
+        return VK_F11;
+    case Keys::F12:
+        return VK_F12;
+
+    case Keys::Escape:
+        return VK_ESCAPE;
+    case Keys::Tilde:
+        return VK_OEM_3;
+
+    case Keys::MinusUnderscore:
+        return VK_OEM_MINUS;
+    case Keys::PlusEquals:
+        return VK_OEM_PLUS;
+    case Keys::Backspace:
+        return VK_BACK;
+    case Keys::Semicolon:
+        return VK_OEM_1;
+    case Keys::Tab:
+        return VK_TAB;
+    case Keys::BracketSquaredLeft:
+        return VK_OEM_4;
+    case Keys::BracketSquaredRight:
+        return VK_OEM_6;
+    case Keys::Enter:
+        return VK_RETURN;
+    case Keys::CapsLock:
+        return VK_CAPITAL;
+    case Keys::Slash:
+        return VK_OEM_2;
+    case Keys::Backslash:
+        return VK_OEM_5;
+    case Keys::Shift:
+        return VK_SHIFT;
+    case Keys::Ctrl:
+        return VK_CONTROL;
+    case Keys::Alt:
+        return VK_MENU;
+    case Keys::WinLeft:
+        return VK_LWIN;
+    case Keys::WinRight:
+        return VK_RWIN;
+    case Keys::Left:
+        return VK_LEFT;
+    case Keys::Right:
+        return VK_RIGHT;
+    case Keys::Up:
+        return VK_UP;
+    case Keys::Down:
+        return VK_DOWN;
+    case Keys::Insert:
+        return VK_INSERT;
+    case Keys::Home:
+        return VK_HOME;
+    case Keys::End:
+        return VK_END;
+    case Keys::Delete:
+        return VK_DELETE;
+    case Keys::PageUp:
+        return VK_PRIOR;
+    case Keys::PageDown:
+        return VK_NEXT;
+    default:
+        return 0;
     }
 }

@@ -19,13 +19,15 @@ private:
 
     struct KeyboardState
     {
-        Keys keys[(int)Keys::END];
+        // so we have enough bits for the whole Keys enum
+        std::uint64_t keysBits[(std::uint32_t)Keys::END / 64 + 1];
     };
 
     MouseState pendingMouseState_;
     MouseState mouseState_;
     MouseState prevMouseState_;
 
+    KeyboardState pendingKeyboardState_;
     KeyboardState prevKeyboardState_;
     KeyboardState keyboardState_;
 
@@ -53,6 +55,16 @@ public:
     bool GetLeftMouseButtonJustReleased() const;
     bool GetRightMouseButtonJustReleased () const;
     bool GetMiddleMouseButtonJustReleased() const;
+
+    bool GetKeyboardButtonDown(Keys key) const;
+    bool GetKeyboardButtonJustPressed(Keys key) const;
+    bool GetKeyboardButtonJustReleased(Keys key) const;
+
+    static std::uint32_t GetCharFromKeys(Keys key);
+
+private:
+    static void SetKeysBitflagValue(std::uint64_t* bitflag, Keys key, bool value);
+    static bool GetKeysBitflagValue(std::uint64_t const* bitflag, Keys key);
 
 
 };

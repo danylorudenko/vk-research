@@ -148,10 +148,57 @@ bool InputSystem::GetMiddleMouseButtonJustReleased() const
     return prevValue && !GetMiddleMouseButtonPressed();
 }
 
+bool InputSystem::GetKeyboardButtonDown(Keys key) const
+{
+    return GetKeysBitflagValue(keyboardState_.keysBits, key);
+}
+
+bool InputSystem::GetKeyboardButtonJustPressed(Keys key) const
+{
+    bool prevValue = GetKeysBitflagValue(prevKeyboardState_.keysBits, key);
+    return !prevValue && GetKeyboardButtonDown(key);
+}
+
+bool InputSystem::GetKeyboardButtonJustReleased(Keys key) const
+{
+    bool prevValue = GetKeysBitflagValue(prevKeyboardState_.keysBits, key);
+    return prevValue && !GetKeyboardButtonDown(key);
+}
+
+void InputSystem::SetKeysBitflagValue(std::uint64_t* bitflag, Keys key, bool value)
+{
+    std::uint32_t member = (std::uint32_t)key / 64;
+    std::uint32_t bitOffset = (std::uint32_t)key - 64 * member;
+
+    if (value) {
+        bitflag[member] |= 1ULL << bitOffset;
+    }
+    else {
+        bitflag[member] &= !(1ULL << bitOffset);
+    }
+    
+}
+
+bool InputSystem::GetKeysBitflagValue(std::uint64_t const* bitflag, Keys key)
+{
+    std::uint32_t member = (std::uint32_t)key / 64;
+    std::uint32_t bitOffset = (std::uint32_t)key - 64 * member;
+
+    return bitflag[member] & (1ULL << bitOffset);
+}
+
+std::uint32_t InputSystem::GetCharFromKeys(Keys key)
+{
+    return MapVirtualKeyW(KeysToVKey(key), MAPVK_VK_TO_CHAR);
+}
+
 void InputSystem::Update()
 {
     prevMouseState_ = mouseState_;
     mouseState_ = pendingMouseState_;
+
+    prevKeyboardState_ = keyboardState_;
+    keyboardState_ = pendingKeyboardState_;
 }
 
 void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)
@@ -207,7 +254,15 @@ void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)
     else if (header.dwType == RIM_TYPEKEYBOARD) {
         // handle keyboard input?
         RAWKEYBOARD& keyboard = rawInput->data.keyboard;
-        Keys key = VKeyToKeys(keyboard.VKey);
+        if (keyboard.Flags & RI_KEY_BREAK) {
+            //up
+            SetKeysBitflagValue(pendingKeyboardState_.keysBits, VKeyToKeys(keyboard.VKey), false);
+        }
+        // RI_KEY_MAKE defined as 0 sooo
+        else if (keyboard.Flags == RI_KEY_MAKE) {
+            // down
+            SetKeysBitflagValue(pendingKeyboardState_.keysBits, VKeyToKeys(keyboard.VKey), true);
+        }
     }
 
     if (data != NULL)

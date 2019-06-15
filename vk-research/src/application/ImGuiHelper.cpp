@@ -73,6 +73,28 @@ void ImGuiHelper::Init()
     //io.FontGlobalScale = 2.5f;
     io.IniFilename = nullptr;
 
+    io.KeyMap[ImGuiKey_Tab] = (std::int32_t)Keys::Tab;
+    io.KeyMap[ImGuiKey_LeftArrow] = (std::int32_t)Keys::Left;
+    io.KeyMap[ImGuiKey_RightArrow] = (std::int32_t)Keys::Right;
+    io.KeyMap[ImGuiKey_UpArrow] = (std::int32_t)Keys::Up;
+    io.KeyMap[ImGuiKey_DownArrow] = (std::int32_t)Keys::Down;
+    io.KeyMap[ImGuiKey_PageUp] = (std::int32_t)Keys::PageUp;
+    io.KeyMap[ImGuiKey_PageDown] = (std::int32_t)Keys::PageDown;
+    io.KeyMap[ImGuiKey_Home] = (std::int32_t)Keys::Home;
+    io.KeyMap[ImGuiKey_End] = (std::int32_t)Keys::End;
+    io.KeyMap[ImGuiKey_Insert] = (std::int32_t)Keys::Insert;
+    io.KeyMap[ImGuiKey_Delete] = (std::int32_t)Keys::Delete;
+    io.KeyMap[ImGuiKey_Backspace] = (std::int32_t)Keys::Backspace;
+    io.KeyMap[ImGuiKey_Space] = (std::int32_t)Keys::Space;
+    io.KeyMap[ImGuiKey_Enter] = (std::int32_t)Keys::Enter;
+    io.KeyMap[ImGuiKey_Escape] = (std::int32_t)Keys::Escape;
+    io.KeyMap[ImGuiKey_A] = (std::int32_t)Keys::A;         // for text edit CTRL+A: select all
+    io.KeyMap[ImGuiKey_C] = (std::int32_t)Keys::C;         // for text edit CTRL+C: copy
+    io.KeyMap[ImGuiKey_V] = (std::int32_t)Keys::V;         // for text edit CTRL+V: paste
+    io.KeyMap[ImGuiKey_X] = (std::int32_t)Keys::X;         // for text edit CTRL+X: cut
+    io.KeyMap[ImGuiKey_Y] = (std::int32_t)Keys::Y;         // for text edit CTRL+Y: redo
+    io.KeyMap[ImGuiKey_Z] = (std::int32_t)Keys::Z;
+
     int imguiAtlasWidth = 0, imguiAtlasHeight, imguiPixelBytes = 0;
     unsigned char* textureData = nullptr;
     io.Fonts->GetTexDataAsAlpha8(&textureData, &imguiAtlasWidth, &imguiAtlasHeight, &imguiPixelBytes);
@@ -255,9 +277,23 @@ void ImGuiHelper::BeginFrame(std::uint32_t context)
     io.MouseDown[1] = inputSystem_->GetRightMouseButtonPressed();
     io.MouseDown[2] = inputSystem_->GetMiddleMouseButtonPressed();
 
-    //io.MouseReleased[0] = inputSystem_->GetLeftMouseButtonJustReleased();
-    //io.MouseReleased[1] = inputSystem_->GetRightMouseButtonJustReleased();
-    //io.MouseReleased[2] = inputSystem_->GetMiddleMouseButtonJustReleased();
+    io.KeyCtrl = inputSystem_->GetKeyboardButtonDown(Keys::Ctrl);
+    io.KeyShift = inputSystem_->GetKeyboardButtonDown(Keys::Shift);
+    io.KeyAlt = inputSystem_->GetKeyboardButtonDown(Keys::Alt);
+    io.KeySuper = inputSystem_->GetKeyboardButtonDown(Keys::WinLeft) || inputSystem_->GetKeyboardButtonDown(Keys::WinRight);
+
+    std::int32_t keyBegin = (std::int32_t)Keys::BEGIN;
+    std::int32_t keyEnd = (std::int32_t)Keys::END;
+    for (std::int32_t key = keyBegin; key < keyEnd; ++key) {
+        io.KeysDown[key] = inputSystem_->GetKeyboardButtonDown((Keys)key);
+
+        if (inputSystem_->GetKeyboardButtonJustReleased((Keys)key)) {
+            char result = (char)InputSystem::GetCharFromKeys((Keys)key);
+            inputSystem_->GetKeyboardButtonJustReleased((Keys)key);
+            if(result)
+                io.AddInputCharacter(result);
+        }
+    }
 
     ImGui::NewFrame();
 }
