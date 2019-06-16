@@ -15,7 +15,7 @@
 namespace Render
 {
 
-Pass::Pass()
+GraphicsPass::GraphicsPass()
     : root_{ nullptr }
     , table_{ nullptr }
     , device_{ nullptr }
@@ -27,7 +27,7 @@ Pass::Pass()
 {
 }
 
-Pass::Pass(PassDesc const& desc)
+GraphicsPass::GraphicsPass(GraphicsPassDesc const& desc)
     : root_{ desc.root_ }
     , table_{ desc.table_ }
     , device_{ desc.device_}
@@ -85,7 +85,7 @@ Pass::Pass(PassDesc const& desc)
     framebuffer_ = resourceProxy_->CreateFramebuffer(framebufferProxyDesc);
 }
 
-Pass::Pass(Pass&& rhs)
+GraphicsPass::GraphicsPass(GraphicsPass&& rhs)
     : root_{ nullptr }
     , table_{ nullptr }
     , device_{ nullptr }
@@ -99,7 +99,7 @@ Pass::Pass(Pass&& rhs)
     operator=(std::move(rhs));
 }
 
-Pass& Pass::operator=(Pass&& rhs)
+GraphicsPass& GraphicsPass::operator=(GraphicsPass&& rhs)
 {
     std::swap(root_, rhs.root_);
     std::swap(table_, rhs.table_);
@@ -117,22 +117,22 @@ Pass& Pass::operator=(Pass&& rhs)
     return *this;
 }
 
-Pass::~Pass()
+GraphicsPass::~GraphicsPass()
 {
     
 }
 
-VKW::RenderPassHandle Pass::VKWRenderPass() const
+VKW::RenderPassHandle GraphicsPass::VKWRenderPass() const
 {
     return vkRenderPass_;
 }
 
-void Pass::RegisterMaterialData(Material::PerPassData* perPassData, PipelineKey const& pipelineKey)
+void GraphicsPass::RegisterMaterialData(Material::PerPassData* perPassData, PipelineKey const& pipelineKey)
 {
     materialDelegatedData_.emplace_back(perPassData, pipelineKey);
 }
 
-void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void GraphicsPass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
     VKW::RenderPass* pass = renderPassController_->GetRenderPass(vkRenderPass_);
     VKW::Framebuffer* framebuffer = resourceProxy_->GetFramebuffer(framebuffer_, contextId);
@@ -175,7 +175,7 @@ void Pass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comma
     
 }
 
-void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void GraphicsPass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
     std::uint32_t const materialsCount = static_cast<std::uint32_t>(materialDelegatedData_.size());
     for (std::uint32_t i = 0u; i < materialsCount; ++i) {
@@ -236,8 +236,8 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
             //                                                                                              //first descriptor
             table_->vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, materialBindsCount, renderItemSetsCount, vkSetsToBind, 0, nullptr);
 
-            assert(renderItem.vertexCount_ >= 0 && "Pass: renderItem.vertexCount < 0");
-            assert(renderItem.indexCount_ >= 0 && "Pass: renderItem.indexCount < 0");
+            assert(renderItem.vertexCount_ >= 0 && "GraphicsPass: renderItem.vertexCount < 0");
+            assert(renderItem.indexCount_ >= 0 && "GraphicsPass: renderItem.indexCount < 0");
             if (renderItem.vertexCount_ > 0) {
                 VKW::BufferView* vertexBufferView = root_->FindGlobalBuffer(renderItem.vertexBufferKey_, contextId);
                 VKW::BufferResource* vertexBuffer = resourceProxy_->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
@@ -269,7 +269,7 @@ void Pass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* comm
     }
 }
 
-void Pass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void GraphicsPass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
     table_->vkCmdEndRenderPass(commandReciever->commandBuffer_);
 }

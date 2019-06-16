@@ -96,7 +96,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     graphicsPipelineInfo.pNext = nullptr;
     graphicsPipelineInfo.flags = desc.optimized_ ? VK_FLAGS_NONE : VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT;
     graphicsPipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-    graphicsPipelineInfo.basePipelineIndex = 0;
+    graphicsPipelineInfo.basePipelineIndex = -1;
     graphicsPipelineInfo.layout = layout->handle_;
     graphicsPipelineInfo.renderPass = renderPass->handle_;
     graphicsPipelineInfo.subpass = 0;
@@ -348,6 +348,38 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
     pipelines_.emplace_back(result);
 
+    return PipelineHandle{ result };
+}
+
+PipelineHandle PipelineFactory::CreateComputePipeline(ComputePipelineDesc const& desc)
+{
+    ShaderModule* shaderModule = shaderModuleFactory_->AccessModule(desc.shaderStage_.shaderModuleHandle_);
+    PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
+    PipelineLayout* layout = descriptorLayoutController_->GetPipelineLayout(layoutHandle);
+
+    VkComputePipelineCreateInfo pipelineInfo;
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+    pipelineInfo.pNext = nullptr;
+    pipelineInfo.flags = desc.optimized_ ? VK_FLAGS_NONE : VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT;
+    pipelineInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    pipelineInfo.stage.pNext = nullptr;
+    pipelineInfo.stage.flags = VK_FLAGS_NONE;
+    pipelineInfo.stage.module = shaderModule->handle_;
+    pipelineInfo.stage.pName = shaderModule->entryPoint_.c_str();
+    pipelineInfo.stage.pSpecializationInfo = nullptr;
+    pipelineInfo.layout = layout->handle_;
+    pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+    pipelineInfo.basePipelineIndex = -1;
+
+    VkPipeline pipeline = VK_NULL_HANDLE;
+    VK_ASSERT(table_->vkCreateComputePipelines(device_->Handle(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline));
+
+
+    Pipeline* result = new Pipeline{};
+    result->vkPipeline_ = pipeline;
+    result->layoutHandle = layoutHandle;
+
+    pipelines_.emplace_back(result);
     return PipelineHandle{ result };
 }
 

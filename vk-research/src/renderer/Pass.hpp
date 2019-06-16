@@ -25,7 +25,7 @@ namespace Render
 
 class Root;
 
-struct PassDesc
+struct GraphicsPassDesc
 {
     Root* root_;
 
@@ -53,15 +53,15 @@ struct PassDesc
     
 };
 
-class Pass
+class GraphicsPass
     : public NonCopyable
 {
 public:
-    Pass();
-    Pass(PassDesc const& desc);
-    Pass(Pass&& rhs);
-    Pass& operator=(Pass&& rhs);
-    ~Pass();
+    GraphicsPass();
+    GraphicsPass(GraphicsPassDesc const& desc);
+    GraphicsPass(GraphicsPass&& rhs);
+    GraphicsPass& operator=(GraphicsPass&& rhs);
+    ~GraphicsPass();
 
     VKW::RenderPassHandle VKWRenderPass() const;
 

@@ -34,7 +34,7 @@ class Loader;
 namespace Render
 {
 
-struct RenderPassDesc
+struct RootGraphicsPassDesc
 {
     std::uint32_t colorAttachmentsCount_;
     struct ColorAttachment
@@ -44,6 +44,11 @@ struct RenderPassDesc
     }
     colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
     ResourceKey depthStencilAttachment_;
+};
+
+struct ComputePassDesc
+{
+
 };
 
 struct RootDesc
@@ -92,7 +97,7 @@ struct GraphicsPipelineDesc
     std::uint32_t blendingState_; // VKW::PipelineBlendingState
 
     Render::PipelineLayoutDesc* layoutDesc_;
-    RenderPassKey renderPass_;
+    PassKey renderPass_;
 };
 
 
@@ -101,7 +106,7 @@ struct MaterialTemplateDesc
     std::uint32_t perPassDataCount_;
     struct PerPassData 
     {
-        RenderPassKey passKey_;
+        PassKey passKey_;
         PipelineKey pipelineKey_;
     } 
     perPassData_[MATERIAL_TEMPLATE_PASS_LIMIT];
@@ -164,13 +169,13 @@ public:
     using UniformBufferMap = std::unordered_map< std::uint64_t, UniformBuffer >;
 
     using ShaderMap = std::map<ShaderKey, Shader>;
-    using RenderPassMap = std::map<RenderPassKey, Pass>;
+    using RenderPassMap = std::map<PassKey, GraphicsPass>;
     using SetLayoutMap = std::map<SetLayoutKey, SetLayout>;
     using PipelineMap = std::map<PipelineKey, Pipeline>;
     using MaterialTemplateMap = std::map<MaterialTemplateKey, MaterialTemplate>;
     using MaterialMap = std::map<MaterialKey, Material>;
 
-    using RenderGraphRoot = std::vector<RenderPassKey>;
+    using RenderGraphRoot = std::vector<PassKey>;
 
 
     Root();
@@ -204,8 +209,8 @@ public:
     VKW::ProxyImageHandle FindGlobalImage(ResourceKey const& key);
     VKW::ImageView* FindGlobalImage(ResourceKey const& key, std::uint32_t frame);
 
-    void DefineRenderPass(RenderPassKey const& key, RenderPassDesc const& desc);
-    Pass& FindPass(RenderPassKey const& key);
+    void DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc);
+    GraphicsPass& FindPass(PassKey const& key);
 
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
     SetLayout& FindSetLayout(SetLayoutKey const& key);
@@ -238,7 +243,7 @@ public:
 
     VKW::ResourceRendererProxy* ResourceProxy() const;
 
-    void PushPassTemp(RenderPassKey const& key);
+    void PushPassTemp(PassKey const& key);
 
     
 

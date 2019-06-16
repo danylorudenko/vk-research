@@ -124,7 +124,7 @@ void ImGuiHelper::Init()
 
 
 
-    Render::RenderPassDesc passDesc;
+    Render::RootGraphicsPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0].resourceKey_ = Render::Root::SWAPCHAIN_IMAGE_KEY;
     passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE_PRESENT;
@@ -329,7 +329,7 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
     std::uint32_t indexBindOffset = 0;
     Render::RenderWorkItem* renderWorkItem = root_->FindRenderWorkItem(IMGUI_PIPELINE_KEY, mainRenderWorkItem_);
 
-    Render::Pass& pass = root_->FindPass(IMGUI_PASS_KEY);
+    Render::GraphicsPass& pass = root_->FindPass(IMGUI_PASS_KEY);
     pass.Begin(context, &commandReciever);
 
     std::int32_t const cmdListsCount = data->CmdListsCount;

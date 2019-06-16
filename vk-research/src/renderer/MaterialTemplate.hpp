@@ -13,7 +13,7 @@ struct MaterialTemplate
     std::uint32_t perPassDataCount_;
     struct PerPassData 
     {
-        RenderPassKey passKey_;
+        PassKey passKey_;
         PipelineKey pipelineKey_;
 
         std::uint32_t materialLayoutKeysCount_;

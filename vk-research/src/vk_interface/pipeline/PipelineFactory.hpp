@@ -117,6 +117,13 @@ struct GraphicsPipelineDesc
     RenderPassHandle renderPass_;
 };
 
+struct ComputePipelineDesc
+{
+    bool optimized_;
+    ShaderStageInfo shaderStage_;
+    PipelineLayoutDesc* layoutDesc_;
+};
+
 class PipelineFactory
 {
 
@@ -128,6 +135,7 @@ public:
     PipelineFactory& operator=(PipelineFactory&& rhs);
 
     PipelineHandle CreateGraphicsPipeline(GraphicsPipelineDesc const& desc);
+    PipelineHandle CreateComputePipeline(ComputePipelineDesc const& desc);
     void DestroyPipeline(PipelineHandle pipeline);
     
     Pipeline* GetPipeline(PipelineHandle handle) const;

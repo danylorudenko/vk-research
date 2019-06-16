@@ -222,10 +222,10 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     depthBufferDesc.height_ = mainWindow_.Height();
     renderRoot_->DefineGlobalImage(depthBufferKey, depthBufferDesc);
 
-    Render::RenderPassDesc passDesc;
+    Render::RootGraphicsPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0].resourceKey_ = Render::Root::SWAPCHAIN_IMAGE_KEY; // we need swapchain reference here
-    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_CLEAR;
+    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_CLEAR_PRESENT;
     passDesc.depthStencilAttachment_ = depthBufferKey;
 
     renderRoot_->DefineRenderPass(passKey, passDesc);
@@ -339,14 +339,14 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->PushPassTemp(passKey);
 
     customData_.transformComponent_ = transformationSystem_.CreateTransformComponent(nullptr, &customData_.uniformProxy_);
-    // how to write resource descriptor to DescriptorSet
-    //renderRoot_->Defue
+    
 
 }
 
 void VulkanApplicationDelegate::InitImGui()
 {
-    imguiHelper_->Init();
+    if (imguiEnabled_)
+        imguiHelper_->Init();
 }
 
 void VulkanApplicationDelegate::TestImGui(std::uint32_t context)
@@ -364,8 +364,8 @@ void VulkanApplicationDelegate::TestImGui(std::uint32_t context)
         //}
         //ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
         //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-        static bool p_open = true;
-        ImGui::ShowDemoWindow(&p_open);
+        //static bool p_open = true;
+        //ImGui::ShowDemoWindow(&p_open);
     }
     
 }

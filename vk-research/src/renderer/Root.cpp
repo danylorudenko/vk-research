@@ -289,9 +289,9 @@ VKW::ImageView* Root::FindGlobalImage(ResourceKey const& key, std::uint32_t fram
     return resourceProxy_->GetImageView(proxyHandle, frame);
 }
 
-void Root::DefineRenderPass(RenderPassKey const& key, RenderPassDesc const& desc)
+void Root::DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc)
 {
-    PassDesc passDesc;
+    GraphicsPassDesc passDesc;
     passDesc.root_ = this;
     passDesc.table_ = loader_->table_.get();
     passDesc.device_ = loader_->device_.get();
@@ -310,10 +310,10 @@ void Root::DefineRenderPass(RenderPassKey const& key, RenderPassDesc const& desc
     }
     passDesc.depthStencilAttachment_ = desc.depthStencilAttachment_.size() > 0 ? &globalImages_[desc.depthStencilAttachment_] : nullptr;
 
-    renderPassMap_[key] = Pass{ passDesc };
+    renderPassMap_[key] = GraphicsPass{ passDesc };
 }
 
-Pass& Root::FindPass(RenderPassKey const& key)
+GraphicsPass& Root::FindPass(PassKey const& key)
 {
     return renderPassMap_[key];
 }
@@ -586,7 +586,7 @@ void Root::RegisterMaterial(MaterialKey const& key)
         PipelineKey const& pipelineKey = materialTemplate.perPassData_[i].pipelineKey_;
         Material::PerPassData* perPassData = material.perPassData_ + i;
 
-        Pass& pass = renderPassMap_[materialTemplate.perPassData_[i].passKey_];
+        GraphicsPass& pass = renderPassMap_[materialTemplate.perPassData_[i].passKey_];
         pass.RegisterMaterialData(perPassData, pipelineKey);
 
     }
@@ -830,7 +830,7 @@ VKW::ResourceRendererProxy* Root::ResourceProxy() const
     return resourceProxy_;
 }
 
-void Root::PushPassTemp(RenderPassKey const& key)
+void Root::PushPassTemp(PassKey const& key)
 {
     renderGraphRootTemp_.emplace_back(key);
 }
