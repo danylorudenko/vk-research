@@ -46,7 +46,7 @@ struct RootGraphicsPassDesc
     ResourceKey depthStencilAttachment_;
 };
 
-struct ComputePassDesc
+struct RootComputePassDesc
 {
 
 };

@@ -25,6 +25,16 @@ namespace Render
 
 class Root;
 
+
+class BasePass
+    : public NonCopyable
+{
+    virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
+    virtual void Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
+    virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
+};
+
+
 struct GraphicsPassDesc
 {
     Root* root_;
@@ -54,7 +64,7 @@ struct GraphicsPassDesc
 };
 
 class GraphicsPass
-    : public NonCopyable
+    : public BasePass
 {
 public:
     GraphicsPass();
@@ -65,19 +75,21 @@ public:
 
     VKW::RenderPassHandle VKWRenderPass() const;
 
-    void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever);
-    void Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever);
-    void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever);
+    virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
 
-    void RegisterMaterialData(Material::PerPassData* perPassData, PipelineKey const& pipelineKey);
+    void RegisterMaterialData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey);
 
 private:
     struct MaterialDelegatedData
     {
-        MaterialDelegatedData(Material::PerPassData* materialPerPassData, PipelineKey const& pipelineKey)
-            : materialPerPassData_{ materialPerPassData }, pipelineKey_{ pipelineKey } { }
+        MaterialDelegatedData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey)
+            : materialKey_{ materialKey }, materialPerPassDataId_{ materialPerPassDataId }, pipelineKey_{ pipelineKey } { }
 
-        Material::PerPassData* materialPerPassData_;
+        MaterialKey materialKey_;
+        std::uint32_t materialPerPassDataId_;
+
         PipelineKey pipelineKey_;
     };
 
@@ -99,5 +111,65 @@ private:
 
     std::vector<MaterialDelegatedData> materialDelegatedData_; 
 };
+
+
+struct ComputePassDesc
+{
+    Root* root_;
+
+    VKW::ImportTable* table_;
+    VKW::Device* device_;
+
+    VKW::ResourceRendererProxy* proxy_;
+    VKW::RenderPassController* renderPassController_;
+    VKW::PipelineFactory* pipelineFactory_;
+    VKW::DescriptorLayoutController* descriptorLayoutController_;
+    VKW::FramedDescriptorsHub* framedDescriptorsHub_;
+    VKW::ImagesProvider* imagesProvider_;
+};
+
+struct ComputePass
+    : public BasePass
+{
+public:
+    ComputePass();
+    ComputePass(ComputePassDesc const& desc);
+    ComputePass(ComputePass&& rhs);
+    ComputePass& operator=(ComputePass&& rhs);
+
+    ~ComputePass();
+
+    virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
+
+    void RegisterMaterialData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey);
+
+
+private:
+    struct MaterialDelegatedData
+    {
+        MaterialDelegatedData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey)
+            : materialKey_{ materialKey }, materialPerPassDataId_{ materialPerPassDataId }, pipelineKey_{ pipelineKey } { }
+
+        MaterialKey materialKey_;
+        std::uint32_t materialPerPassDataId_;
+
+        PipelineKey pipelineKey_;
+    };
+
+private:
+    Root* root_;
+
+    VKW::ImportTable* table_;
+    VKW::Device* device_;
+
+    VKW::ResourceRendererProxy* resourceProxy_;
+    VKW::PipelineFactory* pipelineFactory_;
+    VKW::DescriptorLayoutController* descriptorLayoutController_;
+
+    std::vector<MaterialDelegatedData> materialDelegatedData_;
+};
+
 
 }

@@ -584,11 +584,9 @@ void Root::RegisterMaterial(MaterialKey const& key)
     std::uint32_t materialPassCount = material.perPassDataCount_;
     for (std::uint32_t i = 0; i < materialPassCount; ++i) {
         PipelineKey const& pipelineKey = materialTemplate.perPassData_[i].pipelineKey_;
-        Material::PerPassData* perPassData = material.perPassData_ + i;
 
         GraphicsPass& pass = renderPassMap_[materialTemplate.perPassData_[i].passKey_];
-        pass.RegisterMaterialData(perPassData, pipelineKey);
-
+        pass.RegisterMaterialData(key, i, pipelineKey);
     }
 }
 

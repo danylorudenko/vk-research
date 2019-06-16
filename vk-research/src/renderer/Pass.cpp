@@ -127,9 +127,9 @@ VKW::RenderPassHandle GraphicsPass::VKWRenderPass() const
     return vkRenderPass_;
 }
 
-void GraphicsPass::RegisterMaterialData(Material::PerPassData* perPassData, PipelineKey const& pipelineKey)
+void GraphicsPass::RegisterMaterialData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey)
 {
-    materialDelegatedData_.emplace_back(perPassData, pipelineKey);
+    materialDelegatedData_.emplace_back(materialKey, materialPerPassDataId, pipelineKey);
 }
 
 void GraphicsPass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
@@ -146,7 +146,7 @@ void GraphicsPass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
         val.color.float32[0] = 0.0f;
         val.color.float32[1] = 0.0f;
         val.color.float32[2] = 0.0f;
-        val.color.float32[3] = 1.0f;
+        val.color.float32[3] = 0.0f;
     }
 
     std::uint32_t attachmentsCount = pass->colorAttachmentsCount_;
@@ -198,10 +198,10 @@ void GraphicsPass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciev
         VkCommandBuffer const commandBuffer = commandReciever->commandBuffer_;
         table_->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkwPipeline->vkPipeline_);
         
-
-        Material::PerPassData* perPassData = materialDelegatedData_[i].materialPerPassData_;
+        Material& material = root_->FindMaterial(materialDelegatedData_[i].materialKey_);
+        Material::PerPassData& perPassData = material.perPassData_[i];
         std::uint32_t const materialBindsCount = pipeline.staticLayoutMembersCount_;
-        assert(materialBindsCount == perPassData->descritorSetsOwner_.slotsCount_ && "Something has gone wrong, incorrect data.");
+        assert(materialBindsCount == perPassData.descritorSetsOwner_.slotsCount_ && "Something has gone wrong, incorrect data.");
 
         VkDescriptorSet vkSetsToBind[Render::SCOPE_MAX_SETS_MEDIAN];
 
@@ -212,7 +212,7 @@ void GraphicsPass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciev
             // 2)   create passes and form rendergraph;
             // 3)   register Materials in the rendergraph (provided needed data for each renderpass)
 
-            DescriptorSet& set = perPassData->descritorSetsOwner_.slots_[j].descriptorSet_;
+            DescriptorSet& set = perPassData.descritorSetsOwner_.slots_[j].descriptorSet_;
             VKW::DescriptorSet* vkwSet = root_->ResourceProxy()->GetDescriptorSet(set.proxyDescriptorSetHandle_, contextId);
             vkSetsToBind[j] = vkwSet->handle_;
 
@@ -272,6 +272,78 @@ void GraphicsPass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciev
 void GraphicsPass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
     table_->vkCmdEndRenderPass(commandReciever->commandBuffer_);
+}
+
+
+
+ComputePass::ComputePass()
+    : root_{ nullptr }
+    , table_{ nullptr }
+    , device_{ nullptr }
+    , resourceProxy_{ nullptr }
+    , pipelineFactory_{ nullptr }
+    , descriptorLayoutController_{ nullptr }
+{
+
+}
+
+ComputePass::ComputePass(ComputePassDesc const& desc)
+    : root_{ desc.root_ }
+    , table_{ desc.table_ }
+    , device_{ desc.device_ }
+    , resourceProxy_{ nullptr }
+    , pipelineFactory_{ nullptr }
+    , descriptorLayoutController_{ nullptr }
+{
+
+}
+
+ComputePass::ComputePass(ComputePass&& rhs)
+    : root_{ nullptr }
+    , table_{ nullptr }
+    , device_{ nullptr }
+    , resourceProxy_{ nullptr }
+    , pipelineFactory_{ nullptr }
+    , descriptorLayoutController_{ nullptr }
+{
+    operator=(std::move(rhs));
+}
+
+ComputePass& ComputePass::operator=(ComputePass&& rhs)
+{
+    std::swap(root_, rhs.root_);
+    std::swap(table_, rhs.table_);
+    std::swap(device_, rhs.device_);
+    std::swap(resourceProxy_, rhs.resourceProxy_);
+    std::swap(pipelineFactory_, rhs.pipelineFactory_);
+    std::swap(descriptorLayoutController_, rhs.descriptorLayoutController_);
+
+    return *this;
+}
+
+ComputePass::~ComputePass()
+{
+
+}
+
+void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+{
+
+}
+
+void ComputePass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+{
+
+}
+
+void ComputePass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+{
+
+}
+
+void ComputePass::RegisterMaterialData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey)
+{
+    materialDelegatedData_.emplace_back(materialKey, materialPerPassDataId, pipelineKey);
 }
 
 }
