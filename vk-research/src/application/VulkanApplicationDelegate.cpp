@@ -336,7 +336,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 
     renderRoot_->RegisterMaterial(materialKey);
-    renderRoot_->PushPassTemp(passKey);
+    renderRoot_->PushPass(passKey);
 
     customData_.transformComponent_ = transformationSystem_.CreateTransformComponent(nullptr, &customData_.uniformProxy_);
     

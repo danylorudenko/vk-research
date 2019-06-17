@@ -251,7 +251,7 @@ void ImGuiHelper::Init()
     root_->DefineGlobalBuffer(IMGUI_INDEX_BUFFER_KEY, indexBufferDesc);
 
     root_->RegisterMaterial(IMGUI_MATERIAL_KEY);
-    //root_->PushPassTemp(IMGUI_PASS_KEY); NONONONONO, we gonna process our pass ourselves
+    //root_->PushPass(IMGUI_PASS_KEY); NONONONONO, we gonna process our pass ourselves
 
     Render::Material& material = root_->FindMaterial(IMGUI_MATERIAL_KEY);
     transformUniformBufferProxy_ = Render::UniformBufferWriterProxy{ root_, IMGUI_MATERIAL_KEY, 0, 0, 0 };

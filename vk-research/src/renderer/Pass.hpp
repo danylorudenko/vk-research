@@ -128,6 +128,16 @@ struct ComputePassDesc
     VKW::ImagesProvider* imagesProvider_;
 };
 
+enum ComputePassResourceUsage
+{
+    COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ,
+    COMPUTE_PASS_RESOURCE_USAGE_BUFFER_WRITE,
+    COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ_WRITE,
+    COMPUTE_PASS_RESOURCE_USAGE_IMAGE_READ,
+    COMPUTE_PASS_RESOURCE_USAGE_IMAGE_WRITE,
+    COMPUTE_PASS_RESOURCE_USAGE_IMAGE_READ_WRITE
+};
+
 struct ComputePass
     : public BasePass
 {
@@ -144,6 +154,7 @@ public:
     virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
 
     void RegisterMaterialData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey);
+    void RegisterResourceUsage(ResourceKey const& key, ComputePassResourceUsage usage);
 
 
 private:
@@ -158,6 +169,15 @@ private:
         PipelineKey pipelineKey_;
     };
 
+    struct ResourceUsageData
+    {
+        ResourceUsageData(ResourceKey const& key, ComputePassResourceUsage usage)
+            : resourceKey_{ key }, usage_{ usage } { }
+
+        ResourceKey resourceKey_;
+        ComputePassResourceUsage usage_;
+    };
+
 private:
     Root* root_;
 
@@ -169,6 +189,7 @@ private:
     VKW::DescriptorLayoutController* descriptorLayoutController_;
 
     std::vector<MaterialDelegatedData> materialDelegatedData_;
+    std::vector<ResourceUsageData> resourceUsageInfos_;
 };
 
 

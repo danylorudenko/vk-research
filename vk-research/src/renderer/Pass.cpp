@@ -328,7 +328,28 @@ ComputePass::~ComputePass()
 
 void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
+    std::uint32_t const usagesCount = resourceUsageInfos_.size();
+    for (std::uint32_t i = 0; i < usagesCount; ++i) {
+        ResourceUsageData& usageData = resourceUsageInfos_[i];
+        switch (usageData.usage_) {
+        case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ:
+        {
+            VKW::BufferView* view = root_->FindGlobalBuffer(usageData.resourceKey_, contextId);
 
+        }
+            break;
+        case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_WRITE:
+            break;
+        case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ_WRITE:
+            break;
+        case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_READ:
+            break;
+        case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_WRITE:
+            break;
+        case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_READ_WRITE:
+            break;
+        }
+    }
 }
 
 void ComputePass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
@@ -344,6 +365,11 @@ void ComputePass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* 
 void ComputePass::RegisterMaterialData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey)
 {
     materialDelegatedData_.emplace_back(materialKey, materialPerPassDataId, pipelineKey);
+}
+
+void ComputePass::RegisterResourceUsage(ResourceKey const& resourceKey, ComputePassResourceUsage usage)
+{
+    resourceUsageInfos_.emplace_back(resourceKey, usage);
 }
 
 }

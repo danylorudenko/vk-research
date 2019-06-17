@@ -243,7 +243,7 @@ public:
 
     VKW::ResourceRendererProxy* ResourceProxy() const;
 
-    void PushPassTemp(PassKey const& key);
+    void PushPass(PassKey const& key);
 
     
 

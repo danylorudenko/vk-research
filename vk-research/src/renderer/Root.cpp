@@ -828,7 +828,7 @@ VKW::ResourceRendererProxy* Root::ResourceProxy() const
     return resourceProxy_;
 }
 
-void Root::PushPassTemp(PassKey const& key)
+void Root::PushPass(PassKey const& key)
 {
     renderGraphRootTemp_.emplace_back(key);
 }
