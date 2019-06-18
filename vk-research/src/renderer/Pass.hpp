@@ -30,7 +30,7 @@ class BasePass
     : public NonCopyable
 {
     virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
-    virtual void Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
+    virtual void Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
     virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
 };
 
@@ -76,7 +76,7 @@ public:
     VKW::RenderPassHandle VKWRenderPass() const;
 
     virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
-    virtual void Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
     virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
 
     void RegisterMaterialData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey);
@@ -150,7 +150,7 @@ public:
     ~ComputePass();
 
     virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
-    virtual void Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
     virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
 
     void RegisterMaterialData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey);

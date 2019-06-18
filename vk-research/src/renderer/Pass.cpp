@@ -175,7 +175,7 @@ void GraphicsPass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
     
 }
 
-void GraphicsPass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
     std::uint32_t const materialsCount = static_cast<std::uint32_t>(materialDelegatedData_.size());
     for (std::uint32_t i = 0u; i < materialsCount; ++i) {
@@ -360,7 +360,7 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
     //    VkImageSubresourceRange    subresourceRange;
     //} VkImageMemoryBarrier;
 
-    std::uint32_t const usagesCount = resourceUsageInfos_.size();
+    std::uint32_t const usagesCount = static_cast<std::uint32_t>(resourceUsageInfos_.size());
     for (std::uint32_t i = 0; i < usagesCount; ++i) {
         ResourceUsageData& usageData = resourceUsageInfos_[i];
         switch (usageData.usage_) {
@@ -371,6 +371,7 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
             // if we're just writing, we don't need any memory barrier, we don't care about the content
             break;
         case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ_AFTER_WRITE:
+        {
             VKW::BufferView* view = root_->FindGlobalBuffer(usageData.resourceKey_, contextId);
             VKW::BufferResource* resource = resourceProxy_->GetResource(view->providedBuffer_->bufferResource_);
 
@@ -384,6 +385,7 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
             barrier.buffer = resource->handle_;
             barrier.offset = view->offset_;
             barrier.size = view->size_;
+        }
             break;
         case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_READ:
             break;
@@ -395,7 +397,7 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
     }
 }
 
-void ComputePass::Render(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void ComputePass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
 
 }

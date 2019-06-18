@@ -851,7 +851,7 @@ void Root::IterateRenderGraph(VKW::PresentationContext const& presentationContex
     for (auto i = 0u; i < passCount; ++i) {
         auto& pass = renderPassMap_[renderGraphRootTemp_[i]];
         pass.Begin(contextId, &commandReciever);
-        pass.Render(contextId, &commandReciever);
+        pass.Apply(contextId, &commandReciever);
         pass.End(contextId, &commandReciever);
     }
 }

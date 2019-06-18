@@ -361,7 +361,7 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
                 // drawCmd.TextureId // can be safely ingored, since we don't use multiple fonts or images
                 renderWorkItem->indexCount_ = drawCmd.ElemCount;
                 renderWorkItem->indexBindOffset_ = indexBindOffset + indiciesRendered;
-                pass.Render(context, &commandReciever);
+                pass.Apply(context, &commandReciever);
                 indiciesRendered += drawCmd.ElemCount;
             }
         }
