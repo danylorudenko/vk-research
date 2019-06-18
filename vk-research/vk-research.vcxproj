@@ -144,6 +144,7 @@
     <ClCompile Include="src\io\IOManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory\ByteBuffer.cpp" />
+    <ClCompile Include="src\renderer\CustomTempBlurPass.cpp" />
     <ClCompile Include="src\renderer\Pass.cpp" />
     <ClCompile Include="src\renderer\Root.cpp" />
     <ClCompile Include="src\renderer\UniformBufferWriterProxy.cpp" />

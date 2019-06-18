@@ -96,8 +96,15 @@ struct GraphicsPipelineDesc
     std::uint32_t dynamicStateFlags_;  // VKW::PipelineDynamicStateFlags
     std::uint32_t blendingState_; // VKW::PipelineBlendingState
 
-    Render::PipelineLayoutDesc* layoutDesc_;
+    PipelineLayoutDesc* layoutDesc_;
     PassKey renderPass_;
+};
+
+struct ComputePipelineDesc
+{
+    bool optimized_;
+    VKW::ShaderStageInfo shaderStage_;
+    PipelineLayoutDesc* layoutDesc_;
 };
 
 
@@ -219,6 +226,7 @@ public:
     Shader& FindShader(ShaderKey const& key);
 
     void DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc const& desc);
+    void DefineComputePipeline(PipelineKey const& key, ComputePipelineDesc const& desc);
     Pipeline& FindPipeline(PipelineKey const& key);
 
     void DefineMaterialTemplate(MaterialTemplateKey const& key, MaterialTemplateDesc const& desc);

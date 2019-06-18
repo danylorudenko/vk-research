@@ -78,6 +78,8 @@ DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(
         case DescriptorType::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
             bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             break;
+        case DescriptorType::DESCRIPTOR_TYPE_STORAGE_IMAGE:
+            bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
         default:
             assert(false && "Unsupported DescriptorType.");
         }

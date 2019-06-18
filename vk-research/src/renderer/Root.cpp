@@ -406,6 +406,35 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     pipeline.properties_.pipelineDynamicStateFlags_ = desc.dynamicStateFlags_;
 }
 
+void Root::DefineComputePipeline(PipelineKey const& key, ComputePipelineDesc const& desc)
+{
+    Pipeline& pipeline = pipelineMap_[key];
+    pipeline.staticLayoutMembersCount_ = desc.layoutDesc_->staticMembersCount_;
+    pipeline.instancedLayoutMembersCount_ = 0;
+
+    VKW::PipelineLayoutDesc vkwLayoutDesc;
+    vkwLayoutDesc.membersCount_ = desc.layoutDesc_->staticMembersCount_;
+    
+    std::uint32_t const staticMembersCount = desc.layoutDesc_->staticMembersCount_;
+    for (std::uint32_t i = 0; i < staticMembersCount; ++i) {
+        pipeline.staticLayoutKeys_[i] = desc.layoutDesc_->staticMembers_[i];
+        SetLayout const& setLayout = FindSetLayout(desc.layoutDesc_->staticMembers_[i]);
+        vkwLayoutDesc.members_[i] = setLayout.vkwSetLayoutHandle_;
+    }
+
+    VKW::ComputePipelineDesc vkwDesc;
+    vkwDesc.optimized_ = desc.optimized_;
+    vkwDesc.layoutDesc_ = &vkwLayoutDesc;
+    vkwDesc.shaderStage_ = desc.shaderStage_;
+
+    VKW::PipelineHandle vkwPipelineHandle = pipelineFactory_->CreateComputePipeline(vkwDesc);
+    VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
+
+    pipeline.layoutHandle_ = vkwPipeline->layoutHandle;
+    pipeline.pipelineHandle_ = vkwPipelineHandle;
+    pipeline.properties_.pipelineDynamicStateFlags_ = 0;
+}
+
 Pipeline& Root::FindPipeline(PipelineKey const& key)
 {
     return pipelineMap_[key];
