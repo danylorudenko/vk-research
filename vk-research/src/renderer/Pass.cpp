@@ -328,25 +328,68 @@ ComputePass::~ComputePass()
 
 void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
+    std::uint32_t constexpr MAX_BARRIERS = 8;
+    
+    std::uint32_t bufferBarriersCount = 0;
+    VkBufferMemoryBarrier bufferBarriers[MAX_BARRIERS];
+
+    std::uint32_t imageBarriersCount = 0;
+    VkImageMemoryBarrier imageBarriers[MAX_BARRIERS];
+    
+    //struct VkBufferMemoryBarrier {
+    //    VkStructureType    sType;
+    //    const void*        pNext;
+    //    VkAccessFlags      srcAccessMask;
+    //    VkAccessFlags      dstAccessMask;
+    //    uint32_t           srcQueueFamilyIndex;
+    //    uint32_t           dstQueueFamilyIndex;
+    //    VkBuffer           buffer;
+    //    VkDeviceSize       offset;
+    //    VkDeviceSize       size;
+    //}
+    //struct VkImageMemoryBarrier {
+    //    VkStructureType            sType;
+    //    const void*                pNext;
+    //    VkAccessFlags              srcAccessMask;
+    //    VkAccessFlags              dstAccessMask;
+    //    VkImageLayout              oldLayout;
+    //    VkImageLayout              newLayout;
+    //    uint32_t                   srcQueueFamilyIndex;
+    //    uint32_t                   dstQueueFamilyIndex;
+    //    VkImage                    image;
+    //    VkImageSubresourceRange    subresourceRange;
+    //} VkImageMemoryBarrier;
+
     std::uint32_t const usagesCount = resourceUsageInfos_.size();
     for (std::uint32_t i = 0; i < usagesCount; ++i) {
         ResourceUsageData& usageData = resourceUsageInfos_[i];
         switch (usageData.usage_) {
         case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ:
-        {
-            VKW::BufferView* view = root_->FindGlobalBuffer(usageData.resourceKey_, contextId);
-
-        }
+            // just chillin' reading. no need to sync
             break;
         case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_WRITE:
+            // if we're just writing, we don't need any memory barrier, we don't care about the content
             break;
-        case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ_WRITE:
+        case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ_AFTER_WRITE:
+            VKW::BufferView* view = root_->FindGlobalBuffer(usageData.resourceKey_, contextId);
+            VKW::BufferResource* resource = resourceProxy_->GetResource(view->providedBuffer_->bufferResource_);
+
+            auto& barrier = bufferBarriers[bufferBarriersCount++];
+            barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+            barrier.pNext = nullptr;
+            barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.buffer = resource->handle_;
+            barrier.offset = view->offset_;
+            barrier.size = view->size_;
             break;
         case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_READ:
             break;
         case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_WRITE:
             break;
-        case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_READ_WRITE:
+        case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_READ_AFTER_WRITE:
             break;
         }
     }
