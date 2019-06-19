@@ -29,6 +29,7 @@ class Root;
 class BasePass
     : public NonCopyable
 {
+public:
     virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
     virtual void Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
     virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;

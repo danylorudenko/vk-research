@@ -4,6 +4,7 @@
 
 #include <unordered_map>
 #include <map>
+#include <memory>
 
 #include "RootDef.hpp"
 #include "..\vk_interface\ProxyHandles.hpp"
@@ -176,7 +177,7 @@ public:
     using UniformBufferMap = std::unordered_map< std::uint64_t, UniformBuffer >;
 
     using ShaderMap = std::map<ShaderKey, Shader>;
-    using RenderPassMap = std::map<PassKey, GraphicsPass>;
+    using RenderPassMap = std::map<PassKey, std::unique_ptr<BasePass>>;
     using SetLayoutMap = std::map<SetLayoutKey, SetLayout>;
     using PipelineMap = std::map<PipelineKey, Pipeline>;
     using MaterialTemplateMap = std::map<MaterialTemplateKey, MaterialTemplate>;
@@ -217,7 +218,7 @@ public:
     VKW::ImageView* FindGlobalImage(ResourceKey const& key, std::uint32_t frame);
 
     void DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc);
-    GraphicsPass& FindPass(PassKey const& key);
+    BasePass& FindPass(PassKey const& key);
 
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
     SetLayout& FindSetLayout(SetLayoutKey const& key);

@@ -310,12 +310,12 @@ void Root::DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc
     }
     passDesc.depthStencilAttachment_ = desc.depthStencilAttachment_.size() > 0 ? &globalImages_[desc.depthStencilAttachment_] : nullptr;
 
-    renderPassMap_[key] = GraphicsPass{ passDesc };
+    renderPassMap_[key] = std::make_unique<GraphicsPass>(passDesc);
 }
 
-GraphicsPass& Root::FindPass(PassKey const& key)
+BasePass& Root::FindPass(PassKey const& key)
 {
-    return renderPassMap_[key];
+    return *(renderPassMap_[key]);
 }
 
 void Root::DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc)
@@ -390,7 +390,7 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     }
     vkwDesc.viewportInfo_ = desc.viewportInfo_;
     vkwDesc.layoutDesc_ = &vkwLayoutDesc;
-    vkwDesc.renderPass_ = renderPassMap_[desc.renderPass_].VKWRenderPass();
+    vkwDesc.renderPass_ = reinterpret_cast<GraphicsPass&>(*renderPassMap_[desc.renderPass_]).VKWRenderPass();
     vkwDesc.depthStencilInfo_ = desc.depthStencilInfo_;
     vkwDesc.dynamicStatesFlags_ = desc.dynamicStateFlags_;
     vkwDesc.blendingState_ = desc.blendingState_;
@@ -614,7 +614,7 @@ void Root::RegisterMaterial(MaterialKey const& key)
     for (std::uint32_t i = 0; i < materialPassCount; ++i) {
         PipelineKey const& pipelineKey = materialTemplate.perPassData_[i].pipelineKey_;
 
-        GraphicsPass& pass = renderPassMap_[materialTemplate.perPassData_[i].passKey_];
+        GraphicsPass& pass = reinterpret_cast<GraphicsPass&>(*renderPassMap_[materialTemplate.perPassData_[i].passKey_]);
         pass.RegisterMaterialData(key, i, pipelineKey);
     }
 }
@@ -878,7 +878,7 @@ void Root::IterateRenderGraph(VKW::PresentationContext const& presentationContex
 
     std::uint32_t const passCount = static_cast<std::uint32_t>(renderGraphRootTemp_.size());
     for (auto i = 0u; i < passCount; ++i) {
-        auto& pass = renderPassMap_[renderGraphRootTemp_[i]];
+        auto& pass = *renderPassMap_[renderGraphRootTemp_[i]];
         pass.Begin(contextId, &commandReciever);
         pass.Apply(contextId, &commandReciever);
         pass.End(contextId, &commandReciever);

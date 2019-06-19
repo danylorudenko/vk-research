@@ -329,7 +329,7 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
     std::uint32_t indexBindOffset = 0;
     Render::RenderWorkItem* renderWorkItem = root_->FindRenderWorkItem(IMGUI_PIPELINE_KEY, mainRenderWorkItem_);
 
-    Render::GraphicsPass& pass = root_->FindPass(IMGUI_PASS_KEY);
+    Render::GraphicsPass& pass = reinterpret_cast<Render::GraphicsPass&>(root_->FindPass(IMGUI_PASS_KEY));
     pass.Begin(context, &commandReciever);
 
     std::int32_t const cmdListsCount = data->CmdListsCount;

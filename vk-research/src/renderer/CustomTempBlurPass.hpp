@@ -8,6 +8,7 @@ namespace VKW
     class ImportTable;
     class Device;
     class ResourceRendererProxy;
+    class ShaderModuleFactory;
     class PipelineFactory;
     class DescriptorLayoutController;
 }
@@ -25,6 +26,7 @@ struct CustomTempBlurPassDesc
     VKW::Device* device_;
 
     VKW::ResourceRendererProxy* resourceProxy_;
+    VKW::ShaderModuleFactory* shaderModuleFactory_;
     VKW::PipelineFactory* pipelineFactory_;
     VKW::DescriptorLayoutController* descriptorLayoutController_;
 
@@ -53,6 +55,7 @@ private:
     VKW::Device* device_;
 
     VKW::ResourceRendererProxy* resourceProxy_;
+    VKW::ShaderModuleFactory* shaderModuleFactory_;
     VKW::PipelineFactory* pipelineFactory_;
     VKW::DescriptorLayoutController* descriptorLayoutController_;
 

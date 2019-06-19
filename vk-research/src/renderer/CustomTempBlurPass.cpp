@@ -1,5 +1,6 @@
 #include "CustomTempBlurPass.hpp"
 #include "Root.hpp"
+#include "..\vk_interface\pipeline\ShaderModuleFactory.hpp"
 
 #include <utility>
 
@@ -11,6 +12,7 @@ CustomTempBlurPass::CustomTempBlurPass()
     , table_{ nullptr }
     , device_{ nullptr }
     , resourceProxy_{ nullptr }
+    , shaderModuleFactory_{ nullptr }
     , pipelineFactory_{ nullptr }
     , descriptorLayoutController_{ nullptr }
 {
@@ -22,6 +24,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     , table_{ desc.table_ }
     , device_{ desc.device_ }
     , resourceProxy_{ desc.resourceProxy_ }
+    , shaderModuleFactory_{ desc.shaderModuleFactory_ }
     , pipelineFactory_{ desc.pipelineFactory_ }
     , descriptorLayoutController_{ desc.descriptorLayoutController_ }
     , sceneColorBuffer_{ desc.sceneColorBuffer_ }
@@ -40,20 +43,37 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
 
     root_->DefineSetLayout(universalSetLayout_, setLayoutDesc);
 
+
     PipelineLayoutDesc pipelineLayoutDesc;
     pipelineLayoutDesc.staticMembersCount_ = 1;
     pipelineLayoutDesc.staticMembers_[0] = universalSetLayout_;
 
+
+    VKW::ShaderModuleDesc hModuleDesc;
+    hModuleDesc.type_ = VKW::SHADER_MODULE_TYPE_COMPUTE;
+    hModuleDesc.shaderPath_ = "shader-src\\blur_horizontal.comp.spv";
+
+    VKW::ShaderModuleDesc vModuleDesc;
+    hModuleDesc.type_ = VKW::SHADER_MODULE_TYPE_COMPUTE;
+    hModuleDesc.shaderPath_ = "shader-src\\blur_vertical.comp.spv";
+
+    VKW::ShaderModuleHandle hModuleHandle = shaderModuleFactory_->LoadModule(hModuleDesc);
+    VKW::ShaderModuleHandle vModuleHandle = shaderModuleFactory_->LoadModule(vModuleDesc);
+
     ComputePipelineDesc horizontalPipelineDesc;
     horizontalPipelineDesc.optimized_ = false;
     horizontalPipelineDesc.layoutDesc_ = &pipelineLayoutDesc;
-    horizontalPipelineDesc.shaderStage_.shaderModuleHandle_ = hehe;
+    horizontalPipelineDesc.shaderStage_.shaderModuleHandle_ = hModuleHandle;
+
+    ComputePipelineDesc verticalPipelineDesc;
+    verticalPipelineDesc.optimized_ = false;
+    verticalPipelineDesc.layoutDesc_ = &pipelineLayoutDesc;
+    verticalPipelineDesc.shaderStage_.shaderModuleHandle_ = vModuleHandle;
+
+    root_->DefineComputePipeline(horizontalBlurPipeline_, horizontalPipelineDesc);
+    root_->DefineComputePipeline(verticalBlurPipeline_, verticalPipelineDesc);
 
 
-
-    PipelineLayoutDesc layoutDesc;
-    layoutDesc.staticMembersCount_ = 2;
-    //layoutDesc.staticMembers_[0]
     
     /////////////
     VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, 0);
@@ -71,6 +91,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPass&& rhs)
     , table_{ nullptr }
     , device_{ nullptr }
     , resourceProxy_{ nullptr }
+    , shaderModuleFactory_{ nullptr }
     , pipelineFactory_{ nullptr }
     , descriptorLayoutController_{ nullptr }
 {
@@ -83,6 +104,7 @@ CustomTempBlurPass& CustomTempBlurPass::operator=(CustomTempBlurPass&& rhs)
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
     std::swap(resourceProxy_, rhs.resourceProxy_);
+    std::swap(shaderModuleFactory_, rhs.shaderModuleFactory_);
     std::swap(pipelineFactory_, rhs.pipelineFactory_);
     std::swap(descriptorLayoutController_, rhs.descriptorLayoutController_);
 
