@@ -2,6 +2,7 @@
 
 #include "..\class_features\NonCopyable.hpp"
 #include "Pass.hpp"
+#include "..\vk_interface\ProxyHandles.hpp"
 
 namespace VKW
 {
@@ -71,6 +72,9 @@ private:
     PipelineKey verticalBlurPipeline_;
 
     SetLayoutKey universalSetLayout_;
+
+    VKW::ProxySetHandle horizontalDescriptorSet_;
+    VKW::ProxySetHandle verticalDescriptorSet_;
 };
 
 }

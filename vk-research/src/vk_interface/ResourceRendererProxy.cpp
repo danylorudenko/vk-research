@@ -122,6 +122,7 @@ ProxySetHandle ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout
 
         switch (layoutMember.type_) {
         case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+        case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
             framedSet = true;
             break;
 
@@ -174,6 +175,8 @@ struct ResourceRendererProxy::DescriptorWriteData
 
 void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWriteDesc* descriptions)
 {
+    // TODO: ANNNNNNNNNIHILATE THIS SHITTY DUPLICATION
+    // PURGE THE HERECY
     static DescriptorWriteData descriptorData[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
     static VkWriteDescriptorSet writeDescritorSets[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
 
@@ -218,6 +221,15 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
                 // actual data for descriptors goes next
                 switch (wds.descriptorType) {
                 case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+                {
+                    ImageView* imageView = imagesProvider_->GetImageView(descriptions[j].frames_[i].imageDesc_.imageViewHandle_);
+                    VkSampler sampler = descriptions[j].frames_[0].imageDesc_.sampler_;
+
+                    DecorateImageViewWriteDesc(wds, descriptorData[j], imageView->handle_);
+                    DecorateSamplerWriteDesc(wds, descriptorData[j], sampler);
+                }
+                break;
+                case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
                 {
                     ImageView* imageView = imagesProvider_->GetImageView(descriptions[j].frames_[i].imageDesc_.imageViewHandle_);
                     DecorateImageViewWriteDesc(wds, descriptorData[j], imageView->handle_);
@@ -270,6 +282,12 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
 
                 DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_);
                 DecorateSamplerWriteDesc(wds, descriptorData[i], sampler);
+            }
+            break;
+            case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+            {
+                ImageView* imageView = imagesProvider_->GetImageView(descriptions[i].frames_[0].imageDesc_.imageViewHandle_);
+                DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_);
             }
             break;
             case VK_DESCRIPTOR_TYPE_SAMPLER:

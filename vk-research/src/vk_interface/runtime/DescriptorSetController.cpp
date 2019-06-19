@@ -47,6 +47,10 @@ DescriptorSetController::DescriptorSetController(DescriptorSetControllerDesc con
         {
             VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             256u
+        },
+        {
+            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            16u
         }
     };
 

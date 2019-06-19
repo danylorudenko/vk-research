@@ -78,17 +78,31 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     root_->DefineComputePipeline(horizontalBlurPipeline_, horizontalPipelineDesc);
     root_->DefineComputePipeline(verticalBlurPipeline_, verticalPipelineDesc);
 
-
-    
-    /////////////
     VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, 0);
     VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
 
     std::uint32_t const width = sceneColorBufferResource->width_;
     std::uint32_t const height = sceneColorBufferResource->height_;
+    VkFormat const format = sceneColorBufferResource->format_;
 
-    VKW::ImageViewDesc imageViewDesc;
-    //imageViewDesc.
+    //VKW::ImageViewDesc horizontalBufferDesc;
+    //horizontalBufferDesc.format_ = format;
+    //horizontalBufferDesc.width_ = width;
+    //horizontalBufferDesc.height_ = height;
+    //horizontalBufferDesc.usage_ = VKW::ImageUsage // woooow, we don't have such image usage, f0000000ck
+    //
+    //horizontalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
+    //verticalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
+    //
+    //std::uint32_t const framesCount = resourceProxy_->FramesCount();
+    //VKW::ProxyDescriptorWriteDesc horizontalSetDesc;
+    //for (std::uint32_t i = 0; i < framesCount; ++i)
+    //{
+    //    VKW::ProxyImageHandle proxyImageHandle = root_->FindGlobalImage(horizontalBlurBuffer_);
+    //    horizontalSetDesc.frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(proxyImageHandle, i);
+    //}
+    //
+    //resourceProxy_->WriteSet(horizontalDescriptorSet_, horizontalSetDesc);
 }
 
 CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPass&& rhs)
@@ -274,6 +288,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     );
 #pragma endregion barriersout
 
+    // 0 - we also need to fill descriptor sets
     
     // 1 - blur horzontally
     // 2 - blur vertically
