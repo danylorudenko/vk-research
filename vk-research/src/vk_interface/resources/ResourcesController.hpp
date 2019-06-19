@@ -26,6 +26,7 @@ struct BufferDesc
 enum class ImageUsage
 {
     TEXTURE,
+    STORAGE_IMAGE,
     RENDER_TARGET,
     DEPTH,
     STENCIL,

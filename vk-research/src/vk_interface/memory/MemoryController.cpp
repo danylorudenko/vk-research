@@ -80,6 +80,9 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
     case MemoryUsage::SAMPLE_TEXTURE:
         accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
         break;
+    case MemoryUsage::STORAGE:
+        accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
+        break;
     case MemoryUsage::DEPTH_STENCIL_ATTACHMENT:
         accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
         break;

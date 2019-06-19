@@ -146,6 +146,10 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
         memoryDesc.usage_ = MemoryUsage::SAMPLE_TEXTURE;
         break;
         
+    case ImageUsage::STORAGE_IMAGE:
+        info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+        memoryDesc.usage_ = MemoryUsage::STORAGE;
+
     case ImageUsage::RENDER_TARGET:
         info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         memoryDesc.usage_ = MemoryUsage::COLOR_ATTACHMENT;

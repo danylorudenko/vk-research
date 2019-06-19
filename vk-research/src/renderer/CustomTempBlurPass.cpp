@@ -85,24 +85,26 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     std::uint32_t const height = sceneColorBufferResource->height_;
     VkFormat const format = sceneColorBufferResource->format_;
 
-    //VKW::ImageViewDesc horizontalBufferDesc;
-    //horizontalBufferDesc.format_ = format;
-    //horizontalBufferDesc.width_ = width;
-    //horizontalBufferDesc.height_ = height;
-    //horizontalBufferDesc.usage_ = VKW::ImageUsage // woooow, we don't have such image usage, f0000000ck
-    //
-    //horizontalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
-    //verticalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
-    //
-    //std::uint32_t const framesCount = resourceProxy_->FramesCount();
-    //VKW::ProxyDescriptorWriteDesc horizontalSetDesc;
-    //for (std::uint32_t i = 0; i < framesCount; ++i)
-    //{
-    //    VKW::ProxyImageHandle proxyImageHandle = root_->FindGlobalImage(horizontalBlurBuffer_);
-    //    horizontalSetDesc.frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(proxyImageHandle, i);
-    //}
-    //
-    //resourceProxy_->WriteSet(horizontalDescriptorSet_, horizontalSetDesc);
+    VKW::ImageViewDesc computeBuffersDesc;
+    computeBuffersDesc.format_ = format;
+    computeBuffersDesc.width_ = width;
+    computeBuffersDesc.height_ = height;
+    computeBuffersDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE;
+    root_->DefineGlobalImage(horizontalBlurBuffer_, computeBuffersDesc);
+    root_->DefineGlobalImage(verticalBlurBuffer_, computeBuffersDesc);
+    
+    horizontalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
+    verticalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
+    
+    std::uint32_t const framesCount = resourceProxy_->FramesCount();
+    VKW::ProxyDescriptorWriteDesc horizontalSetDesc;
+    for (std::uint32_t i = 0; i < framesCount; ++i)
+    {
+        VKW::ProxyImageHandle proxyImageHandle = root_->FindGlobalImage(horizontalBlurBuffer_);
+        horizontalSetDesc.frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(proxyImageHandle, i);
+    }
+    
+    //resourceProxy_->WriteSet(horizontalDescriptorSet_, &horizontalSetDesc);
 }
 
 CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPass&& rhs)
