@@ -148,6 +148,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
     VkImage dest = swapchain_->Image(contextId).image_;
 
+#pragma region barriersin
     
     VkImageMemoryBarrier colorBarrierIn;
     colorBarrierIn.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -193,6 +194,10 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         2, inBarriers
     );
 
+#pragma endregion barriersin
+
+#pragma region blittoswapchain
+
     VkImageBlit blitDesc;
     blitDesc.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     blitDesc.srcSubresource.mipLevel = 0;
@@ -219,9 +224,10 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         1, &blitDesc,
         VK_FILTER_NEAREST
     );
+#pragma endregion blittoswapchain
 
 
-
+#pragma region barriersout
 
     VkImageMemoryBarrier colorBarrierOut;
     colorBarrierOut.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -266,6 +272,8 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         0, nullptr,
         2, outBarriers
     );
+#pragma endregion barriersout
+
     
     // 1 - blur horzontally
     // 2 - blur vertically
