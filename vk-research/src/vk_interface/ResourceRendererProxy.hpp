@@ -35,7 +35,7 @@ struct ProxyDescriptorWriteDesc
         {
             ImageViewHandle imageViewHandle_;
             VkSampler sampler_;
-            ImageUsage usage_;
+            VkImageLayout layout_;
         } 
         imageDesc_;
 
@@ -127,7 +127,7 @@ public:
 private:
     struct DescriptorWriteData;
 
-    static void DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& pDescriptorWriteData, VkImageView view);
+    static void DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& pDescriptorWriteData, VkImageView view, VkImageLayout layout);
     static void DecorateSamplerWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkSampler sampler);
     static void DecorateBufferViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBufferView view);
     static void DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkBuffer buffer, std::uint32_t offset, std::uint32_t size);

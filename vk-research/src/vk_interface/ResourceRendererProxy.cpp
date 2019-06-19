@@ -328,11 +328,11 @@ DescriptorSet* ResourceRendererProxy::GetDescriptorSet(ProxySetHandle handle, st
     return descriptorSetsController_->GetDescriptorSet(setHandle);
 }
 
-void ResourceRendererProxy::DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkImageView view)
+void ResourceRendererProxy::DecorateImageViewWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkImageView view, VkImageLayout layout)
 {
     dstInfo.imageInfo.imageView = view;
     dst.pImageInfo = &dstInfo.imageInfo;
-    dstInfo.imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    dstInfo.imageInfo.imageLayout = layout;
 }
 
 void ResourceRendererProxy::DecorateSamplerWriteDesc(VkWriteDescriptorSet& dst, DescriptorWriteData& dstInfo, VkSampler sampler)
@@ -416,6 +416,7 @@ ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
     case VKW::ImageUsage::DEPTH:
     case VKW::ImageUsage::STENCIL:
     case VKW::ImageUsage::DEPTH_STENCIL:
+    case VKW::ImageUsage::STORAGE_IMAGE:
         framedResource = true;
     }
 

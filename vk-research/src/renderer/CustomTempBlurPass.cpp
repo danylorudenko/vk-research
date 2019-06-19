@@ -97,14 +97,21 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     verticalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
     
     std::uint32_t const framesCount = resourceProxy_->FramesCount();
-    VKW::ProxyDescriptorWriteDesc horizontalSetDesc;
+    VKW::ProxyDescriptorWriteDesc horizontalSetDesc[2];
     for (std::uint32_t i = 0; i < framesCount; ++i)
     {
-        VKW::ProxyImageHandle proxyImageHandle = root_->FindGlobalImage(horizontalBlurBuffer_);
-        horizontalSetDesc.frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(proxyImageHandle, i);
+        VKW::ProxyImageHandle horizontalProxyImageHandle = root_->FindGlobalImage(sceneColorBuffer_);
+        horizontalSetDesc[0].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(horizontalProxyImageHandle, i);
+        horizontalSetDesc[0].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        VKW::ProxyImageHandle verticalProxyImageHandle = root_->FindGlobalImage(verticalBlurBuffer_);
+        horizontalSetDesc[1].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(verticalProxyImageHandle, i);
+        horizontalSetDesc[1].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
     }
+
+    // soooo, what are we binding in descriptor sets? barriers also
     
-    //resourceProxy_->WriteSet(horizontalDescriptorSet_, &horizontalSetDesc);
+    resourceProxy_->WriteSet(horizontalDescriptorSet_, horizontalSetDesc);
 }
 
 CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPass&& rhs)
