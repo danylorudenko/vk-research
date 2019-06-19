@@ -228,8 +228,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     Render::RootGraphicsPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
-    passDesc.colorAttachments_[0].resourceKey_ = Render::Root::SWAPCHAIN_IMAGE_KEY; // we need swapchain reference here
-    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_CLEAR_PRESENT;
+    passDesc.colorAttachments_[0].resourceKey_ = renderRoot_->GetDefaultSceneColorOutput();
+    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_CLEAR;
     passDesc.depthStencilAttachment_ = depthBufferKey;
 
     renderRoot_->DefineRenderPass(passKey, passDesc);
@@ -343,7 +343,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->PushPass(passKey);
 
 
-    renderRoot_->DefineCustomBlurPass(blurPass);
+    renderRoot_->DefineCustomBlurPass(blurPass, renderRoot_->GetDefaultSceneColorOutput());
     renderRoot_->PushPass(blurPass);
 
     customData_.transformComponent_ = transformationSystem_.CreateTransformComponent(nullptr, &customData_.uniformProxy_);

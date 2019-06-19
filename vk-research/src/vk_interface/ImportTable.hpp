@@ -149,6 +149,7 @@ public:
 
     PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
     PFN_vkCmdCopyBufferToImage vkCmdCopyBufferToImage = nullptr;
+    PFN_vkCmdBlitImage vkCmdBlitImage = nullptr;
 
     PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers = nullptr;
     PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer = nullptr;

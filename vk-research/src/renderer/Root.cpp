@@ -3,6 +3,7 @@
 #include "..\vk_interface\ResourceRendererProxy.hpp"
 #include "..\vk_interface\worker\Worker.hpp"
 #include "..\vk_interface\Loader.hpp"
+#include "..\vk_interface\Swapchain.hpp"
 #include "CustomTempBlurPass.hpp"
 
 namespace Render
@@ -43,6 +44,15 @@ Root::Root(RootDesc const& desc)
 {
     VKW::ProxyImageHandle swapchainView = resourceProxy_->RegisterSwapchainImageViews();
     globalImages_[SWAPCHAIN_IMAGE_KEY] = swapchainView;
+
+
+    VKW::ImageViewDesc finalColorDesc;
+    finalColorDesc.format_ = loader_->swapchain_->Format();
+    finalColorDesc.width_ = loader_->swapchain_->Width();
+    finalColorDesc.height_ = loader_->swapchain_->Height();
+    finalColorDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
+
+    DefineGlobalImage(GetDefaultSceneColorOutput(), finalColorDesc);
 }
 
 Root::Root(Root&& rhs)
@@ -273,6 +283,16 @@ VKW::BufferView* Root::FindGlobalBuffer(ResourceKey const& key, std::uint32_t fr
     return resourceProxy_->GetBufferView(proxyHandle, frame);
 }
 
+ResourceKey Root::GetDefaultSceneColorOutput() const
+{
+    return SCENE_COLOR_OUTPUT_KEY;
+}
+
+ResourceKey Root::GetSwapchain() const
+{
+    return SWAPCHAIN_IMAGE_KEY;
+}
+
 void Root::DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc)
 {
     VKW::ProxyImageHandle imageHandle = resourceProxy_->CreateImage(desc);
@@ -290,7 +310,7 @@ VKW::ImageView* Root::FindGlobalImage(ResourceKey const& key, std::uint32_t fram
     return resourceProxy_->GetImageView(proxyHandle, frame);
 }
 
-void Root::DefineCustomBlurPass(PassKey const& key)
+void Root::DefineCustomBlurPass(PassKey const& key, ResourceKey const& sceneColorBuffer)
 {
     //Root* root_;
     //
@@ -313,6 +333,7 @@ void Root::DefineCustomBlurPass(PassKey const& key)
     desc.shaderModuleFactory_ = loader_->shaderModuleFactory_.get();
     desc.pipelineFactory_ = pipelineFactory_;
     desc.descriptorLayoutController_ = loader_->descriptorLayoutController_.get();
+    desc.sceneColorBuffer_ = sceneColorBuffer;
 
     renderPassMap_[key] = std::make_unique<CustomTempBlurPass>(desc);
 }

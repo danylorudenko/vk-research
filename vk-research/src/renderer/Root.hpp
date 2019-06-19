@@ -169,8 +169,6 @@ class Root
     : public NonCopyable
 {
 public:
-    static constexpr char const* SWAPCHAIN_IMAGE_KEY = "swapchain";
-
 
     using GlobalImagesMap = std::unordered_map<ResourceKey, VKW::ProxyImageHandle>;
     using GlobalBuffersMap = std::unordered_map<ResourceKey, VKW::ProxyBufferHandle>;
@@ -213,12 +211,14 @@ public:
     VKW::ProxyBufferHandle FindGlobalBuffer(ResourceKey const& key);
     VKW::BufferView* FindGlobalBuffer(ResourceKey const& key, std::uint32_t frame);
 
+    ResourceKey GetDefaultSceneColorOutput() const;
+    ResourceKey GetSwapchain() const;
     void DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc);
     VKW::ProxyImageHandle FindGlobalImage(ResourceKey const& key);
     VKW::ImageView* FindGlobalImage(ResourceKey const& key, std::uint32_t frame);
 
     void DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc);
-    void DefineCustomBlurPass(PassKey const& key);
+    void DefineCustomBlurPass(PassKey const& key, ResourceKey const& sceneColorBuffer);
     BasePass& FindPass(PassKey const& key);
 
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
@@ -262,6 +262,7 @@ public:
     void IterateRenderGraph(VKW::PresentationContext const& presentationContext, VKW::WorkerFrameCommandReciever& commandReciever);
     void EndRenderGraph(VKW::PresentationContext const& presentationContext);
 
+
 private:
     /*DESCRIPTOR_TYPE_TEXTURE,
         DESCRIPTOR_TYPE_SAMPLER,
@@ -271,6 +272,13 @@ private:
     void Decorate_VKWProxyDescriptorWriteDesc_Texture(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VKW::ProxyImageHandle imageView);
 
     void InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCount, SetLayoutKey const* setLayoutKeys, SetOwnerDesc const* setOwnerDescs);
+
+
+private:
+    static constexpr char const* SWAPCHAIN_IMAGE_KEY = "swapchain";
+    static constexpr char const* SCENE_COLOR_OUTPUT_KEY = "colf";
+
+
 
 private:
     VKW::Loader* loader_;

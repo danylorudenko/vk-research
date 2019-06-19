@@ -126,7 +126,7 @@ void ImGuiHelper::Init()
 
     Render::RootGraphicsPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
-    passDesc.colorAttachments_[0].resourceKey_ = Render::Root::SWAPCHAIN_IMAGE_KEY;
+    passDesc.colorAttachments_[0].resourceKey_ = root_->GetSwapchain();
     passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE_PRESENT;
 
     Render::ShaderDesc vertexShaderDesc;

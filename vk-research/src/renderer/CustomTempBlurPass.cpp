@@ -1,6 +1,7 @@
 #include "CustomTempBlurPass.hpp"
 #include "Root.hpp"
 #include "..\vk_interface\pipeline\ShaderModuleFactory.hpp"
+#include "..\vk_interface\worker\Worker.hpp"
 
 #include <utility>
 
@@ -131,6 +132,18 @@ void CustomTempBlurPass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
 void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
+    //void (VKAPI_PTR *PFN_vkCmdBlitImage)(VkCommandBuffer commandBuffer, VkImage srcImage, VkImageLayout srcImageLayout, VkImage dstImage, VkImageLayout dstImageLayout, uint32_t regionCount, const VkImageBlit* pRegions, VkFilter filter);
+
+    VkCommandBuffer cmdBuffer = commandReciever->commandBuffer_;
+
+    VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, 0);
+    VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
+    VkImage source = sceneColorBufferResource->handle_;
+
+    //VkImageBlit
+
+    //table_->vkCmdBlitImage()
+    
     // 1 - blur horzontally
     // 2 - blur vertically
     // 3 - blit to swapchain

@@ -147,7 +147,7 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
         break;
         
     case ImageUsage::RENDER_TARGET:
-        info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         memoryDesc.usage_ = MemoryUsage::COLOR_ATTACHMENT;
         break;
 
