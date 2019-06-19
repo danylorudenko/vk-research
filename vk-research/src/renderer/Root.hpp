@@ -218,6 +218,7 @@ public:
     VKW::ImageView* FindGlobalImage(ResourceKey const& key, std::uint32_t frame);
 
     void DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc);
+    void DefineCustomBlurPass(PassKey const& key);
     BasePass& FindPass(PassKey const& key);
 
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);

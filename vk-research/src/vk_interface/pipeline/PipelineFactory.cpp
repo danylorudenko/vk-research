@@ -363,6 +363,7 @@ PipelineHandle PipelineFactory::CreateComputePipeline(ComputePipelineDesc const&
     pipelineInfo.flags = desc.optimized_ ? VK_FLAGS_NONE : VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT;
     pipelineInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     pipelineInfo.stage.pNext = nullptr;
+    pipelineInfo.stage.stage = VKWShaderTypeToVkFlags(shaderModule->type_);
     pipelineInfo.stage.flags = VK_FLAGS_NONE;
     pipelineInfo.stage.module = shaderModule->handle_;
     pipelineInfo.stage.pName = shaderModule->entryPoint_.c_str();

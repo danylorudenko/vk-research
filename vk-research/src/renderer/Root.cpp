@@ -3,6 +3,7 @@
 #include "..\vk_interface\ResourceRendererProxy.hpp"
 #include "..\vk_interface\worker\Worker.hpp"
 #include "..\vk_interface\Loader.hpp"
+#include "CustomTempBlurPass.hpp"
 
 namespace Render
 {
@@ -287,6 +288,33 @@ VKW::ImageView* Root::FindGlobalImage(ResourceKey const& key, std::uint32_t fram
 {
     auto const& proxyHandle = globalImages_[key];
     return resourceProxy_->GetImageView(proxyHandle, frame);
+}
+
+void Root::DefineCustomBlurPass(PassKey const& key)
+{
+    //Root* root_;
+    //
+    //VKW::ImportTable* table_;
+    //VKW::Device* device_;
+    //
+    //VKW::ResourceRendererProxy* resourceProxy_;
+    //VKW::ShaderModuleFactory* shaderModuleFactory_;
+    //VKW::PipelineFactory* pipelineFactory_;
+    //VKW::DescriptorLayoutController* descriptorLayoutController_;
+    //
+    //ResourceKey sceneColorBuffer_;
+    
+    
+    CustomTempBlurPassDesc desc;
+    desc.root_ = this;
+    desc.table_ = loader_->table_.get();
+    desc.device_ = loader_->device_.get();
+    desc.resourceProxy_ = resourceProxy_;
+    desc.shaderModuleFactory_ = loader_->shaderModuleFactory_.get();
+    desc.pipelineFactory_ = pipelineFactory_;
+    desc.descriptorLayoutController_ = loader_->descriptorLayoutController_.get();
+
+    renderPassMap_[key] = std::make_unique<CustomTempBlurPass>(desc);
 }
 
 void Root::DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc)

@@ -80,6 +80,7 @@ DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(
             break;
         case DescriptorType::DESCRIPTOR_TYPE_STORAGE_IMAGE:
             bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            break;
         default:
             assert(false && "Unsupported DescriptorType.");
         }

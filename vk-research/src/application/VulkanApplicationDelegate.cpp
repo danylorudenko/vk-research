@@ -5,6 +5,8 @@
 #include "..\renderer\Material.hpp"
 #include "..\transform\TansformComponent.hpp"
 
+#include "..\renderer\CustomTempBlurPass.hpp"
+
 #include <utility>
 #include <chrono>
 
@@ -174,6 +176,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     char constexpr materialKey[] = "mat0";
     char constexpr depthBufferKey[] = "dpth0";
 
+    char constexpr blurPass[] = "blur";
+
     Data::ModelMesh testMesh = ioManager_.ReadModelMesh("LFS\\dragon.model");
 
     struct TestVertex
@@ -337,6 +341,10 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     renderRoot_->RegisterMaterial(materialKey);
     renderRoot_->PushPass(passKey);
+
+
+    renderRoot_->DefineCustomBlurPass(blurPass);
+    renderRoot_->PushPass(blurPass);
 
     customData_.transformComponent_ = transformationSystem_.CreateTransformComponent(nullptr, &customData_.uniformProxy_);
     

@@ -54,8 +54,8 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     hModuleDesc.shaderPath_ = "shader-src\\blur_horizontal.comp.spv";
 
     VKW::ShaderModuleDesc vModuleDesc;
-    hModuleDesc.type_ = VKW::SHADER_MODULE_TYPE_COMPUTE;
-    hModuleDesc.shaderPath_ = "shader-src\\blur_vertical.comp.spv";
+    vModuleDesc.type_ = VKW::SHADER_MODULE_TYPE_COMPUTE;
+    vModuleDesc.shaderPath_ = "shader-src\\blur_vertical.comp.spv";
 
     VKW::ShaderModuleHandle hModuleHandle = shaderModuleFactory_->LoadModule(hModuleDesc);
     VKW::ShaderModuleHandle vModuleHandle = shaderModuleFactory_->LoadModule(vModuleDesc);
