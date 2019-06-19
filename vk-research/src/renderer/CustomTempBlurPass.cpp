@@ -245,7 +245,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     swapchainOut.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     swapchainOut.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
     swapchainOut.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    swapchainOut.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    swapchainOut.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     swapchainOut.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     swapchainOut.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     swapchainOut.image = dest;

@@ -4,6 +4,7 @@
 #include "..\vk_interface\worker\Worker.hpp"
 #include "..\vk_interface\Loader.hpp"
 #include "..\vk_interface\Swapchain.hpp"
+#include "..\vk_interface\VkInterfaceConstants.hpp"
 #include "CustomTempBlurPass.hpp"
 
 namespace Render
@@ -53,6 +54,18 @@ Root::Root(RootDesc const& desc)
     finalColorDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
 
     DefineGlobalImage(GetDefaultSceneColorOutput(), finalColorDesc);
+
+    VkImage swapchainImages[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+    VkImageLayout imageLayouts[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+
+    std::uint32_t const swapchainImagesCount = loader_->swapchain_->ImageCount();
+    for (std::uint32_t i = 0; i < swapchainImagesCount; ++i) 
+    {
+        swapchainImages[i] = loader_->swapchain_->Image(i).image_;
+        imageLayouts[i] = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    }
+
+    ImageLayoutTransition(0, swapchainImagesCount, swapchainImages, imageLayouts);
 }
 
 Root::Root(Root&& rhs)
@@ -619,35 +632,6 @@ void Root::DefineMaterial(MaterialKey const& key, MaterialDesc const& desc)
         SetOwnerDesc const* setOwnerDescs = desc.perPassData_[i].setOwnerDesc_;
 
         InitializeSetsOwner(material.perPassData_[i].descritorSetsOwner_, keysCount, setLayoutKeys, setOwnerDescs);
-
-        //std::uint32_t const setLayoutsCount = templatePerPassData.materialLayoutKeysCount_;
-        //for (std::uint32_t j = 0; j < setLayoutsCount; ++j) {
-        //    SetLayoutKey const& setLayoutKey = templatePerPassData.materialLayoutKeys_[j];
-        //    SetLayout const& setLayout = FindSetLayout(setLayoutKey);
-        //
-        //    VKW::ProxySetHandle proxySet = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
-        //    materialPerPassData.descritorSetSlots_.slots_[j].setHandle_ = proxySet;
-        //
-        //    VKW::ProxyDescriptorWriteDesc descriptorsWriteDescs[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-        //
-        //    std::uint32_t const setLayoutMembersCount = setLayout.membersCount_;
-        //    for (std::uint32_t k = 0; k < setLayoutMembersCount; k++) {
-        //        SetLayout::Member const& setLayoutMember = setLayout.membersInfo_[k];
-        //        SetOwnerDesc::Member const& setMemberData = desc.perPassData_[i].setData_[j].members_[k];
-        //
-        //        VKW::DescriptorType const memberType = setLayoutMember.type_;
-        //
-        //        switch (memberType) {
-        //        case VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-        //            UniformBufferHandle uniformBufferHandle = AcquireUniformBuffer(setMemberData.uniformBuffer_.size_);
-        //            Decorate_VKWProxyDescriptorWriteDesc(descriptorsWriteDescs[k], k, uniformBufferHandle);
-        //            break;
-        //        }
-        //        
-        //    }
-        //
-        //    resourceProxy_->WriteSet(proxySet, descriptorsWriteDescs);
-        //}
     }
 }
 
@@ -715,6 +699,48 @@ RenderWorkItemHandle Root::ConstructRenderWorkItem(PipelineKey const& pipelineKe
 void Root::ReleaseRenderWorkItem(PipelineKey const& pipelineKey, RenderWorkItemHandle handle)
 {
     return ReleaseRenderWorkItem(FindPipeline(pipelineKey), handle);
+}
+
+void Root::ImageLayoutTransition(std::uint32_t context, std::uint32_t imagesCount, VkImage* images, VkImageLayout* targetLayouts)
+{
+    std::uint32_t const framesCount = resourceProxy_->FramesCount();
+    VkImageMemoryBarrier imageBarriers[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+
+    for (std::uint32_t i = 0; i < framesCount; ++i)
+    {
+        VkImageMemoryBarrier& imageBarrier = imageBarriers[i];
+        imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        imageBarrier.pNext = nullptr;
+        imageBarrier.srcAccessMask = VK_FLAGS_NONE;
+        imageBarrier.dstAccessMask = VK_FLAGS_NONE;
+        imageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        imageBarrier.newLayout = targetLayouts[i];
+        imageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        imageBarrier.image = images[i];
+        imageBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageBarrier.subresourceRange.baseArrayLayer = 0;
+        imageBarrier.subresourceRange.layerCount = 1;
+        imageBarrier.subresourceRange.baseMipLevel = 0;
+        imageBarrier.subresourceRange.levelCount = 1;
+    }
+
+    VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
+
+    VulkanFuncTable()->vkCmdPipelineBarrier(
+        commandReciever.commandBuffer_,
+        VK_PIPELINE_STAGE_HOST_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_FLAGS_NONE,
+        0, nullptr,
+        0, nullptr,
+        framesCount, imageBarriers);
+    
+    mainWorkerTemp_->EndExecutionFrame(context);
+
+    mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
+
+    VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
 }
 
 void Root::CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context)

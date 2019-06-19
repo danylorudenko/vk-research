@@ -246,6 +246,7 @@ public:
     void ReleaseRenderWorkItem(PipelineKey const& key, RenderWorkItemHandle handle);
     void ReleaseRenderWorkItem(Pipeline& pipeline, RenderWorkItemHandle handle);
 
+    void ImageLayoutTransition(std::uint32_t context, std::uint32_t imagesCount, VkImage* images, VkImageLayout* targetLayouts);
     void CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
     void CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
 
