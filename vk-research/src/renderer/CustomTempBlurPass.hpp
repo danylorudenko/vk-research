@@ -11,6 +11,7 @@ namespace VKW
     class ShaderModuleFactory;
     class PipelineFactory;
     class DescriptorLayoutController;
+    class Swapchain;
 }
 
 namespace Render
@@ -29,6 +30,7 @@ struct CustomTempBlurPassDesc
     VKW::ShaderModuleFactory* shaderModuleFactory_;
     VKW::PipelineFactory* pipelineFactory_;
     VKW::DescriptorLayoutController* descriptorLayoutController_;
+    VKW::Swapchain* swapchain_;
 
     ResourceKey sceneColorBuffer_;
 };
@@ -58,6 +60,7 @@ private:
     VKW::ShaderModuleFactory* shaderModuleFactory_;
     VKW::PipelineFactory* pipelineFactory_;
     VKW::DescriptorLayoutController* descriptorLayoutController_;
+    VKW::Swapchain* swapchain_;
 
     ResourceKey sceneColorBuffer_;
 

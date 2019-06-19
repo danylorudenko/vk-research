@@ -333,6 +333,7 @@ void Root::DefineCustomBlurPass(PassKey const& key, ResourceKey const& sceneColo
     desc.shaderModuleFactory_ = loader_->shaderModuleFactory_.get();
     desc.pipelineFactory_ = pipelineFactory_;
     desc.descriptorLayoutController_ = loader_->descriptorLayoutController_.get();
+    desc.swapchain_ = loader_->swapchain_.get();
     desc.sceneColorBuffer_ = sceneColorBuffer;
 
     renderPassMap_[key] = std::make_unique<CustomTempBlurPass>(desc);
