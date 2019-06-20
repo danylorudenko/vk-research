@@ -93,12 +93,26 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     computeBuffersDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE;
     root_->DefineGlobalImage(horizontalBlurBuffer_, computeBuffersDesc);
     root_->DefineGlobalImage(verticalBlurBuffer_, computeBuffersDesc);
+
+    //VKW::ImageView* vBufferView = root_->FindGlobalImage()
+    VkImage vBufferImages[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+    VkImageLayout imageLayouts[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+
+    std::uint32_t const framesCount = resourceProxy_->FramesCount();
+    for (std::uint32_t i = 0; i < framesCount; ++i)
+    {
+        VKW::ImageView* vBufferImageView = root_->FindGlobalImage(verticalBlurBuffer_, i);
+        VKW::ImageResource* vBufferImageResource = resourceProxy_->GetResource(vBufferImageView->resource_);
+        vBufferImages[i] = vBufferImageResource->handle_;
+        imageLayouts[i] = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    }
+
+    root_->ImageLayoutTransition(0, framesCount, vBufferImages, imageLayouts);
     
     horizontalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
     verticalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
     
     // set for horizontal "subpass"
-    std::uint32_t const framesCount = resourceProxy_->FramesCount();
     VKW::ProxyDescriptorWriteDesc horizontalSetDesc[2];
     for (std::uint32_t i = 0; i < framesCount; ++i)
     {
@@ -272,7 +286,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     vBufferToGeneral.newLayout = VK_IMAGE_LAYOUT_GENERAL;
     vBufferToGeneral.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     vBufferToGeneral.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    vBufferToGeneral.image = colorBufferHandle;
+    vBufferToGeneral.image = verticalBufferHandle;
     vBufferToGeneral.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     vBufferToGeneral.subresourceRange.baseArrayLayer = 0;
     vBufferToGeneral.subresourceRange.layerCount = 1;
@@ -281,7 +295,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
     table_->vkCmdPipelineBarrier(
         cmdBuffer,
-        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
         VK_FLAGS_NONE,
         1, &hBufferBarrier,
@@ -323,7 +337,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     vBufferToTransferSrc.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
     vBufferToTransferSrc.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     vBufferToTransferSrc.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    vBufferToTransferSrc.image = colorBufferHandle;
+    vBufferToTransferSrc.image = verticalBufferHandle;
     vBufferToTransferSrc.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     vBufferToTransferSrc.subresourceRange.baseArrayLayer = 0;
     vBufferToTransferSrc.subresourceRange.layerCount = 1;
@@ -336,7 +350,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
     table_->vkCmdPipelineBarrier(
         cmdBuffer,
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
         VK_PIPELINE_STAGE_TRANSFER_BIT,
         VK_FLAGS_NONE,
         0, nullptr,
@@ -390,8 +404,8 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
     table_->vkCmdPipelineBarrier(
         cmdBuffer,
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_FLAGS_NONE,
         0, nullptr,
         0, nullptr,
