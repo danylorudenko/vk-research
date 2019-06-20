@@ -224,8 +224,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     std::uint32_t const colorBufferWidth = sceneColorBufferResource->width_;
     std::uint32_t const colorBufferHeight = sceneColorBufferResource->height_;
 
-#pragma region barriersin
-    
+
     VkImageMemoryBarrier colorBarrierIn;
     colorBarrierIn.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     colorBarrierIn.pNext = nullptr;
@@ -259,10 +258,26 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
 
     VkMemoryBarrier hBufferBarrier;
-    hBufferBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    hBufferBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
     hBufferBarrier.pNext = nullptr;
     hBufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
     hBufferBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+
+    VkImageMemoryBarrier vBufferToGeneral;
+    vBufferToGeneral.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    vBufferToGeneral.pNext = nullptr;
+    vBufferToGeneral.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    vBufferToGeneral.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    vBufferToGeneral.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    vBufferToGeneral.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    vBufferToGeneral.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    vBufferToGeneral.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    vBufferToGeneral.image = colorBufferHandle;
+    vBufferToGeneral.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    vBufferToGeneral.subresourceRange.baseArrayLayer = 0;
+    vBufferToGeneral.subresourceRange.layerCount = 1;
+    vBufferToGeneral.subresourceRange.baseMipLevel = 0;
+    vBufferToGeneral.subresourceRange.levelCount = 1;
 
     table_->vkCmdPipelineBarrier(
         cmdBuffer,
@@ -271,7 +286,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         VK_FLAGS_NONE,
         1, &hBufferBarrier,
         0, nullptr,
-        0, nullptr
+        1, &vBufferToGeneral
     );
 
 
@@ -281,11 +296,6 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
 
 
-    VkMemoryBarrier vBufferBarrier;
-    vBufferBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    vBufferBarrier.pNext = nullptr;
-    vBufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
-    vBufferBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
 
 
     VkImageMemoryBarrier colorBufferToTransferDst;
@@ -303,15 +313,35 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     colorBufferToTransferDst.subresourceRange.layerCount = 1;
     colorBufferToTransferDst.subresourceRange.baseMipLevel = 0;
     colorBufferToTransferDst.subresourceRange.levelCount = 1;
-    
+
+    VkImageMemoryBarrier vBufferToTransferSrc;
+    vBufferToTransferSrc.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    vBufferToTransferSrc.pNext = nullptr;
+    vBufferToTransferSrc.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    vBufferToTransferSrc.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    vBufferToTransferSrc.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    vBufferToTransferSrc.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    vBufferToTransferSrc.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    vBufferToTransferSrc.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    vBufferToTransferSrc.image = colorBufferHandle;
+    vBufferToTransferSrc.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    vBufferToTransferSrc.subresourceRange.baseArrayLayer = 0;
+    vBufferToTransferSrc.subresourceRange.layerCount = 1;
+    vBufferToTransferSrc.subresourceRange.baseMipLevel = 0;
+    vBufferToTransferSrc.subresourceRange.levelCount = 1;
+
+    VkImageMemoryBarrier beforeBlitBarriers[2];
+    beforeBlitBarriers[0] = colorBufferToTransferDst;
+    beforeBlitBarriers[1] = vBufferToTransferSrc;
+
     table_->vkCmdPipelineBarrier(
         cmdBuffer,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_PIPELINE_STAGE_TRANSFER_BIT,
         VK_FLAGS_NONE,
-        1, &vBufferBarrier,
         0, nullptr,
-        1, &colorBufferToTransferDst
+        0, nullptr,
+        2, beforeBlitBarriers
     );
 
 
@@ -321,7 +351,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     toColorBlitDesc.srcSubresource.baseArrayLayer = 0;
     toColorBlitDesc.srcSubresource.layerCount = 1;
     toColorBlitDesc.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
-    toColorBlitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)sceneColorBufferResource->width_, (std::int32_t)sceneColorBufferResource->height_, 1 };
+    toColorBlitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)verticalBufferResource->width_, (std::int32_t)verticalBufferResource->height_, 1 };
 
 
     toColorBlitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -329,103 +359,44 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     toColorBlitDesc.dstSubresource.baseArrayLayer = 0;
     toColorBlitDesc.dstSubresource.layerCount = 1;
     toColorBlitDesc.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
-    toColorBlitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)swapchain_->Width(), (std::int32_t)swapchain_->Height(), 1 };
+    toColorBlitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)sceneColorBufferResource->width_, (std::int32_t)sceneColorBufferResource->height_, 1 };
 
     table_->vkCmdBlitImage(
         cmdBuffer,
         verticalBufferHandle,
-        VK_IMAGE_LAYOUT_GENERAL,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
         colorBufferHandle,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1, &toColorBlitDesc,
         VK_FILTER_NEAREST
     );
 
-#pragma endregion barriersin
 
-#pragma region blittoswapchain
+    VkImageMemoryBarrier colorToAttachment;
+    colorToAttachment.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    colorToAttachment.pNext = nullptr;
+    colorToAttachment.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    colorToAttachment.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    colorToAttachment.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    colorToAttachment.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorToAttachment.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorToAttachment.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorToAttachment.image = colorBufferHandle;
+    colorToAttachment.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    colorToAttachment.subresourceRange.baseArrayLayer = 0;
+    colorToAttachment.subresourceRange.layerCount = 1;
+    colorToAttachment.subresourceRange.baseMipLevel = 0;
+    colorToAttachment.subresourceRange.levelCount = 1;
 
-    //VkImageBlit blitDesc;
-    //blitDesc.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    //blitDesc.srcSubresource.mipLevel = 0;
-    //blitDesc.srcSubresource.baseArrayLayer = 0;
-    //blitDesc.srcSubresource.layerCount = 1;
-    //blitDesc.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
-    //blitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)sceneColorBufferResource->width_, (std::int32_t)sceneColorBufferResource->height_, 1 };
-    //
-    //
-    //blitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    //blitDesc.dstSubresource.mipLevel = 0;
-    //blitDesc.dstSubresource.baseArrayLayer = 0;
-    //blitDesc.dstSubresource.layerCount = 1;
-    //blitDesc.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
-    //blitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)swapchain_->Width(), (std::int32_t)swapchain_->Height(), 1 };
-    //
-    //
-    //table_->vkCmdBlitImage(
-    //    cmdBuffer,
-    //    source,
-    //    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-    //    dest,
-    //    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-    //    1, &blitDesc,
-    //    VK_FILTER_NEAREST
-    //);
-#pragma endregion blittoswapchain
-
-
-#pragma region barriersout
-
-    //VkImageMemoryBarrier colorBarrierOut;
-    //colorBarrierOut.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    //colorBarrierOut.pNext = nullptr;
-    //colorBarrierOut.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    //colorBarrierOut.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    //colorBarrierOut.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    //colorBarrierOut.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    //colorBarrierOut.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    //colorBarrierOut.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    //colorBarrierOut.image = source;
-    //colorBarrierOut.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    //colorBarrierOut.subresourceRange.baseArrayLayer = 0;
-    //colorBarrierOut.subresourceRange.layerCount = 1;
-    //colorBarrierOut.subresourceRange.baseMipLevel = 0;
-    //colorBarrierOut.subresourceRange.levelCount = 1;
-    //
-    //VkImageMemoryBarrier swapchainOut;
-    //swapchainOut.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    //swapchainOut.pNext = nullptr;
-    //swapchainOut.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    //swapchainOut.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    //swapchainOut.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    //swapchainOut.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    //swapchainOut.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    //swapchainOut.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    //swapchainOut.image = dest;
-    //swapchainOut.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    //swapchainOut.subresourceRange.baseArrayLayer = 0;
-    //swapchainOut.subresourceRange.layerCount = 1;
-    //swapchainOut.subresourceRange.baseMipLevel = 0;
-    //swapchainOut.subresourceRange.levelCount = 1;
-    //
-    //VkImageMemoryBarrier outBarriers[2] = { colorBarrierOut, swapchainOut };
-    //
-    //table_->vkCmdPipelineBarrier(
-    //    cmdBuffer,
-    //    VK_PIPELINE_STAGE_TRANSFER_BIT,
-    //    VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-    //    VK_FLAGS_NONE,
-    //    0, nullptr,
-    //    0, nullptr,
-    //    2, outBarriers
-    //);
-#pragma endregion barriersout
-
-    // 0 - we also need to fill descriptor sets
-    
-    // 1 - blur horzontally
-    // 2 - blur vertically
-    // 3 - blit to swapchain
+    table_->vkCmdPipelineBarrier(
+        cmdBuffer,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_FLAGS_NONE,
+        0, nullptr,
+        0, nullptr,
+        1, &colorToAttachment
+    );
 }
 
 void CustomTempBlurPass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)

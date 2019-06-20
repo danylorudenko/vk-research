@@ -961,10 +961,107 @@ void Root::IterateRenderGraph(VKW::PresentationContext const& presentationContex
     }
 }
 
-void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext)
+void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, VKW::WorkerFrameCommandReciever& commandReciever)
 {
     std::uint32_t const contextId = presentationContext.contextId_;
 
+    // we can do transfer here
+    
+    VKW::ImageView* colorBufferView = FindGlobalImage(GetDefaultSceneColorOutput(), contextId);
+    VKW::ImageResource* colorBufferResource = resourceProxy_->GetResource(colorBufferView->resource_);
+    VkImage colorBufferHandle = colorBufferResource->handle_; // this to transfer src then back to color attachment (maybe without the last one)
+    VkImage swapchainImageHandle = loader_->swapchain_->Image(contextId).image_;
+
+
+    VkImageMemoryBarrier barriers[3];
+    barriers[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barriers[0].pNext = nullptr;
+    barriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    barriers[0].dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    barriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    barriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    barriers[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barriers[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barriers[0].image = colorBufferHandle;
+    barriers[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barriers[0].subresourceRange.baseArrayLayer = 0;
+    barriers[0].subresourceRange.layerCount = 1;
+    barriers[0].subresourceRange.baseMipLevel = 0;
+    barriers[0].subresourceRange.levelCount = 1;
+
+    barriers[1].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barriers[1].pNext = nullptr;
+    barriers[1].srcAccessMask = VK_FLAGS_NONE;
+    barriers[1].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barriers[1].oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    barriers[1].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barriers[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barriers[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barriers[1].image = swapchainImageHandle;
+    barriers[1].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barriers[1].subresourceRange.baseArrayLayer = 0;
+    barriers[1].subresourceRange.layerCount = 1;
+    barriers[1].subresourceRange.baseMipLevel = 0;
+    barriers[1].subresourceRange.levelCount = 1;
+
+    // this barrier goes after copy
+    barriers[2].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barriers[2].pNext = nullptr;
+    barriers[2].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barriers[2].dstAccessMask = VK_FLAGS_NONE;
+    barriers[2].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barriers[2].newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    barriers[2].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barriers[2].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barriers[2].image = swapchainImageHandle;
+    barriers[2].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barriers[2].subresourceRange.baseArrayLayer = 0;
+    barriers[2].subresourceRange.layerCount = 1;
+    barriers[2].subresourceRange.baseMipLevel = 0;
+    barriers[2].subresourceRange.levelCount = 1;
+
+    VkImageCopy toSwapchainCopy;
+    toSwapchainCopy.srcOffset = VkOffset3D{ 0, 0, 0 };
+    toSwapchainCopy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    toSwapchainCopy.srcSubresource.mipLevel = 0;
+    toSwapchainCopy.srcSubresource.baseArrayLayer = 0;
+    toSwapchainCopy.srcSubresource.layerCount = 1;
+    toSwapchainCopy.dstOffset = VkOffset3D{ 0, 0, 0 };
+    toSwapchainCopy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    toSwapchainCopy.dstSubresource.mipLevel = 0;
+    toSwapchainCopy.dstSubresource.baseArrayLayer = 0;
+    toSwapchainCopy.dstSubresource.layerCount = 1;
+    toSwapchainCopy.extent.width = loader_->swapchain_->Width();
+    toSwapchainCopy.extent.height = loader_->swapchain_->Height();
+    toSwapchainCopy.extent.depth = 1;
+
+    VulkanFuncTable()->vkCmdPipelineBarrier(
+        commandReciever.commandBuffer_,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_FLAGS_NONE,
+        0, nullptr,
+        0, nullptr,
+        2, barriers
+    );
+
+    VulkanFuncTable()->vkCmdCopyImage(
+        commandReciever.commandBuffer_,
+        colorBufferHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        swapchainImageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1, &toSwapchainCopy
+    );
+
+    VulkanFuncTable()->vkCmdPipelineBarrier(
+        commandReciever.commandBuffer_,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+        VK_FLAGS_NONE,
+        0, nullptr,
+        0, nullptr,
+        1, barriers + 2
+    );
+    
     mainWorkerTemp_->EndExecutionFrame(contextId);
     VKW::WorkerFrameCompleteSemaphore renderingCompleteSemaphore = mainWorkerTemp_->ExecuteFrame(
         contextId, 

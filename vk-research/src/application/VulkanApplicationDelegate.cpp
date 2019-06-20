@@ -156,7 +156,7 @@ void VulkanApplicationDelegate::update()
         imguiHelper_->Render(context, commandReciever);
     }
 
-    renderRoot_->EndRenderGraph(presentationContext);
+    renderRoot_->EndRenderGraph(presentationContext, commandReciever);
 }
 
 void VulkanApplicationDelegate::shutdown()

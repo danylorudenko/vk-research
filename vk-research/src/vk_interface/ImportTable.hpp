@@ -148,6 +148,7 @@ public:
     PFN_vkDestroyFramebuffer vkDestroyFramebuffer = nullptr;
 
     PFN_vkCmdCopyBuffer vkCmdCopyBuffer = nullptr;
+    PFN_vkCmdCopyImage vkCmdCopyImage = nullptr;
     PFN_vkCmdCopyBufferToImage vkCmdCopyBufferToImage = nullptr;
     PFN_vkCmdBlitImage vkCmdBlitImage = nullptr;
 
