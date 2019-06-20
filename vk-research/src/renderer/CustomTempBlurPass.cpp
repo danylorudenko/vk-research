@@ -182,22 +182,24 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 {
     Pipeline& hPipeline = root_->FindPipeline(horizontalBlurPipeline_);
     VKW::Pipeline* vkwHPipeline = pipelineFactory_->GetPipeline(hPipeline.pipelineHandle_);
+    VKW::PipelineLayout* vkwHPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwHPipeline->layoutHandle);
 
     Pipeline& vPipeline = root_->FindPipeline(verticalBlurPipeline_);
     VKW::Pipeline* vkwVPipeline = pipelineFactory_->GetPipeline(vPipeline.pipelineHandle_);
+    VKW::PipelineLayout* vkwVPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwVPipeline->layoutHandle);
 
 
     VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, contextId);
     VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
 
     VKW::ImageView* horizontalBufferView = root_->FindGlobalImage(horizontalBlurBuffer_, contextId);
-    VKW::ImageResource* horizontalBufferResource = resourceProxy_->GetResource(horizontalBufferView);
+    VKW::ImageResource* horizontalBufferResource = resourceProxy_->GetResource(horizontalBufferView->resource_);
 
     VKW::ImageView* verticalBufferView = root_->FindGlobalImage(verticalBlurBuffer_, contextId);
-    VKW::ImageResource* verticalBufferResource = resourceProxy_->GetResource(verticalBufferView);
+    VKW::ImageResource* verticalBufferResource = resourceProxy_->GetResource(verticalBufferView->resource_);
 
     VKW::DescriptorSetLayoutHandle vkwDescriptorLayoutHandle = root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_;
-    VKW::DescriptorSetLayout* vkwDescriptorLayout = descriptorLayoutController_->GetDescriptorSetLayout();
+    VKW::DescriptorSetLayout* vkwDescriptorLayout = descriptorLayoutController_->GetDescriptorSetLayout(vkwDescriptorLayoutHandle);
 
     VKW::DescriptorSet* vkwHDescriptorSet = resourceProxy_->GetDescriptorSet(horizontalDescriptorSet_, contextId);
     VKW::DescriptorSet* vkwVDescriptorSet = resourceProxy_->GetDescriptorSet(verticalDescriptorSet_, contextId);
@@ -214,6 +216,8 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     VkImage swapchainBufferHandle = swapchain_->Image(contextId).image_;
 
     VkDescriptorSetLayout descriptorLayoutHandle = vkwDescriptorLayout->handle_;
+    VkPipelineLayout hPipelineLayout = vkwHPipelineLayout->handle_;
+    VkPipelineLayout vPipelineLayout = vkwVPipelineLayout->handle_;
     VkDescriptorSet hDescriptorSetHandle = vkwHDescriptorSet->handle_;
     VkDescriptorSet vDescriptorSetHandle = vkwVDescriptorSet->handle_;
 
@@ -245,11 +249,11 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         VK_FLAGS_NONE,
         0, nullptr,
         0, nullptr,
-        1, colorBarrierIn
+        1, &colorBarrierIn
     );
 
     table_->vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, hPipleineHandle);
-    table_->vkCmdBindDescriptorSets(cmdBuffer, descriptorLayoutHandle, 0, 1, &hDescriptorSetHandle, 0, nullptr);
+    table_->vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, hPipelineLayout, 0, 1, &hDescriptorSetHandle, 0, nullptr);
     table_->vkCmdDispatch(cmdBuffer, colorBufferWidth / COMPUTE_LOCAL_GROUP_SIZE, colorBufferHeight / COMPUTE_LOCAL_GROUP_SIZE, 1);
 
 
@@ -272,7 +276,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
 
     table_->vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vPipleineHandle);
-    table_->vkCmdBindDescriptorSets(cmdBuffer, descriptorLayoutHandle, 0, 1, &vDescriptorSetHandle, 0, nullptr);
+    table_->vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vPipelineLayout, 0, 1, &vDescriptorSetHandle, 0, nullptr);
     table_->vkCmdDispatch(cmdBuffer, colorBufferWidth / COMPUTE_LOCAL_GROUP_SIZE, colorBufferHeight / COMPUTE_LOCAL_GROUP_SIZE, 1);
 
 
