@@ -569,7 +569,7 @@ void Root::Decorate_VKWProxyDescriptorWriteDesc_Texture(VKW::ProxyDescriptorWrit
         
         imageDesc.imageViewHandle_ = imageViewHandle;
         imageDesc.sampler_ = resourceProxy_->GetDefaultSampler();
-        imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
+        imageDesc.layout_ = VK_IMAGE_LAYOUT_GENERAL;
     }
 }
 
