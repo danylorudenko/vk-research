@@ -293,6 +293,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     dsInfo.frontStencilState_ = {};
 
     VKW::DescriptorSetLayoutDesc setLayoutDesc;
+    setLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
     setLayoutDesc.membersCount_ = 1;
     setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     setLayoutDesc.membersDesc_[0].binding_ = 0;

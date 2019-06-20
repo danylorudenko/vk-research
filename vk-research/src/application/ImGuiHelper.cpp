@@ -187,11 +187,13 @@ void ImGuiHelper::Init()
 
 
     VKW::DescriptorSetLayoutDesc materialSetLayoutDesc;
+    materialSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
     materialSetLayoutDesc.membersCount_ = 1;
     materialSetLayoutDesc.membersDesc_[0].type_ = VKW::DescriptorType::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     materialSetLayoutDesc.membersDesc_[0].binding_ = 0;
 
     VKW::DescriptorSetLayoutDesc itemSetLayoutDesc;
+    itemSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
     itemSetLayoutDesc.membersCount_ = 1;
     itemSetLayoutDesc.membersDesc_[0].type_ = VKW::DescriptorType::DESCRIPTOR_TYPE_TEXTURE;
     itemSetLayoutDesc.membersDesc_[0].binding_ = 0;

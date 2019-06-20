@@ -40,6 +40,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     , universalSetLayout_{ "bllt" }
 {
     VKW::DescriptorSetLayoutDesc setLayoutDesc;
+    setLayoutDesc.stage_ = VKW::DescriptorStage::COMPUTE;
     setLayoutDesc.membersCount_ = 2;
     setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
     setLayoutDesc.membersDesc_[0].binding_ = 0;

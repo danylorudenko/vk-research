@@ -11,6 +11,15 @@ namespace VKW
 class Device;
 class ImportTable;
 
+enum DescriptorStage
+{
+    COMPUTE,
+    VERTEX,
+    FRAGMENT,
+    RENDERING,
+    ALL
+};
+
 enum DescriptorType
 {
     DESCRIPTOR_TYPE_TEXTURE,
@@ -27,6 +36,7 @@ struct LayoutDescriptorDesc
 
 struct DescriptorSetLayoutDesc
 {
+    DescriptorStage stage_;
     std::uint32_t membersCount_;
     LayoutDescriptorDesc membersDesc_[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
 };

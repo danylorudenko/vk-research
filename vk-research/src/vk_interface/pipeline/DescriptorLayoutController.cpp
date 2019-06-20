@@ -60,11 +60,33 @@ DescriptorLayoutController::~DescriptorLayoutController()
 
 DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(DescriptorSetLayoutDesc const& desc)
 {
+    VkFlags stageFlags = VK_FLAGS_NONE;
+    switch (desc.stage_)
+    {
+    case DescriptorStage::COMPUTE:
+        stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        break;
+    case DescriptorStage::VERTEX:
+        stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        break;
+    case DescriptorStage::FRAGMENT:
+        stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        break;
+    case DescriptorStage::RENDERING:
+        stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        break;
+    case DescriptorStage::ALL:
+        stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+        break;
+    default:
+        assert(false && "Descriptor stage for DescriptorSetLayout is not supported!");
+    }
+
     VkDescriptorSetLayoutBinding bindings[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
     for (auto i = 0u; i < desc.membersCount_; ++i) {
         bindings[i].pImmutableSamplers = nullptr;
         // TODO: in the future these flags potentially will require some adjustments
-        bindings[i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        bindings[i].stageFlags = stageFlags;
         bindings[i].descriptorCount = 1;
         bindings[i].binding = desc.membersDesc_[i].binding_;
         switch (desc.membersDesc_[i].type_)
