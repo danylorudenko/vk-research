@@ -180,15 +180,45 @@ void CustomTempBlurPass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
 void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
 {
-    //void (VKAPI_PTR *PFN_vkCmdBlitImage)(VkCommandBuffer commandBuffer, VkImage srcImage, VkImageLayout srcImageLayout, VkImage dstImage, VkImageLayout dstImageLayout, uint32_t regionCount, const VkImageBlit* pRegions, VkFilter filter);
+    Pipeline& hPipeline = root_->FindPipeline(horizontalBlurPipeline_);
+    VKW::Pipeline* vkwHPipeline = pipelineFactory_->GetPipeline(hPipeline.pipelineHandle_);
 
+    Pipeline& vPipeline = root_->FindPipeline(verticalBlurPipeline_);
+    VKW::Pipeline* vkwVPipeline = pipelineFactory_->GetPipeline(vPipeline.pipelineHandle_);
+
+
+    VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, contextId);
+    VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
+
+    VKW::ImageView* horizontalBufferView = root_->FindGlobalImage(horizontalBlurBuffer_, contextId);
+    VKW::ImageResource* horizontalBufferResource = resourceProxy_->GetResource(horizontalBufferView);
+
+    VKW::ImageView* verticalBufferView = root_->FindGlobalImage(verticalBlurBuffer_, contextId);
+    VKW::ImageResource* verticalBufferResource = resourceProxy_->GetResource(verticalBufferView);
+
+    VKW::DescriptorSetLayoutHandle vkwDescriptorLayoutHandle = root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_;
+    VKW::DescriptorSetLayout* vkwDescriptorLayout = descriptorLayoutController_->GetDescriptorSetLayout();
+
+    VKW::DescriptorSet* vkwHDescriptorSet = resourceProxy_->GetDescriptorSet(horizontalDescriptorSet_, contextId);
+    VKW::DescriptorSet* vkwVDescriptorSet = resourceProxy_->GetDescriptorSet(verticalDescriptorSet_, contextId);
+
+    constexpr std::uint32_t COMPUTE_LOCAL_GROUP_SIZE = 10;
     VkCommandBuffer cmdBuffer = commandReciever->commandBuffer_;
 
-    VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, 0);
-    VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
-    VkImage source = sceneColorBufferResource->handle_;
+    VkPipeline hPipleineHandle = vkwHPipeline->vkPipeline_;
+    VkPipeline vPipleineHandle = vkwVPipeline->vkPipeline_;
 
-    VkImage dest = swapchain_->Image(contextId).image_;
+    VkImage colorBufferHandle = sceneColorBufferResource->handle_;
+    VkImage horizontalBufferHandle = horizontalBufferResource->handle_;
+    VkImage verticalBufferHandle = verticalBufferResource->handle_;
+    VkImage swapchainBufferHandle = swapchain_->Image(contextId).image_;
+
+    VkDescriptorSetLayout descriptorLayoutHandle = vkwDescriptorLayout->handle_;
+    VkDescriptorSet hDescriptorSetHandle = vkwHDescriptorSet->handle_;
+    VkDescriptorSet vDescriptorSetHandle = vkwVDescriptorSet->handle_;
+
+    std::uint32_t const colorBufferWidth = sceneColorBufferResource->width_;
+    std::uint32_t const colorBufferHeight = sceneColorBufferResource->height_;
 
 #pragma region barriersin
     
@@ -196,124 +226,195 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     colorBarrierIn.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     colorBarrierIn.pNext = nullptr;
     colorBarrierIn.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    colorBarrierIn.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    colorBarrierIn.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
     colorBarrierIn.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    colorBarrierIn.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    colorBarrierIn.newLayout = VK_IMAGE_LAYOUT_GENERAL;
     colorBarrierIn.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     colorBarrierIn.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBarrierIn.image = source;
+    colorBarrierIn.image = colorBufferHandle;
     colorBarrierIn.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     colorBarrierIn.subresourceRange.baseArrayLayer = 0;
     colorBarrierIn.subresourceRange.layerCount = 1;
     colorBarrierIn.subresourceRange.baseMipLevel = 0;
     colorBarrierIn.subresourceRange.levelCount = 1;
 
-    VkImageMemoryBarrier swapchainIn;
-    swapchainIn.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    swapchainIn.pNext = nullptr;
-    swapchainIn.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
-    swapchainIn.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    swapchainIn.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    swapchainIn.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    swapchainIn.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    swapchainIn.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    swapchainIn.image = dest;
-    swapchainIn.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    swapchainIn.subresourceRange.baseArrayLayer = 0;
-    swapchainIn.subresourceRange.layerCount = 1;
-    swapchainIn.subresourceRange.baseMipLevel = 0;
-    swapchainIn.subresourceRange.levelCount = 1;
+    table_->vkCmdPipelineBarrier(
+        cmdBuffer,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_FLAGS_NONE,
+        0, nullptr,
+        0, nullptr,
+        1, colorBarrierIn
+    );
 
-    VkImageMemoryBarrier inBarriers[2] = { colorBarrierIn, swapchainIn };
+    table_->vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, hPipleineHandle);
+    table_->vkCmdBindDescriptorSets(cmdBuffer, descriptorLayoutHandle, 0, 1, &hDescriptorSetHandle, 0, nullptr);
+    table_->vkCmdDispatch(cmdBuffer, colorBufferWidth / COMPUTE_LOCAL_GROUP_SIZE, colorBufferHeight / COMPUTE_LOCAL_GROUP_SIZE, 1);
 
+
+
+    VkMemoryBarrier hBufferBarrier;
+    hBufferBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    hBufferBarrier.pNext = nullptr;
+    hBufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+    hBufferBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+
+    table_->vkCmdPipelineBarrier(
+        cmdBuffer,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_FLAGS_NONE,
+        1, &hBufferBarrier,
+        0, nullptr,
+        0, nullptr
+    );
+
+
+    table_->vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vPipleineHandle);
+    table_->vkCmdBindDescriptorSets(cmdBuffer, descriptorLayoutHandle, 0, 1, &vDescriptorSetHandle, 0, nullptr);
+    table_->vkCmdDispatch(cmdBuffer, colorBufferWidth / COMPUTE_LOCAL_GROUP_SIZE, colorBufferHeight / COMPUTE_LOCAL_GROUP_SIZE, 1);
+
+
+
+    VkMemoryBarrier vBufferBarrier;
+    vBufferBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    vBufferBarrier.pNext = nullptr;
+    vBufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+    vBufferBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+
+
+    VkImageMemoryBarrier colorBufferToTransferDst;
+    colorBufferToTransferDst.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    colorBufferToTransferDst.pNext = nullptr;
+    colorBufferToTransferDst.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    colorBufferToTransferDst.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    colorBufferToTransferDst.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    colorBufferToTransferDst.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    colorBufferToTransferDst.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorBufferToTransferDst.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorBufferToTransferDst.image = colorBufferHandle;
+    colorBufferToTransferDst.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    colorBufferToTransferDst.subresourceRange.baseArrayLayer = 0;
+    colorBufferToTransferDst.subresourceRange.layerCount = 1;
+    colorBufferToTransferDst.subresourceRange.baseMipLevel = 0;
+    colorBufferToTransferDst.subresourceRange.levelCount = 1;
+    
     table_->vkCmdPipelineBarrier(
         cmdBuffer,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_PIPELINE_STAGE_TRANSFER_BIT,
         VK_FLAGS_NONE,
+        1, &vBufferBarrier,
         0, nullptr,
-        0, nullptr,
-        2, inBarriers
+        1, &colorBufferToTransferDst
+    );
+
+
+    VkImageBlit toColorBlitDesc;
+    toColorBlitDesc.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    toColorBlitDesc.srcSubresource.mipLevel = 0;
+    toColorBlitDesc.srcSubresource.baseArrayLayer = 0;
+    toColorBlitDesc.srcSubresource.layerCount = 1;
+    toColorBlitDesc.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
+    toColorBlitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)sceneColorBufferResource->width_, (std::int32_t)sceneColorBufferResource->height_, 1 };
+
+
+    toColorBlitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    toColorBlitDesc.dstSubresource.mipLevel = 0;
+    toColorBlitDesc.dstSubresource.baseArrayLayer = 0;
+    toColorBlitDesc.dstSubresource.layerCount = 1;
+    toColorBlitDesc.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
+    toColorBlitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)swapchain_->Width(), (std::int32_t)swapchain_->Height(), 1 };
+
+    table_->vkCmdBlitImage(
+        cmdBuffer,
+        verticalBufferHandle,
+        VK_IMAGE_LAYOUT_GENERAL,
+        colorBufferHandle,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1, &toColorBlitDesc,
+        VK_FILTER_NEAREST
     );
 
 #pragma endregion barriersin
 
 #pragma region blittoswapchain
 
-    VkImageBlit blitDesc;
-    blitDesc.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    blitDesc.srcSubresource.mipLevel = 0;
-    blitDesc.srcSubresource.baseArrayLayer = 0;
-    blitDesc.srcSubresource.layerCount = 1;
-    blitDesc.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
-    blitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)sceneColorBufferResource->width_, (std::int32_t)sceneColorBufferResource->height_, 1 };
-
-
-    blitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    blitDesc.dstSubresource.mipLevel = 0;
-    blitDesc.dstSubresource.baseArrayLayer = 0;
-    blitDesc.dstSubresource.layerCount = 1;
-    blitDesc.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
-    blitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)swapchain_->Width(), (std::int32_t)swapchain_->Height(), 1 };
-    
-
-    table_->vkCmdBlitImage(
-        cmdBuffer,
-        source,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        dest,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        1, &blitDesc,
-        VK_FILTER_NEAREST
-    );
+    //VkImageBlit blitDesc;
+    //blitDesc.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    //blitDesc.srcSubresource.mipLevel = 0;
+    //blitDesc.srcSubresource.baseArrayLayer = 0;
+    //blitDesc.srcSubresource.layerCount = 1;
+    //blitDesc.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
+    //blitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)sceneColorBufferResource->width_, (std::int32_t)sceneColorBufferResource->height_, 1 };
+    //
+    //
+    //blitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    //blitDesc.dstSubresource.mipLevel = 0;
+    //blitDesc.dstSubresource.baseArrayLayer = 0;
+    //blitDesc.dstSubresource.layerCount = 1;
+    //blitDesc.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
+    //blitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)swapchain_->Width(), (std::int32_t)swapchain_->Height(), 1 };
+    //
+    //
+    //table_->vkCmdBlitImage(
+    //    cmdBuffer,
+    //    source,
+    //    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+    //    dest,
+    //    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    //    1, &blitDesc,
+    //    VK_FILTER_NEAREST
+    //);
 #pragma endregion blittoswapchain
 
 
 #pragma region barriersout
 
-    VkImageMemoryBarrier colorBarrierOut;
-    colorBarrierOut.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    colorBarrierOut.pNext = nullptr;
-    colorBarrierOut.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    colorBarrierOut.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    colorBarrierOut.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    colorBarrierOut.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    colorBarrierOut.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBarrierOut.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBarrierOut.image = source;
-    colorBarrierOut.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    colorBarrierOut.subresourceRange.baseArrayLayer = 0;
-    colorBarrierOut.subresourceRange.layerCount = 1;
-    colorBarrierOut.subresourceRange.baseMipLevel = 0;
-    colorBarrierOut.subresourceRange.levelCount = 1;
-
-    VkImageMemoryBarrier swapchainOut;
-    swapchainOut.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    swapchainOut.pNext = nullptr;
-    swapchainOut.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    swapchainOut.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    swapchainOut.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    swapchainOut.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    swapchainOut.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    swapchainOut.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    swapchainOut.image = dest;
-    swapchainOut.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    swapchainOut.subresourceRange.baseArrayLayer = 0;
-    swapchainOut.subresourceRange.layerCount = 1;
-    swapchainOut.subresourceRange.baseMipLevel = 0;
-    swapchainOut.subresourceRange.levelCount = 1;
-
-    VkImageMemoryBarrier outBarriers[2] = { colorBarrierOut, swapchainOut };
-
-    table_->vkCmdPipelineBarrier(
-        cmdBuffer,
-        VK_PIPELINE_STAGE_TRANSFER_BIT,
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-        VK_FLAGS_NONE,
-        0, nullptr,
-        0, nullptr,
-        2, outBarriers
-    );
+    //VkImageMemoryBarrier colorBarrierOut;
+    //colorBarrierOut.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    //colorBarrierOut.pNext = nullptr;
+    //colorBarrierOut.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    //colorBarrierOut.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    //colorBarrierOut.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    //colorBarrierOut.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    //colorBarrierOut.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    //colorBarrierOut.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    //colorBarrierOut.image = source;
+    //colorBarrierOut.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    //colorBarrierOut.subresourceRange.baseArrayLayer = 0;
+    //colorBarrierOut.subresourceRange.layerCount = 1;
+    //colorBarrierOut.subresourceRange.baseMipLevel = 0;
+    //colorBarrierOut.subresourceRange.levelCount = 1;
+    //
+    //VkImageMemoryBarrier swapchainOut;
+    //swapchainOut.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    //swapchainOut.pNext = nullptr;
+    //swapchainOut.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    //swapchainOut.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    //swapchainOut.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    //swapchainOut.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    //swapchainOut.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    //swapchainOut.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    //swapchainOut.image = dest;
+    //swapchainOut.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    //swapchainOut.subresourceRange.baseArrayLayer = 0;
+    //swapchainOut.subresourceRange.layerCount = 1;
+    //swapchainOut.subresourceRange.baseMipLevel = 0;
+    //swapchainOut.subresourceRange.levelCount = 1;
+    //
+    //VkImageMemoryBarrier outBarriers[2] = { colorBarrierOut, swapchainOut };
+    //
+    //table_->vkCmdPipelineBarrier(
+    //    cmdBuffer,
+    //    VK_PIPELINE_STAGE_TRANSFER_BIT,
+    //    VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    //    VK_FLAGS_NONE,
+    //    0, nullptr,
+    //    0, nullptr,
+    //    2, outBarriers
+    //);
 #pragma endregion barriersout
 
     // 0 - we also need to fill descriptor sets
