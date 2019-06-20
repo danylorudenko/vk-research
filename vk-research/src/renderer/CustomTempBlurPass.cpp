@@ -239,6 +239,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     std::uint32_t const colorBufferHeight = sceneColorBufferResource->height_;
 
 
+    // gettin' colorbuffer to read
     VkImageMemoryBarrier colorBarrierIn;
     colorBarrierIn.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     colorBarrierIn.pNext = nullptr;
@@ -265,12 +266,13 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         1, &colorBarrierIn
     );
 
+    // horizontal blur
     table_->vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, hPipleineHandle);
     table_->vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, hPipelineLayout, 0, 1, &hDescriptorSetHandle, 0, nullptr);
     table_->vkCmdDispatch(cmdBuffer, colorBufferWidth / COMPUTE_LOCAL_GROUP_SIZE, colorBufferHeight / COMPUTE_LOCAL_GROUP_SIZE, 1);
 
 
-
+    // getting horizontal blur results for vertical blur
     VkMemoryBarrier hBufferBarrier;
     hBufferBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
     hBufferBarrier.pNext = nullptr;
@@ -303,7 +305,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         1, &vBufferToGeneral
     );
 
-
+    // vertical blur dispatch    
     table_->vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vPipleineHandle);
     table_->vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vPipelineLayout, 0, 1, &vDescriptorSetHandle, 0, nullptr);
     table_->vkCmdDispatch(cmdBuffer, colorBufferWidth / COMPUTE_LOCAL_GROUP_SIZE, colorBufferHeight / COMPUTE_LOCAL_GROUP_SIZE, 1);
@@ -311,7 +313,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
 
 
-
+    // prepare to copy vertical blur results to color buffer
     VkImageMemoryBarrier colorBufferToTransferDst;
     colorBufferToTransferDst.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     colorBufferToTransferDst.pNext = nullptr;
@@ -358,7 +360,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         2, beforeBlitBarriers
     );
 
-
+    // putting results to color buffer
     VkImageBlit toColorBlitDesc;
     toColorBlitDesc.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     toColorBlitDesc.srcSubresource.mipLevel = 0;
@@ -385,7 +387,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         VK_FILTER_NEAREST
     );
 
-
+    // letting other passes use color buffer as a color attachment
     VkImageMemoryBarrier colorToAttachment;
     colorToAttachment.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     colorToAttachment.pNext = nullptr;
