@@ -8,7 +8,7 @@
 #include "..\renderer\CustomTempBlurPass.hpp"
 
 #include <utility>
-#include <chrono>
+#include <cstdio>
 
 #include <glm\gtc\quaternion.hpp>
 
@@ -104,7 +104,6 @@ void VulkanApplicationDelegate::start()
         InitImGui();
 }
 
-//std::chrono::high_resolution_clock::time_point prevTime;
 float testcounter = 0.0f;
 
 
@@ -112,10 +111,12 @@ void VulkanApplicationDelegate::update()
 {
     ////////////////////////////////////////////////////
     // Frame time measurement
-    //auto currTime = std::chrono::high_resolution_clock::now();
-    //auto frameTime = currTime - prevTime;
-    //prevTime = currTime;
-    //std::cout << std::chrono::duration_cast<std::chrono::microseconds>(frameTime).count() << std::endl;
+    auto currTime = std::chrono::high_resolution_clock::now();
+    auto frameTime = currTime - prevFrameTimePoint_;
+    prevFrameTimePoint_ = currTime;
+    prevFrameDelta_ = std::chrono::duration_cast<std::chrono::milliseconds>(frameTime).count();
+
+
     inputSystem_.Update();
 
     VKW::PresentationContext presentationContext = renderRoot_->AcquireNextPresentationContext();
@@ -148,7 +149,7 @@ void VulkanApplicationDelegate::update()
     VKW::WorkerFrameCommandReciever commandReciever = renderRoot_->BeginRenderGraph(presentationContext);
     renderRoot_->IterateRenderGraph(presentationContext, commandReciever);
 
-    TestImGui(context);
+    ImGuiUser(context);
 
 
     if (imguiEnabled_) {
@@ -358,10 +359,13 @@ void VulkanApplicationDelegate::InitImGui()
         imguiHelper_->Init();
 }
 
-void VulkanApplicationDelegate::TestImGui(std::uint32_t context)
+
+
+void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
 {
     if (imguiEnabled_) {
-        //IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
+        IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
+        
         //
         //static char buf[256];
         //static float f = 0.0f;
@@ -373,6 +377,26 @@ void VulkanApplicationDelegate::TestImGui(std::uint32_t context)
         //}
         //ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
         //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+
+        static bool frameDataOpened = false;
+
+
+        ImGui::SetNextWindowContentWidth(100.0f);
+        ImGui::SetNextWindowPos(ImVec2((float)mainWindow_.Width() - 20.0f, 0.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse;
+        if (!ImGui::Begin("Frame Stats", &frameDataOpened, windowFlags))
+        {
+            // Early out if the window is collapsed, as an optimization.
+            ImGui::End();
+            return;
+        }
+
+        ImGui::Text("DT: %f", prevFrameDelta_ * 0.001f);
+        ImGui::Text("FPS: %f", 1.0f / prevFrameDelta_);
+
+        ImGui::End();
+
         //static bool p_open = true;
         //ImGui::ShowDemoWindow(&p_open);
     }

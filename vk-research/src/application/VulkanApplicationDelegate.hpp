@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <chrono>
 
 #include "Application.hpp"
 #include "..\class_features\NonMovable.hpp"
@@ -45,7 +46,7 @@ public:
 
 private:
     void InitImGui();
-    void TestImGui(std::uint32_t context);
+    void ImGuiUser(std::uint32_t context);
 
 private:
     Window mainWindow_;
@@ -57,6 +58,8 @@ private:
     std::unique_ptr<ImGuiHelper> imguiHelper_;
     bool imguiEnabled_;
 
+    std::chrono::high_resolution_clock::time_point prevFrameTimePoint_;
+    std::uint64_t prevFrameDelta_;
 
     Transform::TransformationSystem transformationSystem_;
     

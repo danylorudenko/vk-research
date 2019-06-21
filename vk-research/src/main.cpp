@@ -11,7 +11,7 @@ int main()
 
     HINSTANCE instance = GetModuleHandle(nullptr);
     
-    bool imguiEnabled = false;
+    bool imguiEnabled = true;
     
     auto* appDelegate = new VulkanApplicationDelegate{ instance, "Vulkan Application", 800, 600, 2, debug, imguiEnabled };
     auto* application = new Application{ appDelegate };

@@ -82,7 +82,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, 0);
     VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
 
-    std::uint32_t const width = sceneColorBufferResource->width_;
+    std::uint32_t const width = sceneColorBufferResource->width_ + 20;
     std::uint32_t const height = sceneColorBufferResource->height_;
     VkFormat const format = sceneColorBufferResource->format_;
 

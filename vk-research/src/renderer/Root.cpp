@@ -49,8 +49,8 @@ Root::Root(RootDesc const& desc)
 
     VKW::ImageViewDesc finalColorDesc;
     finalColorDesc.format_ = loader_->swapchain_->Format();
-    finalColorDesc.width_ = loader_->swapchain_->Width();
-    finalColorDesc.height_ = loader_->swapchain_->Height();
+    finalColorDesc.width_ = loader_->swapchain_->Width() + COLOR_BUFFER_THREESHOLD * 2;
+    finalColorDesc.height_ = loader_->swapchain_->Height() + COLOR_BUFFER_THREESHOLD * 2;
     finalColorDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
 
     DefineGlobalImage(GetDefaultSceneColorOutput(), finalColorDesc);
@@ -1020,20 +1020,21 @@ void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, V
     barriers[2].subresourceRange.baseMipLevel = 0;
     barriers[2].subresourceRange.levelCount = 1;
 
-    VkImageCopy toSwapchainCopy;
-    toSwapchainCopy.srcOffset = VkOffset3D{ 0, 0, 0 };
-    toSwapchainCopy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    toSwapchainCopy.srcSubresource.mipLevel = 0;
-    toSwapchainCopy.srcSubresource.baseArrayLayer = 0;
-    toSwapchainCopy.srcSubresource.layerCount = 1;
-    toSwapchainCopy.dstOffset = VkOffset3D{ 0, 0, 0 };
-    toSwapchainCopy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    toSwapchainCopy.dstSubresource.mipLevel = 0;
-    toSwapchainCopy.dstSubresource.baseArrayLayer = 0;
-    toSwapchainCopy.dstSubresource.layerCount = 1;
-    toSwapchainCopy.extent.width = loader_->swapchain_->Width();
-    toSwapchainCopy.extent.height = loader_->swapchain_->Height();
-    toSwapchainCopy.extent.depth = 1;
+    VkImageBlit toSwapchainBlitDesc;
+    toSwapchainBlitDesc.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    toSwapchainBlitDesc.srcSubresource.mipLevel = 0;
+    toSwapchainBlitDesc.srcSubresource.baseArrayLayer = 0;
+    toSwapchainBlitDesc.srcSubresource.layerCount = 1;
+    toSwapchainBlitDesc.srcOffsets[0] = VkOffset3D{ (std::int32_t)COLOR_BUFFER_THREESHOLD, (std::int32_t)COLOR_BUFFER_THREESHOLD, 0 };
+    toSwapchainBlitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)(colorBufferResource->width_ - COLOR_BUFFER_THREESHOLD), (std::int32_t)(colorBufferResource->height_ - COLOR_BUFFER_THREESHOLD), 1 };
+
+
+    toSwapchainBlitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    toSwapchainBlitDesc.dstSubresource.mipLevel = 0;
+    toSwapchainBlitDesc.dstSubresource.baseArrayLayer = 0;
+    toSwapchainBlitDesc.dstSubresource.layerCount = 1;
+    toSwapchainBlitDesc.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
+    toSwapchainBlitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)loader_->swapchain_->Width(), (std::int32_t)loader_->swapchain_->Height(), 1 };
 
     VulkanFuncTable()->vkCmdPipelineBarrier(
         commandReciever.commandBuffer_,
@@ -1045,12 +1046,22 @@ void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, V
         2, barriers
     );
 
-    VulkanFuncTable()->vkCmdCopyImage(
+    VulkanFuncTable()->vkCmdBlitImage(
         commandReciever.commandBuffer_,
-        colorBufferHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        swapchainImageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        1, &toSwapchainCopy
+        colorBufferHandle,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        swapchainImageHandle,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1, &toSwapchainBlitDesc,
+        VK_FILTER_LINEAR
     );
+
+    //VulkanFuncTable()->vkCmdCopyImage(
+    //    commandReciever.commandBuffer_,
+    //    colorBufferHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+    //    swapchainImageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    //    1, &toSwapchainCopy
+    //);
 
     VulkanFuncTable()->vkCmdPipelineBarrier(
         commandReciever.commandBuffer_,

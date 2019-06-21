@@ -278,7 +278,7 @@ private:
 private:
     static constexpr char const* SWAPCHAIN_IMAGE_KEY = "swapchain";
     static constexpr char const* SCENE_COLOR_OUTPUT_KEY = "colf";
-
+    static constexpr std::uint32_t COLOR_BUFFER_THREESHOLD = 10;
 
 
 private:
