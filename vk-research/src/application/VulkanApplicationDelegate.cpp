@@ -389,7 +389,7 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
 
         ImGui::SetNextWindowContentWidth(100.0f);
-        ImGui::SetNextWindowPos(ImVec2((float)colorBufferResource->width_, 0.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+        ImGui::SetNextWindowPos(ImVec2((float)colorBufferResource->width_ - 10.0, 10.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
 
         ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse;
         if (!ImGui::Begin("Frame Stats", &frameDataOpened, windowFlags))

@@ -45,8 +45,8 @@ Root::Root(RootDesc const& desc)
 
     VKW::ImageViewDesc finalColorDesc;
     finalColorDesc.format_ = loader_->swapchain_->Format();
-    finalColorDesc.width_ = loader_->swapchain_->Width() + COLOR_BUFFER_THREESHOLD * 2 * 20;
-    finalColorDesc.height_ = loader_->swapchain_->Height() + COLOR_BUFFER_THREESHOLD * 2 * 20;
+    finalColorDesc.width_ = loader_->swapchain_->Width() + COLOR_BUFFER_THREESHOLD * 2;
+    finalColorDesc.height_ = loader_->swapchain_->Height() + COLOR_BUFFER_THREESHOLD * 2;
     finalColorDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
 
     DefineGlobalImage(GetDefaultSceneColorOutput(), finalColorDesc);
@@ -981,8 +981,8 @@ void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, V
     toSwapchainBlitDesc.srcSubresource.mipLevel = 0;
     toSwapchainBlitDesc.srcSubresource.baseArrayLayer = 0;
     toSwapchainBlitDesc.srcSubresource.layerCount = 1;
-    toSwapchainBlitDesc.srcOffsets[0] = VkOffset3D{ (std::int32_t)0, (std::int32_t)0, 0 };
-    toSwapchainBlitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)(colorBufferResource->width_/* - COLOR_BUFFER_THREESHOLD*/), (std::int32_t)(colorBufferResource->height_/* - COLOR_BUFFER_THREESHOLD*/), 1 };
+    toSwapchainBlitDesc.srcOffsets[0] = VkOffset3D{ (std::int32_t)COLOR_BUFFER_THREESHOLD, (std::int32_t)COLOR_BUFFER_THREESHOLD, 0 };
+    toSwapchainBlitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)(colorBufferResource->width_ - COLOR_BUFFER_THREESHOLD), (std::int32_t)(colorBufferResource->height_ - COLOR_BUFFER_THREESHOLD), 1 };
     
     toSwapchainBlitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     toSwapchainBlitDesc.dstSubresource.mipLevel = 0;
