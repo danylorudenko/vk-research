@@ -21,8 +21,6 @@ Root::Root()
     , pipelineFactory_{ nullptr }
     , presentationController_{ nullptr }
     , mainWorkerTemp_{ nullptr }
-    , defaultFramebufferWidth_{ 0 }
-    , defaultFramebufferHeight_{ 0 }
     , nextUniformBufferId_{ 0u }
 {
 
@@ -39,8 +37,6 @@ Root::Root(RootDesc const& desc)
     , pipelineFactory_{ desc.pipelineFactory_ }
     , presentationController_{ desc.presentationController_ }
     , mainWorkerTemp_{ desc.mainWorkerTemp_ }
-    , defaultFramebufferWidth_{ desc.defaultFramebufferWidth_ }
-    , defaultFramebufferHeight_{ desc.defaultFramebufferHeight_ }
     , nextUniformBufferId_{ 0u }
 {
     VKW::ProxyImageHandle swapchainView = resourceProxy_->RegisterSwapchainImageViews();
@@ -49,8 +45,8 @@ Root::Root(RootDesc const& desc)
 
     VKW::ImageViewDesc finalColorDesc;
     finalColorDesc.format_ = loader_->swapchain_->Format();
-    finalColorDesc.width_ = loader_->swapchain_->Width() + COLOR_BUFFER_THREESHOLD * 2;
-    finalColorDesc.height_ = loader_->swapchain_->Height() + COLOR_BUFFER_THREESHOLD * 2;
+    finalColorDesc.width_ = loader_->swapchain_->Width() + COLOR_BUFFER_THREESHOLD * 2 * 20;
+    finalColorDesc.height_ = loader_->swapchain_->Height() + COLOR_BUFFER_THREESHOLD * 2 * 20;
     finalColorDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
 
     DefineGlobalImage(GetDefaultSceneColorOutput(), finalColorDesc);
@@ -79,8 +75,6 @@ Root::Root(Root&& rhs)
     , pipelineFactory_{ nullptr }
     , presentationController_{ nullptr }
     , mainWorkerTemp_{ nullptr }
-    , defaultFramebufferWidth_{ 0 }
-    , defaultFramebufferHeight_{ 0 }
     , nextUniformBufferId_{ 0u }
 {
     operator=(std::move(rhs));
@@ -98,8 +92,6 @@ Root& Root::operator=(Root&& rhs)
     std::swap(pipelineFactory_, rhs.pipelineFactory_);
     std::swap(presentationController_, rhs.presentationController_);
     std::swap(mainWorkerTemp_, rhs.mainWorkerTemp_);
-    std::swap(defaultFramebufferWidth_, rhs.defaultFramebufferWidth_);
-    std::swap(defaultFramebufferHeight_, rhs.defaultFramebufferHeight_);
     std::swap(globalBuffers_, rhs.globalBuffers_);
     std::swap(globalImages_, rhs.globalImages_);
     std::swap(uniformBuffers_, rhs.uniformBuffers_);
@@ -364,14 +356,24 @@ void Root::DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc
     passDesc.descriptorLayoutController_ = loader_->descriptorLayoutController_.get();
     passDesc.framedDescriptorsHub_ = framedDescriptorsHub_;
     passDesc.imagesProvider_ = imagesProvider_;
-    passDesc.width_ = defaultFramebufferWidth_;
-    passDesc.height_ = defaultFramebufferHeight_;
     passDesc.colorAttachmentCount_ = desc.colorAttachmentsCount_;
     for (auto i = 0u; i < passDesc.colorAttachmentCount_; ++i) {
+        VKW::ImageView* attachmentView = FindGlobalImage(desc.colorAttachments_[i].resourceKey_, 0);
+        VKW::ImageResource* attachmentResource = resourceProxy_->GetResource(attachmentView->resource_);
+
+        if (i > 0) {
+            assert(passDesc.width_ == attachmentResource->width_ && "All attachments in pass must have same dimentions!");
+            assert(passDesc.height_ == attachmentResource->height_ && "All attachments in pass must have same dimentions!");
+        }
+        
+        passDesc.width_ = attachmentResource->width_;
+        passDesc.height_ = attachmentResource->height_;
+
         passDesc.colorAttachments_[i].handle_ = globalImages_[desc.colorAttachments_[i].resourceKey_];
         passDesc.colorAttachments_[i].usage_ = desc.colorAttachments_[i].usage_;
     }
     passDesc.depthStencilAttachment_ = desc.depthStencilAttachment_.size() > 0 ? &globalImages_[desc.depthStencilAttachment_] : nullptr;
+
 
     renderPassMap_[key] = std::make_unique<GraphicsPass>(passDesc);
 }
@@ -703,10 +705,9 @@ void Root::ReleaseRenderWorkItem(PipelineKey const& pipelineKey, RenderWorkItemH
 
 void Root::ImageLayoutTransition(std::uint32_t context, std::uint32_t imagesCount, VkImage* images, VkImageLayout* targetLayouts)
 {
-    std::uint32_t const framesCount = resourceProxy_->FramesCount();
     VkImageMemoryBarrier imageBarriers[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
 
-    for (std::uint32_t i = 0; i < framesCount; ++i)
+    for (std::uint32_t i = 0; i < imagesCount; ++i)
     {
         VkImageMemoryBarrier& imageBarrier = imageBarriers[i];
         imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -734,7 +735,7 @@ void Root::ImageLayoutTransition(std::uint32_t context, std::uint32_t imagesCoun
         VK_FLAGS_NONE,
         0, nullptr,
         0, nullptr,
-        framesCount, imageBarriers);
+        imagesCount, imageBarriers);
     
     mainWorkerTemp_->EndExecutionFrame(context);
 
@@ -872,62 +873,6 @@ void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey con
     VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
 }
 
-void Root::ImagePipelineLayoutBarrier(ResourceKey const& image, VKW::ImageUsage usage, std::uint32_t context)
-{
-    VKW::ImageView* imageView = FindGlobalImage(image, context);
-    VKW::ImageResource* imageResource = resourceProxy_->GetResource(imageView->resource_);
-
-    VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
-
-    VkPipelineStageFlags const srcPipelineStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-    VkPipelineStageFlags const dstPipelineStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-
-    VkImageMemoryBarrier dstImageBarrier;
-    dstImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    dstImageBarrier.pNext = nullptr;
-    dstImageBarrier.srcAccessMask = VK_FLAGS_NONE;
-    dstImageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-    switch (usage)
-    {
-    case VKW::ImageUsage::TEXTURE:
-        dstImageBarrier.dstAccessMask = VK_FLAGS_NONE;
-        dstImageBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        break;
-    case VKW::ImageUsage::RENDER_TARGET:
-        dstImageBarrier.dstAccessMask = VK_FLAGS_NONE;
-        dstImageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        break;
-    default:
-        assert(false && "Other image usages are not supported by this barrier implementation.");
-    }
-    
-
-    dstImageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    dstImageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    dstImageBarrier.image = imageResource->handle_;
-    dstImageBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    dstImageBarrier.subresourceRange.baseArrayLayer = 0;
-    dstImageBarrier.subresourceRange.layerCount = 1;
-    dstImageBarrier.subresourceRange.baseMipLevel = 0;
-    dstImageBarrier.subresourceRange.levelCount = 1;
-
-    VulkanFuncTable()->vkCmdPipelineBarrier(
-        commandReciever.commandBuffer_,
-        srcPipelineStage,
-        dstPipelineStage,
-        VK_FLAGS_NONE,
-        0, nullptr,
-        0, nullptr,
-        1, &dstImageBarrier);
-
-    mainWorkerTemp_->EndExecutionFrame(context);
-
-    mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
-
-    VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
-}
-
 VKW::ResourceRendererProxy* Root::ResourceProxy() const
 {
     return resourceProxy_;
@@ -1020,22 +965,6 @@ void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, V
     barriers[2].subresourceRange.baseMipLevel = 0;
     barriers[2].subresourceRange.levelCount = 1;
 
-    VkImageBlit toSwapchainBlitDesc;
-    toSwapchainBlitDesc.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    toSwapchainBlitDesc.srcSubresource.mipLevel = 0;
-    toSwapchainBlitDesc.srcSubresource.baseArrayLayer = 0;
-    toSwapchainBlitDesc.srcSubresource.layerCount = 1;
-    toSwapchainBlitDesc.srcOffsets[0] = VkOffset3D{ (std::int32_t)COLOR_BUFFER_THREESHOLD, (std::int32_t)COLOR_BUFFER_THREESHOLD, 0 };
-    toSwapchainBlitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)(colorBufferResource->width_ - COLOR_BUFFER_THREESHOLD), (std::int32_t)(colorBufferResource->height_ - COLOR_BUFFER_THREESHOLD), 1 };
-
-
-    toSwapchainBlitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    toSwapchainBlitDesc.dstSubresource.mipLevel = 0;
-    toSwapchainBlitDesc.dstSubresource.baseArrayLayer = 0;
-    toSwapchainBlitDesc.dstSubresource.layerCount = 1;
-    toSwapchainBlitDesc.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
-    toSwapchainBlitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)loader_->swapchain_->Width(), (std::int32_t)loader_->swapchain_->Height(), 1 };
-
     VulkanFuncTable()->vkCmdPipelineBarrier(
         commandReciever.commandBuffer_,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -1045,6 +974,22 @@ void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, V
         0, nullptr,
         2, barriers
     );
+
+
+    VkImageBlit toSwapchainBlitDesc;
+    toSwapchainBlitDesc.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    toSwapchainBlitDesc.srcSubresource.mipLevel = 0;
+    toSwapchainBlitDesc.srcSubresource.baseArrayLayer = 0;
+    toSwapchainBlitDesc.srcSubresource.layerCount = 1;
+    toSwapchainBlitDesc.srcOffsets[0] = VkOffset3D{ (std::int32_t)0, (std::int32_t)0, 0 };
+    toSwapchainBlitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)(colorBufferResource->width_/* - COLOR_BUFFER_THREESHOLD*/), (std::int32_t)(colorBufferResource->height_/* - COLOR_BUFFER_THREESHOLD*/), 1 };
+    
+    toSwapchainBlitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    toSwapchainBlitDesc.dstSubresource.mipLevel = 0;
+    toSwapchainBlitDesc.dstSubresource.baseArrayLayer = 0;
+    toSwapchainBlitDesc.dstSubresource.layerCount = 1;
+    toSwapchainBlitDesc.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
+    toSwapchainBlitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)loader_->swapchain_->Width(), (std::int32_t)loader_->swapchain_->Height(), 1 };
 
     VulkanFuncTable()->vkCmdBlitImage(
         commandReciever.commandBuffer_,
@@ -1056,6 +1001,21 @@ void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, V
         VK_FILTER_LINEAR
     );
 
+    //VkImageCopy toSwapchainCopy;
+    //toSwapchainCopy.srcOffset = VkOffset3D{ 0, 0, 0 };
+    //toSwapchainCopy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    //toSwapchainCopy.srcSubresource.mipLevel = 0;
+    //toSwapchainCopy.srcSubresource.baseArrayLayer = 0;
+    //toSwapchainCopy.srcSubresource.layerCount = 1;
+    //toSwapchainCopy.dstOffset = VkOffset3D{ 0, 0, 0 };
+    //toSwapchainCopy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    //toSwapchainCopy.dstSubresource.mipLevel = 0;
+    //toSwapchainCopy.dstSubresource.baseArrayLayer = 0;
+    //toSwapchainCopy.dstSubresource.layerCount = 1;
+    //toSwapchainCopy.extent.width = loader_->swapchain_->Width();
+    //toSwapchainCopy.extent.height = loader_->swapchain_->Height();
+    //toSwapchainCopy.extent.depth = 1;
+    //
     //VulkanFuncTable()->vkCmdCopyImage(
     //    commandReciever.commandBuffer_,
     //    colorBufferHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,

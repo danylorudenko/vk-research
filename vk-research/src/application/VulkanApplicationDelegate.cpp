@@ -48,8 +48,6 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     rootDesc.pipelineFactory_ = vulkanLoader_->pipelineFactory_.get();
     rootDesc.presentationController_ = vulkanLoader_->presentationController_.get();
     rootDesc.mainWorkerTemp_ = vulkanLoader_->workersProvider_->GetWorker(VKW::WorkerType::GRAPHICS_PRESENT, 0);
-    rootDesc.defaultFramebufferWidth_ = vulkanLoader_->swapchain_->Width();
-    rootDesc.defaultFramebufferHeight_ = vulkanLoader_->swapchain_->Height();
 
     renderRoot_ = std::make_unique<Render::Root>(rootDesc);
 
@@ -128,8 +126,8 @@ void VulkanApplicationDelegate::update()
 
 
     testcounter += 0.01f;
-    customData_.transformComponent_->scale_ = glm::vec3(3.0f);
-    customData_.transformComponent_->position_ = glm::vec3(-0.5f, 0.0f, -1.0f);
+    customData_.transformComponent_->scale_ = glm::vec3(10.0f);
+    customData_.transformComponent_->position_ = glm::vec3(0.0, 0.7f, -1.0f);
     //customData_.transformComponent_->orientation_.z = glm::degrees(testcounter);
     customData_.transformComponent_->orientation_.z = glm::degrees(3.14f);
     customData_.transformComponent_->orientation_.y = glm::degrees(testcounter * 1.1f);
@@ -141,8 +139,11 @@ void VulkanApplicationDelegate::update()
     cameraData.cameraPos = glm::vec3(0.0f);
     cameraData.cameraEuler = glm::vec3(0.0f);
     cameraData.cameraFowDegrees = 60.0f;
-    cameraData.width = (float)mainWindow_.Width();
-    cameraData.height = (float)mainWindow_.Height();
+
+    VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
+    VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
+    cameraData.width = (float)colorBufferResource->width_;
+    cameraData.height = (float)colorBufferResource->height_;
 
     transformationSystem_.Update(context, cameraData);
 
@@ -220,11 +221,15 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->CopyStagingBufferToGPUBuffer(uploadBufferKey, indexBufferKey, 0);
 
 
+
+    VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
+    VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
+
     VKW::ImageViewDesc depthBufferDesc;
     depthBufferDesc.usage_ = VKW::ImageUsage::DEPTH;
     depthBufferDesc.format_ = VK_FORMAT_D16_UNORM;
-    depthBufferDesc.width_ = mainWindow_.Width();
-    depthBufferDesc.height_ = mainWindow_.Height();
+    depthBufferDesc.width_ = colorBufferResource->width_;
+    depthBufferDesc.height_ = colorBufferResource->height_;
     renderRoot_->DefineGlobalImage(depthBufferKey, depthBufferDesc);
 
     Render::RootGraphicsPassDesc passDesc;

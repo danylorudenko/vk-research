@@ -64,8 +64,6 @@ struct RootDesc
     VKW::PipelineFactory* pipelineFactory_;
     VKW::PresentationController* presentationController_;
     VKW::Worker* mainWorkerTemp_;
-    std::uint32_t defaultFramebufferWidth_;
-    std::uint32_t defaultFramebufferHeight_;
 };
 
 struct ShaderDesc
@@ -250,7 +248,6 @@ public:
     void CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
     void CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
 
-    void ImagePipelineLayoutBarrier(ResourceKey const& image, VKW::ImageUsage layout, std::uint32_t context);
 
     VKW::ResourceRendererProxy* ResourceProxy() const;
 
@@ -294,9 +291,6 @@ private:
     VKW::PresentationController* presentationController_;
     // TODO
     VKW::Worker* mainWorkerTemp_;
-
-    std::uint32_t defaultFramebufferWidth_;
-    std::uint32_t defaultFramebufferHeight_;
 
     GlobalImagesMap globalImages_;
     GlobalBuffersMap globalBuffers_;

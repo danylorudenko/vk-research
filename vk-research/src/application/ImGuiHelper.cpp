@@ -118,7 +118,11 @@ void ImGuiHelper::Init()
     root_->FlushBuffer(IMGUI_TEXTURE_STAGING_BUFFER_KEY, 0);
 
     root_->CopyStagingBufferToGPUTexture(IMGUI_TEXTURE_STAGING_BUFFER_KEY, IMGUI_TEXTURE_KEY, 0);
-    root_->ImagePipelineLayoutBarrier(IMGUI_TEXTURE_KEY, VKW::ImageUsage::TEXTURE, 0);
+
+    VKW::ImageView* imguiTextureView = root_->FindGlobalImage(IMGUI_TEXTURE_KEY, 0);
+    VKW::ImageResource* imguiTextureResource = root_->ResourceProxy()->GetResource(imguiTextureView->resource_);
+    VkImageLayout targetLayout = VK_IMAGE_LAYOUT_GENERAL;
+    root_->ImageLayoutTransition(0, 1, &imguiTextureResource->handle_, &targetLayout);
 
     io.Fonts->SetTexID((ImTextureID)IMGUI_TEXTURE_KEY);
 
