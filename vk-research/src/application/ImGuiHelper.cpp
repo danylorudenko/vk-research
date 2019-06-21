@@ -126,8 +126,8 @@ void ImGuiHelper::Init()
 
     Render::RootGraphicsPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
-    passDesc.colorAttachments_[0].resourceKey_ = root_->GetSwapchain();
-    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE_PRESENT;
+    passDesc.colorAttachments_[0].resourceKey_ = root_->GetDefaultSceneColorOutput();
+    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE;
 
     Render::ShaderDesc vertexShaderDesc;
     vertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;

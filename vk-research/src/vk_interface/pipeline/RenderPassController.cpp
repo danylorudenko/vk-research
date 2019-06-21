@@ -57,6 +57,13 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
         vkAttachment.format = desc.colorAttachments_[i].format_;
 
         switch (colorAttachmentsInfo[i].usage_) {
+        case RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE:
+            vkAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+            vkAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            vkAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            vkAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            break;
+
         case RENDER_PASS_ATTACHMENT_USAGE_COLOR_CLEAR:
             vkAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
             vkAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

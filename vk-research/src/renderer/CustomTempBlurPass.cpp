@@ -94,8 +94,9 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     root_->DefineGlobalImage(horizontalBlurBuffer_, computeBuffersDesc);
     root_->DefineGlobalImage(verticalBlurBuffer_, computeBuffersDesc);
 
-    //VKW::ImageView* vBufferView = root_->FindGlobalImage()
-    VkImage vBufferImages[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+
+    // transitioning pass image to neede IMAGE_LAYOUTs
+    VkImage transitionImages[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
     VkImageLayout imageLayouts[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
 
     std::uint32_t const framesCount = resourceProxy_->FramesCount();
@@ -103,12 +104,22 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     {
         VKW::ImageView* vBufferImageView = root_->FindGlobalImage(verticalBlurBuffer_, i);
         VKW::ImageResource* vBufferImageResource = resourceProxy_->GetResource(vBufferImageView->resource_);
-        vBufferImages[i] = vBufferImageResource->handle_;
+        transitionImages[i] = vBufferImageResource->handle_;
         imageLayouts[i] = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
     }
-
-    root_->ImageLayoutTransition(0, framesCount, vBufferImages, imageLayouts);
+    root_->ImageLayoutTransition(0, framesCount, transitionImages, imageLayouts);
     
+    for (std::uint32_t i = 0; i < framesCount; ++i)
+    {
+        VKW::ImageView* hBufferImageView = root_->FindGlobalImage(horizontalBlurBuffer_, i);
+        VKW::ImageResource* hBufferImageResource = resourceProxy_->GetResource(hBufferImageView->resource_);
+        transitionImages[i] = hBufferImageResource->handle_;
+        imageLayouts[i] = VK_IMAGE_LAYOUT_GENERAL;
+    }
+    root_->ImageLayoutTransition(0, framesCount, transitionImages, imageLayouts);
+
+
+
     horizontalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
     verticalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
     
