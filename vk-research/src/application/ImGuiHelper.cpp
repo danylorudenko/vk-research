@@ -62,14 +62,18 @@ ImGuiHelper::~ImGuiHelper()
 
 void ImGuiHelper::Init()
 {
-    std::uint32_t viewportWidth = window_->Width(); 
-    std::uint32_t viewportHeight = window_->Height();
+    VKW::ImageView* colorBufferView = root_->FindGlobalImage(root_->GetDefaultSceneColorOutput(), 0);
+    VKW::ImageResource* colorBufferResource = root_->ResourceProxy()->GetResource(colorBufferView->resource_);
+
+    std::uint32_t viewportWidth = colorBufferResource->width_;
+    std::uint32_t viewportHeight = colorBufferResource->height_;
     
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags = ImGuiConfigFlags_None;
     io.DisplaySize.x = static_cast<float>(viewportWidth);
     io.DisplaySize.y = static_cast<float>(viewportHeight);
+
+    io.ConfigFlags = ImGuiConfigFlags_None;
     //io.FontGlobalScale = 2.5f;
     io.IniFilename = nullptr;
 
@@ -95,6 +99,8 @@ void ImGuiHelper::Init()
     io.KeyMap[ImGuiKey_Y] = (std::int32_t)Keys::Y;         // for text edit CTRL+Y: redo
     io.KeyMap[ImGuiKey_Z] = (std::int32_t)Keys::Z;
 
+
+    // getting ready imgui atlas
     int imguiAtlasWidth = 0, imguiAtlasHeight, imguiPixelBytes = 0;
     unsigned char* textureData = nullptr;
     io.Fonts->GetTexDataAsAlpha8(&textureData, &imguiAtlasWidth, &imguiAtlasHeight, &imguiPixelBytes);

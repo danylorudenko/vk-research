@@ -273,8 +273,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     vInfo.vertexAttributes_[1].offset_ = sizeof(float) * 3;
     vInfo.vertexAttributes_[1].format_ = VK_FORMAT_R32G32B32_SFLOAT;
 
-    std::uint32_t const width = (mainWindow_.Width());
-    std::uint32_t const height = (mainWindow_.Height());
+    std::uint32_t const width = (colorBufferResource->width_);
+    std::uint32_t const height = (colorBufferResource->height_);
 
     VKW::ViewportInfo vpInfo;
     vpInfo.viewportsCount_ = 1;
@@ -385,9 +385,11 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
 
         static bool frameDataOpened = false;
 
+        VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
+        VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
 
         ImGui::SetNextWindowContentWidth(100.0f);
-        ImGui::SetNextWindowPos(ImVec2((float)mainWindow_.Width() - 20.0f, 0.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+        ImGui::SetNextWindowPos(ImVec2((float)colorBufferResource->width_, 0.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
 
         ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse;
         if (!ImGui::Begin("Frame Stats", &frameDataOpened, windowFlags))

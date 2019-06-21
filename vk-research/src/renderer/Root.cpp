@@ -1001,28 +1001,6 @@ void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, V
         VK_FILTER_LINEAR
     );
 
-    //VkImageCopy toSwapchainCopy;
-    //toSwapchainCopy.srcOffset = VkOffset3D{ 0, 0, 0 };
-    //toSwapchainCopy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    //toSwapchainCopy.srcSubresource.mipLevel = 0;
-    //toSwapchainCopy.srcSubresource.baseArrayLayer = 0;
-    //toSwapchainCopy.srcSubresource.layerCount = 1;
-    //toSwapchainCopy.dstOffset = VkOffset3D{ 0, 0, 0 };
-    //toSwapchainCopy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    //toSwapchainCopy.dstSubresource.mipLevel = 0;
-    //toSwapchainCopy.dstSubresource.baseArrayLayer = 0;
-    //toSwapchainCopy.dstSubresource.layerCount = 1;
-    //toSwapchainCopy.extent.width = loader_->swapchain_->Width();
-    //toSwapchainCopy.extent.height = loader_->swapchain_->Height();
-    //toSwapchainCopy.extent.depth = 1;
-    //
-    //VulkanFuncTable()->vkCmdCopyImage(
-    //    commandReciever.commandBuffer_,
-    //    colorBufferHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-    //    swapchainImageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-    //    1, &toSwapchainCopy
-    //);
-
     VulkanFuncTable()->vkCmdPipelineBarrier(
         commandReciever.commandBuffer_,
         VK_PIPELINE_STAGE_TRANSFER_BIT,
