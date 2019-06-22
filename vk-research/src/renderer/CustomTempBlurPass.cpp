@@ -18,7 +18,7 @@ CustomTempBlurPass::CustomTempBlurPass()
     , shaderModuleFactory_{ nullptr }
     , pipelineFactory_{ nullptr }
     , descriptorLayoutController_{ nullptr }
-,     swapchain_{ nullptr }
+    , swapchain_{ nullptr }
 {
 
 }
@@ -35,9 +35,12 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     , swapchain_{ desc.swapchain_ }
     , horizontalBlurBuffer_{ "hblb" }
     , verticalBlurBuffer_{ "vblb" }
+    , mixFactorUniformBuffer_{ "mxub" }
     , horizontalBlurPipeline_{ "hblp" }
     , verticalBlurPipeline_{ "vblp" }
+    , mixPipeline_{ "mixp" }
     , universalSetLayout_{ "bllt" }
+    , mixSetLayout_{ "mxlt"}
 {
     VKW::DescriptorSetLayoutDesc setLayoutDesc;
     setLayoutDesc.stage_ = VKW::DescriptorStage::COMPUTE;
@@ -49,10 +52,29 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
 
     root_->DefineSetLayout(universalSetLayout_, setLayoutDesc);
 
+    VKW::DescriptorSetLayoutDesc mixSetLayoutDesc;
+    mixSetLayoutDesc.stage_ = VKW::DescriptorStage::COMPUTE;
+    mixSetLayoutDesc.membersCount_ = 4;
+    mixSetLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    mixSetLayoutDesc.membersDesc_[0].binding_ = 0;
+    mixSetLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    mixSetLayoutDesc.membersDesc_[1].binding_ = 1;
+    mixSetLayoutDesc.membersDesc_[2].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    mixSetLayoutDesc.membersDesc_[2].binding_ = 2;
+    mixSetLayoutDesc.membersDesc_[3].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    mixSetLayoutDesc.membersDesc_[3].binding_ = 3;
+
+    root_->DefineSetLayout(mixSetLayout_, mixSetLayoutDesc);
+
+
 
     PipelineLayoutDesc pipelineLayoutDesc;
     pipelineLayoutDesc.staticMembersCount_ = 1;
     pipelineLayoutDesc.staticMembers_[0] = universalSetLayout_;
+
+    PipelineLayoutDesc mixPipelineLayoutDesc;
+    mixPipelineLayoutDesc.staticMembersCount_ = 1;
+    mixPipelineLayoutDesc.staticMembers_[0] = mixSetLayout_;
 
 
     VKW::ShaderModuleDesc hModuleDesc;
@@ -63,8 +85,13 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     vModuleDesc.type_ = VKW::SHADER_MODULE_TYPE_COMPUTE;
     vModuleDesc.shaderPath_ = "shader-src\\blur_vertical.comp.spv";
 
+    VKW::ShaderModuleDesc mixModuleDesc;
+    mixModuleDesc.type_ = VKW::SHADER_MODULE_TYPE_COMPUTE;
+    mixModuleDesc.shaderPath_ = "shader-src\\blur_mix.comp.spv";
+
     VKW::ShaderModuleHandle hModuleHandle = shaderModuleFactory_->LoadModule(hModuleDesc);
     VKW::ShaderModuleHandle vModuleHandle = shaderModuleFactory_->LoadModule(vModuleDesc);
+    VKW::ShaderModuleHandle mixModuleHandle = shaderModuleFactory_->LoadModule(mixModuleDesc);
 
     ComputePipelineDesc horizontalPipelineDesc;
     horizontalPipelineDesc.optimized_ = false;
@@ -76,8 +103,14 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     verticalPipelineDesc.layoutDesc_ = &pipelineLayoutDesc;
     verticalPipelineDesc.shaderStage_.shaderModuleHandle_ = vModuleHandle;
 
+    ComputePipelineDesc mixPipelineDesc;
+    mixPipelineDesc.optimized_ = false;
+    mixPipelineDesc.layoutDesc_ = &mixPipelineLayoutDesc;
+    mixPipelineDesc.shaderStage_.shaderModuleHandle_ = mixModuleHandle;
+
     root_->DefineComputePipeline(horizontalBlurPipeline_, horizontalPipelineDesc);
     root_->DefineComputePipeline(verticalBlurPipeline_, verticalPipelineDesc);
+    root_->DefineComputePipeline(mixPipeline_, mixPipelineDesc);
 
     VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, 0);
     VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
@@ -93,6 +126,12 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     computeBuffersDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE;
     root_->DefineGlobalImage(horizontalBlurBuffer_, computeBuffersDesc);
     root_->DefineGlobalImage(verticalBlurBuffer_, computeBuffersDesc);
+
+    VKW::BufferViewDesc mixFactorBufferDesc;
+    mixFactorBufferDesc.format_ = VK_FORMAT_UNDEFINED;
+    mixFactorBufferDesc.size_ = 64;
+    mixFactorBufferDesc.usage_ = VKW::BufferUsage::UNIFORM;
+    root_->DefineGlobalBuffer(mixFactorUniformBuffer_, mixFactorBufferDesc);
 
 
     // transitioning pass image to neede IMAGE_LAYOUTs
@@ -122,6 +161,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
 
     horizontalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
     verticalDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(universalSetLayout_).vkwSetLayoutHandle_);
+    mixDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(mixSetLayout_).vkwSetLayoutHandle_);
     
     // set for horizontal "subpass"
     VKW::ProxyDescriptorWriteDesc horizontalSetDesc[2];
@@ -156,6 +196,35 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     }
 
     resourceProxy_->WriteSet(verticalDescriptorSet_, verticalSetDesc);
+
+    VKW::ProxyDescriptorWriteDesc mixSetDesc[4];
+    for (std::uint32_t i = 0; i < framesCount; ++i) 
+    {
+        // blurred input
+        VKW::ProxyImageHandle verticalProxyImageHandle = root_->FindGlobalImage(verticalBlurBuffer_);
+        mixSetDesc[0].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(verticalProxyImageHandle, i);
+        mixSetDesc[0].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
+
+        // color input
+        VKW::ProxyImageHandle colorBufferImageHandle = root_->FindGlobalImage(sceneColorBuffer_);
+        mixSetDesc[1].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(colorBufferImageHandle, i);
+        mixSetDesc[1].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
+
+        // output
+        VKW::ProxyImageHandle horizontalProxyImageHandle = root_->FindGlobalImage(horizontalBlurBuffer_);
+        mixSetDesc[2].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(horizontalProxyImageHandle, i);
+        mixSetDesc[2].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
+
+        VKW::ProxyBufferHandle mixFactorBufferProxyHandle = root_->FindGlobalBuffer(mixFactorUniformBuffer_);
+        VKW::BufferViewHandle mixFactorBufferHandle = resourceProxy_->GetBufferViewHandle(mixFactorBufferProxyHandle, i);
+        VKW::BufferView* mixFactorBufferView = resourceProxy_->GetBufferView(mixFactorBufferProxyHandle, i);
+        mixSetDesc[3].frames_[i].pureBufferDesc_.pureBufferViewHandle_ = mixFactorBufferHandle;
+        mixSetDesc[3].frames_[i].pureBufferDesc_.offset_ = 0;
+        //mixSetDesc[3].frames_[i].pureBufferDesc_.offset_ = mixFactorBufferView->offset_;
+        mixSetDesc[3].frames_[i].pureBufferDesc_.size_ = mixFactorBufferView->size_;
+    }
+
+    resourceProxy_->WriteSet(mixDescriptorSet_, mixSetDesc);
 }
 
 CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPass&& rhs)

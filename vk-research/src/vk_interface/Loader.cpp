@@ -1,15 +1,23 @@
 #include "Loader.hpp"
 #include <iostream>
 #include "VkInterfaceConstants.hpp"
+#include <Windows.h>
 
 
 namespace VKW
 {
 
 Loader::Loader(LoaderDesc const& desc)
-    : vulkanLibrary_{ std::make_unique<DynamicLibrary>("vulkan-1.dll") }
-    , table_{ std::make_unique<ImportTable>(*vulkanLibrary_) }
+    : vulkanLibrary_{}
+    , table_{}
 {
+    vulkanLibrary_ = std::make_unique<DynamicLibrary>("vulkan-1.dll");
+    if (!vulkanLibrary_) {
+        MessageBoxA(desc.hwnd_, "Failed to load vulkan-1.dll", NULL, MB_ICONERROR | MB_OK);
+        return;
+    }
+
+    table_ = std::make_unique<ImportTable>(*vulkanLibrary_);
 
     auto instanceExtensions = std::vector<std::string>{ "VK_KHR_surface", VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
     if (desc.debug_)

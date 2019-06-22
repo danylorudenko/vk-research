@@ -20,8 +20,8 @@
 
 struct CustomData
 {
-    Render::UniformBufferWriterProxy uniformProxy_;
-    Transform::TransformComponent* transformComponent_;
+    Render::UniformBufferWriterProxy uniformProxies[25];
+    Transform::TransformComponent* transformComponents_[25];
 };
 
 class VulkanApplicationDelegate

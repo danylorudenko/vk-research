@@ -382,7 +382,6 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
         }
 
         vertexBindOffset += vertexBuffer.size() * sizeof(ImDrawVert);
-        constexpr int test = sizeof(ImDrawIdx);
         indexBindOffset += indexBuffer.size() * sizeof(ImDrawIdx);
     }
 

@@ -67,14 +67,18 @@ private:
 
     ResourceKey horizontalBlurBuffer_;
     ResourceKey verticalBlurBuffer_;
+    ResourceKey mixFactorUniformBuffer_;
 
     PipelineKey horizontalBlurPipeline_;
     PipelineKey verticalBlurPipeline_;
+    PipelineKey mixPipeline_;
 
     SetLayoutKey universalSetLayout_;
+    SetLayoutKey mixSetLayout_;
 
     VKW::ProxySetHandle horizontalDescriptorSet_;
     VKW::ProxySetHandle verticalDescriptorSet_;
+    VKW::ProxySetHandle mixDescriptorSet_;
 };
 
 }

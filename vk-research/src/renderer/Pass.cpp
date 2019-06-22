@@ -229,7 +229,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
         for (std::uint32_t j = 0u; j < renderItemsCount; ++j) {
             RenderWorkItem& renderItem = renderItems[j];
             std::uint32_t const renderItemSetsCount = renderItem.descriptorSetsOwner_.slotsCount_;
-            for (std::uint32_t k = 0; k < renderItemsCount; ++k) {
+            for (std::uint32_t k = 0; k < renderItemSetsCount; ++k) {
                 VKW::DescriptorSet* vkwSet = resourceProxy_->GetDescriptorSet(renderItem.descriptorSetsOwner_.slots_[k].descriptorSet_.proxyDescriptorSetHandle_, contextId);
                 vkSetsToBind[k] = vkwSet->handle_;
             }

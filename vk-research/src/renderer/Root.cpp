@@ -298,6 +298,11 @@ ResourceKey Root::GetSwapchain() const
     return SWAPCHAIN_IMAGE_KEY;
 }
 
+std::uint32_t Root::GetDefaultSceneColorBufferThreeshold() const
+{
+    return COLOR_BUFFER_THREESHOLD;
+}
+
 void Root::DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc)
 {
     VKW::ProxyImageHandle imageHandle = resourceProxy_->CreateImage(desc);
@@ -557,6 +562,7 @@ void Root::Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(VKW::ProxyDescript
 
         pureBufferDesc.pureBufferViewHandle_ = resourceProxy_->GetBufferViewHandle(uniformBuffer.proxyBufferViewHandle_, i);
         pureBufferDesc.offset_ = 0;
+        //pureBufferDesc.offset_ = static_cast<std::uint32_t>(view->offset_);
         pureBufferDesc.size_ = static_cast<std::uint32_t>(view->size_);
     }
 }

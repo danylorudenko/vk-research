@@ -126,11 +126,15 @@ void VulkanApplicationDelegate::update()
 
 
     testcounter += 0.01f;
-    customData_.transformComponent_->scale_ = glm::vec3(10.0f);
-    customData_.transformComponent_->position_ = glm::vec3(0.0, 0.8f, -1.1f);
-    //customData_.transformComponent_->orientation_.z = glm::degrees(testcounter);
-    customData_.transformComponent_->orientation_.z = glm::degrees(3.14f);
-    customData_.transformComponent_->orientation_.y = glm::degrees(testcounter * 1.1f);
+
+    for (std::uint32_t x = 0; x < 5; ++x) {
+        for (std::uint32_t y = 0; y < 5; ++y) {
+            customData_.transformComponents_[x * 5 + y]->scale_ = glm::vec3(5.0f);
+            customData_.transformComponents_[x * 5 + y]->position_ = glm::vec3(-2.0f + x, -2.0f + y, -6.1f);
+            customData_.transformComponents_[x * 5 + y]->orientation_.z = glm::degrees(3.14f);
+            customData_.transformComponents_[x * 5 + y]->orientation_.y = glm::degrees(testcounter * 1.1f);
+        }
+    }
     
 
     //
@@ -342,9 +346,16 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 64;
 
-    Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(pipeKey, itemDesc);
-    Render::RenderWorkItem* item = renderRoot_->FindRenderWorkItem(pipeKey, renderItemHandle);
-    customData_.uniformProxy_ = Render::UniformBufferWriterProxy(renderRoot_.get(), item, 0, 0);
+
+    for (std::uint32_t i = 0; i < 25; ++i) {
+        Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(pipeKey, itemDesc);
+
+        Render::RenderWorkItem* item = renderRoot_->FindRenderWorkItem(pipeKey, renderItemHandle);
+        customData_.uniformProxies[i] = Render::UniformBufferWriterProxy(renderRoot_.get(), item, 0, 0);
+
+        customData_.transformComponents_[i] = transformationSystem_.CreateTransformComponent(nullptr, &customData_.uniformProxies[i]);
+    }
+    
 
 
     renderRoot_->RegisterMaterial(materialKey);
@@ -353,8 +364,6 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     renderRoot_->DefineCustomBlurPass(blurPass, renderRoot_->GetDefaultSceneColorOutput());
     renderRoot_->PushPass(blurPass);
-
-    customData_.transformComponent_ = transformationSystem_.CreateTransformComponent(nullptr, &customData_.uniformProxy_);
     
 
 }
@@ -388,16 +397,17 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
         VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
 
-        ImGui::SetNextWindowContentWidth(100.0f);
-        ImGui::SetNextWindowPos(ImVec2((float)colorBufferResource->width_ - 10.0, 10.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+        //ImGui::SetNextWindowContentWidth(100.0f);
+        ImGui::SetNextWindowPos(ImVec2((float)colorBufferResource->width_ - 10.0f, 10.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
 
-        ImGuiWindowFlags windowFlags = 
+        ImGuiWindowFlags frameDataWindowFlags = 
             ImGuiWindowFlags_NoMove | 
             ImGuiWindowFlags_NoResize | 
             ImGuiWindowFlags_NoScrollbar | 
-            ImGuiWindowFlags_NoCollapse;
+            ImGuiWindowFlags_NoCollapse | 
+            ImGuiWindowFlags_NoInputs;
         static bool frameDataOpened = false;
-        if (ImGui::Begin("Frame Stats", nullptr, windowFlags))
+        if (ImGui::Begin("Frame Stats", nullptr, frameDataWindowFlags))
         {
             ImGui::Text("DT: %f", prevFrameDelta_ * 0.001f);
             ImGui::Text("FPS: %f", 1.0f / prevFrameDelta_);
@@ -405,14 +415,18 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         }
         
 
-        ImGui::SetNextWindowContentWidth(200.0f);
+        //ImGui::SetFot;
         ImGui::SetNextWindowPos(ImVec2(10.0f, 10.0f), ImGuiCond_Always, ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f));
         
+        ImGuiWindowFlags blurWindowFlags = 
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
         static bool blurScaleOpened = false;
-        if (ImGui::Begin("Blur scale", nullptr, windowFlags))
+        if (ImGui::Begin("Blur scale", nullptr, blurWindowFlags))
         {
             static float testSliderFloat = 0.0f;
-            ImGui::SliderFloat("kekeke", &testSliderFloat, 0.0f, 1.0f);
+            ImGui::SetNextItemWidth(100.0f);
+            ImGui::SliderFloat("", &testSliderFloat, 0.0f, 1.0f);
             ImGui::End();
         }
 
