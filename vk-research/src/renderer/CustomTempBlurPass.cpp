@@ -21,7 +21,6 @@ CustomTempBlurPass::CustomTempBlurPass()
     , pipelineFactory_{ nullptr }
     , descriptorLayoutController_{ nullptr }
     , swapchain_{ nullptr }
-    //, mappedMixFactorUniformBuffer_{ nullptr }
 {
 
 }
@@ -96,17 +95,17 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     VKW::ShaderModuleHandle mixModuleHandle = shaderModuleFactory_->LoadModule(mixModuleDesc);
 
     ComputePipelineDesc horizontalPipelineDesc;
-    horizontalPipelineDesc.optimized_ = false;
+    horizontalPipelineDesc.optimized_ = true;
     horizontalPipelineDesc.layoutDesc_ = &pipelineLayoutDesc;
     horizontalPipelineDesc.shaderStage_.shaderModuleHandle_ = hModuleHandle;
 
     ComputePipelineDesc verticalPipelineDesc;
-    verticalPipelineDesc.optimized_ = false;
+    verticalPipelineDesc.optimized_ = true;
     verticalPipelineDesc.layoutDesc_ = &pipelineLayoutDesc;
     verticalPipelineDesc.shaderStage_.shaderModuleHandle_ = vModuleHandle;
 
     ComputePipelineDesc mixPipelineDesc;
-    mixPipelineDesc.optimized_ = false;
+    mixPipelineDesc.optimized_ = true;
     mixPipelineDesc.layoutDesc_ = &mixPipelineLayoutDesc;
     mixPipelineDesc.shaderStage_.shaderModuleHandle_ = mixModuleHandle;
 
@@ -129,12 +128,8 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     root_->DefineGlobalImage(horizontalBlurBuffer_, computeBuffersDesc);
     root_->DefineGlobalImage(verticalBlurBuffer_, computeBuffersDesc);
 
-    //VKW::BufferViewDesc mixFactorBufferDesc;
-    //mixFactorBufferDesc.format_ = VK_FORMAT_UNDEFINED;
-    //mixFactorBufferDesc.size_ = 64;
-    //mixFactorBufferDesc.usage_ = VKW::BufferUsage::UNIFORM;
-    //root_->DefineGlobalBuffer(mixFactorUniformBuffer_, mixFactorBufferDesc);
     mixFactorUniformBuffer_ = root_->AcquireUniformBuffer(8);
+
 
     // transitioning pass image to neede IMAGE_LAYOUTs
     VkImage transitionImages[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
@@ -222,21 +217,10 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
         VKW::BufferView* mixFactorBufferView = resourceProxy_->GetBufferView(mixFactorUniformBuffer.proxyBufferViewHandle_, i);
         mixSetDesc[3].frames_[i].pureBufferDesc_.pureBufferViewHandle_ = mixFactorBufferHandle;
         mixSetDesc[3].frames_[i].pureBufferDesc_.offset_ = 0;
-        //mixSetDesc[3].frames_[i].pureBufferDesc_.offset_ = mixFactorBufferView->offset_;
         mixSetDesc[3].frames_[i].pureBufferDesc_.size_ = (std::uint32_t)mixFactorBufferView->size_;
     }
 
     resourceProxy_->WriteSet(mixDescriptorSet_, mixSetDesc);
-
-    //for (std::uint32_t i = 0; i < framesCount; ++i) {
-    //    VKW::BufferView* mixFactorBufferView = root_->FindUniformBuffer(mixFactorUniformBuffer_, i);
-    //    VKW::MemoryRegion const* memoryRegion = root_->GetViewMemory(mixFactorBufferView);
-    //    VKW::MemoryPage const* memoryPage = root_->GetViewMemoryPage(mixFactorBufferView);
-    //
-    //    std::uint64_t const offset = memoryRegion->offset_ + mixFactorBufferView->offset_;
-    //
-    //    mappedMixFactorUniformBuffer_[i] = (reinterpret_cast<std::uint8_t*>(memoryPage->mappedMemoryPtr_) + offset);
-    //}
 }
 
 CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPass&& rhs)
@@ -342,19 +326,6 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     void* mappedMixFactorUniformBuffer = root_->MapUniformBuffer(mixFactorUniformBuffer_, contextId);
     std::memcpy(mappedMixFactorUniformBuffer, &IMGUI_USER_BLUR_SCALE, sizeof(IMGUI_USER_BLUR_SCALE));
     root_->FlushUniformBuffer(mixFactorUniformBuffer_, contextId);
-    //VKW::BufferView* mixFactorBufferView = root_->FindGlobalBuffer(mixFactorUniformBuffer_, contextId);
-    //VKW::MemoryRegion const* mixFactorMemoryRegion = root_->GetViewMemory(mixFactorBufferView);
-    //VKW::MemoryPage const* mixFactorMemoryPage = root_->GetViewMemoryPage(mixFactorBufferView);
-    //if (!(mixFactorMemoryPage->propertyFlags_ & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
-    //    VkMappedMemoryRange mappedRange;
-    //    mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-    //    mappedRange.pNext = nullptr;
-    //    mappedRange.memory = mixFactorMemoryPage->deviceMemory_;
-    //    mappedRange.offset = mixFactorMemoryRegion->offset_ + mixFactorBufferView->offset_;
-    //    mappedRange.size = mixFactorBufferView->size_;
-    //    VK_ASSERT(table_->vkFlushMappedMemoryRanges(device_->Handle(), 1, &mappedRange));
-    //}
-
     
 
 

@@ -81,7 +81,6 @@ private:
     VKW::ProxySetHandle mixDescriptorSet_;
 
     UniformBufferHandle mixFactorUniformBuffer_;
-    //void* mappedMixFactorUniformBuffer_[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
 };
 
 }
