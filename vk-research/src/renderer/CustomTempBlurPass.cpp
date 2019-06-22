@@ -3,6 +3,8 @@
 #include "..\vk_interface\pipeline\ShaderModuleFactory.hpp"
 #include "..\vk_interface\worker\Worker.hpp"
 #include "..\vk_interface\Swapchain.hpp"
+#include "..\renderer\UniformBufferWriterProxy.hpp"
+#include "..\application\ImGuiUserData.hpp"
 
 #include <utility>
 #include <cstdint>
@@ -19,6 +21,7 @@ CustomTempBlurPass::CustomTempBlurPass()
     , pipelineFactory_{ nullptr }
     , descriptorLayoutController_{ nullptr }
     , swapchain_{ nullptr }
+    , mappedMixFactorUniformBuffer_{ nullptr }
 {
 
 }
@@ -221,10 +224,21 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
         mixSetDesc[3].frames_[i].pureBufferDesc_.pureBufferViewHandle_ = mixFactorBufferHandle;
         mixSetDesc[3].frames_[i].pureBufferDesc_.offset_ = 0;
         //mixSetDesc[3].frames_[i].pureBufferDesc_.offset_ = mixFactorBufferView->offset_;
-        mixSetDesc[3].frames_[i].pureBufferDesc_.size_ = mixFactorBufferView->size_;
+        mixSetDesc[3].frames_[i].pureBufferDesc_.size_ = (std::uint32_t)mixFactorBufferView->size_;
     }
 
     resourceProxy_->WriteSet(mixDescriptorSet_, mixSetDesc);
+
+    for (std::uint32_t i = 0; i < framesCount; ++i) {
+        VKW::BufferView* mixFactorBufferView = root_->FindGlobalBuffer(mixFactorUniformBuffer_, i);
+        VKW::MemoryRegion const* memoryRegion = root_->GetViewMemory(mixFactorBufferView);
+        VKW::MemoryPage const* memoryPage = root_->GetViewMemoryPage(mixFactorBufferView);
+
+        std::uint64_t const offset = memoryRegion->offset_ + mixFactorBufferView->offset_;
+
+        mappedMixFactorUniformBuffer_[i] = (reinterpret_cast<std::uint8_t*>(memoryPage->mappedMemoryPtr_) + offset);
+    }
+    
 }
 
 CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPass&& rhs)
@@ -317,6 +331,10 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
     std::uint32_t const colorBufferWidth = sceneColorBufferResource->width_;
     std::uint32_t const colorBufferHeight = sceneColorBufferResource->height_;
+
+    // writing blur mix data
+
+    std::memcpy(mappedMixFactorUniformBuffer_ + contextId, &IMGUI_USER_BLUR_SCALE, sizeof(IMGUI_USER_BLUR_SCALE));
 
 
     // gettin' colorbuffer to read

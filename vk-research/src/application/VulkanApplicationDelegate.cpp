@@ -13,6 +13,7 @@
 #include <glm\gtc\quaternion.hpp>
 
 #include <imgui/imgui.h>
+#include "ImGuiUserData.hpp"
 
 VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, std::uint32_t buffering, bool vkDebug, bool imguiEnabled)
     : mainWindow_ {
@@ -421,12 +422,11 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         
         ImGuiWindowFlags blurWindowFlags = 
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
-        static bool blurScaleOpened = false;
         if (ImGui::Begin("Blur scale", nullptr, blurWindowFlags))
         {
             static float testSliderFloat = 0.0f;
             ImGui::SetNextItemWidth(100.0f);
-            ImGui::SliderFloat("", &testSliderFloat, 0.0f, 1.0f);
+            ImGui::SliderFloat("", &IMGUI_USER_BLUR_SCALE, 0.0f, 1.0f);
             ImGui::End();
         }
 

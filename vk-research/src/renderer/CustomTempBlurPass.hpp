@@ -3,6 +3,7 @@
 #include "..\class_features\NonCopyable.hpp"
 #include "Pass.hpp"
 #include "..\vk_interface\ProxyHandles.hpp"
+#include "..\vk_interface\VkInterfaceConstants.hpp"
 
 namespace VKW
 {
@@ -79,6 +80,8 @@ private:
     VKW::ProxySetHandle horizontalDescriptorSet_;
     VKW::ProxySetHandle verticalDescriptorSet_;
     VKW::ProxySetHandle mixDescriptorSet_;
+
+    void* mappedMixFactorUniformBuffer_[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
 };
 
 }
