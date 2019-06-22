@@ -68,7 +68,6 @@ private:
 
     ResourceKey horizontalBlurBuffer_;
     ResourceKey verticalBlurBuffer_;
-    ResourceKey mixFactorUniformBuffer_;
 
     PipelineKey horizontalBlurPipeline_;
     PipelineKey verticalBlurPipeline_;
@@ -81,7 +80,8 @@ private:
     VKW::ProxySetHandle verticalDescriptorSet_;
     VKW::ProxySetHandle mixDescriptorSet_;
 
-    void* mappedMixFactorUniformBuffer_[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+    UniformBufferHandle mixFactorUniformBuffer_;
+    //void* mappedMixFactorUniformBuffer_[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
 };
 
 }

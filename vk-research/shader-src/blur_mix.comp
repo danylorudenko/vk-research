@@ -18,7 +18,7 @@ void main()
 	vec4 blurredInput = imageLoad(imageInput0, coords);
 	vec4 colorInput = imageLoad(imageInput1, coords);
 	
-	vec4 result = mix(blurredInput, colorInput, 0.5);
+	vec4 result = mix(blurredInput, colorInput, blendFactor.factor_);
 	
 	imageStore(imageOutput, coords, result);
 }
