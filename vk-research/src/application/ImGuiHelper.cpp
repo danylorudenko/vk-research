@@ -236,6 +236,7 @@ void ImGuiHelper::Init()
     Render::RenderWorkItemDesc renderWorkItemDesc;
     renderWorkItemDesc.vertexCount_ = 0;
     renderWorkItemDesc.vertexBufferKey_ = IMGUI_VERTEX_BUFFER_KEY;
+    renderWorkItemDesc.vertexBindOffset_ = 0;
     renderWorkItemDesc.indexCount_ = 0;
     renderWorkItemDesc.indexBufferKey_ = IMGUI_INDEX_BUFFER_KEY;
     renderWorkItemDesc.indexBindOffset_ = 0;
@@ -339,6 +340,7 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
     void* mappedVertexBuffer = root_->MapBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
     void* mappedIndexBuffer = root_->MapBuffer(IMGUI_INDEX_BUFFER_KEY, context);
     std::uint32_t indexBindOffset = 0;
+    std::uint32_t vertexBindOffset = 0;
     Render::RenderWorkItem* renderWorkItem = root_->FindRenderWorkItem(IMGUI_PIPELINE_KEY, mainRenderWorkItem_);
 
     Render::GraphicsPass& pass = reinterpret_cast<Render::GraphicsPass&>(root_->FindPass(IMGUI_PASS_KEY));
@@ -346,7 +348,7 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
 
     std::int32_t const cmdListsCount = data->CmdListsCount;
     for (std::int32_t i = 0; i < cmdListsCount; ++i) {
-        ImDrawList const* drawList = data->CmdLists[0];
+        ImDrawList const* drawList = data->CmdLists[i];
         ImVector<ImDrawVert> const& vertexBuffer = drawList->VtxBuffer;
         ImVector<ImDrawIdx> const& indexBuffer = drawList->IdxBuffer;
         ImVector<ImDrawCmd> const& cmdBuffer = drawList->CmdBuffer;
@@ -371,14 +373,17 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
             }
             else {
                 // drawCmd.TextureId // can be safely ingored, since we don't use multiple fonts or images
+                renderWorkItem->vertexBindOffset_ = vertexBindOffset;
                 renderWorkItem->indexCount_ = drawCmd.ElemCount;
-                renderWorkItem->indexBindOffset_ = indexBindOffset + indiciesRendered;
+                renderWorkItem->indexBindOffset_ = indexBindOffset + (indiciesRendered * sizeof(ImDrawIdx));
                 pass.Apply(context, &commandReciever);
                 indiciesRendered += drawCmd.ElemCount;
             }
         }
 
-        indexBindOffset += indexBuffer.size();
+        vertexBindOffset += vertexBuffer.size() * sizeof(ImDrawVert);
+        constexpr int test = sizeof(ImDrawIdx);
+        indexBindOffset += indexBuffer.size() * sizeof(ImDrawIdx);
     }
 
     pass.End(context, &commandReciever);

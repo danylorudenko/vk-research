@@ -663,6 +663,7 @@ RenderWorkItemHandle Root::ConstructRenderWorkItem(Pipeline& pipeline, RenderWor
     item.vertexBufferKey_ = desc.vertexBufferKey_;
     item.indexBufferKey_ = desc.indexBufferKey_;
     item.vertexCount_ = desc.vertexCount_;
+    item.vertexBindOffset_ = desc.vertexBindOffset_;
     item.indexCount_ = desc.indexCount_;
     item.indexBindOffset_ = desc.indexBindOffset_;
     

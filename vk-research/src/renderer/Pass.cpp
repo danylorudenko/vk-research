@@ -243,7 +243,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
                 VKW::BufferResource* vertexBuffer = resourceProxy_->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
 
                 VkBuffer vkBuffer = vertexBuffer->handle_;
-                VkDeviceSize offset = vertexBufferView->offset_;
+                VkDeviceSize offset = vertexBufferView->offset_ + renderItem.vertexBindOffset_;
                 table_->vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkBuffer, &offset);
             }
 
@@ -253,7 +253,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
 
                 VkBuffer vkBuffer = indexBuffer->handle_;
                 VkDeviceSize offset = indexBufferView->offset_;
-                table_->vkCmdBindIndexBuffer(commandBuffer, vkBuffer, offset + renderItem.indexBindOffset_ * sizeof(std::uint32_t), VK_INDEX_TYPE_UINT32);
+                table_->vkCmdBindIndexBuffer(commandBuffer, vkBuffer, offset + renderItem.indexBindOffset_, VK_INDEX_TYPE_UINT32);
             }
             
             

@@ -127,7 +127,7 @@ void VulkanApplicationDelegate::update()
 
     testcounter += 0.01f;
     customData_.transformComponent_->scale_ = glm::vec3(10.0f);
-    customData_.transformComponent_->position_ = glm::vec3(0.0, 0.7f, -1.0f);
+    customData_.transformComponent_->position_ = glm::vec3(0.0, 0.8f, -1.1f);
     //customData_.transformComponent_->orientation_.z = glm::degrees(testcounter);
     customData_.transformComponent_->orientation_.z = glm::degrees(3.14f);
     customData_.transformComponent_->orientation_.y = glm::degrees(testcounter * 1.1f);
@@ -336,6 +336,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     itemDesc.vertexBufferKey_ = vertexBufferKey;
     itemDesc.indexBufferKey_ = indexBufferKey;
     itemDesc.vertexCount_ = vertexDataSizeBytes / sizeof(TestVertex);
+    itemDesc.vertexBindOffset_ = 0;
     itemDesc.indexCount_ = indexDataSizeBytes / sizeof(std::uint32_t);
     itemDesc.indexBindOffset_ = 0;
 
@@ -383,7 +384,6 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         //ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
         //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
 
-        static bool frameDataOpened = false;
 
         VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
         VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
@@ -391,18 +391,31 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         ImGui::SetNextWindowContentWidth(100.0f);
         ImGui::SetNextWindowPos(ImVec2((float)colorBufferResource->width_ - 10.0, 10.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
 
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse;
-        if (!ImGui::Begin("Frame Stats", &frameDataOpened, windowFlags))
+        ImGuiWindowFlags windowFlags = 
+            ImGuiWindowFlags_NoMove | 
+            ImGuiWindowFlags_NoResize | 
+            ImGuiWindowFlags_NoScrollbar | 
+            ImGuiWindowFlags_NoCollapse;
+        static bool frameDataOpened = false;
+        if (ImGui::Begin("Frame Stats", nullptr, windowFlags))
         {
-            // Early out if the window is collapsed, as an optimization.
+            ImGui::Text("DT: %f", prevFrameDelta_ * 0.001f);
+            ImGui::Text("FPS: %f", 1.0f / prevFrameDelta_);
             ImGui::End();
-            return;
+        }
+        
+
+        ImGui::SetNextWindowContentWidth(200.0f);
+        ImGui::SetNextWindowPos(ImVec2(10.0f, 10.0f), ImGuiCond_Always, ImVec2(0.0f, 0.0f));
+        
+        static bool blurScaleOpened = false;
+        if (ImGui::Begin("Blur scale", nullptr, windowFlags))
+        {
+            static float testSliderFloat = 0.0f;
+            ImGui::SliderFloat("kekeke", &testSliderFloat, 0.0f, 1.0f);
+            ImGui::End();
         }
 
-        ImGui::Text("DT: %f", prevFrameDelta_ * 0.001f);
-        ImGui::Text("FPS: %f", 1.0f / prevFrameDelta_);
-
-        ImGui::End();
 
         //static bool p_open = true;
         //ImGui::ShowDemoWindow(&p_open);
