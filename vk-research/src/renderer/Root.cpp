@@ -320,23 +320,11 @@ VKW::ImageView* Root::FindGlobalImage(ResourceKey const& key, std::uint32_t fram
     return resourceProxy_->GetImageView(proxyHandle, frame);
 }
 
-void Root::DefineCustomBlurPass(PassKey const& key, ResourceKey const& sceneColorBuffer)
+void Root::DefineCustomBlurPass(PassKey const& key, ResourceKey const& sceneColorBuffer, IOManager* ioManager)
 {
-    //Root* root_;
-    //
-    //VKW::ImportTable* table_;
-    //VKW::Device* device_;
-    //
-    //VKW::ResourceRendererProxy* resourceProxy_;
-    //VKW::ShaderModuleFactory* shaderModuleFactory_;
-    //VKW::PipelineFactory* pipelineFactory_;
-    //VKW::DescriptorLayoutController* descriptorLayoutController_;
-    //
-    //ResourceKey sceneColorBuffer_;
-    
-    
     CustomTempBlurPassDesc desc;
     desc.root_ = this;
+    desc.ioManager_ = ioManager;
     desc.table_ = loader_->table_.get();
     desc.device_ = loader_->device_.get();
     desc.resourceProxy_ = resourceProxy_;

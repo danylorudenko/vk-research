@@ -431,6 +431,7 @@
     <ClInclude Include="include\imgui\imstb_rectpack.h" />
     <ClInclude Include="include\imgui\imstb_textedit.h" />
     <ClInclude Include="include\imgui\imstb_truetype.h" />
+    <ClInclude Include="include\stb\stb_image.h" />
     <ClInclude Include="include\vulkan\vk_platform.h" />
     <ClInclude Include="include\vulkan\vulkan.h" />
     <ClInclude Include="include\vulkan\vulkan_android.h" />
@@ -452,6 +453,7 @@
     <ClInclude Include="src\class_features\NonMovable.hpp" />
     <ClInclude Include="src\class_features\ContinuousDataStorage.hpp" />
     <ClInclude Include="src\data\ModelMesh.hpp" />
+    <ClInclude Include="src\data\Texture2D.hpp" />
     <ClInclude Include="src\input\InputSystem.hpp" />
     <ClInclude Include="src\input\Keyboard.hpp" />
     <ClInclude Include="src\io\IOManager.hpp" />

@@ -363,7 +363,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->PushPass(passKey);
 
 
-    renderRoot_->DefineCustomBlurPass(blurPass, renderRoot_->GetDefaultSceneColorOutput());
+    renderRoot_->DefineCustomBlurPass(blurPass, renderRoot_->GetDefaultSceneColorOutput(), &ioManager_);
     renderRoot_->PushPass(blurPass);
     
 

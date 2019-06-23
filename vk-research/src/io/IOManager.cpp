@@ -5,6 +5,9 @@
 #include <iostream>
 #include <utility>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb\stb_image.h>
+
 IOManager::IOManager() {}
 
 IOManager::IOManager(IOManager&& rhs) {}
@@ -85,4 +88,44 @@ Data::ModelMesh IOManager::ReadModelMesh(char const* path)
     istream.close();
 
     return std::move(model);
+}
+
+Data::Texture2D IOManager::ReadTexture2D(char const* path, Data::TextureChannelVariations channelVariations)
+{
+    Data::Texture2D texture;
+
+    int desiredChannels = 0;
+    switch (channelVariations)
+    {
+    case Data::TEXTURE_VARIATION_GRAY:
+        desiredChannels = 1;
+        break;
+    case Data::TEXTURE_VARIATION_GRAY_ALPHA:
+        desiredChannels = 2;
+        break;
+    case Data::TEXTURE_VARIATION_RGB:
+        desiredChannels = 3;
+        break;
+    case Data::TEXTURE_VARIATION_RGBA:
+        desiredChannels = 4;
+        break;
+    default:
+        assert(false && "Invalid TextureChannelVariations");
+    }
+
+    int x, y, n;
+    stbi_uc* textureData = stbi_load(path, &x, &y, &n, desiredChannels);
+    if (textureData == NULL) {
+        return std::move(texture);
+    }
+
+    std::uint32_t const dataSize = x * y;
+    texture.textureData_.resize(dataSize);
+    std::memcpy(texture.textureData_.data(), textureData, dataSize);
+
+    texture.textureChannelVariations_ = channelVariations;
+
+    stbi_image_free(textureData);
+
+    return std::move(texture);
 }

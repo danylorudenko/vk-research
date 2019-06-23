@@ -5,6 +5,7 @@
 #include "..\vk_interface\Swapchain.hpp"
 #include "..\renderer\UniformBufferWriterProxy.hpp"
 #include "..\application\ImGuiUserData.hpp"
+#include "..\io\IOManager.hpp"
 
 #include <utility>
 #include <cstdint>
@@ -14,6 +15,7 @@ namespace Render
 
 CustomTempBlurPass::CustomTempBlurPass()
     : root_{ nullptr }
+    , ioManager_{ nullptr }
     , table_{ nullptr }
     , device_{ nullptr }
     , resourceProxy_{ nullptr }
@@ -27,6 +29,7 @@ CustomTempBlurPass::CustomTempBlurPass()
 
 CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     : root_{ desc.root_ }
+    , ioManager_{ desc.ioManager_ }
     , table_{ desc.table_ }
     , device_{ desc.device_ }
     , resourceProxy_{ desc.resourceProxy_ }
@@ -238,9 +241,42 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPass&& rhs)
 
 CustomTempBlurPass& CustomTempBlurPass::operator=(CustomTempBlurPass&& rhs)
 {
+    //Root* root_;
+    //IOManager* ioManager_;
+    //
+    //VKW::ImportTable* table_;
+    //VKW::Device* device_;
+    //
+    //VKW::ResourceRendererProxy* resourceProxy_;
+    //VKW::ShaderModuleFactory* shaderModuleFactory_;
+    //VKW::PipelineFactory* pipelineFactory_;
+    //VKW::DescriptorLayoutController* descriptorLayoutController_;
+    //VKW::Swapchain* swapchain_;
+    //
+    //ResourceKey sceneColorBuffer_;
+    //
+    //ResourceKey horizontalBlurBuffer_;
+    //ResourceKey verticalBlurBuffer_;
+    //
+    //PipelineKey horizontalBlurPipeline_;
+    //PipelineKey verticalBlurPipeline_;
+    //PipelineKey mixPipeline_;
+    //
+    //SetLayoutKey universalSetLayout_;
+    //SetLayoutKey mixSetLayout_;
+    //
+    //VKW::ProxySetHandle horizontalDescriptorSet_;
+    //VKW::ProxySetHandle verticalDescriptorSet_;
+    //VKW::ProxySetHandle mixDescriptorSet_;
+    //
+    //UniformBufferHandle mixFactorUniformBuffer_;
+
     std::swap(root_, rhs.root_);
+    std::swap(ioManager_, rhs.ioManager_);
+
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
+
     std::swap(resourceProxy_, rhs.resourceProxy_);
     std::swap(shaderModuleFactory_, rhs.shaderModuleFactory_);
     std::swap(pipelineFactory_, rhs.pipelineFactory_);
@@ -254,6 +290,16 @@ CustomTempBlurPass& CustomTempBlurPass::operator=(CustomTempBlurPass&& rhs)
 
     std::swap(horizontalBlurPipeline_, rhs.horizontalBlurPipeline_);
     std::swap(verticalBlurPipeline_, rhs.verticalBlurPipeline_);
+    std::swap(mixPipeline_, rhs.mixPipeline_);
+
+    std::swap(universalSetLayout_, rhs.universalSetLayout_);
+    std::swap(mixSetLayout_, rhs.mixSetLayout_);
+
+    std::swap(horizontalDescriptorSet_, rhs.horizontalDescriptorSet_);
+    std::swap(verticalDescriptorSet_, rhs.verticalDescriptorSet_);
+    std::swap(mixDescriptorSet_, rhs.mixDescriptorSet_);
+
+    std::swap(mixFactorUniformBuffer_, rhs.mixFactorUniformBuffer_);
 
     return *this;
 }

@@ -5,6 +5,8 @@
 #include "..\vk_interface\ProxyHandles.hpp"
 #include "..\vk_interface\VkInterfaceConstants.hpp"
 
+class IOManager;
+
 namespace VKW
 {
     class ImportTable;
@@ -24,6 +26,7 @@ class Root;
 struct CustomTempBlurPassDesc
 {
     Root* root_;
+    IOManager* ioManager_;
 
     VKW::ImportTable* table_;
     VKW::Device* device_;
@@ -54,6 +57,7 @@ public:
 
 private:
     Root* root_;
+    IOManager* ioManager_;
 
     VKW::ImportTable* table_;
     VKW::Device* device_;
