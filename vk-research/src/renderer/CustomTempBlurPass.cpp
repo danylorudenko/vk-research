@@ -139,20 +139,22 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     mixFactorUniformBuffer_ = root_->AcquireUniformBuffer(8);
 
 
-    Data::Texture2D maskTexture2D = ioManager_->ReadTexture2D("textures\\mask0.png", Data::TEXTURE_VARIATION_GRAY);
+    //Data::Texture2D maskTexture2D = ioManager_->ReadTexture2D("textures\\mask0.png", Data::TEXTURE_VARIATION_GRAY);
+    //Data::Texture2D maskTexture2D = ioManager_->ReadTexture2D("textures\\mask1.jpg", Data::TEXTURE_VARIATION_GRAY);
+    Data::Texture2D maskTexture2D = ioManager_->ReadTexture2D("textures\\mask2.jpg", Data::TEXTURE_VARIATION_GRAY);
 
+    char const* maskUploadImage = "msku";
     VKW::ImageViewDesc maskUploadImageDesc;
     maskUploadImageDesc.format_ = VK_FORMAT_R8_UNORM;
     maskUploadImageDesc.usage_ = VKW::ImageUsage::UPLOAD_IMAGE;
     maskUploadImageDesc.width_ = maskTexture2D.width_;
     maskUploadImageDesc.height_ = maskTexture2D.height_;
-
-
-    char const* maskUploadImage = "msku";
     root_->DefineGlobalImage(maskUploadImage, maskUploadImageDesc);
+
     void* mappedUploadBufferMask = root_->MapImage(maskUploadImage, 0);
     std::memcpy(mappedUploadBufferMask, maskTexture2D.textureData_.data(), maskTexture2D.textureData_.size());
     root_->FlushImage(maskUploadImage, 0);
+
 
     VKW::ImageView* colorBufferImageView = root_->FindGlobalImage(sceneColorBuffer_, 0);
     VKW::ImageResource* colorBufferResource = resourceProxy_->GetResource(colorBufferImageView->resource_);
