@@ -220,6 +220,7 @@ public:
 
     ResourceKey GetDefaultSceneColorOutput() const;
     ResourceKey GetSwapchain() const;
+    VkSampler GetDefaultSampler() const;
     std::uint32_t GetDefaultSceneColorBufferThreeshold() const;
     void DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc);
     VKW::ProxyImageHandle FindGlobalImage(ResourceKey const& key);

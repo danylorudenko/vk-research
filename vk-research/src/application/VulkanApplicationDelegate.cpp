@@ -131,7 +131,7 @@ void VulkanApplicationDelegate::update()
     for (std::uint32_t x = 0; x < 5; ++x) {
         for (std::uint32_t y = 0; y < 5; ++y) {
             customData_.transformComponents_[x * 5 + y]->scale_ = glm::vec3(5.0f);
-            customData_.transformComponents_[x * 5 + y]->position_ = glm::vec3(-2.0f + x, -2.0f + y, -6.1f);
+            customData_.transformComponents_[x * 5 + y]->position_ = glm::vec3(-2.0f + x, -1.8f + y, -3.1f);
             customData_.transformComponents_[x * 5 + y]->orientation_.z = glm::degrees(3.14f);
             customData_.transformComponents_[x * 5 + y]->orientation_.y = glm::degrees(testcounter * 1.1f);
         }
@@ -382,19 +382,6 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
     if (imguiEnabled_) {
         IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
         
-        //
-        //static char buf[256];
-        //static float f = 0.0f;
-        //
-        //ImGui::Text("Hello, world %d", 123);
-        //if (ImGui::Button("Save"))
-        //{
-        //    // do stuff
-        //}
-        //ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
-        //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-
-
         VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
         VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
 
@@ -416,7 +403,6 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         }
         
 
-        //ImGui::SetFot;
         ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always, ImVec2(0.0f, 0.0f));
         ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f));
         
@@ -424,7 +410,6 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
         if (ImGui::Begin("Blur scale", nullptr, blurWindowFlags))
         {
-            static float testSliderFloat = 0.0f;
             ImGui::SetNextItemWidth(100.0f);
             ImGui::SliderFloat("", &IMGUI_USER_BLUR_SCALE, 0.0f, 1.0f);
             ImGui::End();

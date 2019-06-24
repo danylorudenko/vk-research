@@ -98,16 +98,16 @@ Data::Texture2D IOManager::ReadTexture2D(char const* path, Data::TextureChannelV
     switch (channelVariations)
     {
     case Data::TEXTURE_VARIATION_GRAY:
-        desiredChannels = 1;
+        desiredChannels = STBI_grey;
         break;
     case Data::TEXTURE_VARIATION_GRAY_ALPHA:
-        desiredChannels = 2;
+        desiredChannels = STBI_grey_alpha;
         break;
     case Data::TEXTURE_VARIATION_RGB:
-        desiredChannels = 3;
+        desiredChannels = STBI_rgb;
         break;
     case Data::TEXTURE_VARIATION_RGBA:
-        desiredChannels = 4;
+        desiredChannels = STBI_rgb_alpha;
         break;
     default:
         assert(false && "Invalid TextureChannelVariations");

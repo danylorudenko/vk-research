@@ -353,6 +353,11 @@ ResourceKey Root::GetSwapchain() const
     return SWAPCHAIN_IMAGE_KEY;
 }
 
+VkSampler Root::GetDefaultSampler() const
+{
+    return imagesProvider_->DefaultSamplerHandle();
+}
+
 std::uint32_t Root::GetDefaultSceneColorBufferThreeshold() const
 {
     return COLOR_BUFFER_THREESHOLD;
@@ -865,8 +870,8 @@ void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey con
     
     VkBufferImageCopy copyInfo;
     copyInfo.bufferOffset = srcView->offset_;
-    copyInfo.bufferRowLength = dstImage->width_;
-    copyInfo.bufferImageHeight = dstImage->height_;
+    copyInfo.bufferRowLength = 0;
+    copyInfo.bufferImageHeight = 0;
     copyInfo.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     copyInfo.imageSubresource.mipLevel = 0;
     copyInfo.imageSubresource.baseArrayLayer = 0;

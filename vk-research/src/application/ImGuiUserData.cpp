@@ -1,3 +1,3 @@
 #include "ImGuiUserData.hpp"
 
-float IMGUI_USER_BLUR_SCALE = 0.0f;
+float IMGUI_USER_BLUR_SCALE = 1.0f;

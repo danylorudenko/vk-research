@@ -139,20 +139,43 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     mixFactorUniformBuffer_ = root_->AcquireUniformBuffer(8);
 
 
-    //Data::Texture2D maskTexture2D = ioManager_->ReadTexture2D("textures\\mask0.png", Data::TEXTURE_VARIATION_GRAY);
-    //Data::Texture2D maskTexture2D = ioManager_->ReadTexture2D("textures\\mask1.jpg", Data::TEXTURE_VARIATION_GRAY);
-    Data::Texture2D maskTexture2D = ioManager_->ReadTexture2D("textures\\mask3.jpg", Data::TEXTURE_VARIATION_GRAY);
+    //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask0.png", Data::TEXTURE_VARIATION_GRAY);
+    //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask1.jpg", Data::TEXTURE_VARIATION_GRAY);
+    //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask2.jpg", Data::TEXTURE_VARIATION_GRAY);
+    Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask3.jpg", Data::TEXTURE_VARIATION_GRAY);
+    //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask4.png", Data::TEXTURE_VARIATION_GRAY);
+    //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask5.png", Data::TEXTURE_VARIATION_GRAY);
+    //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask5.png", Data::TEXTURE_VARIATION_GRAY);
+    //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask6.png", Data::TEXTURE_VARIATION_GRAY);
 
     char const* maskUploadImage = "msku";
     VKW::ImageViewDesc maskUploadImageDesc;
     maskUploadImageDesc.format_ = VK_FORMAT_R8_UNORM;
     maskUploadImageDesc.usage_ = VKW::ImageUsage::UPLOAD_IMAGE;
-    maskUploadImageDesc.width_ = maskTexture2D.width_;
-    maskUploadImageDesc.height_ = maskTexture2D.height_;
+    maskUploadImageDesc.width_ = maskTexture2DData.width_;
+    maskUploadImageDesc.height_ = maskTexture2DData.height_;
     root_->DefineGlobalImage(maskUploadImage, maskUploadImageDesc);
 
-    void* mappedUploadBufferMask = root_->MapImage(maskUploadImage, 0);
-    std::memcpy(mappedUploadBufferMask, maskTexture2D.textureData_.data(), maskTexture2D.textureData_.size());
+    VKW::ImageView* maskUploadImageView = root_->FindGlobalImage(maskUploadImage, 0);
+    VKW::ImageResource* maskUploadImageResource = resourceProxy_->GetResource(maskUploadImageView->resource_);
+
+    VkImageSubresource maskSubresource;
+    maskSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    maskSubresource.arrayLayer = 0;
+    maskSubresource.mipLevel = 0;
+
+    VkSubresourceLayout maskSubresourceLayout;
+
+    table_->vkGetImageSubresourceLayout(device_->Handle(), maskUploadImageResource->handle_, &maskSubresource, &maskSubresourceLayout);
+
+    std::uint8_t* mappedUploadBufferMask = reinterpret_cast<std::uint8_t*>(root_->MapImage(maskUploadImage, 0));
+    std::uint8_t* textureData = reinterpret_cast<std::uint8_t*>(maskTexture2DData.textureData_.data());
+    for (std::uint32_t row = 0; row < maskTexture2DData.height_; ++row) {
+        void* rowStart = mappedUploadBufferMask + (row * maskSubresourceLayout.rowPitch) + maskSubresourceLayout.offset;
+        std::uint32_t rowSize = maskTexture2DData.width_;
+        std::memcpy(rowStart, textureData + maskTexture2DData.width_ * row, rowSize);
+
+    }
     root_->FlushImage(maskUploadImage, 0);
 
 
