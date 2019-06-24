@@ -65,8 +65,8 @@ void ImGuiHelper::Init()
     VKW::ImageView* colorBufferView = root_->FindGlobalImage(root_->GetDefaultSceneColorOutput(), 0);
     VKW::ImageResource* colorBufferResource = root_->ResourceProxy()->GetResource(colorBufferView->resource_);
 
-    std::uint32_t viewportWidth = colorBufferResource->width_;
-    std::uint32_t viewportHeight = colorBufferResource->height_;
+    std::uint32_t viewportWidth = colorBufferResource->width_ - root_->GetDefaultSceneColorBufferThreeshold();
+    std::uint32_t viewportHeight = colorBufferResource->height_ - root_->GetDefaultSceneColorBufferThreeshold();
     
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -176,8 +176,8 @@ void ImGuiHelper::Init()
     VKW::ViewportInfo vpInfo;
     vpInfo.viewportsCount_ = 1;
     VKW::ViewportInfo::Viewport& vp = vpInfo.viewports_[0];
-    vp.x_ = 0.0f;
-    vp.y_ = 0.0f;
+    vp.x_ = static_cast<float>(root_->GetDefaultSceneColorBufferThreeshold());
+    vp.y_ = static_cast<float>(root_->GetDefaultSceneColorBufferThreeshold());
     vp.width_ = static_cast<float>(viewportWidth);
     vp.height_ = static_cast<float>(viewportHeight);
     vp.minDepth_ = 0.0f;

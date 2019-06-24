@@ -147,6 +147,7 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
         case ImageUsage::RENDER_TARGET:
         case ImageUsage::TEXTURE:
         case ImageUsage::STORAGE_IMAGE:
+        case ImageUsage::UPLOAD_IMAGE:
             aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
             break;
         case ImageUsage::DEPTH:
@@ -158,6 +159,8 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
         case ImageUsage::DEPTH_STENCIL:
             aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
             break;
+        default:
+            assert(false && "Image usage not supported");
         }
 
         VkImageViewCreateInfo viewInfo;
@@ -175,7 +178,9 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
         viewInfo.subresourceRange.levelCount = 1;
 
         VkImageView vkView = VK_NULL_HANDLE;
-        VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkView));
+
+        if (descs[i].usage_ != ImageUsage::UPLOAD_IMAGE)
+            VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkView));
 
         ImageView* imageView = new ImageView{ vkView, viewInfo.format, viewInfo.viewType, viewInfo.subresourceRange, imageResourceHandle };
 

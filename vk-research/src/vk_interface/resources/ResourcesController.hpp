@@ -30,7 +30,8 @@ enum class ImageUsage
     RENDER_TARGET,
     DEPTH,
     STENCIL,
-    DEPTH_STENCIL
+    DEPTH_STENCIL,
+    UPLOAD_IMAGE
 };
 
 struct ImageDesc

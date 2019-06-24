@@ -203,10 +203,16 @@ public:
 
     void* MapBuffer(ResourceKey const& key, std::uint32_t frame);
     void FlushBuffer(ResourceKey const& key, std::uint32_t frame);
+    void* MapImage(ResourceKey const& key, std::uint32_t frame);
+    void FlushImage(ResourceKey const& key, std::uint32_t frame);
+
 
     VKW::BufferResource* GetViewResource(VKW::BufferView* view);
     VKW::MemoryRegion* GetViewMemory(VKW::BufferView* view);
     VKW::MemoryPage* GetViewMemoryPage(VKW::BufferView* view);
+    VKW::ImageResource* GetViewResource(VKW::ImageView* view);
+    VKW::MemoryRegion* GetViewMemory(VKW::ImageView* view);
+    VKW::MemoryPage* GetViewMemoryPage(VKW::ImageView* view);
 
     void DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc);
     VKW::ProxyBufferHandle FindGlobalBuffer(ResourceKey const& key);

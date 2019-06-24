@@ -116,6 +116,9 @@ Data::Texture2D IOManager::ReadTexture2D(char const* path, Data::TextureChannelV
     int x, y, n;
     stbi_uc* textureData = stbi_load(path, &x, &y, &n, desiredChannels);
     if (textureData == NULL) {
+        texture.width_ = 0;
+        texture.height_ = 0;
+        texture.textureChannelVariations_ = Data::TEXTURE_VARIATION_INVALID;
         return std::move(texture);
     }
 
@@ -124,6 +127,8 @@ Data::Texture2D IOManager::ReadTexture2D(char const* path, Data::TextureChannelV
     std::memcpy(texture.textureData_.data(), textureData, dataSize);
 
     texture.textureChannelVariations_ = channelVariations;
+    texture.width_ = x;
+    texture.height_ = y;
 
     stbi_image_free(textureData);
 

@@ -163,6 +163,11 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
         memoryDesc.usage_ = MemoryUsage::DEPTH_STENCIL_ATTACHMENT;
         break;
 
+    case ImageUsage::UPLOAD_IMAGE:
+        info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        info.tiling = VK_IMAGE_TILING_LINEAR;
+        memoryDesc.usage_ = MemoryUsage::UPLOAD_BUFFER;
+        break;
     default:
         assert(false && "Non-supported usage for image.");
         break;

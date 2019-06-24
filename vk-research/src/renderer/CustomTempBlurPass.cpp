@@ -46,6 +46,8 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     , universalSetLayout_{ "bllt" }
     , mixSetLayout_{ "mxlt"}
 {
+    // allocating necessary api objects
+
     VKW::DescriptorSetLayoutDesc setLayoutDesc;
     setLayoutDesc.stage_ = VKW::DescriptorStage::COMPUTE;
     setLayoutDesc.membersCount_ = 2;
@@ -132,6 +134,23 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     root_->DefineGlobalImage(verticalBlurBuffer_, computeBuffersDesc);
 
     mixFactorUniformBuffer_ = root_->AcquireUniformBuffer(8);
+
+
+    Data::Texture2D maskTexture2D = ioManager_->ReadTexture2D("textures\\mask0.png", Data::TEXTURE_VARIATION_GRAY);
+
+    VKW::BufferViewDesc uploadBufferMaskDesc;
+    uploadBufferMaskDesc.format_ = VK_FORMAT_UNDEFINED;
+    uploadBufferMaskDesc.size_ = maskTexture2D.textureData_.size();
+    uploadBufferMaskDesc.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
+
+    VKW::ImageViewDesc maskImageDesc;
+    maskImageDesc.format_ = VK_FORMAT_R8_UNORM;
+    maskImageDesc.usage_ = VKW::ImageUsage::UPLOAD_IMAGE;
+    maskImageDesc.width_ = maskTexture2D.width_;
+    maskImageDesc.height_ = maskTexture2D.height_;
+
+    root_->DefineGlobalImage("test", maskImageDesc);
+    // root_->CopyStagingBufferToGPUTexture
 
 
     // transitioning pass image to neede IMAGE_LAYOUTs

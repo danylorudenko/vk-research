@@ -252,6 +252,42 @@ void Root::FlushBuffer(ResourceKey const& key, std::uint32_t frame)
     VK_ASSERT(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
 }
 
+void* Root::MapImage(ResourceKey const& key, std::uint32_t frame)
+{
+    VKW::ImageView* view = FindGlobalImage(key, frame);
+    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
+
+    std::uint64_t const offset = memoryRegion->offset_;
+    //std::uint64_t const size = view->size_;
+
+    return (reinterpret_cast<std::uint8_t*>(memoryPage->mappedMemoryPtr_) + offset);
+}
+
+void Root::FlushImage(ResourceKey const& key, std::uint32_t frame)
+{
+    VKW::ImageView* view = FindGlobalImage(key, frame);
+    VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
+    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+
+    if (memoryPage->propertyFlags_ & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+        return;
+
+    VKW::ImportTable* table = loader_->table_.get();
+    VkDevice const vkDevice = loader_->device_->Handle();
+    VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
+    std::uint64_t const offset = memoryRegion->offset_;
+    std::uint64_t const size = memoryRegion->size_;
+
+    VkMappedMemoryRange range;
+    range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    range.pNext = nullptr;
+    range.memory = deviceMemory;
+    range.size = VK_WHOLE_SIZE;
+    range.offset = offset;
+    VK_ASSERT(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
+}
+
 VKW::BufferResource* Root::GetViewResource(VKW::BufferView* view)
 {
     VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
@@ -268,6 +304,25 @@ VKW::MemoryRegion* Root::GetViewMemory(VKW::BufferView* view)
 VKW::MemoryPage* Root::GetViewMemoryPage(VKW::BufferView* view)
 {
     VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
+    return resourceProxy_->GetMemoryPage(resourceHandle);
+}
+
+VKW::ImageResource* Root::GetViewResource(VKW::ImageView* view)
+{
+    VKW::ImageResourceHandle resourceHandle = view->resource_;
+    return resourceProxy_->GetResource(resourceHandle);
+}
+
+VKW::MemoryRegion* Root::GetViewMemory(VKW::ImageView* view)
+{
+    VKW::ImageResourceHandle resourceHandle = view->resource_;
+    VKW::ImageResource* imageResource = resourceProxy_->GetResource(resourceHandle);
+    return &imageResource->memory_;
+}
+
+VKW::MemoryPage* Root::GetViewMemoryPage(VKW::ImageView* view)
+{
+    VKW::ImageResourceHandle resourceHandle = view->resource_;
     return resourceProxy_->GetMemoryPage(resourceHandle);
 }
 

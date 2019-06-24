@@ -399,7 +399,7 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
 
         //ImGui::SetNextWindowContentWidth(100.0f);
-        ImGui::SetNextWindowPos(ImVec2((float)colorBufferResource->width_ - 10.0f, 10.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+        ImGui::SetNextWindowPos(ImVec2((float)colorBufferResource->width_ - 10.0f, 0.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
 
         ImGuiWindowFlags frameDataWindowFlags = 
             ImGuiWindowFlags_NoMove | 
@@ -417,7 +417,7 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         
 
         //ImGui::SetFot;
-        ImGui::SetNextWindowPos(ImVec2(10.0f, 10.0f), ImGuiCond_Always, ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always, ImVec2(0.0f, 0.0f));
         ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f));
         
         ImGuiWindowFlags blurWindowFlags = 
