@@ -40,6 +40,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     , swapchain_{ desc.swapchain_ }
     , horizontalBlurBuffer_{ "hblb" }
     , verticalBlurBuffer_{ "vblb" }
+    , blurMaskTexture_{ "blmk" }
     , horizontalBlurPipeline_{ "hblp" }
     , verticalBlurPipeline_{ "vblp" }
     , mixPipeline_{ "mixp" }
@@ -138,19 +139,30 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
 
     Data::Texture2D maskTexture2D = ioManager_->ReadTexture2D("textures\\mask0.png", Data::TEXTURE_VARIATION_GRAY);
 
-    VKW::BufferViewDesc uploadBufferMaskDesc;
-    uploadBufferMaskDesc.format_ = VK_FORMAT_UNDEFINED;
-    uploadBufferMaskDesc.size_ = maskTexture2D.textureData_.size();
-    uploadBufferMaskDesc.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
+    VKW::ImageViewDesc maskUploadImageDesc;
+    maskUploadImageDesc.format_ = VK_FORMAT_R8_UNORM;
+    maskUploadImageDesc.usage_ = VKW::ImageUsage::UPLOAD_IMAGE;
+    maskUploadImageDesc.width_ = maskTexture2D.width_;
+    maskUploadImageDesc.height_ = maskTexture2D.height_;
 
+
+    char const* maskUploadImage = "msku";
+    root_->DefineGlobalImage(maskUploadImage, maskUploadImageDesc);
+    void* mappedUploadBufferMask = root_->MapImage(maskUploadImage, 0);
+    std::memcpy(mappedUploadBufferMask, maskTexture2D.textureData_.data(), maskTexture2D.textureData_.size());
+    root_->FlushImage(maskUploadImage, 0);
+
+    VKW::ImageView* colorBufferImageView = root_->FindGlobalImage(sceneColorBuffer_, 0);
+    VKW::ImageResource* colorBufferResource = resourceProxy_->GetResource(colorBufferImageView->resource_);
     VKW::ImageViewDesc maskImageDesc;
     maskImageDesc.format_ = VK_FORMAT_R8_UNORM;
-    maskImageDesc.usage_ = VKW::ImageUsage::UPLOAD_IMAGE;
-    maskImageDesc.width_ = maskTexture2D.width_;
-    maskImageDesc.height_ = maskTexture2D.height_;
+    maskImageDesc.width_ = colorBufferResource->width_;
+    maskImageDesc.height_ = colorBufferResource->height_;
+    maskImageDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE;
+    root_->DefineGlobalImage(blurMaskTexture_, maskImageDesc);
+    root_->BlitImages(maskUploadImage, blurMaskTexture_, 0, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_READ_BIT);
 
-    root_->DefineGlobalImage("test", maskImageDesc);
-    // root_->CopyStagingBufferToGPUTexture
+    
 
 
     // transitioning pass image to neede IMAGE_LAYOUTs
@@ -260,36 +272,6 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPass&& rhs)
 
 CustomTempBlurPass& CustomTempBlurPass::operator=(CustomTempBlurPass&& rhs)
 {
-    //Root* root_;
-    //IOManager* ioManager_;
-    //
-    //VKW::ImportTable* table_;
-    //VKW::Device* device_;
-    //
-    //VKW::ResourceRendererProxy* resourceProxy_;
-    //VKW::ShaderModuleFactory* shaderModuleFactory_;
-    //VKW::PipelineFactory* pipelineFactory_;
-    //VKW::DescriptorLayoutController* descriptorLayoutController_;
-    //VKW::Swapchain* swapchain_;
-    //
-    //ResourceKey sceneColorBuffer_;
-    //
-    //ResourceKey horizontalBlurBuffer_;
-    //ResourceKey verticalBlurBuffer_;
-    //
-    //PipelineKey horizontalBlurPipeline_;
-    //PipelineKey verticalBlurPipeline_;
-    //PipelineKey mixPipeline_;
-    //
-    //SetLayoutKey universalSetLayout_;
-    //SetLayoutKey mixSetLayout_;
-    //
-    //VKW::ProxySetHandle horizontalDescriptorSet_;
-    //VKW::ProxySetHandle verticalDescriptorSet_;
-    //VKW::ProxySetHandle mixDescriptorSet_;
-    //
-    //UniformBufferHandle mixFactorUniformBuffer_;
-
     std::swap(root_, rhs.root_);
     std::swap(ioManager_, rhs.ioManager_);
 
@@ -306,6 +288,7 @@ CustomTempBlurPass& CustomTempBlurPass::operator=(CustomTempBlurPass&& rhs)
 
     std::swap(horizontalBlurBuffer_, rhs.horizontalBlurBuffer_);
     std::swap(verticalBlurBuffer_, rhs.verticalBlurBuffer_);
+    std::swap(blurMaskTexture_, rhs.blurMaskTexture_);
 
     std::swap(horizontalBlurPipeline_, rhs.horizontalBlurPipeline_);
     std::swap(verticalBlurPipeline_, rhs.verticalBlurPipeline_);

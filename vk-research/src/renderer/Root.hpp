@@ -257,6 +257,7 @@ public:
     void ImageLayoutTransition(std::uint32_t context, std::uint32_t imagesCount, VkImage* images, VkImageLayout* targetLayouts);
     void CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
     void CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
+    void BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context, VkImageLayout dstEndLayout, VkAccessFlags dstEndAccessFlags);
 
 
     VKW::ResourceRendererProxy* ResourceProxy() const;

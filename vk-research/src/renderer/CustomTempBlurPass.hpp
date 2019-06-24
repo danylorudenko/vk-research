@@ -72,6 +72,7 @@ private:
 
     ResourceKey horizontalBlurBuffer_;
     ResourceKey verticalBlurBuffer_;
+    ResourceKey blurMaskTexture_;
 
     PipelineKey horizontalBlurPipeline_;
     PipelineKey verticalBlurPipeline_;

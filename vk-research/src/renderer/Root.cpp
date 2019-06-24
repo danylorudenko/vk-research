@@ -923,6 +923,116 @@ void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey con
     VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
 }
 
+void Root::BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context, VkImageLayout dstEndImageLayout, VkAccessFlags dstEndAccessFlags)
+{
+    VKW::ImageView* srcView = FindGlobalImage(src, context);
+    VKW::ImageView* dstView = FindGlobalImage(dst, context);
+
+    VKW::ImageResource* srcImage = resourceProxy_->GetResource(srcView->resource_);
+    VKW::ImageResource* dstImage = resourceProxy_->GetResource(dstView->resource_);
+    
+    VkImageMemoryBarrier imageBarriers[3];
+    imageBarriers[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    imageBarriers[0].pNext = nullptr;
+    imageBarriers[0].srcAccessMask = VK_FLAGS_NONE;
+    imageBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    imageBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    imageBarriers[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageBarriers[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageBarriers[0].image = srcImage->handle_;
+    imageBarriers[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageBarriers[0].subresourceRange.baseArrayLayer = 0;
+    imageBarriers[0].subresourceRange.layerCount = 1;
+    imageBarriers[0].subresourceRange.baseMipLevel = 0;
+    imageBarriers[0].subresourceRange.levelCount = 1;
+
+    imageBarriers[1].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    imageBarriers[1].pNext = nullptr;
+    imageBarriers[1].srcAccessMask = VK_FLAGS_NONE;
+    imageBarriers[1].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    imageBarriers[1].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageBarriers[1].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    imageBarriers[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageBarriers[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageBarriers[1].image = dstImage->handle_;
+    imageBarriers[1].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageBarriers[1].subresourceRange.baseArrayLayer = 0;
+    imageBarriers[1].subresourceRange.layerCount = 1;
+    imageBarriers[1].subresourceRange.baseMipLevel = 0;
+    imageBarriers[1].subresourceRange.levelCount = 1;
+
+    imageBarriers[2].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    imageBarriers[2].pNext = nullptr;
+    imageBarriers[2].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    imageBarriers[2].dstAccessMask = dstEndAccessFlags;
+    imageBarriers[2].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    imageBarriers[2].newLayout = dstEndImageLayout;
+    imageBarriers[2].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageBarriers[2].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageBarriers[2].image = dstImage->handle_;
+    imageBarriers[2].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageBarriers[2].subresourceRange.baseArrayLayer = 0;
+    imageBarriers[2].subresourceRange.layerCount = 1;
+    imageBarriers[2].subresourceRange.baseMipLevel = 0;
+    imageBarriers[2].subresourceRange.levelCount = 1;
+
+
+    VkImageBlit blitDesc;
+    blitDesc.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    blitDesc.srcSubresource.mipLevel = 0;
+    blitDesc.srcSubresource.baseArrayLayer = 0;
+    blitDesc.srcSubresource.layerCount = 1;
+    blitDesc.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
+    blitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)srcImage->width_, (std::int32_t)srcImage->height_, 1 };
+
+
+    blitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    blitDesc.dstSubresource.mipLevel = 0;
+    blitDesc.dstSubresource.baseArrayLayer = 0;
+    blitDesc.dstSubresource.layerCount = 1;
+    blitDesc.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
+    blitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)dstImage->width_, (std::int32_t)dstImage->height_, 1 };
+
+    VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
+
+    VulkanFuncTable()->vkCmdPipelineBarrier(
+        commandReciever.commandBuffer_,
+        VK_PIPELINE_STAGE_HOST_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_FLAGS_NONE,
+        0, nullptr,
+        0, nullptr,
+        2, imageBarriers
+    );
+
+    VulkanFuncTable()->vkCmdBlitImage(
+        commandReciever.commandBuffer_,
+        srcImage->handle_,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        dstImage->handle_,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1, &blitDesc ,
+        VK_FILTER_NEAREST
+    );
+
+    VulkanFuncTable()->vkCmdPipelineBarrier(
+        commandReciever.commandBuffer_,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
+        VK_FLAGS_NONE,
+        0, nullptr,
+        0, nullptr,
+        1, imageBarriers + 2
+    );
+
+    mainWorkerTemp_->EndExecutionFrame(context);
+
+    mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
+
+    VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
+}
+
 VKW::ResourceRendererProxy* Root::ResourceProxy() const
 {
     return resourceProxy_;
