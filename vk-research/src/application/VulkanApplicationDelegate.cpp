@@ -178,9 +178,13 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     char constexpr indexBufferKey[] = "ind0";
     char constexpr passKey[] = "pass0";
     char constexpr pipeKey[] = "pipe0";
+    char constexpr backgroundPipeKey[] = "pipe1";
     char constexpr setLayoutKey[] = "set0";
+    char constexpr backgroundSetLayoutKey[] = "set1";
     char constexpr materialTemplateKey[] = "templ0";
+    char constexpr backgroundMaterialTemplateKey[] = "templ1";
     char constexpr materialKey[] = "mat0";
+    char constexpr backgroundMaterialKey[] = "mat1";
     char constexpr depthBufferKey[] = "dpth0";
 
     char constexpr blurPass[] = "blur";
@@ -365,7 +369,83 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     renderRoot_->DefineCustomBlurPass(blurPass, renderRoot_->GetDefaultSceneColorOutput(), &ioManager_);
     renderRoot_->PushPass(blurPass);
-    
+
+
+
+    // background
+    Render::ShaderDesc backgroundVertexShaderDesc;
+    backgroundVertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
+    backgroundVertexShaderDesc.relativePath_ = "shader-src\\background.vert.spv";
+
+    Render::ShaderDesc backgroundFragmentShaderDesc;
+    backgroundFragmentShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
+    backgroundFragmentShaderDesc.relativePath_ = "shader-src\\background.frag.spv";
+
+    renderRoot_->DefineShader("bvShader", backgroundVertexShaderDesc);
+    renderRoot_->DefineShader("bfShader", backgroundFragmentShaderDesc);
+
+
+
+    Render::GraphicsPipelineDesc pipelineBackroundDesc;
+
+    pipelineBackroundDesc.renderPass_ = passKey;
+    pipelineBackroundDesc.shaderStagesCount_ = 2;
+    pipelineBackroundDesc.shaderStages_[0] = "bvShader";
+    pipelineBackroundDesc.shaderStages_[1] = "bfShader";
+
+
+    VKW::DescriptorSetLayoutDesc backgroundSetLayoutDesc;
+    backgroundSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
+    backgroundSetLayoutDesc.membersCount_ = 1;
+    backgroundSetLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
+    backgroundSetLayoutDesc.membersDesc_[0].binding_ = 0;
+    renderRoot_->DefineSetLayout(backgroundSetLayoutKey, backgroundSetLayoutDesc);
+
+    Render::PipelineLayoutDesc backgroundLayoutDesc;
+    backgroundLayoutDesc.staticMembersCount_ = 0;
+    backgroundLayoutDesc.instancedMembersCount_ = 1;
+    backgroundLayoutDesc.instancedMembers_[0] = backgroundSetLayoutKey;
+
+    pipelineBackroundDesc.inputAssemblyInfo_ = &iaInfo;
+    pipelineBackroundDesc.vertexInputInfo_ = &vInfo;
+    pipelineBackroundDesc.viewportInfo_ = &vpInfo;
+    pipelineBackroundDesc.depthStencilInfo_ = &dsInfo;
+    pipelineBackroundDesc.layoutDesc_ = &backgroundLayoutDesc;
+    pipelineBackroundDesc.dynamicStateFlags_ = VK_FLAGS_NONE;
+    pipelineBackroundDesc.blendingState_ = VKW::PIPELINE_BLENDING_NONE;
+
+    renderRoot_->DefineGraphicsPipeline(backgroundPipeKey, pipelineBackroundDesc);
+
+    Render::MaterialTemplateDesc backgroundMaterialTemplateDesc;
+    backgroundMaterialTemplateDesc.perPassDataCount_ = 1;
+    backgroundMaterialTemplateDesc.perPassData_[0].passKey_ = passKey;
+    backgroundMaterialTemplateDesc.perPassData_[0].pipelineKey_ = backgroundPipeKey;
+    renderRoot_->DefineMaterialTemplate(backgroundMaterialTemplateKey, backgroundMaterialTemplateDesc);
+
+    Render::MaterialDesc backgroundMaterialDesc;
+    materialDesc.templateKey_ = backgroundMaterialTemplateKey;
+    renderRoot_->DefineMaterial(backgroundMaterialKey, backgroundMaterialDesc);
+
+    char const* backgroundVertexBufferName = "bcgvtx";
+    VKW::BufferViewDesc backgroundVertexBufferDesc;
+    backgroundVertexBufferDesc.format_ = VK_FORMAT_UNDEFINED;
+    backgroundVertexBufferDesc.size_ = sizeof(TestVertex) * 6;
+    backgroundVertexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX;
+    renderRoot_->DefineGlobalBuffer(backgroundVertexBufferName, backgroundVertexBufferDesc);
+
+    kekekek
+    std::memcpy(mappedUploadBuffer, nullptr, sizeof(TestVertex) * 6);
+
+
+    Render::RenderWorkItemDesc itemDesc;
+    itemDesc.vertexBufferKey_ = vertexBufferKey;
+    itemDesc.indexBufferKey_ = indexBufferKey;
+    itemDesc.vertexCount_ = vertexDataSizeBytes / sizeof(TestVertex);
+    itemDesc.vertexBindOffset_ = 0;
+    itemDesc.indexCount_ = indexDataSizeBytes / sizeof(std::uint32_t);
+    itemDesc.indexBindOffset_ = 0;
+
+    itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 64;
 
 }
 
