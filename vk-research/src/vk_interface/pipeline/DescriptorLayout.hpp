@@ -15,7 +15,7 @@ struct DescriptorSetLayoutMemberInfo
 
 struct DescriptorSetLayout
 {
-    static std::uint32_t constexpr MAX_SET_LAYOUT_MEMBERS = 4;
+    static std::uint32_t constexpr MAX_SET_LAYOUT_MEMBERS = 6;
     
     VkDescriptorSetLayout handle_ = VK_NULL_HANDLE;
     std::uint32_t membersCount_;

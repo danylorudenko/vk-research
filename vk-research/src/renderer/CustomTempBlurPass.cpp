@@ -61,15 +61,17 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
 
     VKW::DescriptorSetLayoutDesc mixSetLayoutDesc;
     mixSetLayoutDesc.stage_ = VKW::DescriptorStage::COMPUTE;
-    mixSetLayoutDesc.membersCount_ = 4;
+    mixSetLayoutDesc.membersCount_ = 5;
     mixSetLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
     mixSetLayoutDesc.membersDesc_[0].binding_ = 0;
     mixSetLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
     mixSetLayoutDesc.membersDesc_[1].binding_ = 1;
     mixSetLayoutDesc.membersDesc_[2].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
     mixSetLayoutDesc.membersDesc_[2].binding_ = 2;
-    mixSetLayoutDesc.membersDesc_[3].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    mixSetLayoutDesc.membersDesc_[3].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
     mixSetLayoutDesc.membersDesc_[3].binding_ = 3;
+    mixSetLayoutDesc.membersDesc_[4].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    mixSetLayoutDesc.membersDesc_[4].binding_ = 4;
 
     root_->DefineSetLayout(mixSetLayout_, mixSetLayoutDesc);
 
@@ -158,7 +160,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     maskImageDesc.format_ = VK_FORMAT_R8_UNORM;
     maskImageDesc.width_ = colorBufferResource->width_;
     maskImageDesc.height_ = colorBufferResource->height_;
-    maskImageDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE;
+    maskImageDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE_READONLY;
     root_->DefineGlobalImage(blurMaskTexture_, maskImageDesc);
     root_->BlitImages(maskUploadImage, blurMaskTexture_, 0, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_READ_BIT);
 
@@ -228,7 +230,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
 
     resourceProxy_->WriteSet(verticalDescriptorSet_, verticalSetDesc);
 
-    VKW::ProxyDescriptorWriteDesc mixSetDesc[4];
+    VKW::ProxyDescriptorWriteDesc mixSetDesc[5];
     for (std::uint32_t i = 0; i < framesCount; ++i) 
     {
         // blurred input
@@ -246,12 +248,16 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
         mixSetDesc[2].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(horizontalProxyImageHandle, i);
         mixSetDesc[2].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
 
+        VKW::ProxyImageHandle blurMaskProxyImageHandle = root_->FindGlobalImage(blurMaskTexture_);
+        mixSetDesc[3].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(blurMaskProxyImageHandle, i);
+        mixSetDesc[3].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
+
         UniformBuffer& mixFactorUniformBuffer = root_->FindUniformBuffer(mixFactorUniformBuffer_);
         VKW::BufferViewHandle mixFactorBufferHandle = resourceProxy_->GetBufferViewHandle(mixFactorUniformBuffer.proxyBufferViewHandle_, i);
         VKW::BufferView* mixFactorBufferView = resourceProxy_->GetBufferView(mixFactorUniformBuffer.proxyBufferViewHandle_, i);
-        mixSetDesc[3].frames_[i].pureBufferDesc_.pureBufferViewHandle_ = mixFactorBufferHandle;
-        mixSetDesc[3].frames_[i].pureBufferDesc_.offset_ = 0;
-        mixSetDesc[3].frames_[i].pureBufferDesc_.size_ = (std::uint32_t)mixFactorBufferView->size_;
+        mixSetDesc[4].frames_[i].pureBufferDesc_.pureBufferViewHandle_ = mixFactorBufferHandle;
+        mixSetDesc[4].frames_[i].pureBufferDesc_.offset_ = 0;
+        mixSetDesc[4].frames_[i].pureBufferDesc_.size_ = (std::uint32_t)mixFactorBufferView->size_;
     }
 
     resourceProxy_->WriteSet(mixDescriptorSet_, mixSetDesc);

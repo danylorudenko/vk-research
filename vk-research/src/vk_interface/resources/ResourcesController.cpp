@@ -147,6 +147,7 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
         break;
         
     case ImageUsage::STORAGE_IMAGE:
+    case ImageUsage::STORAGE_IMAGE_READONLY:
         info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         memoryDesc.usage_ = MemoryUsage::STORAGE;
         break;

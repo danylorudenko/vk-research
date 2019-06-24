@@ -83,7 +83,7 @@ DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(
     }
 
     VkDescriptorSetLayoutBinding bindings[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-    for (auto i = 0u; i < desc.membersCount_; ++i) {
+    for (std::uint32_t i = 0u; i < desc.membersCount_; ++i) {
         bindings[i].pImmutableSamplers = nullptr;
         // TODO: in the future these flags potentially will require some adjustments
         bindings[i].stageFlags = stageFlags;

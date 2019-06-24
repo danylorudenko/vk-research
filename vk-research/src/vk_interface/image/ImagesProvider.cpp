@@ -147,6 +147,7 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
         case ImageUsage::RENDER_TARGET:
         case ImageUsage::TEXTURE:
         case ImageUsage::STORAGE_IMAGE:
+        case ImageUsage::STORAGE_IMAGE_READONLY:
         case ImageUsage::UPLOAD_IMAGE:
             aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
             break;

@@ -3,7 +3,8 @@
 layout (set=0, binding=0, rgba8) uniform readonly image2D imageInput0;
 layout (set=0, binding=1, rgba8) uniform readonly image2D imageInput1;
 layout (set=0, binding=2, rgba8) uniform image2D imageOutput;
-layout (set=0, binding=3) uniform BlendFactor
+layout (set=0, binding=3, r8) uniform readonly image2D blurMask;
+layout (set=0, binding=4) uniform BlendFactor
 {
 	float factor_;
 } blendFactor;
@@ -17,8 +18,9 @@ void main()
 	
 	vec4 blurredInput = imageLoad(imageInput0, coords);
 	vec4 colorInput = imageLoad(imageInput1, coords);
+	float maskValue = imageLoad(blurMask, coords).r;
 	
-	vec4 result = mix(colorInput, blurredInput, blendFactor.factor_);
+	vec4 result = mix(colorInput, blurredInput, maskValue * blendFactor.factor_);
 	
 	imageStore(imageOutput, coords, result);
 }

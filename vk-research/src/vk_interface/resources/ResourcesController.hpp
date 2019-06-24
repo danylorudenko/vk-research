@@ -27,6 +27,7 @@ enum class ImageUsage
 {
     TEXTURE,
     STORAGE_IMAGE,
+    STORAGE_IMAGE_READONLY,
     RENDER_TARGET,
     DEPTH,
     STENCIL,
