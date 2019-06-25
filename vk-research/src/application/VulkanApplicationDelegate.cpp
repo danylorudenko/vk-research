@@ -191,6 +191,11 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     Data::ModelMesh testMesh = ioManager_.ReadModelMesh("LFS\\dragon.model");
 
+    if (testMesh.vertexData_.size() == 0 ||
+        testMesh.indexData_.size() == 0) {
+        std::cerr << "WARNING: LFS\\dragon.model failed to load. Consider pulling LFS forler." << std::endl;
+    }
+
     struct TestVertex
     {
         float x;
