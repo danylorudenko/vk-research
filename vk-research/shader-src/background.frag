@@ -8,5 +8,5 @@ layout(set = 0, binding = 0) uniform sampler2D backgroundTexture;
 
 void main()
 {
-	finalColor = texture(backgroundTexture, in_uv);
+	finalColor = vec4(texture(backgroundTexture, in_uv).rgb, 1.0);
 }

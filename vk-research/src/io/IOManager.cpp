@@ -122,7 +122,7 @@ Data::Texture2D IOManager::ReadTexture2D(char const* path, Data::TextureChannelV
         return std::move(texture);
     }
 
-    std::uint32_t const dataSize = x * y;
+    std::uint32_t const dataSize = x * y * desiredChannels;
     texture.textureData_.resize(dataSize);
     std::memcpy(texture.textureData_.data(), textureData, dataSize);
 

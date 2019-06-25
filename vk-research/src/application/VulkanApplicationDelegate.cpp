@@ -401,13 +401,32 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     backgroundSetLayoutDesc.membersDesc_[0].binding_ = 0;
     renderRoot_->DefineSetLayout(backgroundSetLayoutKey, backgroundSetLayoutDesc);
 
+    struct BackgroundVertex
+    {
+        float x;
+        float y;
+        float u;
+        float v;
+    };
+
+    VKW::VertexInputInfo backgroundVInfo;
+    backgroundVInfo.binding_ = 0;
+    backgroundVInfo.stride_ = sizeof(BackgroundVertex);
+    backgroundVInfo.vertexAttributesCount_ = 2;
+    backgroundVInfo.vertexAttributes_[0].location_ = 0;
+    backgroundVInfo.vertexAttributes_[0].offset_ = 0;
+    backgroundVInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32_SFLOAT;
+    backgroundVInfo.vertexAttributes_[1].location_ = 1;
+    backgroundVInfo.vertexAttributes_[1].offset_ = sizeof(float) * 2;
+    backgroundVInfo.vertexAttributes_[1].format_ = VK_FORMAT_R32G32_SFLOAT;
+
     Render::PipelineLayoutDesc backgroundLayoutDesc;
     backgroundLayoutDesc.staticMembersCount_ = 0;
     backgroundLayoutDesc.instancedMembersCount_ = 1;
     backgroundLayoutDesc.instancedMembers_[0] = backgroundSetLayoutKey;
 
     pipelineBackroundDesc.inputAssemblyInfo_ = &iaInfo;
-    pipelineBackroundDesc.vertexInputInfo_ = &vInfo;
+    pipelineBackroundDesc.vertexInputInfo_ = &backgroundVInfo;
     pipelineBackroundDesc.viewportInfo_ = &vpInfo;
     pipelineBackroundDesc.depthStencilInfo_ = &dsInfo;
     pipelineBackroundDesc.layoutDesc_ = &backgroundLayoutDesc;
@@ -423,29 +442,88 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->DefineMaterialTemplate(backgroundMaterialTemplateKey, backgroundMaterialTemplateDesc);
 
     Render::MaterialDesc backgroundMaterialDesc;
-    materialDesc.templateKey_ = backgroundMaterialTemplateKey;
+    backgroundMaterialDesc.templateKey_ = backgroundMaterialTemplateKey;
     renderRoot_->DefineMaterial(backgroundMaterialKey, backgroundMaterialDesc);
 
+    
+
     char const* backgroundVertexBufferName = "bcgvtx";
+    std::uint32_t constexpr BACKGOUND_VERTICES_COUNT = 6;
     VKW::BufferViewDesc backgroundVertexBufferDesc;
     backgroundVertexBufferDesc.format_ = VK_FORMAT_UNDEFINED;
-    backgroundVertexBufferDesc.size_ = sizeof(TestVertex) * 6;
+    backgroundVertexBufferDesc.size_ = sizeof(BackgroundVertex) * BACKGOUND_VERTICES_COUNT;
     backgroundVertexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX;
     renderRoot_->DefineGlobalBuffer(backgroundVertexBufferName, backgroundVertexBufferDesc);
 
-    kekekek
-    std::memcpy(mappedUploadBuffer, nullptr, sizeof(TestVertex) * 6);
+    BackgroundVertex backgroundVerticesData[BACKGOUND_VERTICES_COUNT];
+    backgroundVerticesData[0].x = -1.0f;
+    backgroundVerticesData[0].y = -1.0f;
+    backgroundVerticesData[0].u = 0.0f;
+    backgroundVerticesData[0].v = 0.0f;
+
+    backgroundVerticesData[1].x = 1.0f;
+    backgroundVerticesData[1].y = 1.0f;
+    backgroundVerticesData[1].u = 1.0f;
+    backgroundVerticesData[1].v = 1.0f;
+
+    backgroundVerticesData[2].x = -1.0f;
+    backgroundVerticesData[2].y = 1.0f;
+    backgroundVerticesData[2].u = 0.0f;
+    backgroundVerticesData[2].v = 1.0f;
 
 
-    Render::RenderWorkItemDesc itemDesc;
-    itemDesc.vertexBufferKey_ = vertexBufferKey;
-    itemDesc.indexBufferKey_ = indexBufferKey;
-    itemDesc.vertexCount_ = vertexDataSizeBytes / sizeof(TestVertex);
-    itemDesc.vertexBindOffset_ = 0;
-    itemDesc.indexCount_ = indexDataSizeBytes / sizeof(std::uint32_t);
-    itemDesc.indexBindOffset_ = 0;
 
-    itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 64;
+
+    backgroundVerticesData[3].x = -1.0f;
+    backgroundVerticesData[3].y = -1.0f;
+    backgroundVerticesData[3].u = 0.0f;
+    backgroundVerticesData[3].v = 0.0f;
+
+    backgroundVerticesData[5].x = 1.0f;
+    backgroundVerticesData[5].y = 1.0f;
+    backgroundVerticesData[5].u = 1.0f;
+    backgroundVerticesData[5].v = 1.0f;
+
+    backgroundVerticesData[4].x = 1.0f;
+    backgroundVerticesData[4].y = -1.0f;
+    backgroundVerticesData[4].u = 1.0f;
+    backgroundVerticesData[4].v = 0.0f;
+
+    std::memcpy(mappedUploadBuffer, backgroundVerticesData, sizeof(BackgroundVertex) * BACKGOUND_VERTICES_COUNT);
+    renderRoot_->FlushBuffer(uploadBufferKey, 0);
+    renderRoot_->CopyStagingBufferToGPUBuffer(uploadBufferKey, backgroundVertexBufferName, 0);
+
+    char const* backgroundTextureName = "bckground_texture";
+    Data::Texture2D backgroundTextureData = ioManager_.ReadTexture2D("textures\\background.jpg", Data::TextureChannelVariations::TEXTURE_VARIATION_RGBA);
+    std::memcpy(mappedUploadBuffer, backgroundTextureData.textureData_.data(), backgroundTextureData.textureData_.size());
+
+
+    VKW::ImageViewDesc backgroundTextureDesc;
+    backgroundTextureDesc.format_ = VK_FORMAT_R8G8B8A8_UNORM;
+    backgroundTextureDesc.width_ = backgroundTextureData.width_;
+    backgroundTextureDesc.height_ = backgroundTextureData.height_;
+    backgroundTextureDesc.usage_ = VKW::ImageUsage::TEXTURE;
+    renderRoot_->DefineGlobalImage(backgroundTextureName, backgroundTextureDesc);
+
+    renderRoot_->CopyStagingBufferToGPUTexture(uploadBufferKey, backgroundTextureName, 0);
+    VKW::ImageView* backgroundImageView = renderRoot_->FindGlobalImage(backgroundTextureName, 0);
+    VKW::ImageResource* backgroundImageResource = renderRoot_->ResourceProxy()->GetResource(backgroundImageView->resource_);
+    VkImageLayout backgroundImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    renderRoot_->ImageLayoutTransition(0, 1, &backgroundImageResource->handle_, &backgroundImageLayout);
+
+    Render::RenderWorkItemDesc backgroundItemDesc;
+    backgroundItemDesc.vertexBufferKey_ = backgroundVertexBufferName;
+    backgroundItemDesc.indexBufferKey_ = "";
+    backgroundItemDesc.vertexCount_ = BACKGOUND_VERTICES_COUNT;
+    backgroundItemDesc.vertexBindOffset_ = 0;
+    backgroundItemDesc.indexCount_ = 0;
+    backgroundItemDesc.indexBindOffset_ = 0;
+
+    backgroundItemDesc.setOwnerDescs_[0].members_[0].texture2D_.imageKey_ = backgroundTextureName;
+
+    renderRoot_->RegisterMaterial(backgroundMaterialKey);
+    Render::RenderWorkItemHandle backgroundRenderItemHandle = renderRoot_->ConstructRenderWorkItem(backgroundPipeKey, backgroundItemDesc);
+
 
 }
 
