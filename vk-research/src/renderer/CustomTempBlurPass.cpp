@@ -142,10 +142,9 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask0.png", Data::TEXTURE_VARIATION_GRAY);
     //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask1.jpg", Data::TEXTURE_VARIATION_GRAY);
     //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask2.jpg", Data::TEXTURE_VARIATION_GRAY);
-    Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask3.jpg", Data::TEXTURE_VARIATION_GRAY);
+    //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask3.jpg", Data::TEXTURE_VARIATION_GRAY);
     //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask4.png", Data::TEXTURE_VARIATION_GRAY);
-    //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask5.png", Data::TEXTURE_VARIATION_GRAY);
-    //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask5.png", Data::TEXTURE_VARIATION_GRAY);
+    Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask5.png", Data::TEXTURE_VARIATION_GRAY);
     //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask6.png", Data::TEXTURE_VARIATION_GRAY);
 
     char const* maskUploadImage = "msku";
