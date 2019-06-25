@@ -372,7 +372,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 
 
-    // background
+    // background pipeline, shaders, materials, renderworkitem
     Render::ShaderDesc backgroundVertexShaderDesc;
     backgroundVertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
     backgroundVertexShaderDesc.relativePath_ = "shader-src\\background.vert.spv";
@@ -417,7 +417,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     backgroundVInfo.vertexAttributes_[0].offset_ = 0;
     backgroundVInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32_SFLOAT;
     backgroundVInfo.vertexAttributes_[1].location_ = 1;
-    backgroundVInfo.vertexAttributes_[1].offset_ = sizeof(float) * 2;
+    backgroundVInfo.vertexAttributes_[1].offset_ = offsetof(BackgroundVertex, u);
     backgroundVInfo.vertexAttributes_[1].format_ = VK_FORMAT_R32G32_SFLOAT;
 
     Render::PipelineLayoutDesc backgroundLayoutDesc;
@@ -508,7 +508,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->CopyStagingBufferToGPUTexture(uploadBufferKey, backgroundTextureName, 0);
     VKW::ImageView* backgroundImageView = renderRoot_->FindGlobalImage(backgroundTextureName, 0);
     VKW::ImageResource* backgroundImageResource = renderRoot_->ResourceProxy()->GetResource(backgroundImageView->resource_);
-    VkImageLayout backgroundImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    VkImageLayout backgroundImageLayout = VK_IMAGE_LAYOUT_GENERAL;
     renderRoot_->ImageLayoutTransition(0, 1, &backgroundImageResource->handle_, &backgroundImageLayout);
 
     Render::RenderWorkItemDesc backgroundItemDesc;
@@ -523,8 +523,6 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     renderRoot_->RegisterMaterial(backgroundMaterialKey);
     Render::RenderWorkItemHandle backgroundRenderItemHandle = renderRoot_->ConstructRenderWorkItem(backgroundPipeKey, backgroundItemDesc);
-
-
 }
 
 void VulkanApplicationDelegate::InitImGui()
