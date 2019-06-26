@@ -193,7 +193,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     if (testMesh.vertexData_.size() == 0 ||
         testMesh.indexData_.size() == 0) {
-        std::cerr << "WARNING: LFS\\dragon.model failed to load. Consider pulling LFS forler." << std::endl;
+        std::cerr << "WARNING: LFS\\dragon.model failed to load. Consider pulling LFS folder." << std::endl;
     }
 
     struct TestVertex
