@@ -373,8 +373,8 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     //VKW::DescriptorSet* vkwVDescriptorSet = resourceProxy_->GetDescriptorSet(verticalDescriptorSet_, contextId);
     VKW::DescriptorSet* vkwMixDescriptorSet = resourceProxy_->GetDescriptorSet(mixDescriptorSet_, contextId);
 
-    constexpr std::uint32_t COMPUTE_LOCAL_GROUP_SIZE_X = 8;
-    constexpr std::uint32_t COMPUTE_LOCAL_GROUP_SIZE_Y = 4;
+    constexpr std::uint32_t COMPUTE_LOCAL_GROUP_SIZE_X = 10;
+    constexpr std::uint32_t COMPUTE_LOCAL_GROUP_SIZE_Y = 10;
     VkCommandBuffer cmdBuffer = commandReciever->commandBuffer_;
 
     //VkPipeline hPipleineHandle = vkwHPipeline->vkPipeline_;

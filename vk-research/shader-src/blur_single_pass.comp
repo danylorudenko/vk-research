@@ -11,14 +11,14 @@ layout (set=0, binding=3) uniform BlendFactor
 const uint BLUR_KERNEL_SIZE = 9;
 const float kernel[BLUR_KERNEL_SIZE] = { 0.106004, 0.109777, 0.112553, 0.114253, 0.114825, 0.114253, 0.112553, 0.109777, 0.106004 };
 
-shared vec3 intermediate_data[8 * 4];
+shared vec3 intermediate_data[10 * 10];
 
-layout (local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
+layout (local_size_x = 10, local_size_y = 10, local_size_z = 1) in;
 
 void main()
 {
 	ivec2 coords = ivec2(gl_GlobalInvocationID.xy);
-	uint intermediate_data_id = uint(gl_LocalInvocationID.y * 4 + gl_LocalInvocationID.x);
+	uint intermediate_data_id = uint(gl_LocalInvocationID.y * 10 + gl_LocalInvocationID.x);
 	
 	intermediate_data[intermediate_data_id] = vec3(0.0, 0.0, 0.0);
 	
@@ -29,7 +29,7 @@ void main()
 	}
 	
 	
-	memoryBarrierShared();
+	//memoryBarrierShared();
 	
 	// vertical
 	for(int i = 0; i < BLUR_KERNEL_SIZE; i++)
