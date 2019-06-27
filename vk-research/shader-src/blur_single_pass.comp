@@ -1,8 +1,9 @@
 #version 450 core
 
-layout (set=0, binding=0, rgba8) uniform readonly image2D imageInput0;
-layout (set=0, binding=1, rgba8) uniform image2D imageOutput;
-layout (set=0, binding=2, r8) uniform readonly image2D blurMask;
+layout (set=0, binding=0, rgba8) uniform readonly 	image2D imageInput0;
+layout (set=0, binding=1, rgba8) uniform 			image2D imageOutput;
+layout (set=0, binding=2, r8) uniform readonly 		image2D blurMask;
+
 layout (set=0, binding=3) uniform BlendFactor
 {
 	float factor_;
@@ -25,16 +26,13 @@ void main()
 	// horizontal
 	for(int i = 0; i < BLUR_KERNEL_SIZE; i++)
 	{
-		intermediate_data[intermediate_data_id].rgb += imageLoad(imageInput0, ivec2(coords.x + i - BLUR_KERNEL_SIZE / 2, coords.y)).rgb * kernel[i];
+		intermediate_data[intermediate_data_id].rgb += imageLoad(imageInput0, ivec2(coords.x + i - BLUR_KERNEL_SIZE / 2, coords.y)).rgb * kernel[i] / 2.0;
 	}
-	
-	
-	//memoryBarrierShared();
 	
 	// vertical
 	for(int i = 0; i < BLUR_KERNEL_SIZE; i++)
 	{
-		intermediate_data[intermediate_data_id].rgb += imageLoad(imageInput0, ivec2(coords.x, coords.y + i - BLUR_KERNEL_SIZE / 2)).rgb * kernel[i];
+		intermediate_data[intermediate_data_id].rgb += imageLoad(imageInput0, ivec2(coords.x, coords.y + i - BLUR_KERNEL_SIZE / 2)).rgb * kernel[i] / 2.0;
 	}
 	
 	

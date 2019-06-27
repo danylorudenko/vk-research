@@ -1,0 +1,58 @@
+#version 450 core
+
+layout (set=0, binding=0, rgba8) uniform readonly 	image2D imageInput0;
+layout (set=0, binding=1, rgba8) uniform 			image2D imageOutput;
+layout (set=0, binding=2, r8) uniform readonly 		image2D blurMask;
+
+layout (set=0, binding=3) uniform BlendFactor
+{
+	float factor_;
+} blendFactor;
+
+const uint BLUR_KERNEL_ROW_SIZE = 9;
+const float kernel[BLUR_KERNEL_ROW_SIZE * BLUR_KERNEL_ROW_SIZE] = { 
+	0.011237,	0.011637,	0.011931,	0.012111,	0.012172,	0.012111,	0.011931,	0.011637,	0.011237,
+	0.011637,	0.012051,	0.012356,	0.012542,	0.012605,	0.012542,	0.012356,	0.012051,	0.011637,
+	0.011931,	0.012356,	0.012668,	0.01286	,	0.012924,	0.01286	,	0.012668,	0.012356,	0.011931,
+	0.012111,	0.012542,	0.01286	,	0.013054,	0.013119,	0.013054,	0.01286	,	0.012542,	0.012111,
+	0.012172,	0.012605,	0.012924,	0.013119,	0.013185,	0.013119,	0.012924,	0.012605,	0.012172,
+	0.012111,	0.012542,	0.01286	,	0.013054,	0.013119,	0.013054,	0.01286	,	0.012542,	0.012111,
+	0.011931,	0.012356,	0.012668,	0.01286	,	0.012924,	0.01286	,	0.012668,	0.012356,	0.011931,
+	0.011637,	0.012051,	0.012356,	0.012542,	0.012605,	0.012542,	0.012356,	0.012051,	0.011637,
+	0.011237,	0.011637,	0.011931,	0.012111,	0.012172,	0.012111,	0.011931,	0.011637,	0.011237 };
+
+shared vec3 intermediate_data[10 * 10];
+
+layout (local_size_x = 10, local_size_y = 10, local_size_z = 1) in;
+
+void main()
+{
+	ivec2 coords = ivec2(gl_GlobalInvocationID.xy);
+	uint intermediate_data_id = uint(gl_LocalInvocationID.y * 10 + gl_LocalInvocationID.x);
+	
+	intermediate_data[intermediate_data_id] = vec3(0.0, 0.0, 0.0);
+	
+	const uint start_offset = BLUR_KERNEL_ROW_SIZE / 2;
+	const uint end_offset = BLUR_KERNEL_ROW_SIZE / 2 + 1;
+	
+	for(uint x = 0; x < BLUR_KERNEL_ROW_SIZE; ++x)
+	{
+		for(uint y = 0; y < BLUR_KERNEL_ROW_SIZE; ++y)
+		{
+			ivec2 coords_to_sample = ivec2(coords.x + x - 4, coords.y + y - 4);
+			intermediate_data[intermediate_data_id].rgb += imageLoad(imageInput0, coords_to_sample).rgb * kernel[y * BLUR_KERNEL_ROW_SIZE + x];
+		}
+	}
+	
+	
+	// mixing
+	vec4 colorInput = imageLoad(imageInput0, coords);
+	memoryBarrierShared();
+	vec3 blurredInput = intermediate_data[intermediate_data_id].rgb;
+	float maskValue = imageLoad(blurMask, coords).r;
+	
+	vec4 result = vec4(mix(colorInput.rgb, blurredInput, maskValue * blendFactor.factor_), colorInput.a);
+	
+	
+	imageStore(imageOutput, coords, result);
+}

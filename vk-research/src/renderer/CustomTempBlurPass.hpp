@@ -70,20 +70,15 @@ private:
 
     ResourceKey sceneColorBuffer_;
 
-    ResourceKey horizontalBlurBuffer_;
-    ResourceKey verticalBlurBuffer_;
+    ResourceKey blurBuffer_;
     ResourceKey blurMaskTexture_;
 
-    PipelineKey horizontalBlurPipeline_;
-    PipelineKey verticalBlurPipeline_;
-    PipelineKey mixPipeline_;
+    PipelineKey blurFastPipeline_;
+    PipelineKey blurFullPipeline_;
 
-    SetLayoutKey universalSetLayout_;
-    SetLayoutKey mixSetLayout_;
+    SetLayoutKey blurSetLayout_;
 
-    VKW::ProxySetHandle horizontalDescriptorSet_;
-    VKW::ProxySetHandle verticalDescriptorSet_;
-    VKW::ProxySetHandle mixDescriptorSet_;
+    VKW::ProxySetHandle blurDescriptorSet_;
 
     UniformBufferHandle mixFactorUniformBuffer_;
 };

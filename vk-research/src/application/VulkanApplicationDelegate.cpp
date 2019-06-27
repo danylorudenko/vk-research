@@ -573,6 +573,10 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         {
             ImGui::SetNextItemWidth(100.0f);
             ImGui::SliderFloat("", &IMGUI_USER_BLUR_SCALE, 0.0f, 1.0f);
+            
+            ImGui::RadioButton("Fast blur", (int*)&IMGUI_USER_BLUR, (int)IMGUI_USER_BLUR_TYPE_FAST); ImGui::SameLine();
+            ImGui::RadioButton("Full blur", (int*)&IMGUI_USER_BLUR, (int)IMGUI_USER_BLUR_TYPE_FULL); ImGui::SameLine();
+
             ImGui::End();
         }
 
