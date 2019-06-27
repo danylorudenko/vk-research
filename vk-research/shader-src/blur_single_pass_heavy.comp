@@ -21,14 +21,14 @@ const float kernel[BLUR_KERNEL_ROW_SIZE * BLUR_KERNEL_ROW_SIZE] = {
 	0.011637,	0.012051,	0.012356,	0.012542,	0.012605,	0.012542,	0.012356,	0.012051,	0.011637,
 	0.011237,	0.011637,	0.011931,	0.012111,	0.012172,	0.012111,	0.011931,	0.011637,	0.011237 };
 
-shared vec3 intermediate_data[10 * 10];
+shared vec3 intermediate_data[5 * 5];
 
-layout (local_size_x = 10, local_size_y = 10, local_size_z = 1) in;
+layout (local_size_x = 5, local_size_y = 5, local_size_z = 1) in;
 
 void main()
 {
 	ivec2 coords = ivec2(gl_GlobalInvocationID.xy);
-	uint intermediate_data_id = uint(gl_LocalInvocationID.y * 10 + gl_LocalInvocationID.x);
+	uint intermediate_data_id = uint(gl_LocalInvocationID.y * 5 + gl_LocalInvocationID.x);
 	
 	intermediate_data[intermediate_data_id] = vec3(0.0, 0.0, 0.0);
 	
