@@ -1,0 +1,51 @@
+#version 450 core
+
+layout (set=0, binding=0, rgba8) uniform readonly image2D imageInput0;
+layout (set=0, binding=1, rgba8) uniform image2D imageOutput;
+layout (set=0, binding=2, r8) uniform readonly image2D blurMask;
+layout (set=0, binding=3) uniform BlendFactor
+{
+	float factor_;
+} blendFactor;
+
+const uint BLUR_KERNEL_SIZE = 9;
+const float kernel[BLUR_KERNEL_SIZE] = { 0.106004, 0.109777, 0.112553, 0.114253, 0.114825, 0.114253, 0.112553, 0.109777, 0.106004 };
+
+shared vec3 intermediate_data[8 * 4];
+
+layout (local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
+
+void main()
+{
+	ivec2 coords = ivec2(gl_GlobalInvocationID.xy);
+	uint intermediate_data_id = uint(gl_LocalInvocationID.y * 4 + gl_LocalInvocationID.x);
+	
+	intermediate_data[intermediate_data_id] = vec3(0.0, 0.0, 0.0);
+	
+	// horizontal
+	for(int i = 0; i < BLUR_KERNEL_SIZE; i++)
+	{
+		intermediate_data[intermediate_data_id].rgb += imageLoad(imageInput0, ivec2(coords.x + i - BLUR_KERNEL_SIZE / 2, coords.y)).rgb * kernel[i];
+	}
+	
+	
+	memoryBarrierShared();
+	
+	// vertical
+	for(int i = 0; i < BLUR_KERNEL_SIZE; i++)
+	{
+		intermediate_data[intermediate_data_id].rgb += imageLoad(imageInput0, ivec2(coords.x, coords.y + i - BLUR_KERNEL_SIZE / 2)).rgb * kernel[i];
+	}
+	
+	
+	// mixing
+	vec4 colorInput = imageLoad(imageInput0, coords);
+	memoryBarrierShared();
+	vec3 blurredInput = intermediate_data[intermediate_data_id].rgb;
+	float maskValue = imageLoad(blurMask, coords).r;
+	
+	vec4 result = vec4(mix(colorInput.rgb, blurredInput, maskValue * blendFactor.factor_), colorInput.a);
+	
+	
+	imageStore(imageOutput, coords, result);
+}

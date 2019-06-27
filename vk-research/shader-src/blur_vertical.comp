@@ -3,7 +3,7 @@
 layout (set=0, binding=0, rgba8) uniform readonly image2D imageInput;
 layout (set=0, binding=1, rgba8) uniform image2D imageOutput;
 
-layout (local_size_x = 10, local_size_y = 10, local_size_z = 1) in;
+layout (local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 
 //const float kernel[9] = { 0.000229, 0.005977, 0.060598, 0.241732, 0.382928, 0.241732, 0.060598, 0.005977, 0.000229 };
 const float kernel[9] = { 0.106004, 0.109777, 0.112553, 0.114253, 0.114825, 0.114253, 0.112553, 0.109777, 0.106004 };
