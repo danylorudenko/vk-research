@@ -97,12 +97,12 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     std::uint32_t const height = sceneColorBufferResource->height_;
     VkFormat const format = sceneColorBufferResource->format_;
 
-    VKW::ImageViewDesc computeBuffersDesc;
-    computeBuffersDesc.format_ = format;
-    computeBuffersDesc.width_ = width;
-    computeBuffersDesc.height_ = height;
-    computeBuffersDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE;
-    root_->DefineGlobalImage(blurBuffer_, computeBuffersDesc);
+    VKW::ImageViewDesc blurBuffersDesc;
+    blurBuffersDesc.format_ = format;
+    blurBuffersDesc.width_ = width;
+    blurBuffersDesc.height_ = height;
+    blurBuffersDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE;
+    root_->DefineGlobalImage(blurBuffer_, blurBuffersDesc);
 
     mixFactorUniformBuffer_ = root_->AcquireUniformBuffer(8);
 
@@ -270,8 +270,8 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, contextId);
     VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
 
-    VKW::ImageView* horizontalBufferView = root_->FindGlobalImage(blurBuffer_, contextId);
-    VKW::ImageResource* horizontalBufferResource = resourceProxy_->GetResource(horizontalBufferView->resource_);
+    VKW::ImageView* blurBufferView = root_->FindGlobalImage(blurBuffer_, contextId);
+    VKW::ImageResource* blurBufferResource = resourceProxy_->GetResource(blurBufferView->resource_);
 
     VKW::DescriptorSet* vkwBlurDescriptorSet = resourceProxy_->GetDescriptorSet(blurDescriptorSet_, contextId);
 
@@ -283,7 +283,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     VkPipeline blurFullPipelineHandle = vkwBlurFullPipeline->vkPipeline_;
 
     VkImage colorBufferHandle = sceneColorBufferResource->handle_;
-    VkImage horizontalBufferHandle = horizontalBufferResource->handle_;
+    VkImage blurBufferHandle = blurBufferResource->handle_;
 
     VkPipelineLayout mixPipelineLayout = vkwBlurFastPipelineLayout->handle_;
     VkDescriptorSet mixDescriptorSetHandle = vkwBlurDescriptorSet->handle_;
@@ -300,36 +300,36 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
 
     // gettin' colorbuffer to read
-    VkImageMemoryBarrier colorBarrierIn_hBufferToGeneral[2];
-    colorBarrierIn_hBufferToGeneral[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    colorBarrierIn_hBufferToGeneral[0].pNext = nullptr;
-    colorBarrierIn_hBufferToGeneral[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    colorBarrierIn_hBufferToGeneral[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
-    colorBarrierIn_hBufferToGeneral[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    colorBarrierIn_hBufferToGeneral[0].newLayout = VK_IMAGE_LAYOUT_GENERAL;
-    colorBarrierIn_hBufferToGeneral[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBarrierIn_hBufferToGeneral[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBarrierIn_hBufferToGeneral[0].image = colorBufferHandle;
-    colorBarrierIn_hBufferToGeneral[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    colorBarrierIn_hBufferToGeneral[0].subresourceRange.baseArrayLayer = 0;
-    colorBarrierIn_hBufferToGeneral[0].subresourceRange.layerCount = 1;
-    colorBarrierIn_hBufferToGeneral[0].subresourceRange.baseMipLevel = 0;
-    colorBarrierIn_hBufferToGeneral[0].subresourceRange.levelCount = 1;
+    VkImageMemoryBarrier colorBarrierIn_bBufferToGeneral[2];
+    colorBarrierIn_bBufferToGeneral[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    colorBarrierIn_bBufferToGeneral[0].pNext = nullptr;
+    colorBarrierIn_bBufferToGeneral[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    colorBarrierIn_bBufferToGeneral[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+    colorBarrierIn_bBufferToGeneral[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorBarrierIn_bBufferToGeneral[0].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    colorBarrierIn_bBufferToGeneral[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorBarrierIn_bBufferToGeneral[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorBarrierIn_bBufferToGeneral[0].image = colorBufferHandle;
+    colorBarrierIn_bBufferToGeneral[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    colorBarrierIn_bBufferToGeneral[0].subresourceRange.baseArrayLayer = 0;
+    colorBarrierIn_bBufferToGeneral[0].subresourceRange.layerCount = 1;
+    colorBarrierIn_bBufferToGeneral[0].subresourceRange.baseMipLevel = 0;
+    colorBarrierIn_bBufferToGeneral[0].subresourceRange.levelCount = 1;
 
-    colorBarrierIn_hBufferToGeneral[1].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    colorBarrierIn_hBufferToGeneral[1].pNext = nullptr;
-    colorBarrierIn_hBufferToGeneral[1].srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    colorBarrierIn_hBufferToGeneral[1].dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-    colorBarrierIn_hBufferToGeneral[1].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    colorBarrierIn_hBufferToGeneral[1].newLayout = VK_IMAGE_LAYOUT_GENERAL;
-    colorBarrierIn_hBufferToGeneral[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBarrierIn_hBufferToGeneral[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBarrierIn_hBufferToGeneral[1].image = horizontalBufferHandle;
-    colorBarrierIn_hBufferToGeneral[1].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    colorBarrierIn_hBufferToGeneral[1].subresourceRange.baseArrayLayer = 0;
-    colorBarrierIn_hBufferToGeneral[1].subresourceRange.layerCount = 1;
-    colorBarrierIn_hBufferToGeneral[1].subresourceRange.baseMipLevel = 0;
-    colorBarrierIn_hBufferToGeneral[1].subresourceRange.levelCount = 1;
+    colorBarrierIn_bBufferToGeneral[1].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    colorBarrierIn_bBufferToGeneral[1].pNext = nullptr;
+    colorBarrierIn_bBufferToGeneral[1].srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    colorBarrierIn_bBufferToGeneral[1].dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    colorBarrierIn_bBufferToGeneral[1].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    colorBarrierIn_bBufferToGeneral[1].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    colorBarrierIn_bBufferToGeneral[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorBarrierIn_bBufferToGeneral[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorBarrierIn_bBufferToGeneral[1].image = blurBufferHandle;
+    colorBarrierIn_bBufferToGeneral[1].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    colorBarrierIn_bBufferToGeneral[1].subresourceRange.baseArrayLayer = 0;
+    colorBarrierIn_bBufferToGeneral[1].subresourceRange.layerCount = 1;
+    colorBarrierIn_bBufferToGeneral[1].subresourceRange.baseMipLevel = 0;
+    colorBarrierIn_bBufferToGeneral[1].subresourceRange.levelCount = 1;
 
     table_->vkCmdPipelineBarrier(
         cmdBuffer,
@@ -338,7 +338,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         VK_FLAGS_NONE,
         0, nullptr,
         0, nullptr,
-        2, colorBarrierIn_hBufferToGeneral
+        2, colorBarrierIn_bBufferToGeneral
     );
 
     // blur
@@ -352,36 +352,36 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
 
     // prepare to copy vertical blur results to color buffer
-    VkImageMemoryBarrier colorBufferToTransferDst_hBufferToTransferSrc[2];
-    colorBufferToTransferDst_hBufferToTransferSrc[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].pNext = nullptr;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].image = colorBufferHandle;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].subresourceRange.baseArrayLayer = 0;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].subresourceRange.layerCount = 1;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].subresourceRange.baseMipLevel = 0;
-    colorBufferToTransferDst_hBufferToTransferSrc[0].subresourceRange.levelCount = 1;
+    VkImageMemoryBarrier colorBufferToTransferDst_bBufferToTransferSrc[2];
+    colorBufferToTransferDst_bBufferToTransferSrc[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].pNext = nullptr;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].image = colorBufferHandle;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].subresourceRange.baseArrayLayer = 0;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].subresourceRange.layerCount = 1;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].subresourceRange.baseMipLevel = 0;
+    colorBufferToTransferDst_bBufferToTransferSrc[0].subresourceRange.levelCount = 1;
     
-    colorBufferToTransferDst_hBufferToTransferSrc[1].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].pNext = nullptr;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].image = horizontalBufferHandle;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].subresourceRange.baseArrayLayer = 0;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].subresourceRange.layerCount = 1;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].subresourceRange.baseMipLevel = 0;
-    colorBufferToTransferDst_hBufferToTransferSrc[1].subresourceRange.levelCount = 1;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].pNext = nullptr;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].image = blurBufferHandle;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].subresourceRange.baseArrayLayer = 0;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].subresourceRange.layerCount = 1;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].subresourceRange.baseMipLevel = 0;
+    colorBufferToTransferDst_bBufferToTransferSrc[1].subresourceRange.levelCount = 1;
     
     
     table_->vkCmdPipelineBarrier(
@@ -391,7 +391,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
         VK_FLAGS_NONE,
         0, nullptr,
         0, nullptr,
-        2, colorBufferToTransferDst_hBufferToTransferSrc
+        2, colorBufferToTransferDst_bBufferToTransferSrc
     );
     
     //// putting results to color buffer
@@ -401,7 +401,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     toColorBlitDesc.srcSubresource.baseArrayLayer = 0;
     toColorBlitDesc.srcSubresource.layerCount = 1;
     toColorBlitDesc.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
-    toColorBlitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)horizontalBufferResource->width_, (std::int32_t)horizontalBufferResource->height_, 1 };
+    toColorBlitDesc.srcOffsets[1] = VkOffset3D{ (std::int32_t)blurBufferResource->width_, (std::int32_t)blurBufferResource->height_, 1 };
     
     
     toColorBlitDesc.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -413,7 +413,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     
     table_->vkCmdBlitImage(
         cmdBuffer,
-        horizontalBufferHandle,
+        blurBufferHandle,
         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
         colorBufferHandle,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
