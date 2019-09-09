@@ -139,7 +139,6 @@
     <ClCompile Include="src\application\ImGuiHelper.cpp" />
     <ClCompile Include="src\application\ImGuiUserData.cpp" />
     <ClCompile Include="src\application\VulkanApplicationDelegate.cpp" />
-    <ClCompile Include="src\class_features\ContinuousDataStorage.cpp" />
     <ClCompile Include="src\input\InputSystem.cpp" />
     <ClCompile Include="src\input\Keyboard.cpp" />
     <ClCompile Include="src\io\IOManager.cpp" />
@@ -164,7 +163,6 @@
     <ClCompile Include="src\vk_interface\pipeline\RenderPassController.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\ShaderModule.cpp" />
     <ClCompile Include="src\vk_interface\pipeline\ShaderModuleFactory.cpp" />
-    <ClCompile Include="src\vk_interface\ResourceRendererProxy.cpp" />
     <ClCompile Include="src\vk_interface\resources\DynamicResourcesStorage.cpp" />
     <ClCompile Include="src\vk_interface\resources\Resource.cpp" />
     <ClCompile Include="src\vk_interface\resources\ResourcesController.cpp" />
@@ -175,7 +173,6 @@
     <ClCompile Include="src\vk_interface\resources\FramebufferController.cpp" />
     <ClCompile Include="src\vk_interface\runtime\DescriptorSetController.cpp" />
     <ClCompile Include="src\vk_interface\runtime\PresentationController.cpp" />
-    <ClCompile Include="src\vk_interface\runtime\ResourceBindingService.cpp" />
     <ClCompile Include="src\vk_interface\Surface.cpp" />
     <ClCompile Include="src\vk_interface\Swapchain.cpp" />
     <ClCompile Include="src\vk_interface\worker\Worker.cpp" />
@@ -450,7 +447,6 @@
     <ClInclude Include="src\application\VulkanApplicationDelegate.hpp" />
     <ClInclude Include="src\class_features\NonCopyable.hpp" />
     <ClInclude Include="src\class_features\NonMovable.hpp" />
-    <ClInclude Include="src\class_features\ContinuousDataStorage.hpp" />
     <ClInclude Include="src\data\ModelMesh.hpp" />
     <ClInclude Include="src\data\Texture2D.hpp" />
     <ClInclude Include="src\input\InputSystem.hpp" />
@@ -486,9 +482,6 @@
     <ClInclude Include="src\vk_interface\pipeline\RenderPassController.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\ShaderModule.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\ShaderModuleFactory.hpp" />
-    <ClInclude Include="src\vk_interface\ProxyHandles.hpp" />
-    <ClInclude Include="src\vk_interface\ResourceRendererProxy.hpp" />
-    <ClInclude Include="src\vk_interface\runtime\FramedDescriptorsHub.hpp" />
     <ClInclude Include="src\vk_interface\resources\ResourceTransferService.hpp" />
     <ClInclude Include="src\vk_interface\runtime\DescriptorSetController.hpp" />
     <ClInclude Include="src\vk_interface\runtime\PresentationController.hpp" />
@@ -503,7 +496,6 @@
     <ClInclude Include="src\vk_interface\pipeline\DescriptorLayout.hpp" />
     <ClInclude Include="src\vk_interface\resources\Framebuffer.hpp" />
     <ClInclude Include="src\vk_interface\resources\FramebufferController.hpp" />
-    <ClInclude Include="src\vk_interface\runtime\ResourceBindingService.hpp" />
     <ClInclude Include="src\vk_interface\pipeline\DescriptorLayoutController.hpp" />
     <ClInclude Include="src\vk_interface\Tools.hpp" />
     <ClInclude Include="src\vk_interface\VkInterfaceConstants.hpp" />
