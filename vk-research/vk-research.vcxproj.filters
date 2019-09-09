@@ -141,9 +141,6 @@
     <ClCompile Include="include\glm\detail\glm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\UniformBufferWriterProxy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\transform\TransformationSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -363,9 +360,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\RootDef.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\SetLayout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\RendererPipeline.hpp">
@@ -1094,15 +1088,6 @@
     <ClInclude Include="include\glm\vector_relational.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\UniformBuffer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\RendererDescriptorSet.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\RendererDescriptorSetScope.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\renderer\Material.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1112,13 +1097,7 @@
     <ClInclude Include="src\renderer\Shader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\RendererDescriptorSetsOwner.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\renderer\RenderWorkItem.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\UniformBufferWriterProxy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\transform\TansformComponent.hpp">
@@ -1158,9 +1137,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\input\Keyboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\GraphResourceTransition.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\ResourceUsage.hpp">

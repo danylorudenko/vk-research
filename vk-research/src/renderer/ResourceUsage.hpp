@@ -4,7 +4,7 @@
 
 namespace Render
 {
-    using ResourceUsage == std::uint64_t;
+    using ResourceUsage = std::uint64_t;
 
     enum ResourceUsageBits
     {
