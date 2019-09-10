@@ -1,8 +1,8 @@
 #pragma once
 
 #include "..\class_features\NonCopyable.hpp"
-#include "..\vk_interface\pipeline\RenderPassController.hpp"
-#include "..\vk_interface\ResourceRendererProxy.hpp"
+#include "..\VAL\pipeline\RenderPassController.hpp"
+#include "..\VAL\ResourceRendererProxy.hpp"
 #include "Material.hpp"
 #include "RootDef.hpp"
 
@@ -30,9 +30,9 @@ class BasePass
     : public NonCopyable
 {
 public:
-    virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
-    virtual void Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
-    virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) = 0;
+    virtual void Begin(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) = 0;
+    virtual void Apply(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) = 0;
+    virtual void End(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) = 0;
 };
 
 
@@ -40,15 +40,15 @@ struct GraphicsPassDesc
 {
     Root* root_;
 
-    VKW::ImportTable* table_;
-    VKW::Device* device_;
+    VAL::ImportTable* table_;
+    VAL::Device* device_;
 
-    VKW::ResourceRendererProxy* proxy_;
-    VKW::RenderPassController* renderPassController_;
-    VKW::PipelineFactory* pipelineFactory_;
-    VKW::DescriptorLayoutController* descriptorLayoutController_;
-    VKW::FramedDescriptorsHub* framedDescriptorsHub_;
-    VKW::ImagesProvider* imagesProvider_;
+    VAL::ResourceRendererProxy* proxy_;
+    VAL::RenderPassController* renderPassController_;
+    VAL::PipelineFactory* pipelineFactory_;
+    VAL::DescriptorLayoutController* descriptorLayoutController_;
+    VAL::FramedDescriptorsHub* framedDescriptorsHub_;
+    VAL::ImagesProvider* imagesProvider_;
 
     std::uint32_t width_;
     std::uint32_t height_;
@@ -56,11 +56,11 @@ struct GraphicsPassDesc
     std::uint32_t colorAttachmentCount_;
     struct ColorAttachment
     {
-        VKW::ProxyImageHandle handle_;
-        VKW::RenderPassAttachmentUsage usage_;
+        VAL::ProxyImageHandle handle_;
+        VAL::RenderPassAttachmentUsage usage_;
     }
-    colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
-    VKW::ProxyImageHandle* depthStencilAttachment_;
+    colorAttachments_[VAL::RenderPass::MAX_COLOR_ATTACHMENTS];
+    VAL::ProxyImageHandle* depthStencilAttachment_;
     
 };
 
@@ -74,11 +74,11 @@ public:
     GraphicsPass& operator=(GraphicsPass&& rhs);
     ~GraphicsPass();
 
-    VKW::RenderPassHandle VKWRenderPass() const;
+    VAL::RenderPassHandle VKWRenderPass() const;
 
-    virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
-    virtual void Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
-    virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void Begin(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void Apply(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void End(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) override;
 
     void RegisterMaterialData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey);
 
@@ -97,16 +97,16 @@ private:
 
     Root* root_;
 
-    VKW::ImportTable* table_;
-    VKW::Device* device_;
+    VAL::ImportTable* table_;
+    VAL::Device* device_;
 
-    VKW::ResourceRendererProxy* resourceProxy_;
-    VKW::RenderPassController* renderPassController_;
-    VKW::PipelineFactory* pipelineFactory_;
-    VKW::DescriptorLayoutController* descriptorLayoutController_;
+    VAL::ResourceRendererProxy* resourceProxy_;
+    VAL::RenderPassController* renderPassController_;
+    VAL::PipelineFactory* pipelineFactory_;
+    VAL::DescriptorLayoutController* descriptorLayoutController_;
 
-    VKW::RenderPassHandle vkRenderPass_;
-    VKW::ProxyFramebufferHandle framebuffer_;
+    VAL::RenderPassHandle vkRenderPass_;
+    VAL::ProxyFramebufferHandle framebuffer_;
     std::uint32_t width_;
     std::uint32_t height_;
 
@@ -118,15 +118,15 @@ struct ComputePassDesc
 {
     Root* root_;
 
-    VKW::ImportTable* table_;
-    VKW::Device* device_;
+    VAL::ImportTable* table_;
+    VAL::Device* device_;
 
-    VKW::ResourceRendererProxy* proxy_;
-    VKW::RenderPassController* renderPassController_;
-    VKW::PipelineFactory* pipelineFactory_;
-    VKW::DescriptorLayoutController* descriptorLayoutController_;
-    VKW::FramedDescriptorsHub* framedDescriptorsHub_;
-    VKW::ImagesProvider* imagesProvider_;
+    VAL::ResourceRendererProxy* proxy_;
+    VAL::RenderPassController* renderPassController_;
+    VAL::PipelineFactory* pipelineFactory_;
+    VAL::DescriptorLayoutController* descriptorLayoutController_;
+    VAL::FramedDescriptorsHub* framedDescriptorsHub_;
+    VAL::ImagesProvider* imagesProvider_;
 };
 
 enum ComputePassResourceUsage
@@ -150,9 +150,9 @@ public:
 
     ~ComputePass();
 
-    virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
-    virtual void Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
-    virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void Begin(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void Apply(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void End(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) override;
 
     void RegisterMaterialData(MaterialKey const& materialKey, std::uint32_t materialPerPassDataId, PipelineKey const& pipelineKey);
     void RegisterResourceUsage(ResourceKey const& key, ComputePassResourceUsage usage);
@@ -182,12 +182,12 @@ private:
 private:
     Root* root_;
 
-    VKW::ImportTable* table_;
-    VKW::Device* device_;
+    VAL::ImportTable* table_;
+    VAL::Device* device_;
 
-    VKW::ResourceRendererProxy* resourceProxy_;
-    VKW::PipelineFactory* pipelineFactory_;
-    VKW::DescriptorLayoutController* descriptorLayoutController_;
+    VAL::ResourceRendererProxy* resourceProxy_;
+    VAL::PipelineFactory* pipelineFactory_;
+    VAL::DescriptorLayoutController* descriptorLayoutController_;
 
     std::vector<MaterialDelegatedData> materialDelegatedData_;
     std::vector<ResourceUsageData> resourceUsageInfos_;

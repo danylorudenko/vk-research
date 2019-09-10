@@ -1,8 +1,8 @@
 #include "CustomTempBlurPass.hpp"
 #include "Root.hpp"
-#include "..\vk_interface\pipeline\ShaderModuleFactory.hpp"
-#include "..\vk_interface\worker\Worker.hpp"
-#include "..\vk_interface\Swapchain.hpp"
+#include "..\VAL\pipeline\ShaderModuleFactory.hpp"
+#include "..\VAL\worker\Worker.hpp"
+#include "..\VAL\Swapchain.hpp"
 #include "..\renderer\UniformBufferWriterProxy.hpp"
 #include "..\application\ImGuiUserData.hpp"
 #include "..\io\IOManager.hpp"
@@ -45,16 +45,16 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     , blurSetLayout_{ "mxlt"}
 {
     // allocating necessary api objects
-    VKW::DescriptorSetLayoutDesc blurSetLayoutDesc;
-    blurSetLayoutDesc.stage_ = VKW::DescriptorStage::COMPUTE;
+    VAL::DescriptorSetLayoutDesc blurSetLayoutDesc;
+    blurSetLayoutDesc.stage_ = VAL::DescriptorStage::COMPUTE;
     blurSetLayoutDesc.membersCount_ = 4;
-    blurSetLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    blurSetLayoutDesc.membersDesc_[0].type_ = VAL::DESCRIPTOR_TYPE_STORAGE_IMAGE;
     blurSetLayoutDesc.membersDesc_[0].binding_ = 0;
-    blurSetLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    blurSetLayoutDesc.membersDesc_[1].type_ = VAL::DESCRIPTOR_TYPE_STORAGE_IMAGE;
     blurSetLayoutDesc.membersDesc_[1].binding_ = 1;
-    blurSetLayoutDesc.membersDesc_[2].type_ = VKW::DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    blurSetLayoutDesc.membersDesc_[2].type_ = VAL::DESCRIPTOR_TYPE_STORAGE_IMAGE;
     blurSetLayoutDesc.membersDesc_[2].binding_ = 2;
-    blurSetLayoutDesc.membersDesc_[3].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    blurSetLayoutDesc.membersDesc_[3].type_ = VAL::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     blurSetLayoutDesc.membersDesc_[3].binding_ = 3;
 
     root_->DefineSetLayout(blurSetLayout_, blurSetLayoutDesc);
@@ -65,17 +65,17 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     mixPipelineLayoutDesc.staticMembers_[0] = blurSetLayout_;
 
 
-    VKW::ShaderModuleDesc blurFastModuleDesc;
-    blurFastModuleDesc.type_ = VKW::SHADER_MODULE_TYPE_COMPUTE;
+    VAL::ShaderModuleDesc blurFastModuleDesc;
+    blurFastModuleDesc.type_ = VAL::SHADER_MODULE_TYPE_COMPUTE;
     blurFastModuleDesc.shaderPath_ = "shader-src\\blur_single_pass.comp.spv";
 
-    VKW::ShaderModuleDesc blurFullModuleDesc;
-    blurFullModuleDesc.type_ = VKW::SHADER_MODULE_TYPE_COMPUTE;
+    VAL::ShaderModuleDesc blurFullModuleDesc;
+    blurFullModuleDesc.type_ = VAL::SHADER_MODULE_TYPE_COMPUTE;
     blurFullModuleDesc.shaderPath_ = "shader-src\\blur_single_pass_heavy.comp.spv";
 
 
-    VKW::ShaderModuleHandle blurFastModuleHandle = shaderModuleFactory_->LoadModule(blurFastModuleDesc);
-    VKW::ShaderModuleHandle blurFullModuleHandle = shaderModuleFactory_->LoadModule(blurFullModuleDesc);
+    VAL::ShaderModuleHandle blurFastModuleHandle = shaderModuleFactory_->LoadModule(blurFastModuleDesc);
+    VAL::ShaderModuleHandle blurFullModuleHandle = shaderModuleFactory_->LoadModule(blurFullModuleDesc);
 
     ComputePipelineDesc blurFastPipelineDesc;
     blurFastPipelineDesc.optimized_ = true;
@@ -90,18 +90,18 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     root_->DefineComputePipeline(blurFastPipeline_, blurFastPipelineDesc);
     root_->DefineComputePipeline(blurFullPipeline_, blurFullPipelineDesc);
 
-    VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, 0);
-    VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
+    VAL::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, 0);
+    VAL::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
 
     std::uint32_t const width = sceneColorBufferResource->width_;
     std::uint32_t const height = sceneColorBufferResource->height_;
     VkFormat const format = sceneColorBufferResource->format_;
 
-    VKW::ImageViewDesc computeBuffersDesc;
+    VAL::ImageViewDesc computeBuffersDesc;
     computeBuffersDesc.format_ = format;
     computeBuffersDesc.width_ = width;
     computeBuffersDesc.height_ = height;
-    computeBuffersDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE;
+    computeBuffersDesc.usage_ = VAL::ImageUsage::STORAGE_IMAGE;
     root_->DefineGlobalImage(blurBuffer_, computeBuffersDesc);
 
     mixFactorUniformBuffer_ = root_->AcquireUniformBuffer(8);
@@ -114,15 +114,15 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask4.png", Data::TEXTURE_VARIATION_GRAY);
 
     char const* maskUploadImage = "msku";
-    VKW::ImageViewDesc maskUploadImageDesc;
+    VAL::ImageViewDesc maskUploadImageDesc;
     maskUploadImageDesc.format_ = VK_FORMAT_R8_UNORM;
-    maskUploadImageDesc.usage_ = VKW::ImageUsage::UPLOAD_IMAGE;
+    maskUploadImageDesc.usage_ = VAL::ImageUsage::UPLOAD_IMAGE;
     maskUploadImageDesc.width_ = maskTexture2DData.width_;
     maskUploadImageDesc.height_ = maskTexture2DData.height_;
     root_->DefineGlobalImage(maskUploadImage, maskUploadImageDesc);
 
-    VKW::ImageView* maskUploadImageView = root_->FindGlobalImage(maskUploadImage, 0);
-    VKW::ImageResource* maskUploadImageResource = resourceProxy_->GetResource(maskUploadImageView->resource_);
+    VAL::ImageView* maskUploadImageView = root_->FindGlobalImage(maskUploadImage, 0);
+    VAL::ImageResource* maskUploadImageResource = resourceProxy_->GetResource(maskUploadImageView->resource_);
 
     VkImageSubresource maskSubresource;
     maskSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -144,13 +144,13 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     root_->FlushImage(maskUploadImage, 0);
 
 
-    VKW::ImageView* colorBufferImageView = root_->FindGlobalImage(sceneColorBuffer_, 0);
-    VKW::ImageResource* colorBufferResource = resourceProxy_->GetResource(colorBufferImageView->resource_);
-    VKW::ImageViewDesc maskImageDesc;
+    VAL::ImageView* colorBufferImageView = root_->FindGlobalImage(sceneColorBuffer_, 0);
+    VAL::ImageResource* colorBufferResource = resourceProxy_->GetResource(colorBufferImageView->resource_);
+    VAL::ImageViewDesc maskImageDesc;
     maskImageDesc.format_ = VK_FORMAT_R8_UNORM;
     maskImageDesc.width_ = colorBufferResource->width_;
     maskImageDesc.height_ = colorBufferResource->height_;
-    maskImageDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE_READONLY;
+    maskImageDesc.usage_ = VAL::ImageUsage::STORAGE_IMAGE_READONLY;
     root_->DefineGlobalImage(blurMaskTexture_, maskImageDesc);
     root_->BlitImages(maskUploadImage, blurMaskTexture_, 0, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_READ_BIT);
 
@@ -158,14 +158,14 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
 
 
     // transitioning pass image to neede IMAGE_LAYOUTs
-    VkImage transitionImages[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
-    VkImageLayout imageLayouts[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+    VkImage transitionImages[VAL::CONSTANTS::MAX_FRAMES_BUFFERING];
+    VkImageLayout imageLayouts[VAL::CONSTANTS::MAX_FRAMES_BUFFERING];
 
     std::uint32_t const framesCount = resourceProxy_->FramesCount();
     for (std::uint32_t i = 0; i < framesCount; ++i)
     {
-        VKW::ImageView* blurBufferImageView = root_->FindGlobalImage(blurBuffer_, i);
-        VKW::ImageResource* blurBufferImageResource = resourceProxy_->GetResource(blurBufferImageView->resource_);
+        VAL::ImageView* blurBufferImageView = root_->FindGlobalImage(blurBuffer_, i);
+        VAL::ImageResource* blurBufferImageResource = resourceProxy_->GetResource(blurBufferImageView->resource_);
         transitionImages[i] = blurBufferImageResource->handle_;
         imageLayouts[i] = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
     }
@@ -176,26 +176,26 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     
     blurDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(blurSetLayout_).vkwSetLayoutHandle_);
     
-    VKW::ProxyDescriptorWriteDesc blurSetDesc[5];
+    VAL::ProxyDescriptorWriteDesc blurSetDesc[5];
     for (std::uint32_t i = 0; i < framesCount; ++i) 
     {
         // color input
-        VKW::ProxyImageHandle colorBufferImageHandle = root_->FindGlobalImage(sceneColorBuffer_);
+        VAL::ProxyImageHandle colorBufferImageHandle = root_->FindGlobalImage(sceneColorBuffer_);
         blurSetDesc[0].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(colorBufferImageHandle, i);
         blurSetDesc[0].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
 
         // output
-        VKW::ProxyImageHandle horizontalProxyImageHandle = root_->FindGlobalImage(blurBuffer_);
+        VAL::ProxyImageHandle horizontalProxyImageHandle = root_->FindGlobalImage(blurBuffer_);
         blurSetDesc[1].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(horizontalProxyImageHandle, i);
         blurSetDesc[1].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
 
-        VKW::ProxyImageHandle blurMaskProxyImageHandle = root_->FindGlobalImage(blurMaskTexture_);
+        VAL::ProxyImageHandle blurMaskProxyImageHandle = root_->FindGlobalImage(blurMaskTexture_);
         blurSetDesc[2].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(blurMaskProxyImageHandle, i);
         blurSetDesc[2].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
 
         UniformBuffer& mixFactorUniformBuffer = root_->FindUniformBuffer(mixFactorUniformBuffer_);
-        VKW::BufferViewHandle mixFactorBufferHandle = resourceProxy_->GetBufferViewHandle(mixFactorUniformBuffer.proxyBufferViewHandle_, i);
-        VKW::BufferView* mixFactorBufferView = resourceProxy_->GetBufferView(mixFactorUniformBuffer.proxyBufferViewHandle_, i);
+        VAL::BufferViewHandle mixFactorBufferHandle = resourceProxy_->GetBufferViewHandle(mixFactorUniformBuffer.proxyBufferViewHandle_, i);
+        VAL::BufferView* mixFactorBufferView = resourceProxy_->GetBufferView(mixFactorUniformBuffer.proxyBufferViewHandle_, i);
         blurSetDesc[3].frames_[i].pureBufferDesc_.pureBufferViewHandle_ = mixFactorBufferHandle;
         blurSetDesc[3].frames_[i].pureBufferDesc_.offset_ = 0;
         blurSetDesc[3].frames_[i].pureBufferDesc_.size_ = (std::uint32_t)mixFactorBufferView->size_;
@@ -253,27 +253,27 @@ CustomTempBlurPass::~CustomTempBlurPass()
 
 }
 
-void CustomTempBlurPass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void CustomTempBlurPass::Begin(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever)
 {
 
 }
 
-void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void CustomTempBlurPass::Apply(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever)
 {
     Pipeline& blurFastPipeline = root_->FindPipeline(blurFastPipeline_);
     Pipeline& blurFullPipeline = root_->FindPipeline(blurFullPipeline_);
-    VKW::Pipeline* vkwBlurFastPipeline = pipelineFactory_->GetPipeline(blurFastPipeline.pipelineHandle_);
-    VKW::Pipeline* vkwBlurFullPipeline = pipelineFactory_->GetPipeline(blurFullPipeline.pipelineHandle_);
-    VKW::PipelineLayout* vkwBlurFastPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwBlurFastPipeline->layoutHandle);
+    VAL::Pipeline* vkwBlurFastPipeline = pipelineFactory_->GetPipeline(blurFastPipeline.pipelineHandle_);
+    VAL::Pipeline* vkwBlurFullPipeline = pipelineFactory_->GetPipeline(blurFullPipeline.pipelineHandle_);
+    VAL::PipelineLayout* vkwBlurFastPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwBlurFastPipeline->layoutHandle);
 
 
-    VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, contextId);
-    VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
+    VAL::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, contextId);
+    VAL::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
 
-    VKW::ImageView* horizontalBufferView = root_->FindGlobalImage(blurBuffer_, contextId);
-    VKW::ImageResource* horizontalBufferResource = resourceProxy_->GetResource(horizontalBufferView->resource_);
+    VAL::ImageView* horizontalBufferView = root_->FindGlobalImage(blurBuffer_, contextId);
+    VAL::ImageResource* horizontalBufferResource = resourceProxy_->GetResource(horizontalBufferView->resource_);
 
-    VKW::DescriptorSet* vkwBlurDescriptorSet = resourceProxy_->GetDescriptorSet(blurDescriptorSet_, contextId);
+    VAL::DescriptorSet* vkwBlurDescriptorSet = resourceProxy_->GetDescriptorSet(blurDescriptorSet_, contextId);
 
     constexpr std::uint32_t COMPUTE_LOCAL_GROUP_SIZE_X = 5;
     constexpr std::uint32_t COMPUTE_LOCAL_GROUP_SIZE_Y = 5;
@@ -449,7 +449,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     );
 }
 
-void CustomTempBlurPass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void CustomTempBlurPass::End(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever)
 {
 
 }

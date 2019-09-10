@@ -66,10 +66,10 @@ public:
 
     ~Device();
 
-    VKW::Device::PhysicalDeviceProperties const& Properties() const;
+    VAL::Device::PhysicalDeviceProperties const& Properties() const;
     
     std::uint32_t QueueFamilyCount() const;
-    VKW::DeviceQueueFamilyInfo const& GetQueueFamily(std::uint32_t index) const;
+    VAL::DeviceQueueFamilyInfo const& GetQueueFamily(std::uint32_t index) const;
 
     VkDevice Handle() const;
     VkPhysicalDevice PhysicalDeviceHandle() const;
@@ -79,16 +79,16 @@ public:
 
 private:
     static void PrintPhysicalDeviceData(
-        VKW::Device::PhysicalDeviceProperties const& deviceProperties);
+        VAL::Device::PhysicalDeviceProperties const& deviceProperties);
 
     bool IsPhysicalDeviceValid(
-        VKW::Device::PhysicalDeviceProperties const& deviceProperties,
+        VAL::Device::PhysicalDeviceProperties const& deviceProperties,
         std::vector<std::string> const& requiredExtensions
     );
 
     void RequestDeviceProperties(
         VkPhysicalDevice targetDevice,
-        VKW::Device::PhysicalDeviceProperties& deviceProperties
+        VAL::Device::PhysicalDeviceProperties& deviceProperties
     );
 
 private:
@@ -96,7 +96,7 @@ private:
     ImportTable* table_;
 
     VkPhysicalDevice physicalDevice_;
-    VKW::Device::PhysicalDeviceProperties physicalDeviceProperties_;
+    VAL::Device::PhysicalDeviceProperties physicalDeviceProperties_;
 
     std::vector<DeviceQueueFamilyInfo> queueInfo_;
 };

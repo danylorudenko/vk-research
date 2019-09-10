@@ -17,9 +17,9 @@ struct MaterialTemplate
         PipelineKey pipelineKey_;
 
         std::uint32_t materialLayoutKeysCount_;
-        SetLayoutKey materialLayoutKeys_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+        SetLayoutKey materialLayoutKeys_[VAL::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
         std::uint32_t renderitemLayoutKeysCount_;
-        SetLayoutKey renderitemLayoutKeys_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+        SetLayoutKey renderitemLayoutKeys_[VAL::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     } perPassData_[MATERIAL_TEMPLATE_PASS_LIMIT];
 };
 

@@ -54,38 +54,38 @@ public:
 
     std::unique_ptr<DynamicLibrary> vulkanLibrary_;
 
-    std::unique_ptr<VKW::ImportTable> table_;
+    std::unique_ptr<VAL::ImportTable> table_;
 
-    std::unique_ptr<VKW::Instance> instance_;
-    std::unique_ptr<VKW::Device> device_;
-    std::unique_ptr<VKW::Surface> surface_;
-    std::unique_ptr<VKW::Swapchain> swapchain_;
+    std::unique_ptr<VAL::Instance> instance_;
+    std::unique_ptr<VAL::Device> device_;
+    std::unique_ptr<VAL::Surface> surface_;
+    std::unique_ptr<VAL::Swapchain> swapchain_;
 
-    std::unique_ptr<VKW::MemoryController> memoryController_;
-    std::unique_ptr<VKW::ResourcesController> resourcesController_;
+    std::unique_ptr<VAL::MemoryController> memoryController_;
+    std::unique_ptr<VAL::ResourcesController> resourcesController_;
 
-    std::unique_ptr<VKW::BuffersProvider> buffersProvider_;
-    std::unique_ptr<VKW::ImagesProvider> imagesProvider_;
+    std::unique_ptr<VAL::BuffersProvider> buffersProvider_;
+    std::unique_ptr<VAL::ImagesProvider> imagesProvider_;
 
-    std::unique_ptr<VKW::DescriptorLayoutController> descriptorLayoutController_;
-    std::unique_ptr<VKW::DescriptorSetController> descriptorSetController_;
+    std::unique_ptr<VAL::DescriptorLayoutController> descriptorLayoutController_;
+    std::unique_ptr<VAL::DescriptorSetController> descriptorSetController_;
 
-    std::unique_ptr<VKW::FramedDescriptorsHub> framedDescriptorsHub_;
+    std::unique_ptr<VAL::FramedDescriptorsHub> framedDescriptorsHub_;
 
-    std::unique_ptr<VKW::RenderPassController> renderPassController_;
-    std::unique_ptr<VKW::FramebufferController> framebufferController_;
+    std::unique_ptr<VAL::RenderPassController> renderPassController_;
+    std::unique_ptr<VAL::FramebufferController> framebufferController_;
 
-    std::unique_ptr<VKW::ResourceRendererProxy> resourceRendererProxy_;
+    std::unique_ptr<VAL::ResourceRendererProxy> resourceRendererProxy_;
 
-    std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;
-    std::unique_ptr<VKW::PipelineFactory> pipelineFactory_;
+    std::unique_ptr<VAL::ShaderModuleFactory> shaderModuleFactory_;
+    std::unique_ptr<VAL::PipelineFactory> pipelineFactory_;
 
-    std::unique_ptr<VKW::WorkersProvider> workersProvider_;
+    std::unique_ptr<VAL::WorkersProvider> workersProvider_;
 
-    std::unique_ptr<VKW::PresentationController> presentationController_;
+    std::unique_ptr<VAL::PresentationController> presentationController_;
 
 
-    //std::unique_ptr<VKW::ResourceBindingService> resourceBindingService_;
+    //std::unique_ptr<VAL::ResourceBindingService> resourceBindingService_;
 
 };
 

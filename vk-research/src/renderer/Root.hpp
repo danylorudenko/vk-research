@@ -7,14 +7,14 @@
 #include <memory>
 
 #include "RootDef.hpp"
-#include "..\vk_interface\ProxyHandles.hpp"
-#include "..\vk_interface\buffer\BuffersProvider.hpp"
-#include "..\vk_interface\image\ImagesProvider.hpp"
-#include "..\vk_interface\pipeline\RenderPassController.hpp"
-#include "..\vk_interface\pipeline\DescriptorLayoutController.hpp"
-#include "..\vk_interface\pipeline\ShaderModuleFactory.hpp"
-#include "..\vk_interface\pipeline\PipelineFactory.hpp"
-#include "..\vk_interface\runtime\PresentationController.hpp"
+#include "..\VAL\ProxyHandles.hpp"
+#include "..\VAL\buffer\BuffersProvider.hpp"
+#include "..\VAL\image\ImagesProvider.hpp"
+#include "..\VAL\pipeline\RenderPassController.hpp"
+#include "..\VAL\pipeline\DescriptorLayoutController.hpp"
+#include "..\VAL\pipeline\ShaderModuleFactory.hpp"
+#include "..\VAL\pipeline\PipelineFactory.hpp"
+#include "..\VAL\runtime\PresentationController.hpp"
 
 #include "Shader.hpp"
 #include "MaterialTemplate.hpp"
@@ -43,9 +43,9 @@ struct RootGraphicsPassDesc
     struct ColorAttachment
     {
         ResourceKey resourceKey_;
-        VKW::RenderPassAttachmentUsage usage_;
+        VAL::RenderPassAttachmentUsage usage_;
     }
-    colorAttachments_[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
+    colorAttachments_[VAL::RenderPass::MAX_COLOR_ATTACHMENTS];
     ResourceKey depthStencilAttachment_;
 };
 
@@ -56,30 +56,30 @@ struct RootComputePassDesc
 
 struct RootDesc
 {
-    VKW::Loader* loader_;
-    VKW::ResourceRendererProxy* resourceProxy_;
-    VKW::RenderPassController* renderPassController_;
-    VKW::ImagesProvider* imagesProvider_;
-    VKW::FramedDescriptorsHub* framedDescriptorsHub_;
-    VKW::DescriptorLayoutController* layoutController_;
-    VKW::ShaderModuleFactory* shaderModuleFactory_;
-    VKW::PipelineFactory* pipelineFactory_;
-    VKW::PresentationController* presentationController_;
-    VKW::Worker* mainWorkerTemp_;
+    VAL::Loader* loader_;
+    VAL::ResourceRendererProxy* resourceProxy_;
+    VAL::RenderPassController* renderPassController_;
+    VAL::ImagesProvider* imagesProvider_;
+    VAL::FramedDescriptorsHub* framedDescriptorsHub_;
+    VAL::DescriptorLayoutController* layoutController_;
+    VAL::ShaderModuleFactory* shaderModuleFactory_;
+    VAL::PipelineFactory* pipelineFactory_;
+    VAL::PresentationController* presentationController_;
+    VAL::Worker* mainWorkerTemp_;
 };
 
 struct ShaderDesc
 {
-    VKW::ShaderModuleType type_;
+    VAL::ShaderModuleType type_;
     std::string relativePath_;
 };
 
 struct PipelineLayoutDesc
 {
     std::uint32_t staticMembersCount_;
-    SetLayoutKey staticMembers_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+    SetLayoutKey staticMembers_[VAL::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     std::uint32_t instancedMembersCount_;
-    SetLayoutKey instancedMembers_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+    SetLayoutKey instancedMembers_[VAL::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
 };
 
 
@@ -88,14 +88,14 @@ struct GraphicsPipelineDesc
     bool optimized_;
 
     std::uint32_t shaderStagesCount_;
-    ShaderKey shaderStages_[VKW::Pipeline::MAX_SHADER_STAGES];
+    ShaderKey shaderStages_[VAL::Pipeline::MAX_SHADER_STAGES];
 
-    VKW::InputAssemblyInfo* inputAssemblyInfo_;
-    VKW::VertexInputInfo* vertexInputInfo_;
-    VKW::ViewportInfo* viewportInfo_;
-    VKW::DepthStencilInfo* depthStencilInfo_;
-    std::uint32_t dynamicStateFlags_;  // VKW::PipelineDynamicStateFlags
-    std::uint32_t blendingState_; // VKW::PipelineBlendingState
+    VAL::InputAssemblyInfo* inputAssemblyInfo_;
+    VAL::VertexInputInfo* vertexInputInfo_;
+    VAL::ViewportInfo* viewportInfo_;
+    VAL::DepthStencilInfo* depthStencilInfo_;
+    std::uint32_t dynamicStateFlags_;  // VAL::PipelineDynamicStateFlags
+    std::uint32_t blendingState_; // VAL::PipelineBlendingState
 
     PipelineLayoutDesc* layoutDesc_;
     PassKey renderPass_;
@@ -104,7 +104,7 @@ struct GraphicsPipelineDesc
 struct ComputePipelineDesc
 {
     bool optimized_;
-    VKW::ShaderStageInfo shaderStage_;
+    VAL::ShaderStageInfo shaderStage_;
     PipelineLayoutDesc* layoutDesc_;
 };
 
@@ -142,7 +142,7 @@ struct SetOwnerDesc
         Texture2DSetMemberData texture2D_;
         StorageBufferSetMemberData storageBuffer_;
     }
-    members_[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+    members_[VAL::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
 };
 
 struct MaterialDesc
@@ -150,7 +150,7 @@ struct MaterialDesc
     MaterialTemplateKey templateKey_;
     struct PerPassData
     {
-        SetOwnerDesc setOwnerDesc_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+        SetOwnerDesc setOwnerDesc_[VAL::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     } 
     perPassData_[MATERIAL_TEMPLATE_PASS_LIMIT];
 };
@@ -171,8 +171,8 @@ class Root
 {
 public:
 
-    using GlobalImagesMap = std::unordered_map<ResourceKey, VKW::ProxyImageHandle>;
-    using GlobalBuffersMap = std::unordered_map<ResourceKey, VKW::ProxyBufferHandle>;
+    using GlobalImagesMap = std::unordered_map<ResourceKey, VAL::ProxyImageHandle>;
+    using GlobalBuffersMap = std::unordered_map<ResourceKey, VAL::ProxyBufferHandle>;
     using UniformBufferMap = std::unordered_map< std::uint64_t, UniformBuffer >;
 
     using ShaderMap = std::map<ShaderKey, Shader>;
@@ -191,11 +191,11 @@ public:
     Root& operator=(Root&& rhs);
     ~Root();
 
-    VKW::ImportTable* VulkanFuncTable() const;
+    VAL::ImportTable* VulkanFuncTable() const;
 
     UniformBufferHandle AcquireUniformBuffer(std::uint32_t size);
     UniformBuffer& FindUniformBuffer(UniformBufferHandle id);
-    VKW::BufferView* FindUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
+    VAL::BufferView* FindUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
     void ReleaseUniformBuffer(UniformBufferHandle id);
     void* MapUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
     void UnmapUniformBuffer(UniformBufferHandle id, std::uint32_t frame);
@@ -207,30 +207,30 @@ public:
     void FlushImage(ResourceKey const& key, std::uint32_t frame);
 
 
-    VKW::BufferResource* GetViewResource(VKW::BufferView* view);
-    VKW::MemoryRegion* GetViewMemory(VKW::BufferView* view);
-    VKW::MemoryPage* GetViewMemoryPage(VKW::BufferView* view);
-    VKW::ImageResource* GetViewResource(VKW::ImageView* view);
-    VKW::MemoryRegion* GetViewMemory(VKW::ImageView* view);
-    VKW::MemoryPage* GetViewMemoryPage(VKW::ImageView* view);
+    VAL::BufferResource* GetViewResource(VAL::BufferView* view);
+    VAL::MemoryRegion* GetViewMemory(VAL::BufferView* view);
+    VAL::MemoryPage* GetViewMemoryPage(VAL::BufferView* view);
+    VAL::ImageResource* GetViewResource(VAL::ImageView* view);
+    VAL::MemoryRegion* GetViewMemory(VAL::ImageView* view);
+    VAL::MemoryPage* GetViewMemoryPage(VAL::ImageView* view);
 
-    void DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc);
-    VKW::ProxyBufferHandle FindGlobalBuffer(ResourceKey const& key);
-    VKW::BufferView* FindGlobalBuffer(ResourceKey const& key, std::uint32_t frame);
+    void DefineGlobalBuffer(ResourceKey const& key, VAL::BufferViewDesc const& desc);
+    VAL::ProxyBufferHandle FindGlobalBuffer(ResourceKey const& key);
+    VAL::BufferView* FindGlobalBuffer(ResourceKey const& key, std::uint32_t frame);
 
     ResourceKey GetDefaultSceneColorOutput() const;
     ResourceKey GetSwapchain() const;
     VkSampler GetDefaultSampler() const;
     std::uint32_t GetDefaultSceneColorBufferThreeshold() const;
-    void DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc);
-    VKW::ProxyImageHandle FindGlobalImage(ResourceKey const& key);
-    VKW::ImageView* FindGlobalImage(ResourceKey const& key, std::uint32_t frame);
+    void DefineGlobalImage(ResourceKey const& key, VAL::ImageViewDesc const& desc);
+    VAL::ProxyImageHandle FindGlobalImage(ResourceKey const& key);
+    VAL::ImageView* FindGlobalImage(ResourceKey const& key, std::uint32_t frame);
 
     void DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc);
     void DefineCustomBlurPass(PassKey const& key, ResourceKey const& sceneColorBuffer, IOManager* ioManager);
     BasePass& FindPass(PassKey const& key);
 
-    void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
+    void DefineSetLayout(SetLayoutKey const& key, VAL::DescriptorSetLayoutDesc const& desc);
     SetLayout& FindSetLayout(SetLayoutKey const& key);
 
     void DefineShader(ShaderKey const& key, ShaderDesc const& desc);
@@ -261,16 +261,16 @@ public:
     void BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context, VkImageLayout dstEndLayout, VkAccessFlags dstEndAccessFlags);
 
 
-    VKW::ResourceRendererProxy* ResourceProxy() const;
+    VAL::ResourceRendererProxy* ResourceProxy() const;
 
     void PushPass(PassKey const& key);
 
     
 
-    VKW::PresentationContext AcquireNextPresentationContext();
-    VKW::WorkerFrameCommandReciever BeginRenderGraph(VKW::PresentationContext const& presentationContext);
-    void IterateRenderGraph(VKW::PresentationContext const& presentationContext, VKW::WorkerFrameCommandReciever& commandReciever);
-    void EndRenderGraph(VKW::PresentationContext const& presentationContext, VKW::WorkerFrameCommandReciever& commandReciever);
+    VAL::PresentationContext AcquireNextPresentationContext();
+    VAL::WorkerFrameCommandReciever BeginRenderGraph(VAL::PresentationContext const& presentationContext);
+    void IterateRenderGraph(VAL::PresentationContext const& presentationContext, VAL::WorkerFrameCommandReciever& commandReciever);
+    void EndRenderGraph(VAL::PresentationContext const& presentationContext, VAL::WorkerFrameCommandReciever& commandReciever);
 
 
 private:
@@ -278,8 +278,8 @@ private:
         DESCRIPTOR_TYPE_SAMPLER,
         DESCRIPTOR_TYPE_UNIFORM_BUFFER*/
 
-    void Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle);
-    void Decorate_VKWProxyDescriptorWriteDesc_Texture(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VKW::ProxyImageHandle imageView);
+    void Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(VAL::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle);
+    void Decorate_VKWProxyDescriptorWriteDesc_Texture(VAL::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VAL::ProxyImageHandle imageView);
 
     void InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCount, SetLayoutKey const* setLayoutKeys, SetOwnerDesc const* setOwnerDescs);
 
@@ -291,18 +291,18 @@ private:
 
 
 private:
-    VKW::Loader* loader_;
-    VKW::ResourceRendererProxy* resourceProxy_;
-    VKW::RenderPassController* renderPassController_;
-    VKW::ImagesProvider* imagesProvider_;
-    VKW::FramedDescriptorsHub* framedDescriptorsHub_;
-    VKW::DescriptorLayoutController* layoutController_;
-    VKW::ShaderModuleFactory* shaderModuleFactory_;
-    VKW::PipelineFactory* pipelineFactory_;
+    VAL::Loader* loader_;
+    VAL::ResourceRendererProxy* resourceProxy_;
+    VAL::RenderPassController* renderPassController_;
+    VAL::ImagesProvider* imagesProvider_;
+    VAL::FramedDescriptorsHub* framedDescriptorsHub_;
+    VAL::DescriptorLayoutController* layoutController_;
+    VAL::ShaderModuleFactory* shaderModuleFactory_;
+    VAL::PipelineFactory* pipelineFactory_;
 
-    VKW::PresentationController* presentationController_;
+    VAL::PresentationController* presentationController_;
     // TODO
-    VKW::Worker* mainWorkerTemp_;
+    VAL::Worker* mainWorkerTemp_;
 
     GlobalImagesMap globalImages_;
     GlobalBuffersMap globalBuffers_;

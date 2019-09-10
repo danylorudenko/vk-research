@@ -134,7 +134,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
         inputBindingsInfo[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
         for (auto i = 0u; i < attrCount; ++i) {
-            VKW::VertexInputInfo::Attribute const& sourceVertexInfo = desc.vertexInputInfo_->vertexAttributes_[i];
+            VAL::VertexInputInfo::Attribute const& sourceVertexInfo = desc.vertexInputInfo_->vertexAttributes_[i];
             inputAttributesInfo[i].binding = desc.vertexInputInfo_->binding_;
             inputAttributesInfo[i].location = sourceVertexInfo.location_;
             inputAttributesInfo[i].offset = sourceVertexInfo.offset_;

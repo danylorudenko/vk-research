@@ -62,8 +62,8 @@ ImGuiHelper::~ImGuiHelper()
 
 void ImGuiHelper::Init()
 {
-    VKW::ImageView* colorBufferView = root_->FindGlobalImage(root_->GetDefaultSceneColorOutput(), 0);
-    VKW::ImageResource* colorBufferResource = root_->ResourceProxy()->GetResource(colorBufferView->resource_);
+    VAL::ImageView* colorBufferView = root_->FindGlobalImage(root_->GetDefaultSceneColorOutput(), 0);
+    VAL::ImageResource* colorBufferResource = root_->ResourceProxy()->GetResource(colorBufferView->resource_);
 
     std::uint32_t viewportWidth = colorBufferResource->width_ - root_->GetDefaultSceneColorBufferThreeshold();
     std::uint32_t viewportHeight = colorBufferResource->height_ - root_->GetDefaultSceneColorBufferThreeshold();
@@ -106,17 +106,17 @@ void ImGuiHelper::Init()
     io.Fonts->GetTexDataAsAlpha8(&textureData, &imguiAtlasWidth, &imguiAtlasHeight, &imguiPixelBytes);
     assert(imguiPixelBytes == 1 && "ImGuiHelper: bytesPerPixel > 1, something went wrong");
 
-    VKW::ImageViewDesc imageDesc;
+    VAL::ImageViewDesc imageDesc;
     imageDesc.width_ = imguiAtlasWidth;
     imageDesc.height_ = imguiAtlasHeight;
     imageDesc.format_ = VK_FORMAT_R8_UNORM;
-    imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
+    imageDesc.usage_ = VAL::ImageUsage::TEXTURE;
     root_->DefineGlobalImage(IMGUI_TEXTURE_KEY, imageDesc);
 
-    VKW::BufferViewDesc stagingBufferDesc;
+    VAL::BufferViewDesc stagingBufferDesc;
     stagingBufferDesc.format_ = VK_FORMAT_UNDEFINED;
     stagingBufferDesc.size_ = imguiAtlasWidth * imguiAtlasHeight * imguiPixelBytes;
-    stagingBufferDesc.usage_ = VKW::BufferUsage::UPLOAD_BUFFER;
+    stagingBufferDesc.usage_ = VAL::BufferUsage::UPLOAD_BUFFER;
     root_->DefineGlobalBuffer(IMGUI_TEXTURE_STAGING_BUFFER_KEY, stagingBufferDesc);
 
     void* stagingBufferPtr = root_->MapBuffer(IMGUI_TEXTURE_STAGING_BUFFER_KEY, 0);
@@ -125,8 +125,8 @@ void ImGuiHelper::Init()
 
     root_->CopyStagingBufferToGPUTexture(IMGUI_TEXTURE_STAGING_BUFFER_KEY, IMGUI_TEXTURE_KEY, 0);
 
-    VKW::ImageView* imguiTextureView = root_->FindGlobalImage(IMGUI_TEXTURE_KEY, 0);
-    VKW::ImageResource* imguiTextureResource = root_->ResourceProxy()->GetResource(imguiTextureView->resource_);
+    VAL::ImageView* imguiTextureView = root_->FindGlobalImage(IMGUI_TEXTURE_KEY, 0);
+    VAL::ImageResource* imguiTextureResource = root_->ResourceProxy()->GetResource(imguiTextureView->resource_);
     VkImageLayout targetLayout = VK_IMAGE_LAYOUT_GENERAL;
     root_->ImageLayoutTransition(0, 1, &imguiTextureResource->handle_, &targetLayout);
 
@@ -137,14 +137,14 @@ void ImGuiHelper::Init()
     Render::RootGraphicsPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;
     passDesc.colorAttachments_[0].resourceKey_ = root_->GetDefaultSceneColorOutput();
-    passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE;
+    passDesc.colorAttachments_[0].usage_ = VAL::RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE;
 
     Render::ShaderDesc vertexShaderDesc;
-    vertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
+    vertexShaderDesc.type_ = VAL::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
     vertexShaderDesc.relativePath_ = "shader-src\\imgui.vert.spv";
 
     Render::ShaderDesc fragmentShaderDesc;
-    fragmentShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
+    fragmentShaderDesc.type_ = VAL::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
     fragmentShaderDesc.relativePath_ = "shader-src\\imgui.frag.spv";
 
     Render::GraphicsPipelineDesc pipelineDesc;
@@ -155,11 +155,11 @@ void ImGuiHelper::Init()
     pipelineDesc.shaderStages_[0] = IMGUI_VERT_SHADER_KEY;
     pipelineDesc.shaderStages_[1] = IMGUI_FRAG_SHADER_KEY;
 
-    VKW::InputAssemblyInfo iaInfo;
+    VAL::InputAssemblyInfo iaInfo;
     iaInfo.primitiveRestartEnable_ = false;
     iaInfo.primitiveTopology_ = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
-    VKW::VertexInputInfo vInfo;
+    VAL::VertexInputInfo vInfo;
     vInfo.binding_ = 0;
     vInfo.stride_ = sizeof(ImDrawVert);
     vInfo.vertexAttributesCount_ = 3;
@@ -173,9 +173,9 @@ void ImGuiHelper::Init()
     vInfo.vertexAttributes_[2].offset_ = offsetof(ImDrawVert, col);
     vInfo.vertexAttributes_[2].format_ = VK_FORMAT_R8G8B8A8_UNORM;
 
-    VKW::ViewportInfo vpInfo;
+    VAL::ViewportInfo vpInfo;
     vpInfo.viewportsCount_ = 1;
-    VKW::ViewportInfo::Viewport& vp = vpInfo.viewports_[0];
+    VAL::ViewportInfo::Viewport& vp = vpInfo.viewports_[0];
     vp.x_ = static_cast<float>(root_->GetDefaultSceneColorBufferThreeshold());
     vp.y_ = static_cast<float>(root_->GetDefaultSceneColorBufferThreeshold());
     vp.width_ = static_cast<float>(viewportWidth);
@@ -187,7 +187,7 @@ void ImGuiHelper::Init()
     vp.scissorXextent_ = viewportWidth;
     vp.scissorYextent_ = viewportHeight;
 
-    VKW::DepthStencilInfo dsInfo;
+    VAL::DepthStencilInfo dsInfo;
     dsInfo.depthTestEnabled_ = true;
     dsInfo.depthWriteEnabled_ = true;
     dsInfo.depthCompareOp_ = VK_COMPARE_OP_LESS;
@@ -196,16 +196,16 @@ void ImGuiHelper::Init()
     dsInfo.frontStencilState_ = {};
 
 
-    VKW::DescriptorSetLayoutDesc materialSetLayoutDesc;
-    materialSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
+    VAL::DescriptorSetLayoutDesc materialSetLayoutDesc;
+    materialSetLayoutDesc.stage_ = VAL::DescriptorStage::RENDERING;
     materialSetLayoutDesc.membersCount_ = 1;
-    materialSetLayoutDesc.membersDesc_[0].type_ = VKW::DescriptorType::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    materialSetLayoutDesc.membersDesc_[0].type_ = VAL::DescriptorType::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     materialSetLayoutDesc.membersDesc_[0].binding_ = 0;
 
-    VKW::DescriptorSetLayoutDesc itemSetLayoutDesc;
-    itemSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
+    VAL::DescriptorSetLayoutDesc itemSetLayoutDesc;
+    itemSetLayoutDesc.stage_ = VAL::DescriptorStage::RENDERING;
     itemSetLayoutDesc.membersCount_ = 1;
-    itemSetLayoutDesc.membersDesc_[0].type_ = VKW::DescriptorType::DESCRIPTOR_TYPE_TEXTURE;
+    itemSetLayoutDesc.membersDesc_[0].type_ = VAL::DescriptorType::DESCRIPTOR_TYPE_TEXTURE;
     itemSetLayoutDesc.membersDesc_[0].binding_ = 0;
 
     Render::PipelineLayoutDesc layoutDesc;
@@ -219,17 +219,17 @@ void ImGuiHelper::Init()
     pipelineDesc.viewportInfo_ = &vpInfo;
     pipelineDesc.depthStencilInfo_ = &dsInfo;
     pipelineDesc.layoutDesc_ = &layoutDesc;
-    //pipelineDesc.dynamicStateFlags_ = VKW::PIPELINE_DYNAMIC_STATE_VIEWPORT | VKW::PIPELINE_DYNAMIC_STATE_SCISSOR;
+    //pipelineDesc.dynamicStateFlags_ = VAL::PIPELINE_DYNAMIC_STATE_VIEWPORT | VAL::PIPELINE_DYNAMIC_STATE_SCISSOR;
     pipelineDesc.dynamicStateFlags_ = VK_FLAGS_NONE;
-    pipelineDesc.blendingState_ = VKW::PIPELINE_BLENDING_SRC_ALPHA_DST_ONE;
+    pipelineDesc.blendingState_ = VAL::PIPELINE_BLENDING_SRC_ALPHA_DST_ONE;
 
-    VKW::BufferViewDesc vertexBufferDesc;
-    vertexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX_WRITABLE;
+    VAL::BufferViewDesc vertexBufferDesc;
+    vertexBufferDesc.usage_ = VAL::BufferUsage::VERTEX_INDEX_WRITABLE;
     vertexBufferDesc.size_ = IMGUI_VERTEX_BUFFER_SIZE;
     vertexBufferDesc.format_ = VK_FORMAT_UNDEFINED;
 
-    VKW::BufferViewDesc indexBufferDesc;
-    indexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX_WRITABLE;
+    VAL::BufferViewDesc indexBufferDesc;
+    indexBufferDesc.usage_ = VAL::BufferUsage::VERTEX_INDEX_WRITABLE;
     indexBufferDesc.size_ = IMGUI_INDEX_BUFFER_SIZE;
     indexBufferDesc.format_ = VK_FORMAT_UNDEFINED;
 
@@ -316,7 +316,7 @@ void ImGuiHelper::EndFrame(std::uint32_t context)
     ImGui::EndFrame();
 }
 
-void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever)
+void ImGuiHelper::Render(std::uint32_t context, VAL::WorkerFrameCommandReciever commandReciever)
 {
     ImGui::Render();
     ImDrawData* data = ImGui::GetDrawData();

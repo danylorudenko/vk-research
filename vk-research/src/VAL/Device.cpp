@@ -35,7 +35,7 @@ Device::Device(DeviceDesc const& desc)
     // Pick physical device
     {
         if (physicalDeviceCount == 0) {
-            std::cerr << "FATAL: Error initializing VKW::Device (Vulkan instance couldn't find any physical devices in the system)" << std::endl;
+            std::cerr << "FATAL: Error initializing VAL::Device (Vulkan instance couldn't find any physical devices in the system)" << std::endl;
             assert(physicalDeviceCount != 0);
         }
 
@@ -88,8 +88,8 @@ Device::Device(DeviceDesc const& desc)
             std::cout << "CHOSEN DEVICE: " << physicalDeviceProperties_.properties.deviceName << std::endl;
         }
         else {
-            std::cout << "FATAL: Error initializing VKW::Device (cannot find valid VkPhysicalDevice)" << std::endl;
-            assert(false && "FATAL: Error initializing VKW::Device (cannot find valid VkPhysicalDevice)");
+            std::cout << "FATAL: Error initializing VAL::Device (cannot find valid VkPhysicalDevice)" << std::endl;
+            assert(false && "FATAL: Error initializing VAL::Device (cannot find valid VkPhysicalDevice)");
         }
     }
 
@@ -263,7 +263,7 @@ void Device::PrintPhysicalDeviceFormatProperties(VkFormat format)
     std::cout << "Not implemented!" << std::endl;
 }
 
-VKW::Device::PhysicalDeviceProperties const& Device::Properties() const
+VAL::Device::PhysicalDeviceProperties const& Device::Properties() const
 {
     return physicalDeviceProperties_;
 }
@@ -273,7 +273,7 @@ std::uint32_t Device::QueueFamilyCount() const
     return static_cast<std::uint32_t>(queueInfo_.size());
 }
 
-VKW::DeviceQueueFamilyInfo const& Device::GetQueueFamily(std::uint32_t index) const
+VAL::DeviceQueueFamilyInfo const& Device::GetQueueFamily(std::uint32_t index) const
 {
     return queueInfo_[index];
 }
@@ -288,7 +288,7 @@ Device::~Device()
 }
 
 bool Device::IsPhysicalDeviceValid(
-    VKW::Device::PhysicalDeviceProperties const& deviceProperties,
+    VAL::Device::PhysicalDeviceProperties const& deviceProperties,
     std::vector<std::string> const& requiredExtensions)
 {    
     bool supportsGraphics = false;
@@ -325,7 +325,7 @@ bool Device::IsPhysicalDeviceValid(
 
 void Device::RequestDeviceProperties(
     VkPhysicalDevice targetDevice,
-    VKW::Device::PhysicalDeviceProperties& deviceProperties)
+    VAL::Device::PhysicalDeviceProperties& deviceProperties)
 {
     table_->vkGetPhysicalDeviceProperties(targetDevice, &deviceProperties.properties);
     table_->vkGetPhysicalDeviceMemoryProperties(targetDevice, &deviceProperties.memoryProperties);
@@ -352,7 +352,7 @@ void Device::RequestDeviceProperties(
     VK_ASSERT(table_->vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, deviceProperties.extensionProperties.data()));
 }
 
-void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const& deviceProperties)
+void Device::PrintPhysicalDeviceData(VAL::Device::PhysicalDeviceProperties const& deviceProperties)
 {
     auto const& properties = deviceProperties.properties;
 

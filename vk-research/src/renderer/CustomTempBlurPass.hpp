@@ -2,8 +2,8 @@
 
 #include "..\class_features\NonCopyable.hpp"
 #include "Pass.hpp"
-#include "..\vk_interface\ProxyHandles.hpp"
-#include "..\vk_interface\VkInterfaceConstants.hpp"
+#include "..\VAL\ProxyHandles.hpp"
+#include "..\VAL\VkInterfaceConstants.hpp"
 
 class IOManager;
 
@@ -29,14 +29,14 @@ struct CustomTempBlurPassDesc
     Root* root_;
     IOManager* ioManager_;
 
-    VKW::ImportTable* table_;
-    VKW::Device* device_;
+    VAL::ImportTable* table_;
+    VAL::Device* device_;
 
-    VKW::ResourceRendererProxy* resourceProxy_;
-    VKW::ShaderModuleFactory* shaderModuleFactory_;
-    VKW::PipelineFactory* pipelineFactory_;
-    VKW::DescriptorLayoutController* descriptorLayoutController_;
-    VKW::Swapchain* swapchain_;
+    VAL::ResourceRendererProxy* resourceProxy_;
+    VAL::ShaderModuleFactory* shaderModuleFactory_;
+    VAL::PipelineFactory* pipelineFactory_;
+    VAL::DescriptorLayoutController* descriptorLayoutController_;
+    VAL::Swapchain* swapchain_;
 
     ResourceKey sceneColorBuffer_;
 };
@@ -51,23 +51,23 @@ public:
     CustomTempBlurPass& operator=(CustomTempBlurPass&& rhs);
     ~CustomTempBlurPass();
 
-    virtual void Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
-    virtual void Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
-    virtual void End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void Begin(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void Apply(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) override;
+    virtual void End(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever) override;
 
 
 private:
     Root* root_;
     IOManager* ioManager_;
 
-    VKW::ImportTable* table_;
-    VKW::Device* device_;
+    VAL::ImportTable* table_;
+    VAL::Device* device_;
 
-    VKW::ResourceRendererProxy* resourceProxy_;
-    VKW::ShaderModuleFactory* shaderModuleFactory_;
-    VKW::PipelineFactory* pipelineFactory_;
-    VKW::DescriptorLayoutController* descriptorLayoutController_;
-    VKW::Swapchain* swapchain_;
+    VAL::ResourceRendererProxy* resourceProxy_;
+    VAL::ShaderModuleFactory* shaderModuleFactory_;
+    VAL::PipelineFactory* pipelineFactory_;
+    VAL::DescriptorLayoutController* descriptorLayoutController_;
+    VAL::Swapchain* swapchain_;
 
     ResourceKey sceneColorBuffer_;
 
@@ -79,7 +79,7 @@ private:
 
     SetLayoutKey blurSetLayout_;
 
-    VKW::ProxySetHandle blurDescriptorSet_;
+    VAL::ProxySetHandle blurDescriptorSet_;
 
     UniformBufferHandle mixFactorUniformBuffer_;
 };

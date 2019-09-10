@@ -1,13 +1,13 @@
 #pragma once
 
-#include "..\vk_interface\pipeline\ShaderModule.hpp"
+#include "..\VAL\pipeline\ShaderModule.hpp"
 
 namespace Render
 {
 
 struct Shader
 {
-    VKW::ShaderModuleHandle vkwShaderModuleHandle_;
+    VAL::ShaderModuleHandle vkwShaderModuleHandle_;
 };
 
 }

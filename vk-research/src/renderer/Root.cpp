@@ -1,10 +1,10 @@
 #include <utility>
 #include "Root.hpp"
-#include "..\vk_interface\ResourceRendererProxy.hpp"
-#include "..\vk_interface\worker\Worker.hpp"
-#include "..\vk_interface\Loader.hpp"
-#include "..\vk_interface\Swapchain.hpp"
-#include "..\vk_interface\VkInterfaceConstants.hpp"
+#include "..\VAL\ResourceRendererProxy.hpp"
+#include "..\VAL\worker\Worker.hpp"
+#include "..\VAL\Loader.hpp"
+#include "..\VAL\Swapchain.hpp"
+#include "..\VAL\VkInterfaceConstants.hpp"
 #include "CustomTempBlurPass.hpp"
 
 namespace Render
@@ -39,20 +39,20 @@ Root::Root(RootDesc const& desc)
     , mainWorkerTemp_{ desc.mainWorkerTemp_ }
     , nextUniformBufferId_{ 0u }
 {
-    VKW::ProxyImageHandle swapchainView = resourceProxy_->RegisterSwapchainImageViews();
+    VAL::ProxyImageHandle swapchainView = resourceProxy_->RegisterSwapchainImageViews();
     globalImages_[SWAPCHAIN_IMAGE_KEY] = swapchainView;
 
 
-    VKW::ImageViewDesc finalColorDesc;
+    VAL::ImageViewDesc finalColorDesc;
     finalColorDesc.format_ = loader_->swapchain_->Format();
     finalColorDesc.width_ = loader_->swapchain_->Width() + COLOR_BUFFER_THREESHOLD * 2;
     finalColorDesc.height_ = loader_->swapchain_->Height() + COLOR_BUFFER_THREESHOLD * 2;
-    finalColorDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
+    finalColorDesc.usage_ = VAL::ImageUsage::RENDER_TARGET;
 
     DefineGlobalImage(GetDefaultSceneColorOutput(), finalColorDesc);
 
-    VkImage swapchainImages[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
-    VkImageLayout imageLayouts[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+    VkImage swapchainImages[VAL::CONSTANTS::MAX_FRAMES_BUFFERING];
+    VkImageLayout imageLayouts[VAL::CONSTANTS::MAX_FRAMES_BUFFERING];
 
     std::uint32_t const swapchainImagesCount = loader_->swapchain_->ImageCount();
     for (std::uint32_t i = 0; i < swapchainImagesCount; ++i) 
@@ -109,19 +109,19 @@ Root::~Root()
 
 }
 
-VKW::ImportTable* Root::VulkanFuncTable() const
+VAL::ImportTable* Root::VulkanFuncTable() const
 {
     return loader_->table_.get();
 }
 
 UniformBufferHandle Root::AcquireUniformBuffer(std::uint32_t size)
 {
-    VKW::BufferViewDesc desc;
-    desc.usage_ = VKW::BufferUsage::UNIFORM;
+    VAL::BufferViewDesc desc;
+    desc.usage_ = VAL::BufferUsage::UNIFORM;
     desc.size_ = size;
     desc.format_ = VK_FORMAT_UNDEFINED;
     
-    VKW::ProxyBufferHandle bufferHandle = resourceProxy_->CreateBuffer(desc);
+    VAL::ProxyBufferHandle bufferHandle = resourceProxy_->CreateBuffer(desc);
     UniformBufferHandle handle { nextUniformBufferId_++ };
     uniformBuffers_[handle.id_] = UniformBuffer{ bufferHandle };
 
@@ -133,7 +133,7 @@ UniformBuffer& Root::FindUniformBuffer(UniformBufferHandle handle)
     return uniformBuffers_[handle.id_];
 }
 
-VKW::BufferView* Root::FindUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
+VAL::BufferView* Root::FindUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 {
     auto const& proxyHandle = uniformBuffers_[handle.id_].proxyBufferViewHandle_;
     return resourceProxy_->GetBufferView(proxyHandle, frame);
@@ -151,9 +151,9 @@ void* Root::MapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     // is persistently-mapped, so the only thing we need is mapped memory ptr + offset for the resource.
 
     UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
-    VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
-    VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
+    VAL::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
+    VAL::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VAL::MemoryPage const* memoryPage = GetViewMemoryPage(view);
 
     std::uint64_t const offset = memoryRegion->offset_ + view->offset_;
     //std::uint64_t const size = view->size_;
@@ -163,7 +163,7 @@ void* Root::MapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 
     //VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
     //
-    //VKW::ImportTable* table = loader_->table_.get();
+    //VAL::ImportTable* table = loader_->table_.get();
     //VkDevice const vkDevice = loader_->device_->Handle();
     //
     //void* mappedRange = nullptr;
@@ -179,13 +179,13 @@ void Root::UnmapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     // is persistently mapped, so it can't be unmapped.
 
     //UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
-    //VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
-    //VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
-    //VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    //VAL::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
+    //VAL::MemoryPage const* memoryPage = GetViewMemoryPage(view);
+    //VAL::MemoryRegion const* memoryRegion = GetViewMemory(view);
     //
     //VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
     //
-    //VKW::ImportTable* table = loader_->table_.get();
+    //VAL::ImportTable* table = loader_->table_.get();
     //VkDevice const vkDevice = loader_->device_->Handle();
     //
     //table->vkUnmapMemory(vkDevice, deviceMemory);
@@ -194,14 +194,14 @@ void Root::UnmapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 {
     UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
-    VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
-    VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VAL::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
+    VAL::MemoryPage const* memoryPage = GetViewMemoryPage(view);
+    VAL::MemoryRegion const* memoryRegion = GetViewMemory(view);
 
     if(memoryPage->propertyFlags_ & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
         return;
 
-    VKW::ImportTable* table = loader_->table_.get();
+    VAL::ImportTable* table = loader_->table_.get();
     VkDevice const vkDevice = loader_->device_->Handle();
     VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
     std::uint64_t const offset = memoryRegion->offset_ + view->offset_;
@@ -218,9 +218,9 @@ void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 
 void* Root::MapBuffer(ResourceKey const& key, std::uint32_t frame)
 {
-    VKW::BufferView* view = FindGlobalBuffer(key, frame);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
-    VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
+    VAL::BufferView* view = FindGlobalBuffer(key, frame);
+    VAL::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VAL::MemoryPage const* memoryPage = GetViewMemoryPage(view);
 
     std::uint64_t const offset = memoryRegion->offset_ + view->offset_;
     //std::uint64_t const size = view->size_;
@@ -230,14 +230,14 @@ void* Root::MapBuffer(ResourceKey const& key, std::uint32_t frame)
 
 void Root::FlushBuffer(ResourceKey const& key, std::uint32_t frame)
 {
-    VKW::BufferView* view = FindGlobalBuffer(key, frame);
-    VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VAL::BufferView* view = FindGlobalBuffer(key, frame);
+    VAL::MemoryPage const* memoryPage = GetViewMemoryPage(view);
+    VAL::MemoryRegion const* memoryRegion = GetViewMemory(view);
 
     if (memoryPage->propertyFlags_ & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
         return;
 
-    VKW::ImportTable* table = loader_->table_.get();
+    VAL::ImportTable* table = loader_->table_.get();
     VkDevice const vkDevice = loader_->device_->Handle();
     VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
     std::uint64_t const offset = memoryRegion->offset_ + view->offset_;
@@ -254,9 +254,9 @@ void Root::FlushBuffer(ResourceKey const& key, std::uint32_t frame)
 
 void* Root::MapImage(ResourceKey const& key, std::uint32_t frame)
 {
-    VKW::ImageView* view = FindGlobalImage(key, frame);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
-    VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
+    VAL::ImageView* view = FindGlobalImage(key, frame);
+    VAL::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VAL::MemoryPage const* memoryPage = GetViewMemoryPage(view);
 
     std::uint64_t const offset = memoryRegion->offset_;
     //std::uint64_t const size = view->size_;
@@ -266,14 +266,14 @@ void* Root::MapImage(ResourceKey const& key, std::uint32_t frame)
 
 void Root::FlushImage(ResourceKey const& key, std::uint32_t frame)
 {
-    VKW::ImageView* view = FindGlobalImage(key, frame);
-    VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VAL::ImageView* view = FindGlobalImage(key, frame);
+    VAL::MemoryPage const* memoryPage = GetViewMemoryPage(view);
+    VAL::MemoryRegion const* memoryRegion = GetViewMemory(view);
 
     if (memoryPage->propertyFlags_ & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
         return;
 
-    VKW::ImportTable* table = loader_->table_.get();
+    VAL::ImportTable* table = loader_->table_.get();
     VkDevice const vkDevice = loader_->device_->Handle();
     VkDeviceMemory const deviceMemory = memoryPage->deviceMemory_;
     std::uint64_t const offset = memoryRegion->offset_;
@@ -288,56 +288,56 @@ void Root::FlushImage(ResourceKey const& key, std::uint32_t frame)
     VK_ASSERT(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
 }
 
-VKW::BufferResource* Root::GetViewResource(VKW::BufferView* view)
+VAL::BufferResource* Root::GetViewResource(VAL::BufferView* view)
 {
-    VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
+    VAL::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
     return resourceProxy_->GetResource(resourceHandle);
 }
 
-VKW::MemoryRegion* Root::GetViewMemory(VKW::BufferView* view)
+VAL::MemoryRegion* Root::GetViewMemory(VAL::BufferView* view)
 {
-    VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
-    VKW::BufferResource* bufferResource = resourceProxy_->GetResource(resourceHandle);
+    VAL::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
+    VAL::BufferResource* bufferResource = resourceProxy_->GetResource(resourceHandle);
     return &bufferResource->memory_;
 }
 
-VKW::MemoryPage* Root::GetViewMemoryPage(VKW::BufferView* view)
+VAL::MemoryPage* Root::GetViewMemoryPage(VAL::BufferView* view)
 {
-    VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
+    VAL::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
     return resourceProxy_->GetMemoryPage(resourceHandle);
 }
 
-VKW::ImageResource* Root::GetViewResource(VKW::ImageView* view)
+VAL::ImageResource* Root::GetViewResource(VAL::ImageView* view)
 {
-    VKW::ImageResourceHandle resourceHandle = view->resource_;
+    VAL::ImageResourceHandle resourceHandle = view->resource_;
     return resourceProxy_->GetResource(resourceHandle);
 }
 
-VKW::MemoryRegion* Root::GetViewMemory(VKW::ImageView* view)
+VAL::MemoryRegion* Root::GetViewMemory(VAL::ImageView* view)
 {
-    VKW::ImageResourceHandle resourceHandle = view->resource_;
-    VKW::ImageResource* imageResource = resourceProxy_->GetResource(resourceHandle);
+    VAL::ImageResourceHandle resourceHandle = view->resource_;
+    VAL::ImageResource* imageResource = resourceProxy_->GetResource(resourceHandle);
     return &imageResource->memory_;
 }
 
-VKW::MemoryPage* Root::GetViewMemoryPage(VKW::ImageView* view)
+VAL::MemoryPage* Root::GetViewMemoryPage(VAL::ImageView* view)
 {
-    VKW::ImageResourceHandle resourceHandle = view->resource_;
+    VAL::ImageResourceHandle resourceHandle = view->resource_;
     return resourceProxy_->GetMemoryPage(resourceHandle);
 }
 
-void Root::DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc)
+void Root::DefineGlobalBuffer(ResourceKey const& key, VAL::BufferViewDesc const& desc)
 {
-    VKW::ProxyBufferHandle bufferHandle = resourceProxy_->CreateBuffer(desc);
+    VAL::ProxyBufferHandle bufferHandle = resourceProxy_->CreateBuffer(desc);
     globalBuffers_[key] = bufferHandle;
 }
 
-VKW::ProxyBufferHandle Root::FindGlobalBuffer(ResourceKey const& key)
+VAL::ProxyBufferHandle Root::FindGlobalBuffer(ResourceKey const& key)
 {
     return globalBuffers_[key];
 }
 
-VKW::BufferView* Root::FindGlobalBuffer(ResourceKey const& key, std::uint32_t frame)
+VAL::BufferView* Root::FindGlobalBuffer(ResourceKey const& key, std::uint32_t frame)
 {
     auto const& proxyHandle = globalBuffers_[key];
     return resourceProxy_->GetBufferView(proxyHandle, frame);
@@ -363,18 +363,18 @@ std::uint32_t Root::GetDefaultSceneColorBufferThreeshold() const
     return COLOR_BUFFER_THREESHOLD;
 }
 
-void Root::DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc)
+void Root::DefineGlobalImage(ResourceKey const& key, VAL::ImageViewDesc const& desc)
 {
-    VKW::ProxyImageHandle imageHandle = resourceProxy_->CreateImage(desc);
+    VAL::ProxyImageHandle imageHandle = resourceProxy_->CreateImage(desc);
     globalImages_[key] = imageHandle;
 }
 
-VKW::ProxyImageHandle Root::FindGlobalImage(ResourceKey const& key)
+VAL::ProxyImageHandle Root::FindGlobalImage(ResourceKey const& key)
 {
     return globalImages_[key];
 }
 
-VKW::ImageView* Root::FindGlobalImage(ResourceKey const& key, std::uint32_t frame)
+VAL::ImageView* Root::FindGlobalImage(ResourceKey const& key, std::uint32_t frame)
 {
     auto const& proxyHandle = globalImages_[key];
     return resourceProxy_->GetImageView(proxyHandle, frame);
@@ -411,8 +411,8 @@ void Root::DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc
     passDesc.imagesProvider_ = imagesProvider_;
     passDesc.colorAttachmentCount_ = desc.colorAttachmentsCount_;
     for (auto i = 0u; i < passDesc.colorAttachmentCount_; ++i) {
-        VKW::ImageView* attachmentView = FindGlobalImage(desc.colorAttachments_[i].resourceKey_, 0);
-        VKW::ImageResource* attachmentResource = resourceProxy_->GetResource(attachmentView->resource_);
+        VAL::ImageView* attachmentView = FindGlobalImage(desc.colorAttachments_[i].resourceKey_, 0);
+        VAL::ImageResource* attachmentResource = resourceProxy_->GetResource(attachmentView->resource_);
 
         if (i > 0) {
             assert(passDesc.width_ == attachmentResource->width_ && "All attachments in pass must have same dimentions!");
@@ -436,14 +436,14 @@ BasePass& Root::FindPass(PassKey const& key)
     return *(renderPassMap_[key]);
 }
 
-void Root::DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc)
+void Root::DefineSetLayout(SetLayoutKey const& key, VAL::DescriptorSetLayoutDesc const& desc)
 {
-    VKW::DescriptorSetLayoutHandle handle = layoutController_->CreateDescriptorSetLayout(desc);
+    VAL::DescriptorSetLayoutHandle handle = layoutController_->CreateDescriptorSetLayout(desc);
     SetLayout& set = setLayoutMap_[key];
     set.vkwSetLayoutHandle_ = handle;
     set.membersCount_ = desc.membersCount_;
     
-    VKW::DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(handle);
+    VAL::DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(handle);
     std::uint32_t const membersCount = layout->membersCount_;
     for (std::uint32_t i = 0; i < membersCount; ++i) {
         set.membersInfo_[i].type_ = desc.membersDesc_[i].type_;
@@ -465,7 +465,7 @@ void Root::DefineShader(ShaderKey const& key, ShaderDesc const& desc)
 {
     Shader& shader = shaderMap_[key];
 
-    VKW::ShaderModuleDesc moduleDesc;
+    VAL::ShaderModuleDesc moduleDesc;
     moduleDesc.shaderPath_ = desc.relativePath_.c_str();
     moduleDesc.type_ = desc.type_;
 
@@ -478,7 +478,7 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     pipeline.staticLayoutMembersCount_ = desc.layoutDesc_->staticMembersCount_;
     pipeline.instancedLayoutMembersCount_ = desc.layoutDesc_->instancedMembersCount_;
     
-    VKW::PipelineLayoutDesc vkwLayoutDesc;
+    VAL::PipelineLayoutDesc vkwLayoutDesc;
     vkwLayoutDesc.membersCount_ = desc.layoutDesc_->staticMembersCount_ + desc.layoutDesc_->instancedMembersCount_;
 
     std::uint32_t vkwMembersCounter = 0;
@@ -497,14 +497,14 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
         vkwLayoutDesc.members_[vkwMembersCounter] = setLayout.vkwSetLayoutHandle_;
     }
     
-    VKW::GraphicsPipelineDesc vkwDesc;
+    VAL::GraphicsPipelineDesc vkwDesc;
     vkwDesc.optimized_ = desc.optimized_;
     vkwDesc.inputAssemblyInfo_ = desc.inputAssemblyInfo_;
     vkwDesc.vertexInputInfo_ = desc.vertexInputInfo_;
     vkwDesc.shaderStagesCount_ = desc.shaderStagesCount_;
     for (std::uint32_t i = 0u; i < desc.shaderStagesCount_; ++i) {
         Shader& shader = FindShader(desc.shaderStages_[i]);
-        vkwDesc.shaderStages_[i] = VKW::ShaderStageInfo{ shader.vkwShaderModuleHandle_ };
+        vkwDesc.shaderStages_[i] = VAL::ShaderStageInfo{ shader.vkwShaderModuleHandle_ };
     }
     vkwDesc.viewportInfo_ = desc.viewportInfo_;
     vkwDesc.layoutDesc_ = &vkwLayoutDesc;
@@ -513,9 +513,9 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     vkwDesc.dynamicStatesFlags_ = desc.dynamicStateFlags_;
     vkwDesc.blendingState_ = desc.blendingState_;
     
-    VKW::PipelineHandle const vkwPipelineHandle = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
-    VKW::Pipeline const* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
-    VKW::PipelineLayoutHandle const vkwPipelineLayoutHandle = vkwPipeline->layoutHandle;
+    VAL::PipelineHandle const vkwPipelineHandle = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
+    VAL::Pipeline const* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
+    VAL::PipelineLayoutHandle const vkwPipelineLayoutHandle = vkwPipeline->layoutHandle;
 
 
     pipeline.layoutHandle_ = vkwPipelineLayoutHandle;
@@ -530,7 +530,7 @@ void Root::DefineComputePipeline(PipelineKey const& key, ComputePipelineDesc con
     pipeline.staticLayoutMembersCount_ = desc.layoutDesc_->staticMembersCount_;
     pipeline.instancedLayoutMembersCount_ = 0;
 
-    VKW::PipelineLayoutDesc vkwLayoutDesc;
+    VAL::PipelineLayoutDesc vkwLayoutDesc;
     vkwLayoutDesc.membersCount_ = desc.layoutDesc_->staticMembersCount_;
     
     std::uint32_t const staticMembersCount = desc.layoutDesc_->staticMembersCount_;
@@ -540,13 +540,13 @@ void Root::DefineComputePipeline(PipelineKey const& key, ComputePipelineDesc con
         vkwLayoutDesc.members_[i] = setLayout.vkwSetLayoutHandle_;
     }
 
-    VKW::ComputePipelineDesc vkwDesc;
+    VAL::ComputePipelineDesc vkwDesc;
     vkwDesc.optimized_ = desc.optimized_;
     vkwDesc.layoutDesc_ = &vkwLayoutDesc;
     vkwDesc.shaderStage_ = desc.shaderStage_;
 
-    VKW::PipelineHandle vkwPipelineHandle = pipelineFactory_->CreateComputePipeline(vkwDesc);
-    VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
+    VAL::PipelineHandle vkwPipelineHandle = pipelineFactory_->CreateComputePipeline(vkwDesc);
+    VAL::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
 
     pipeline.layoutHandle_ = vkwPipeline->layoutHandle;
     pipeline.pipelineHandle_ = vkwPipelineHandle;
@@ -572,7 +572,7 @@ void Root::DefineMaterialTemplate(MaterialTemplateKey const& key, MaterialTempla
         perPassData.passKey_ = perPassDataDesc.passKey_;
         
         Pipeline& pipeline = FindPipeline(perPassDataDesc.pipelineKey_);
-        VKW::PipelineLayout* vkwPipelineLayout = layoutController_->GetPipelineLayout(pipeline.layoutHandle_);
+        VAL::PipelineLayout* vkwPipelineLayout = layoutController_->GetPipelineLayout(pipeline.layoutHandle_);
         
         perPassData.pipelineKey_ = perPassDataDesc.pipelineKey_;
 
@@ -598,15 +598,15 @@ MaterialTemplate& Root::FindMaterialTemplate(MaterialTemplateKey const& key)
     return materialTemplateMap_[key];
 }
 
-void Root::Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle)
+void Root::Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(VAL::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, UniformBufferHandle bufferHandle)
 {
     UniformBuffer const& uniformBuffer = FindUniformBuffer(bufferHandle);
 
     std::uint32_t framesCount = resourceProxy_->FramesCount();
     for (std::uint32_t i = 0; i < framesCount; ++i) {
-        VKW::ProxyDescriptorWriteDesc::Union::PureBufferDesc& pureBufferDesc = writeDesc.frames_[i].pureBufferDesc_;
+        VAL::ProxyDescriptorWriteDesc::Union::PureBufferDesc& pureBufferDesc = writeDesc.frames_[i].pureBufferDesc_;
         
-        VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, i);
+        VAL::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, i);
 
         pureBufferDesc.pureBufferViewHandle_ = resourceProxy_->GetBufferViewHandle(uniformBuffer.proxyBufferViewHandle_, i);
         pureBufferDesc.offset_ = 0;
@@ -615,13 +615,13 @@ void Root::Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(VKW::ProxyDescript
     }
 }
 
-void Root::Decorate_VKWProxyDescriptorWriteDesc_Texture(VKW::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VKW::ProxyImageHandle proxyImageHandle)
+void Root::Decorate_VKWProxyDescriptorWriteDesc_Texture(VAL::ProxyDescriptorWriteDesc& writeDesc, std::uint32_t id, VAL::ProxyImageHandle proxyImageHandle)
 {
     std::uint32_t const framesCount = resourceProxy_->FramesCount();
     for (std::uint32_t i = 0; i < framesCount; ++i) {
-        VKW::ProxyDescriptorWriteDesc::Union::ImageDesc& imageDesc = writeDesc.frames_[i].imageDesc_;
+        VAL::ProxyDescriptorWriteDesc::Union::ImageDesc& imageDesc = writeDesc.frames_[i].imageDesc_;
 
-        VKW::ImageViewHandle imageViewHandle = resourceProxy_->GetImageViewHandle(proxyImageHandle, i);
+        VAL::ImageViewHandle imageViewHandle = resourceProxy_->GetImageViewHandle(proxyImageHandle, i);
         
         imageDesc.imageViewHandle_ = imageViewHandle;
         imageDesc.sampler_ = resourceProxy_->GetDefaultSampler();
@@ -637,28 +637,28 @@ void Root::InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCou
     for (std::uint32_t i = 0; i < setLayoutsCount; ++i) {
         SetLayout const& setLayout = FindSetLayout(setLayoutKeys[i]);
 
-        VKW::ProxySetHandle proxySet = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
+        VAL::ProxySetHandle proxySet = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
         owner.slots_[i].descriptorSet_.setLayoutKey_ = setLayoutKeys[i];
         owner.slots_[i].descriptorSet_.proxyDescriptorSetHandle_ = proxySet;
 
-        VKW::ProxyDescriptorWriteDesc descriptorsWriteDescs[VKW::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
+        VAL::ProxyDescriptorWriteDesc descriptorsWriteDescs[VAL::DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
 
         std::uint32_t const setLayoutMembersCount = setLayout.membersCount_;
         for (std::uint32_t k = 0; k < setLayoutMembersCount; k++) {
             SetLayout::Member const& setLayoutMember = setLayout.membersInfo_[k];
             SetOwnerDesc::Member const& setMemberData = setOwnerDescs[i].members_[k];
 
-            VKW::DescriptorType const memberType = setLayoutMember.type_;
+            VAL::DescriptorType const memberType = setLayoutMember.type_;
 
             switch (memberType) {
-            case VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+            case VAL::DESCRIPTOR_TYPE_UNIFORM_BUFFER:
                 UniformBufferHandle uniformBufferHandle = AcquireUniformBuffer(setMemberData.uniformBuffer_.size_);
                 Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(descriptorsWriteDescs[k], k, uniformBufferHandle);
                 owner.slots_[i].descriptorSet_.setMembers_[k].data_.uniformBuffer_.uniformBufferHandle_ = uniformBufferHandle;
                 break;
 
-            case VKW::DESCRIPTOR_TYPE_TEXTURE:
-                VKW::ProxyImageHandle imageProxyHandle = FindGlobalImage(setMemberData.texture2D_.imageKey_);
+            case VAL::DESCRIPTOR_TYPE_TEXTURE:
+                VAL::ProxyImageHandle imageProxyHandle = FindGlobalImage(setMemberData.texture2D_.imageKey_);
                 Decorate_VKWProxyDescriptorWriteDesc_Texture(descriptorsWriteDescs[k], k, imageProxyHandle);
                 owner.slots_[i].descriptorSet_.setMembers_[k].data_.texture2D_.textureKey_ = setMemberData.texture2D_.imageKey_;
                 break;
@@ -760,7 +760,7 @@ void Root::ReleaseRenderWorkItem(PipelineKey const& pipelineKey, RenderWorkItemH
 
 void Root::ImageLayoutTransition(std::uint32_t context, std::uint32_t imagesCount, VkImage* images, VkImageLayout* targetLayouts)
 {
-    VkImageMemoryBarrier imageBarriers[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+    VkImageMemoryBarrier imageBarriers[VAL::CONSTANTS::MAX_FRAMES_BUFFERING];
 
     for (std::uint32_t i = 0; i < imagesCount; ++i)
     {
@@ -781,7 +781,7 @@ void Root::ImageLayoutTransition(std::uint32_t context, std::uint32_t imagesCoun
         imageBarrier.subresourceRange.levelCount = 1;
     }
 
-    VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
+    VAL::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
 
     VulkanFuncTable()->vkCmdPipelineBarrier(
         commandReciever.commandBuffer_,
@@ -801,13 +801,13 @@ void Root::ImageLayoutTransition(std::uint32_t context, std::uint32_t imagesCoun
 
 void Root::CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context)
 {
-    VKW::BufferView* srcView = FindGlobalBuffer(src, context);
-    VKW::BufferView* dstView = FindGlobalBuffer(dst, context);
+    VAL::BufferView* srcView = FindGlobalBuffer(src, context);
+    VAL::BufferView* dstView = FindGlobalBuffer(dst, context);
     
-    VKW::BufferResource* srcBuffer = resourceProxy_->GetResource(srcView->providedBuffer_->bufferResource_);
-    VKW::BufferResource* dstBuffer = resourceProxy_->GetResource(dstView->providedBuffer_->bufferResource_);
+    VAL::BufferResource* srcBuffer = resourceProxy_->GetResource(srcView->providedBuffer_->bufferResource_);
+    VAL::BufferResource* dstBuffer = resourceProxy_->GetResource(dstView->providedBuffer_->bufferResource_);
     
-    VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
+    VAL::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
 
     VkBufferCopy copyInfo;
     copyInfo.srcOffset = srcView->offset_;
@@ -860,13 +860,13 @@ void Root::CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey cons
 
 void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context)
 {
-    VKW::BufferView* srcView = FindGlobalBuffer(src, context);
-    VKW::ImageView* dstView = FindGlobalImage(dst, context);
+    VAL::BufferView* srcView = FindGlobalBuffer(src, context);
+    VAL::ImageView* dstView = FindGlobalImage(dst, context);
 
-    VKW::BufferResource* srcBuffer = resourceProxy_->GetResource(srcView->providedBuffer_->bufferResource_);
-    VKW::ImageResource* dstImage = resourceProxy_->GetResource(dstView->resource_);
+    VAL::BufferResource* srcBuffer = resourceProxy_->GetResource(srcView->providedBuffer_->bufferResource_);
+    VAL::ImageResource* dstImage = resourceProxy_->GetResource(dstView->resource_);
 
-    VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
+    VAL::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
     
     VkBufferImageCopy copyInfo;
     copyInfo.bufferOffset = srcView->offset_;
@@ -930,11 +930,11 @@ void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey con
 
 void Root::BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context, VkImageLayout dstEndImageLayout, VkAccessFlags dstEndAccessFlags)
 {
-    VKW::ImageView* srcView = FindGlobalImage(src, context);
-    VKW::ImageView* dstView = FindGlobalImage(dst, context);
+    VAL::ImageView* srcView = FindGlobalImage(src, context);
+    VAL::ImageView* dstView = FindGlobalImage(dst, context);
 
-    VKW::ImageResource* srcImage = resourceProxy_->GetResource(srcView->resource_);
-    VKW::ImageResource* dstImage = resourceProxy_->GetResource(dstView->resource_);
+    VAL::ImageResource* srcImage = resourceProxy_->GetResource(srcView->resource_);
+    VAL::ImageResource* dstImage = resourceProxy_->GetResource(dstView->resource_);
     
     VkImageMemoryBarrier imageBarriers[3];
     imageBarriers[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -999,7 +999,7 @@ void Root::BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint3
     blitDesc.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
     blitDesc.dstOffsets[1] = VkOffset3D{ (std::int32_t)dstImage->width_, (std::int32_t)dstImage->height_, 1 };
 
-    VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
+    VAL::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
 
     VulkanFuncTable()->vkCmdPipelineBarrier(
         commandReciever.commandBuffer_,
@@ -1038,7 +1038,7 @@ void Root::BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint3
     VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
 }
 
-VKW::ResourceRendererProxy* Root::ResourceProxy() const
+VAL::ResourceRendererProxy* Root::ResourceProxy() const
 {
     return resourceProxy_;
 }
@@ -1048,17 +1048,17 @@ void Root::PushPass(PassKey const& key)
     renderGraphRootTemp_.emplace_back(key);
 }
 
-VKW::PresentationContext Root::AcquireNextPresentationContext()
+VAL::PresentationContext Root::AcquireNextPresentationContext()
 {
     return presentationController_->AcquireNewPresentationContext();
 }
 
-VKW::WorkerFrameCommandReciever Root::BeginRenderGraph(VKW::PresentationContext const& presentationContext)
+VAL::WorkerFrameCommandReciever Root::BeginRenderGraph(VAL::PresentationContext const& presentationContext)
 {
     return mainWorkerTemp_->StartExecutionFrame(presentationContext.contextId_);
 }
 
-void Root::IterateRenderGraph(VKW::PresentationContext const& presentationContext, VKW::WorkerFrameCommandReciever& commandReciever)
+void Root::IterateRenderGraph(VAL::PresentationContext const& presentationContext, VAL::WorkerFrameCommandReciever& commandReciever)
 {
     std::uint32_t contextId = presentationContext.contextId_;
 
@@ -1071,14 +1071,14 @@ void Root::IterateRenderGraph(VKW::PresentationContext const& presentationContex
     }
 }
 
-void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, VKW::WorkerFrameCommandReciever& commandReciever)
+void Root::EndRenderGraph(VAL::PresentationContext const& presentationContext, VAL::WorkerFrameCommandReciever& commandReciever)
 {
     std::uint32_t const contextId = presentationContext.contextId_;
 
     // we can do transfer here
     
-    VKW::ImageView* colorBufferView = FindGlobalImage(GetDefaultSceneColorOutput(), contextId);
-    VKW::ImageResource* colorBufferResource = resourceProxy_->GetResource(colorBufferView->resource_);
+    VAL::ImageView* colorBufferView = FindGlobalImage(GetDefaultSceneColorOutput(), contextId);
+    VAL::ImageResource* colorBufferResource = resourceProxy_->GetResource(colorBufferView->resource_);
     VkImage colorBufferHandle = colorBufferResource->handle_; // this to transfer src then back to color attachment (maybe without the last one)
     VkImage swapchainImageHandle = loader_->swapchain_->Image(contextId).image_;
 
@@ -1177,7 +1177,7 @@ void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, V
     );
     
     mainWorkerTemp_->EndExecutionFrame(contextId);
-    VKW::WorkerFrameCompleteSemaphore renderingCompleteSemaphore = mainWorkerTemp_->ExecuteFrame(
+    VAL::WorkerFrameCompleteSemaphore renderingCompleteSemaphore = mainWorkerTemp_->ExecuteFrame(
         contextId, 
         presentationContext.contextPresentationCompleteSemaphore_);
 

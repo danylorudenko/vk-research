@@ -56,7 +56,7 @@ WorkersProvider::WorkersProvider(WorkersProviderDesc const& desc)
             workerGroupDesc.workersCount_ = queueCounts[i];
             workerGroupDesc.bufferingCount_ = desc.bufferingCount_;
 
-            workerGroups[i] = std::make_unique<VKW::WorkerGroup>(workerGroupDesc);
+            workerGroups[i] = std::make_unique<VAL::WorkerGroup>(workerGroupDesc);
         }
     }
 
@@ -127,7 +127,7 @@ std::uint32_t WorkersProvider::FindFamilyIndex(Device const* device, DeviceQueue
 
     std::uint32_t const familyCount = device->QueueFamilyCount();
     for (std::uint32_t i = 0u; i < familyCount; ++i) {
-        VKW::DeviceQueueFamilyInfo const& familyDesc = device->GetQueueFamily(i);
+        VAL::DeviceQueueFamilyInfo const& familyDesc = device->GetQueueFamily(i);
 
         //if presentation is required on this type of family, skip family in case it doesn't support presentation
         if (presentRequired && !familyDesc.presentationSupported_) {

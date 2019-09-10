@@ -11,7 +11,7 @@
 #include "..\input\InputSystem.hpp"
 
 #include "..\io\IOManager.hpp"
-#include "..\vk_interface\Loader.hpp"
+#include "..\VAL\Loader.hpp"
 #include "..\renderer\Root.hpp"
 #include "..\renderer\RootDef.hpp"
 #include "..\renderer\UniformBufferWriterProxy.hpp"
@@ -53,7 +53,7 @@ private:
     InputSystem inputSystem_;
     IOManager ioManager_;
 
-    std::unique_ptr<VKW::Loader> vulkanLoader_;
+    std::unique_ptr<VAL::Loader> vulkanLoader_;
     std::unique_ptr<Render::Root> renderRoot_;
     std::unique_ptr<ImGuiHelper> imguiHelper_;
     bool imguiEnabled_;

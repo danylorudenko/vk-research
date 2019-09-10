@@ -3,7 +3,7 @@
 #include "..\class_features\NonCopyable.hpp"
 #include "..\renderer\RenderWorkItem.hpp"
 #include "..\renderer\UniformBufferWriterProxy.hpp"
-#include "..\vk_interface\worker\WorkerFrame.hpp"
+#include "..\VAL\worker\WorkerFrame.hpp"
 #include <imgui\imgui.h>
 
 class Window;
@@ -34,7 +34,7 @@ public:
     void Init();
     void BeginFrame(std::uint32_t context);
     void EndFrame(std::uint32_t context);
-    void Render(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever);
+    void Render(std::uint32_t context, VAL::WorkerFrameCommandReciever commandReciever);
 
 private:
     static char const* IMGUI_TEXTURE_KEY;

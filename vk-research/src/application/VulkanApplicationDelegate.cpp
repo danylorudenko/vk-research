@@ -1,5 +1,5 @@
 #include "VulkanApplicationDelegate.hpp"
-#include "..\vk_interface\Tools.hpp"
+#include "..\VAL\Tools.hpp"
 #include "..\renderer\Root.hpp"
 
 #include "..\renderer\Material.hpp"
@@ -27,14 +27,14 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     , inputSystem_{ mainWindow_.NativeHandle() }
     , imguiEnabled_{ imguiEnabled }
 {
-    VKW::LoaderDesc loaderDesc;
+    VAL::LoaderDesc loaderDesc;
     loaderDesc.hInstance_ = instance; 
     loaderDesc.hwnd_ = mainWindow_.NativeHandle();
     loaderDesc.bufferingCount_ = buffering;
     loaderDesc.ioManager_ = &ioManager_;
     loaderDesc.debug_ = vkDebug;
 
-    vulkanLoader_ = std::make_unique<VKW::Loader>(loaderDesc);
+    vulkanLoader_ = std::make_unique<VAL::Loader>(loaderDesc);
 
 
 
@@ -48,7 +48,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
     rootDesc.shaderModuleFactory_ = vulkanLoader_->shaderModuleFactory_.get();
     rootDesc.pipelineFactory_ = vulkanLoader_->pipelineFactory_.get();
     rootDesc.presentationController_ = vulkanLoader_->presentationController_.get();
-    rootDesc.mainWorkerTemp_ = vulkanLoader_->workersProvider_->GetWorker(VKW::WorkerType::GRAPHICS_PRESENT, 0);
+    rootDesc.mainWorkerTemp_ = vulkanLoader_->workersProvider_->GetWorker(VAL::WorkerType::GRAPHICS_PRESENT, 0);
 
     renderRoot_ = std::make_unique<Render::Root>(rootDesc);
 
@@ -117,7 +117,7 @@ void VulkanApplicationDelegate::update()
 
     inputSystem_.Update();
 
-    VKW::PresentationContext presentationContext = renderRoot_->AcquireNextPresentationContext();
+    VAL::PresentationContext presentationContext = renderRoot_->AcquireNextPresentationContext();
     std::uint32_t context = presentationContext.contextId_;
     ////////////////////////////////////////////////////
     //
@@ -133,14 +133,14 @@ void VulkanApplicationDelegate::update()
     cameraData.cameraEuler = glm::vec3(0.0f);
     cameraData.cameraFowDegrees = 60.0f;
 
-    VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
-    VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
+    VAL::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
+    VAL::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
     cameraData.width = (float)colorBufferResource->width_;
     cameraData.height = (float)colorBufferResource->height_;
 
     transformationSystem_.Update(context, cameraData);
 
-    VKW::WorkerFrameCommandReciever commandReciever = renderRoot_->BeginRenderGraph(presentationContext);
+    VAL::WorkerFrameCommandReciever commandReciever = renderRoot_->BeginRenderGraph(presentationContext);
     renderRoot_->IterateRenderGraph(presentationContext, commandReciever);
 
     ImGuiUser(context);
@@ -177,8 +177,8 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
     if (imguiEnabled_) {
         IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
         
-        VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
-        VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
+        VAL::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
+        VAL::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
 
         //ImGui::SetNextWindowContentWidth(100.0f);
         ImGui::SetNextWindowPos(ImVec2((float)colorBufferResource->width_ - 10.0f, 0.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));

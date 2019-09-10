@@ -1,14 +1,14 @@
 #include "Pass.hpp"
 #include "Root.hpp"
-#include "..\vk_interface\ResourceRendererProxy.hpp"
-#include "..\vk_interface\pipeline\RenderPassController.hpp"
-#include "..\vk_interface\pipeline\PipelineFactory.hpp"
-#include "..\vk_interface\pipeline\Pipeline.hpp"
-#include "..\vk_interface\ImportTable.hpp"
-#include "..\vk_interface\Device.hpp"
-#include "..\vk_interface\worker\Worker.hpp"
-#include "..\vk_interface\ImportTable.hpp"
-#include "..\vk_interface\Device.hpp"
+#include "..\VAL\ResourceRendererProxy.hpp"
+#include "..\VAL\pipeline\RenderPassController.hpp"
+#include "..\VAL\pipeline\PipelineFactory.hpp"
+#include "..\VAL\pipeline\Pipeline.hpp"
+#include "..\VAL\ImportTable.hpp"
+#include "..\VAL\Device.hpp"
+#include "..\VAL\worker\Worker.hpp"
+#include "..\VAL\ImportTable.hpp"
+#include "..\VAL\Device.hpp"
 
 #include <utility>
 
@@ -40,16 +40,16 @@ GraphicsPass::GraphicsPass(GraphicsPassDesc const& desc)
 {
     std::uint32_t const colorAttachmentCount = desc.colorAttachmentCount_;
 
-    VKW::RenderPassAttachmentDesc colorAttachmentDescs[VKW::RenderPass::MAX_COLOR_ATTACHMENTS];
-    VKW::RenderPassAttachmentDesc depthStencilAttachmentDesc;
+    VAL::RenderPassAttachmentDesc colorAttachmentDescs[VAL::RenderPass::MAX_COLOR_ATTACHMENTS];
+    VAL::RenderPassAttachmentDesc depthStencilAttachmentDesc;
 
-    VKW::RenderPassDesc vkRenderPassDesc;
+    VAL::RenderPassDesc vkRenderPassDesc;
     
     vkRenderPassDesc.colorAttachmentsCount_ = colorAttachmentCount;
     for (auto i = 0u; i < colorAttachmentCount; ++i) {
 
-        VKW::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.colorAttachments_[i].handle_.id_];
-        VKW::ImageView* imageView = desc.imagesProvider_->GetImageView(imageViewHandle);
+        VAL::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.colorAttachments_[i].handle_.id_];
+        VAL::ImageView* imageView = desc.imagesProvider_->GetImageView(imageViewHandle);
         colorAttachmentDescs[i].format_ = imageView->format_;
         colorAttachmentDescs[i].usage_ = desc.colorAttachments_[i].usage_;
     }
@@ -57,8 +57,8 @@ GraphicsPass::GraphicsPass(GraphicsPassDesc const& desc)
     vkRenderPassDesc.colorAttachments_ = colorAttachmentDescs;
 
     if (desc.depthStencilAttachment_ != nullptr) {
-        VKW::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.depthStencilAttachment_->id_];
-        VKW::ImageView* imageView = desc.imagesProvider_->GetImageView(imageViewHandle);
+        VAL::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.depthStencilAttachment_->id_];
+        VAL::ImageView* imageView = desc.imagesProvider_->GetImageView(imageViewHandle);
         vkRenderPassDesc.depthStencilAttachment_ = &depthStencilAttachmentDesc;
         vkRenderPassDesc.depthStencilAttachment_->format_ = imageView->format_;
     }
@@ -71,7 +71,7 @@ GraphicsPass::GraphicsPass(GraphicsPassDesc const& desc)
 
 
 
-    VKW::ProxyFramebufferDesc framebufferProxyDesc;
+    VAL::ProxyFramebufferDesc framebufferProxyDesc;
     framebufferProxyDesc.renderPass_ = vkRenderPass_;
     framebufferProxyDesc.width_ = desc.width_;
     framebufferProxyDesc.height_ = desc.height_;
@@ -122,7 +122,7 @@ GraphicsPass::~GraphicsPass()
     
 }
 
-VKW::RenderPassHandle GraphicsPass::VKWRenderPass() const
+VAL::RenderPassHandle GraphicsPass::VKWRenderPass() const
 {
     return vkRenderPass_;
 }
@@ -132,12 +132,12 @@ void GraphicsPass::RegisterMaterialData(MaterialKey const& materialKey, std::uin
     materialDelegatedData_.emplace_back(materialKey, materialPerPassDataId, pipelineKey);
 }
 
-void GraphicsPass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void GraphicsPass::Begin(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever)
 {
-    VKW::RenderPass* pass = renderPassController_->GetRenderPass(vkRenderPass_);
-    VKW::Framebuffer* framebuffer = resourceProxy_->GetFramebuffer(framebuffer_, contextId);
+    VAL::RenderPass* pass = renderPassController_->GetRenderPass(vkRenderPass_);
+    VAL::Framebuffer* framebuffer = resourceProxy_->GetFramebuffer(framebuffer_, contextId);
 
-    VkClearValue clearValues[VKW::RenderPass::MAX_ATTACHMENTS];
+    VkClearValue clearValues[VAL::RenderPass::MAX_ATTACHMENTS];
     std::uint32_t const colorAttachmentsCount = pass->colorAttachmentsCount_;
     for (auto i = 0u; i < colorAttachmentsCount; ++i) {
 
@@ -151,7 +151,7 @@ void GraphicsPass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
 
     std::uint32_t attachmentsCount = pass->colorAttachmentsCount_;
 
-    if (pass->depthStencilAttachmentInfo_.usage_ == VKW::RENDER_PASS_ATTACHMENT_USAGE_DEPTH_STENCIL) {
+    if (pass->depthStencilAttachmentInfo_.usage_ == VAL::RENDER_PASS_ATTACHMENT_USAGE_DEPTH_STENCIL) {
         clearValues[colorAttachmentsCount].depthStencil.depth = 1.0f;
         clearValues[colorAttachmentsCount].depthStencil.stencil = 0;
         ++attachmentsCount;
@@ -175,12 +175,12 @@ void GraphicsPass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
     
 }
 
-void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void GraphicsPass::Apply(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever)
 {
     std::uint32_t const materialsCount = static_cast<std::uint32_t>(materialDelegatedData_.size());
     for (std::uint32_t i = 0u; i < materialsCount; ++i) {
         Pipeline& pipeline = root_->FindPipeline(materialDelegatedData_[i].pipelineKey_);
-        if (pipeline.properties_.pipelineDynamicStateFlags_ & VKW::PIPELINE_DYNAMIC_STATE_VIEWPORT) {
+        if (pipeline.properties_.pipelineDynamicStateFlags_ & VAL::PIPELINE_DYNAMIC_STATE_VIEWPORT) {
             VkViewport viewport;
             viewport.x = 0.0f;
             viewport.y = 0.0f;
@@ -191,8 +191,8 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
             table_->vkCmdSetViewport(commandReciever->commandBuffer_, 0, 1, &viewport);
         }
 
-        VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(pipeline.pipelineHandle_);
-        VKW::PipelineLayout const* vkwPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwPipeline->layoutHandle);
+        VAL::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(pipeline.pipelineHandle_);
+        VAL::PipelineLayout const* vkwPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwPipeline->layoutHandle);
         VkPipelineLayout const vkPipelineLayout = vkwPipelineLayout->handle_;
 
         VkCommandBuffer const commandBuffer = commandReciever->commandBuffer_;
@@ -213,7 +213,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
             // 3)   register Materials in the rendergraph (provided needed data for each renderpass)
 
             DescriptorSet& set = perPassData.descritorSetsOwner_.slots_[j].descriptorSet_;
-            VKW::DescriptorSet* vkwSet = root_->ResourceProxy()->GetDescriptorSet(set.proxyDescriptorSetHandle_, contextId);
+            VAL::DescriptorSet* vkwSet = root_->ResourceProxy()->GetDescriptorSet(set.proxyDescriptorSetHandle_, contextId);
             vkSetsToBind[j] = vkwSet->handle_;
 
             
@@ -230,7 +230,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
             RenderWorkItem& renderItem = renderItems[j];
             std::uint32_t const renderItemSetsCount = renderItem.descriptorSetsOwner_.slotsCount_;
             for (std::uint32_t k = 0; k < renderItemSetsCount; ++k) {
-                VKW::DescriptorSet* vkwSet = resourceProxy_->GetDescriptorSet(renderItem.descriptorSetsOwner_.slots_[k].descriptorSet_.proxyDescriptorSetHandle_, contextId);
+                VAL::DescriptorSet* vkwSet = resourceProxy_->GetDescriptorSet(renderItem.descriptorSetsOwner_.slots_[k].descriptorSet_.proxyDescriptorSetHandle_, contextId);
                 vkSetsToBind[k] = vkwSet->handle_;
             }
             //                                                                                              //first descriptor
@@ -239,8 +239,8 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
             assert(renderItem.vertexCount_ >= 0 && "GraphicsPass: renderItem.vertexCount < 0");
             assert(renderItem.indexCount_ >= 0 && "GraphicsPass: renderItem.indexCount < 0");
             if (renderItem.vertexCount_ > 0) {
-                VKW::BufferView* vertexBufferView = root_->FindGlobalBuffer(renderItem.vertexBufferKey_, contextId);
-                VKW::BufferResource* vertexBuffer = resourceProxy_->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
+                VAL::BufferView* vertexBufferView = root_->FindGlobalBuffer(renderItem.vertexBufferKey_, contextId);
+                VAL::BufferResource* vertexBuffer = resourceProxy_->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
 
                 VkBuffer vkBuffer = vertexBuffer->handle_;
                 VkDeviceSize offset = vertexBufferView->offset_ + renderItem.vertexBindOffset_;
@@ -248,8 +248,8 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
             }
 
             if (renderItem.indexCount_ > 0) {
-                VKW::BufferView* indexBufferView = root_->FindGlobalBuffer(renderItem.indexBufferKey_, contextId);
-                VKW::BufferResource* indexBuffer = resourceProxy_->GetResource(indexBufferView->providedBuffer_->bufferResource_);
+                VAL::BufferView* indexBufferView = root_->FindGlobalBuffer(renderItem.indexBufferKey_, contextId);
+                VAL::BufferResource* indexBuffer = resourceProxy_->GetResource(indexBufferView->providedBuffer_->bufferResource_);
 
                 VkBuffer vkBuffer = indexBuffer->handle_;
                 VkDeviceSize offset = indexBufferView->offset_;
@@ -269,7 +269,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
     }
 }
 
-void GraphicsPass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void GraphicsPass::End(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever)
 {
     table_->vkCmdEndRenderPass(commandReciever->commandBuffer_);
 }
@@ -326,7 +326,7 @@ ComputePass::~ComputePass()
 
 }
 
-void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void ComputePass::Begin(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever)
 {
     std::uint32_t constexpr MAX_BARRIERS = 8;
     
@@ -372,8 +372,8 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
             break;
         case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ_AFTER_WRITE:
         {
-            VKW::BufferView* view = root_->FindGlobalBuffer(usageData.resourceKey_, contextId);
-            VKW::BufferResource* resource = resourceProxy_->GetResource(view->providedBuffer_->bufferResource_);
+            VAL::BufferView* view = root_->FindGlobalBuffer(usageData.resourceKey_, contextId);
+            VAL::BufferResource* resource = resourceProxy_->GetResource(view->providedBuffer_->bufferResource_);
 
             auto& barrier = bufferBarriers[bufferBarriersCount++];
             barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -397,12 +397,12 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
     }
 }
 
-void ComputePass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void ComputePass::Apply(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever)
 {
 
 }
 
-void ComputePass::End(std::uint32_t contextId, VKW::WorkerFrameCommandReciever* commandReciever)
+void ComputePass::End(std::uint32_t contextId, VAL::WorkerFrameCommandReciever* commandReciever)
 {
 
 }

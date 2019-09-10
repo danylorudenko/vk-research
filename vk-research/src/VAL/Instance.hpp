@@ -47,7 +47,7 @@ public:
 
 
 private:
-    VKW::ImportTable* table_;
+    VAL::ImportTable* table_;
     VkInstance instance_;
     VkDebugReportCallbackEXT debugCallback_;
 };

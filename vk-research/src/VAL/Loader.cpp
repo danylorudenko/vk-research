@@ -30,17 +30,17 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
-    VKW::InstanceDesc instanceDesc;
+    VAL::InstanceDesc instanceDesc;
     instanceDesc.table_ = table_.get();
     instanceDesc.requiredInstanceExtensions_ = instanceExtensions;
     instanceDesc.requiredInstanceLayers_ = instanceLayers;
     instanceDesc.debug_ = desc.debug_;
 
-    instance_ = std::make_unique<VKW::Instance>(instanceDesc);
+    instance_ = std::make_unique<VAL::Instance>(instanceDesc);
 
 
 
-    VKW::DeviceDesc deviceDesc;
+    VAL::DeviceDesc deviceDesc;
     deviceDesc.table_ = table_.get();
     deviceDesc.instance_ = instance_.get();
     deviceDesc.requiredExtensions_ = { "VK_KHR_swapchain" };
@@ -48,113 +48,113 @@ Loader::Loader(LoaderDesc const& desc)
     deviceDesc.computeQueueCount_ = 0;
     deviceDesc.transferQueueCount_ = 0;
 
-    device_ = std::make_unique<VKW::Device>(deviceDesc);
+    device_ = std::make_unique<VAL::Device>(deviceDesc);
     
 
 
-    VKW::SurfaceDesc surfaceDesc;
+    VAL::SurfaceDesc surfaceDesc;
     surfaceDesc.table_ = table_.get();
     surfaceDesc.instance_ = instance_.get();
     surfaceDesc.device_ = device_.get();
     surfaceDesc.hInstance_ = desc.hInstance_;
     surfaceDesc.hwnd_ = desc.hwnd_;
 
-    surface_ = std::make_unique<VKW::Surface>(surfaceDesc);
+    surface_ = std::make_unique<VAL::Surface>(surfaceDesc);
 
 
 
-    VKW::SwapchainDesc swapchainDesc;
+    VAL::SwapchainDesc swapchainDesc;
     swapchainDesc.table_ = table_.get();
     swapchainDesc.device_ = device_.get();
     swapchainDesc.surface_ = surface_.get();
     swapchainDesc.imagesCount_ = desc.bufferingCount_;
 
-    swapchain_ = std::make_unique<VKW::Swapchain>(swapchainDesc);
+    swapchain_ = std::make_unique<VAL::Swapchain>(swapchainDesc);
 
 
 
 
-    VKW::MemoryControllerDesc memoryControllerDesc;
+    VAL::MemoryControllerDesc memoryControllerDesc;
     memoryControllerDesc.table_ = table_.get();
     memoryControllerDesc.device_ = device_.get();
 
-    memoryController_ = std::make_unique<VKW::MemoryController>(memoryControllerDesc);
+    memoryController_ = std::make_unique<VAL::MemoryController>(memoryControllerDesc);
 
 
 
-    VKW::ResourcesControllerDesc resourcesControllerDesc;
+    VAL::ResourcesControllerDesc resourcesControllerDesc;
     resourcesControllerDesc.table_ = table_.get();
     resourcesControllerDesc.device_ = device_.get();
     resourcesControllerDesc.memoryController_ = memoryController_.get();
 
-    resourcesController_ = std::make_unique<VKW::ResourcesController>(resourcesControllerDesc);
+    resourcesController_ = std::make_unique<VAL::ResourcesController>(resourcesControllerDesc);
 
 
 
-    VKW::BuffersProviderDesc buffersProviderDesc;
+    VAL::BuffersProviderDesc buffersProviderDesc;
     buffersProviderDesc.table_ = table_.get();
     buffersProviderDesc.device_ = device_.get();
     buffersProviderDesc.resourcesController_ = resourcesController_.get();
 
-    buffersProvider_ = std::make_unique<VKW::BuffersProvider>(buffersProviderDesc);
+    buffersProvider_ = std::make_unique<VAL::BuffersProvider>(buffersProviderDesc);
 
 
 
-    VKW::ImagesProviderDesc imagesProviderDesc;
+    VAL::ImagesProviderDesc imagesProviderDesc;
     imagesProviderDesc.table_ = table_.get();
     imagesProviderDesc.device_ = device_.get();
     imagesProviderDesc.swapchain_ = swapchain_.get();
     imagesProviderDesc.resourcesController_ = resourcesController_.get();
 
-    imagesProvider_ = std::make_unique<VKW::ImagesProvider>(imagesProviderDesc);
+    imagesProvider_ = std::make_unique<VAL::ImagesProvider>(imagesProviderDesc);
 
 
 
-    framedDescriptorsHub_ = std::make_unique<VKW::FramedDescriptorsHub>();
+    framedDescriptorsHub_ = std::make_unique<VAL::FramedDescriptorsHub>();
     assert(swapchain_->ImageCount() <= CONSTANTS::MAX_FRAMES_BUFFERING);
     framedDescriptorsHub_->framesCount_ = swapchain_->ImageCount();
 
 
 
-    VKW::RenderPassControllerDesc renderPassControllerDesc;
+    VAL::RenderPassControllerDesc renderPassControllerDesc;
     renderPassControllerDesc.table_ = table_.get();
     renderPassControllerDesc.device_ = device_.get();
 
-    renderPassController_ = std::make_unique<VKW::RenderPassController>(renderPassControllerDesc);
+    renderPassController_ = std::make_unique<VAL::RenderPassController>(renderPassControllerDesc);
 
 
 
-    VKW::FramebufferControllerDesc framebufferControllerDesc;
+    VAL::FramebufferControllerDesc framebufferControllerDesc;
     framebufferControllerDesc.table_ = table_.get();
     framebufferControllerDesc.device_ = device_.get();
     framebufferControllerDesc.swapchain_ = swapchain_.get();
     framebufferControllerDesc.imagesProvider_ = imagesProvider_.get();
     framebufferControllerDesc.renderPassController_ = renderPassController_.get();
 
-    framebufferController_ = std::make_unique<VKW::FramebufferController>(framebufferControllerDesc);
+    framebufferController_ = std::make_unique<VAL::FramebufferController>(framebufferControllerDesc);
 
 
 
-    VKW::DescriptorLayoutControllerDesc descriptorLayoutControllerDesc;
+    VAL::DescriptorLayoutControllerDesc descriptorLayoutControllerDesc;
     descriptorLayoutControllerDesc.device_ = device_.get();
     descriptorLayoutControllerDesc.table_ = table_.get();
 
-    descriptorLayoutController_ = std::make_unique<VKW::DescriptorLayoutController>(descriptorLayoutControllerDesc);
+    descriptorLayoutController_ = std::make_unique<VAL::DescriptorLayoutController>(descriptorLayoutControllerDesc);
 
 
 
-    VKW::DescriptorSetControllerDesc descriptorSetControllerDesc;
+    VAL::DescriptorSetControllerDesc descriptorSetControllerDesc;
     descriptorSetControllerDesc.table_ = table_.get();
     descriptorSetControllerDesc.device_ = device_.get();
     descriptorSetControllerDesc.buffersProvider_ = buffersProvider_.get();
     descriptorSetControllerDesc.imagesProvider_ = imagesProvider_.get();
     descriptorSetControllerDesc.layoutController_ = descriptorLayoutController_.get();
 
-    descriptorSetController_ = std::make_unique<VKW::DescriptorSetController>(descriptorSetControllerDesc);
+    descriptorSetController_ = std::make_unique<VAL::DescriptorSetController>(descriptorSetControllerDesc);
 
 
 
-    VKW::ResourceRendererProxyDesc resourceRendererProxyDesc;
+    VAL::ResourceRendererProxyDesc resourceRendererProxyDesc;
     resourceRendererProxyDesc.table_ = table_.get();
     resourceRendererProxyDesc.device_ = device_.get();
     resourceRendererProxyDesc.memoryController_ = memoryController_.get();
@@ -167,31 +167,31 @@ Loader::Loader(LoaderDesc const& desc)
     resourceRendererProxyDesc.framebufferController_ = framebufferController_.get();
     resourceRendererProxyDesc.framedDescriptorsHub_ = framedDescriptorsHub_.get();
 
-    resourceRendererProxy_ = std::make_unique<VKW::ResourceRendererProxy>(resourceRendererProxyDesc);
+    resourceRendererProxy_ = std::make_unique<VAL::ResourceRendererProxy>(resourceRendererProxyDesc);
 
 
 
-    VKW::ShaderModuleFactoryDesc shaderModuleFactoryDesc;
+    VAL::ShaderModuleFactoryDesc shaderModuleFactoryDesc;
     shaderModuleFactoryDesc.table_ = table_.get();
     shaderModuleFactoryDesc.device_ = device_.get();
     shaderModuleFactoryDesc.ioManager_ = desc.ioManager_;
 
-    shaderModuleFactory_ = std::make_unique<VKW::ShaderModuleFactory>(shaderModuleFactoryDesc);
+    shaderModuleFactory_ = std::make_unique<VAL::ShaderModuleFactory>(shaderModuleFactoryDesc);
 
 
 
-    VKW::PipelineFactoryDesc pipelineFactoryDesc;
+    VAL::PipelineFactoryDesc pipelineFactoryDesc;
     pipelineFactoryDesc.table_ = table_.get();
     pipelineFactoryDesc.device_ = device_.get();
     pipelineFactoryDesc.descriptorLayoutController_ = descriptorLayoutController_.get();
     pipelineFactoryDesc.renderPassController_ = renderPassController_.get();
     pipelineFactoryDesc.shaderModuleFactory_ = shaderModuleFactory_.get();
 
-    pipelineFactory_ = std::make_unique<VKW::PipelineFactory>(pipelineFactoryDesc);
+    pipelineFactory_ = std::make_unique<VAL::PipelineFactory>(pipelineFactoryDesc);
 
 
 
-    VKW::WorkersProviderDesc wcsDesc;
+    VAL::WorkersProviderDesc wcsDesc;
     wcsDesc.table_ = table_.get();
     wcsDesc.device_ = device_.get();
     wcsDesc.bufferingCount_ = swapchain_->ImageCount();
@@ -199,26 +199,26 @@ Loader::Loader(LoaderDesc const& desc)
     wcsDesc.computeQueueCount_ = 0;
     wcsDesc.transferQueueCount_ = 0;
 
-    workersProvider_ = std::make_unique<VKW::WorkersProvider>(wcsDesc);
+    workersProvider_ = std::make_unique<VAL::WorkersProvider>(wcsDesc);
 
 
 
-    VKW::PresentationControllerDesc presentationControllerDesc;
+    VAL::PresentationControllerDesc presentationControllerDesc;
     presentationControllerDesc.table_ = table_.get();
     presentationControllerDesc.device_ = device_.get();
     presentationControllerDesc.swapchain_ = swapchain_.get();
     presentationControllerDesc.presentationWorker_ = workersProvider_->PresentWorker();
 
-    presentationController_ = std::make_unique<VKW::PresentationController>(presentationControllerDesc);
+    presentationController_ = std::make_unique<VAL::PresentationController>(presentationControllerDesc);
 
 
 
-    VKW::ResourceBindingServiceDesc resourceBindingServiceDesc;
+    VAL::ResourceBindingServiceDesc resourceBindingServiceDesc;
     resourceBindingServiceDesc.table_ = table_.get();
     resourceBindingServiceDesc.device_ = device_.get();
     resourceBindingServiceDesc.framesCount_ = swapchain_->ImageCount();
 
-    //resourceBindingService_ = std::make_unique<VKW::ResourceBindingService>(resourceBindingServiceDesc);
+    //resourceBindingService_ = std::make_unique<VAL::ResourceBindingService>(resourceBindingServiceDesc);
 }
 
 Loader::~Loader()
