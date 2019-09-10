@@ -3,7 +3,7 @@
 
 #include <Windows.h>
 
-#include "Application.hpp"
+#include <application/Application.hpp>
 
 Application::Application(ApplicationDelegate* delegate)
     : delegate_(delegate)

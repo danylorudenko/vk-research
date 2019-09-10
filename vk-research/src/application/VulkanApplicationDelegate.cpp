@@ -1,11 +1,14 @@
-#include "VulkanApplicationDelegate.hpp"
-#include "..\VAL\Tools.hpp"
-#include "..\renderer\Root.hpp"
+#include <application\VulkanApplicationDelegate.hpp>
 
-#include "..\renderer\Material.hpp"
-#include "..\transform\TansformComponent.hpp"
+#include <application\ImGuiUserData.hpp>
 
-#include "..\renderer\CustomTempBlurPass.hpp"
+#include <VAL\Tools.hpp>
+#include <renderer\Root.hpp>
+
+#include <renderer\Material.hpp>
+#include <transform\TansformComponent.hpp>
+
+#include <renderer\CustomTempBlurPass.hpp>
 
 #include <utility>
 #include <cstdio>
@@ -13,7 +16,6 @@
 #include <glm\gtc\quaternion.hpp>
 
 #include <imgui/imgui.h>
-#include "ImGuiUserData.hpp"
 
 VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char const* title, std::uint32_t windowWidth, std::uint32_t windowHeight, std::uint32_t buffering, bool vkDebug, bool imguiEnabled)
     : mainWindow_ {

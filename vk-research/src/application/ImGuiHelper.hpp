@@ -1,9 +1,8 @@
 #pragma once
 
-#include "..\class_features\NonCopyable.hpp"
-#include "..\renderer\RenderWorkItem.hpp"
-#include "..\renderer\UniformBufferWriterProxy.hpp"
-#include "..\VAL\worker\WorkerFrame.hpp"
+#include <class_features\NonCopyable.hpp>
+#include <renderer\RenderWorkItem.hpp>
+#include <VAL\worker\WorkerFrame.hpp>
 #include <imgui\imgui.h>
 
 class Window;

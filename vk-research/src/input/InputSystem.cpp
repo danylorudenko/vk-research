@@ -1,5 +1,5 @@
-#include "InputSystem.hpp"
-#include "Keyboard.hpp"
+#include <input\InputSystem.hpp>
+#include <input\Keyboard.hpp>
 #include <utility>
 #include <cstdint>
 #include <cstring>
