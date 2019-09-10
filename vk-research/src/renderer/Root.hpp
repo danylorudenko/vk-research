@@ -27,7 +27,7 @@
 
 class IOManager;
 
-namespace VKW
+namespace VAL
 {
 class ResourceRendererProxy;
 class Worker;
