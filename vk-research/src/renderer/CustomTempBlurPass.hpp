@@ -7,7 +7,8 @@
 
 class IOManager;
 
-namespace VKW
+
+namespace VAL
 {
     class ImportTable;
     class Device;

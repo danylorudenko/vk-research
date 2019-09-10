@@ -6,7 +6,7 @@
 #include "Material.hpp"
 #include "RootDef.hpp"
 
-namespace VKW
+namespace VAL
 {
 class ImportTable;
 class Device;
