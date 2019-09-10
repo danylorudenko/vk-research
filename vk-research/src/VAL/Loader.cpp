@@ -110,12 +110,6 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
-    framedDescriptorsHub_ = std::make_unique<VAL::FramedDescriptorsHub>();
-    assert(swapchain_->ImageCount() <= CONSTANTS::MAX_FRAMES_BUFFERING);
-    framedDescriptorsHub_->framesCount_ = swapchain_->ImageCount();
-
-
-
     VAL::RenderPassControllerDesc renderPassControllerDesc;
     renderPassControllerDesc.table_ = table_.get();
     renderPassControllerDesc.device_ = device_.get();
@@ -152,22 +146,6 @@ Loader::Loader(LoaderDesc const& desc)
 
     descriptorSetController_ = std::make_unique<VAL::DescriptorSetController>(descriptorSetControllerDesc);
 
-
-
-    VAL::ResourceRendererProxyDesc resourceRendererProxyDesc;
-    resourceRendererProxyDesc.table_ = table_.get();
-    resourceRendererProxyDesc.device_ = device_.get();
-    resourceRendererProxyDesc.memoryController_ = memoryController_.get();
-    resourceRendererProxyDesc.resourcesController_ = resourcesController_.get();
-    resourceRendererProxyDesc.buffersProvider_ = buffersProvider_.get();
-    resourceRendererProxyDesc.imagesProvider_ = imagesProvider_.get();
-    resourceRendererProxyDesc.layoutController_ = descriptorLayoutController_.get();
-    resourceRendererProxyDesc.descriptorSetsController_ = descriptorSetController_.get();
-    resourceRendererProxyDesc.renderPassController_ = renderPassController_.get();
-    resourceRendererProxyDesc.framebufferController_ = framebufferController_.get();
-    resourceRendererProxyDesc.framedDescriptorsHub_ = framedDescriptorsHub_.get();
-
-    resourceRendererProxy_ = std::make_unique<VAL::ResourceRendererProxy>(resourceRendererProxyDesc);
 
 
 
@@ -210,15 +188,6 @@ Loader::Loader(LoaderDesc const& desc)
     presentationControllerDesc.presentationWorker_ = workersProvider_->PresentWorker();
 
     presentationController_ = std::make_unique<VAL::PresentationController>(presentationControllerDesc);
-
-
-
-    VAL::ResourceBindingServiceDesc resourceBindingServiceDesc;
-    resourceBindingServiceDesc.table_ = table_.get();
-    resourceBindingServiceDesc.device_ = device_.get();
-    resourceBindingServiceDesc.framesCount_ = swapchain_->ImageCount();
-
-    //resourceBindingService_ = std::make_unique<VAL::ResourceBindingService>(resourceBindingServiceDesc);
 }
 
 Loader::~Loader()

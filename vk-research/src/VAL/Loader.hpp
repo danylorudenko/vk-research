@@ -17,9 +17,6 @@
 #include "pipeline\DescriptorLayoutController.hpp"
 #include "runtime\DescriptorSetController.hpp"
 #include "worker\WorkersProvider.hpp"
-#include "runtime\FramedDescriptorsHub.hpp"
-#include "ResourceRendererProxy.hpp"
-#include "runtime\ResourceBindingService.hpp"
 #include "pipeline\RenderPassController.hpp"
 #include "resources\FramebufferController.hpp"
 #include "pipeline\PipelineFactory.hpp"
@@ -70,12 +67,8 @@ public:
     std::unique_ptr<VAL::DescriptorLayoutController> descriptorLayoutController_;
     std::unique_ptr<VAL::DescriptorSetController> descriptorSetController_;
 
-    std::unique_ptr<VAL::FramedDescriptorsHub> framedDescriptorsHub_;
-
     std::unique_ptr<VAL::RenderPassController> renderPassController_;
     std::unique_ptr<VAL::FramebufferController> framebufferController_;
-
-    std::unique_ptr<VAL::ResourceRendererProxy> resourceRendererProxy_;
 
     std::unique_ptr<VAL::ShaderModuleFactory> shaderModuleFactory_;
     std::unique_ptr<VAL::PipelineFactory> pipelineFactory_;
@@ -83,9 +76,6 @@ public:
     std::unique_ptr<VAL::WorkersProvider> workersProvider_;
 
     std::unique_ptr<VAL::PresentationController> presentationController_;
-
-
-    //std::unique_ptr<VAL::ResourceBindingService> resourceBindingService_;
 
 };
 
