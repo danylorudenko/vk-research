@@ -174,7 +174,7 @@ void InputSystem::SetKeysBitflagValue(std::uint64_t* bitflag, Keys key, bool val
         bitflag[member] |= 1ULL << bitOffset;
     }
     else {
-        bitflag[member] &= !(1ULL << bitOffset);
+        bitflag[member] &= ~(1ULL << bitOffset);
     }
     
 }
@@ -228,22 +228,22 @@ void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)
     if (header.dwType == RIM_TYPEMOUSE) {
         RAWMOUSE& mouse = rawInput->data.mouse;
         if(mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
-            pendingMouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Left;
+            pendingMouseState_.mouseButtonStates_ |= 1 << static_cast<std::uint32_t>(MouseState::MouseButtonOffsets::Left);
 
         if(mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
-            pendingMouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Right;
+            pendingMouseState_.mouseButtonStates_ |= 1 << static_cast<std::uint32_t>(MouseState::MouseButtonOffsets::Right);
 
         if(mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
-            pendingMouseState_.mouseButtonStates_ |= 1 << MouseState::MouseButtonOffsets::Middle;
+            pendingMouseState_.mouseButtonStates_ |= 1 << static_cast<std::uint32_t>(MouseState::MouseButtonOffsets::Middle);
 
         if(mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
-            pendingMouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Left);
+            pendingMouseState_.mouseButtonStates_ &= ~(1 << static_cast<std::uint32_t>(MouseState::MouseButtonOffsets::Left));
 
         if (mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
-            pendingMouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Right);
+            pendingMouseState_.mouseButtonStates_ &= ~(1 << static_cast<std::uint32_t>(MouseState::MouseButtonOffsets::Right));
 
         if (mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
-            pendingMouseState_.mouseButtonStates_ &= !(1 << MouseState::MouseButtonOffsets::Middle);
+            pendingMouseState_.mouseButtonStates_ &= ~(1 << static_cast<std::uint32_t>(MouseState::MouseButtonOffsets::Middle));
 
         if (mouse.usButtonFlags & RI_MOUSE_WHEEL)
             pendingMouseState_.mouseWheelDelta_ = static_cast<float>(mouse.usButtonData);
@@ -252,14 +252,12 @@ void InputSystem::ProcessSystemInput(HWND handle, WPARAM wparam, LPARAM lparam)
         pendingMouseState_.yDelta_ = static_cast<float>(mouse.lLastY);
     }
     else if (header.dwType == RIM_TYPEKEYBOARD) {
-        // handle keyboard input?
         RAWKEYBOARD& keyboard = rawInput->data.keyboard;
-        if (keyboard.Flags & RI_KEY_BREAK) {
-            //up
+        if (keyboard.Message == WM_KEYUP || keyboard.Message == WM_SYSKEYUP) {
+            // up
             SetKeysBitflagValue(pendingKeyboardState_.keysBits, VKeyToKeys(keyboard.VKey), false);
         }
-        // RI_KEY_MAKE defined as 0 sooo
-        else if (keyboard.Flags == RI_KEY_MAKE) {
+        if (keyboard.Message == WM_KEYDOWN || keyboard.Message == WM_SYSKEYDOWN) {
             // down
             SetKeysBitflagValue(pendingKeyboardState_.keysBits, VKeyToKeys(keyboard.VKey), true);
         }
