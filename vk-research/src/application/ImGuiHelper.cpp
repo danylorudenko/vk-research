@@ -1,7 +1,8 @@
 #include "ImGuiHelper.hpp"
-#include "..\input\InputSystem.hpp"
-#include "..\system\Window.hpp"
-#include "..\renderer\Root.hpp"
+
+#include <input\InputSystem.hpp>
+#include <system\Window.hpp>
+#include <renderer\Root.hpp>
 
 #include <glm\vec2.hpp>
 #include <glm\gtc\type_ptr.hpp>

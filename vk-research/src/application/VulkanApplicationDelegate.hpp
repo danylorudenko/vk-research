@@ -3,20 +3,21 @@
 #include <memory>
 #include <chrono>
 
-#include "Application.hpp"
-#include "..\class_features\NonMovable.hpp"
+#include <class_features\NonMovable.hpp>
 
-#include "..\system\Window.hpp"
-#include "..\system\DynamicLibrary.hpp"
-#include "..\input\InputSystem.hpp"
+#include <application\Application.hpp>
+#include <application\ImGuiHelper.hpp>
 
-#include "..\io\IOManager.hpp"
-#include "..\vk_interface\Loader.hpp"
-#include "..\renderer\Root.hpp"
-#include "..\renderer\RootDef.hpp"
-#include "..\renderer\UniformBufferWriterProxy.hpp"
-#include "..\transform\TransformationSystem.hpp"
-#include "ImGuiHelper.hpp"
+#include <system\Window.hpp>
+#include <system\DynamicLibrary.hpp>
+#include <input\InputSystem.hpp>
+
+#include <io\IOManager.hpp>
+#include <vk_interface\Loader.hpp>
+#include <renderer\Root.hpp>
+#include <renderer\RootDef.hpp>
+#include <renderer\UniformBufferWriterProxy.hpp>
+#include <transform\TransformationSystem.hpp>
 
 struct CustomData
 {

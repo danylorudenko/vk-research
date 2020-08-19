@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <cassert>
 
-#include "..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
 class DynamicLibrary final
     : public NonCopyable

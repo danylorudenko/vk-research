@@ -1,6 +1,6 @@
 #include "TransformationSystem.hpp"
 
-#include "TansformComponent.hpp"
+#include <transform\TansformComponent.hpp>
 #include <utility>
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\quaternion.hpp>

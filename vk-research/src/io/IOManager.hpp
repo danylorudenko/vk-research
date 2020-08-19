@@ -1,8 +1,8 @@
 #pragma once
 
-#include "..\class_features\NonCopyable.hpp"
-#include "..\data\ModelMesh.hpp"
-#include "..\data\Texture2D.hpp"
+#include <class_features\NonCopyable.hpp>
+#include <data\ModelMesh.hpp>
+#include <data\Texture2D.hpp>
 
 class ByteBuffer;
 

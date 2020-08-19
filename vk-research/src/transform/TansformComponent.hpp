@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm\glm.hpp>
-#include "..\renderer\UniformBufferWriterProxy.hpp"
+#include <renderer\UniformBufferWriterProxy.hpp>
 
 namespace Transform
 {

@@ -1,9 +1,10 @@
+#include "Application.hpp"
+
 #include <utility>
 #include <cassert>
 
 #include <Windows.h>
 
-#include "Application.hpp"
 
 Application::Application(ApplicationDelegate* delegate)
     : delegate_(delegate)

@@ -1,4 +1,5 @@
 #include "ByteBuffer.hpp"
+
 #include <stdlib.h>
 #include <cstring>
 #include <utility>

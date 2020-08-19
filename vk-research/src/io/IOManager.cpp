@@ -1,5 +1,6 @@
 #include "IOManager.hpp"
-#include "..\memory\ByteBuffer.hpp"
+
+#include <memory\ByteBuffer.hpp>
 
 #include <fstream>
 #include <iostream>

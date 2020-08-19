@@ -5,7 +5,7 @@
 
 #include <Windows.h>
 
-#include "..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
 class WindowClass
     : public NonCopyable

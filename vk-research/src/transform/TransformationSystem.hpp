@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <glm\vec3.hpp>
-#include "..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
 namespace Render
 {
