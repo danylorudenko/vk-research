@@ -2,10 +2,10 @@
 
 #include <vulkan\vulkan.h>
 
-#include "..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
-#include "ImportTable.hpp"
-#include "Instance.hpp"
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Instance.hpp>
 
 namespace VKW
 {

@@ -3,9 +3,9 @@
 #include <vector>
 #include <string>
 
-#include "..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
-#include "ImportTable.hpp"
+#include <vk_interface\ImportTable.hpp>
 
 namespace VKW
 {

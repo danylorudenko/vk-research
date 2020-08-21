@@ -2,7 +2,7 @@
 
 #include <vulkan\vulkan.h>
 
-#include "..\system\DynamicLibrary.hpp"
+#include <system\DynamicLibrary.hpp>
 
 namespace VKW
 {
