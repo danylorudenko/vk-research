@@ -1,11 +1,12 @@
 #pragma once
 
-#include "..\..\class_features\NonCopyable.hpp"
-#include "Framebuffer.hpp"
-#include "..\image\ImageView.hpp"
-#include "..\pipeline\RenderPass.hpp"
+#include <class_features\NonCopyable.hpp>
+#include <vk_interface\resources\Framebuffer.hpp>
+#include <vk_interface\image\ImageView.hpp>
+#include <vk_interface\pipeline\RenderPass.hpp>
+
 #include <vector>
-#include <cstdint>
+
 
 namespace VKW
 {

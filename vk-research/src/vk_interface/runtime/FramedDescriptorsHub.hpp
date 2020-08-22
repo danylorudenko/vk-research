@@ -1,11 +1,12 @@
 #pragma once
 
+#include <vk_interface\VkInterfaceConstants.hpp>
+#include <vk_interface\buffer\BufferView.hpp>
+#include <vk_interface\image\ImageView.hpp>
+#include <vk_interface\runtime\DescriptorSet.hpp>
+#include <vk_interface\resources\Framebuffer.hpp>
+
 #include <vector>
-#include "..\VkInterfaceConstants.hpp"
-#include "..\buffer\BufferView.hpp"
-#include "..\image\ImageView.hpp"
-#include "..\runtime\DescriptorSet.hpp"
-#include "..\resources\Framebuffer.hpp"
 
 namespace VKW
 {

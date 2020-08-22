@@ -4,8 +4,8 @@
 #include <limits>
 #include <vulkan\vulkan.h>
 
-#include "..\image\ImageView.hpp"
-#include "..\pipeline\RenderPass.hpp"
+#include <vk_interface\image\ImageView.hpp>
+#include <vk_interface\pipeline\RenderPass.hpp>
 
 namespace VKW
 {

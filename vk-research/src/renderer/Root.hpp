@@ -1,29 +1,29 @@
 #pragma once
 
-#include "..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
 #include <unordered_map>
 #include <map>
 #include <memory>
 
-#include "RootDef.hpp"
-#include "..\vk_interface\ProxyHandles.hpp"
-#include "..\vk_interface\buffer\BuffersProvider.hpp"
-#include "..\vk_interface\image\ImagesProvider.hpp"
-#include "..\vk_interface\pipeline\RenderPassController.hpp"
-#include "..\vk_interface\pipeline\DescriptorLayoutController.hpp"
-#include "..\vk_interface\pipeline\ShaderModuleFactory.hpp"
-#include "..\vk_interface\pipeline\PipelineFactory.hpp"
-#include "..\vk_interface\runtime\PresentationController.hpp"
+#include <renderer\RootDef.hpp>
+#include <vk_interface\ProxyHandles.hpp>
+#include <vk_interface\buffer\BuffersProvider.hpp>
+#include <vk_interface\image\ImagesProvider.hpp>
+#include <vk_interface\pipeline\RenderPassController.hpp>
+#include <vk_interface\pipeline\DescriptorLayoutController.hpp>
+#include <vk_interface\pipeline\ShaderModuleFactory.hpp>
+#include <vk_interface\pipeline\PipelineFactory.hpp>
+#include <vk_interface\runtime\PresentationController.hpp>
 
-#include "Shader.hpp"
-#include "MaterialTemplate.hpp"
-#include "Material.hpp"
-#include "Pass.hpp"
-#include "SetLayout.hpp"
-#include "RendererPipeline.hpp"
-#include "UniformBuffer.hpp"
-#include "RenderWorkItem.hpp"
+#include <renderer\Shader.hpp>
+#include <renderer\MaterialTemplate.hpp>
+#include <renderer\Material.hpp>
+#include <renderer\Pass.hpp>
+#include <renderer\SetLayout.hpp>
+#include <renderer\RendererPipeline.hpp>
+#include <renderer\UniformBuffer.hpp>
+#include <renderer\RenderWorkItem.hpp>
 
 class IOManager;
 

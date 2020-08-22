@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\pipeline\DescriptorLayout.hpp"
+#include <vk_interface\pipeline\DescriptorLayout.hpp>
 
 #include <vulkan\vulkan.h>
 

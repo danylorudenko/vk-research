@@ -1,9 +1,10 @@
 #include "ImagesProvider.hpp"
-#include "..\Device.hpp"
-#include "..\ImportTable.hpp"
-#include "..\Swapchain.hpp"
-#include "..\resources\ResourcesController.hpp"
-#include "..\VkInterfaceConstants.hpp"
+
+#include <vk_interface\Device.hpp>
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Swapchain.hpp>
+#include <vk_interface\resources\ResourcesController.hpp>
+#include <vk_interface\VkInterfaceConstants.hpp>
 
 #include <utility>
 #include <algorithm>

@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <vulkan\vulkan.h>
-#include "..\..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
 namespace VKW
 {

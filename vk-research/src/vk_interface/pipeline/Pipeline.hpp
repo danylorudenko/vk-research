@@ -1,10 +1,9 @@
 #pragma once
 
 #include <vulkan\vulkan.h>
-#include <limits>
 #include <cstdint>
 
-#include "DescriptorLayout.hpp"
+#include <vk_interface\pipeline\DescriptorLayout.hpp>
 
 namespace VKW
 {

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "..\class_features\NonCopyable.hpp"
-#include "pipeline\DescriptorLayout.hpp"
-#include "resources\ResourcesController.hpp"
-#include "buffer\BufferView.hpp"
-#include "image\ImageView.hpp"
-#include "ProxyHandles.hpp"
+#include <class_features\NonCopyable.hpp>
+
+#include <vk_interface\pipeline\DescriptorLayout.hpp>
+#include <vk_interface\resources\ResourcesController.hpp>
+#include <vk_interface\buffer\BufferView.hpp>
+#include <vk_interface\image\ImageView.hpp>
+#include <vk_interface\ProxyHandles.hpp>
 
 namespace VKW
 {

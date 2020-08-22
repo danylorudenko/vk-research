@@ -1,10 +1,12 @@
 #include "ShaderModuleFactory.hpp"
+
 #include <utility>
-#include "..\ImportTable.hpp"
-#include "..\Device.hpp"
-#include "..\Tools.hpp"
-#include "..\..\io\IOManager.hpp"
-#include "..\..\memory\ByteBuffer.hpp"
+
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Device.hpp>
+#include <vk_interface\Tools.hpp>
+#include <memory\ByteBuffer.hpp>
+#include <io\IOManager.hpp>
 
 namespace VKW
 {

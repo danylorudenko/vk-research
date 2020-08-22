@@ -1,14 +1,14 @@
 #include "CustomTempBlurPass.hpp"
-#include "Root.hpp"
-#include "..\vk_interface\pipeline\ShaderModuleFactory.hpp"
-#include "..\vk_interface\worker\Worker.hpp"
-#include "..\vk_interface\Swapchain.hpp"
-#include "..\renderer\UniformBufferWriterProxy.hpp"
-#include "..\application\ImGuiUserData.hpp"
-#include "..\io\IOManager.hpp"
+
+#include <renderer\Root.hpp>
+#include <vk_interface\pipeline\ShaderModuleFactory.hpp>
+#include <vk_interface\worker\Worker.hpp>
+#include <vk_interface\Swapchain.hpp>
+#include <renderer\UniformBufferWriterProxy.hpp>
+#include <application\ImGuiUserData.hpp>
+#include <io\IOManager.hpp>
 
 #include <utility>
-#include <cstdint>
 
 namespace Render
 {

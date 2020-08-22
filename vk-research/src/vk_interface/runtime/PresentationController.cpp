@@ -1,10 +1,11 @@
 #include "PresentationController.hpp"
 
-#include "..\Tools.hpp"
-#include "..\ImportTable.hpp"
-#include "..\Device.hpp"
-#include "..\Swapchain.hpp"
-#include "..\worker\Worker.hpp"
+#include <vk_interface\Tools.hpp>
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Device.hpp>
+#include <vk_interface\Swapchain.hpp>
+#include <vk_interface\worker\Worker.hpp>
+
 #include <utility>
 #include <limits>
 

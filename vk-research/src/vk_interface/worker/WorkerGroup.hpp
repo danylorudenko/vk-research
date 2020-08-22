@@ -1,8 +1,8 @@
 #pragma once
 
-#include "..\..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
-#include "Worker.hpp"
+#include <vk_interface\worker\Worker.hpp>
 
 namespace VKW
 {

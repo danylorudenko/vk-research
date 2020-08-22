@@ -1,9 +1,9 @@
 #include "Worker.hpp"
-#include "WorkerGroup.hpp"
 
 #include <utility>
 
-#include "..\Tools.hpp"
+#include <vk_interface\Tools.hpp>
+#include <vk_interface\worker\WorkerGroup.hpp>
 
 namespace VKW
 {

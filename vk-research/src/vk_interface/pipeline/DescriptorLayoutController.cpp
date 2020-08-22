@@ -1,7 +1,8 @@
 #include "DescriptorLayoutController.hpp"
-#include "..\Tools.hpp"
-#include "..\Device.hpp"
-#include "..\ImportTable.hpp"
+
+#include <vk_interface\Tools.hpp>
+#include <vk_interface\Device.hpp>
+#include <vk_interface\ImportTable.hpp>
 
 #include <utility>
 #include <cassert>

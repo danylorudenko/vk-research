@@ -1,8 +1,8 @@
 #pragma once
 
-#include "..\vk_interface\runtime\DescriptorSet.hpp"
-#include "..\vk_interface\ProxyHandles.hpp"
-#include "RootDef.hpp"
+#include <vk_interface\runtime\DescriptorSet.hpp>
+#include <vk_interface\ProxyHandles.hpp>
+#include <renderer\RootDef.hpp>
 
 namespace Render
 {

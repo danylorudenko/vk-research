@@ -1,10 +1,10 @@
 #pragma once
 
-#include "..\class_features\NonCopyable.hpp"
-#include "..\vk_interface\pipeline\Pipeline.hpp"
-#include "..\vk_interface\pipeline\DescriptorLayout.hpp"
-#include "RootDef.hpp"
-#include "RenderWorkItem.hpp"
+#include <class_features\NonCopyable.hpp>
+#include <vk_interface\pipeline\Pipeline.hpp>
+#include <vk_interface\pipeline\DescriptorLayout.hpp>
+#include <renderer\RootDef.hpp>
+#include <renderer\RenderWorkItem.hpp>
 
 namespace Render
 {

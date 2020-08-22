@@ -1,6 +1,6 @@
 #include "WorkerGroup.hpp"
 
-#include "..\Tools.hpp"
+#include <vk_interface\Tools.hpp>
 
 #include <limits>
 

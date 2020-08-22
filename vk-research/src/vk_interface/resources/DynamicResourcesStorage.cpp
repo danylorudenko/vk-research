@@ -1,7 +1,8 @@
 #include "DynamicResourcesStorage.hpp"
-#include "..\memory\MemoryController.hpp"
-#include "..\Tools.hpp"
-#include "..\Device.hpp"
+
+#include <vk_interface\memory\MemoryController.hpp>
+#include <vk_interface\Tools.hpp>
+#include <vk_interface\Device.hpp>
 
 #include <algorithm>
 

@@ -2,10 +2,10 @@
 
 #include <vector>
 #include <utility>
-#include "..\..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
-#include "ImageView.hpp"
-#include "..\resources\ResourcesController.hpp"
+#include <vk_interface\image\ImageView.hpp>
+#include <vk_interface\resources\ResourcesController.hpp>
 
 namespace VKW
 {

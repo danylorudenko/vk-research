@@ -4,7 +4,7 @@
 
 #include <limits>
 
-#include "..\memory\Memory.hpp"
+#include <vk_interface\memory\Memory.hpp>
 
 namespace VKW
 {

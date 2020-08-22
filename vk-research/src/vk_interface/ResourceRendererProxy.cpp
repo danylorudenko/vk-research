@@ -1,18 +1,17 @@
 #include "ResourceRendererProxy.hpp"
-#include "ImportTable.hpp"
-#include "Device.hpp"
-#include "Swapchain.hpp"
-#include "memory\MemoryController.hpp"
-#include "buffer\BuffersProvider.hpp"
-#include "image\ImagesProvider.hpp"
-#include "pipeline\DescriptorLayoutController.hpp"
-#include "runtime\DescriptorSetController.hpp"
-#include "pipeline\RenderPassController.hpp"
-#include "resources\FramebufferController.hpp"
-#include "runtime\FramedDescriptorsHub.hpp"
 
-#include <utility>
-#include <cassert>
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Device.hpp>
+#include <vk_interface\Swapchain.hpp>
+#include <vk_interface\memory\MemoryController.hpp>
+#include <vk_interface\buffer\BuffersProvider.hpp>
+#include <vk_interface\buffer\ProvidedBuffer.hpp>
+#include <vk_interface\image\ImagesProvider.hpp>
+#include <vk_interface\pipeline\DescriptorLayoutController.hpp>
+#include <vk_interface\runtime\DescriptorSetController.hpp>
+#include <vk_interface\pipeline\RenderPassController.hpp>
+#include <vk_interface\resources\FramebufferController.hpp>
+#include <vk_interface\runtime\FramedDescriptorsHub.hpp>
 
 namespace VKW
 {

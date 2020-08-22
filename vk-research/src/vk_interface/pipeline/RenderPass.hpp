@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vulkan\vulkan.h>
 
-#include "..\resources\Resource.hpp"
+#include <vk_interface\resources\Resource.hpp>
 
 namespace VKW
 {

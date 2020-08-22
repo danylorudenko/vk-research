@@ -1,10 +1,10 @@
 #include "Swapchain.hpp"
-#include "ImportTable.hpp"
-#include "Device.hpp"
-#include "Surface.hpp"
-#include "Tools.hpp"
 
-#include <utility>
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Device.hpp>
+#include <vk_interface\Surface.hpp>
+#include <vk_interface\Tools.hpp>
+
 #include <algorithm>
 
 namespace VKW

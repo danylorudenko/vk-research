@@ -1,8 +1,6 @@
 #pragma once
 
 #include <vulkan\vulkan.h>
-#include <limits>
-#include <cstdint>
 #include <string>
 
 namespace VKW

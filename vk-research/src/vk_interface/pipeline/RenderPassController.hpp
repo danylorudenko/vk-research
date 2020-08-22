@@ -1,7 +1,7 @@
 #pragma once
 
-#include "..\..\class_features\NonCopyable.hpp"
-#include "RenderPass.hpp"
+#include <class_features\NonCopyable.hpp>
+#include <vk_interface\pipeline\RenderPass.hpp>
 
 #include <vector>
 

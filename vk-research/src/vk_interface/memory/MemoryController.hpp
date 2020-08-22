@@ -3,8 +3,9 @@
 #include <cstdint>
 #include <vector>
 #include <vulkan\vulkan.h>
-#include "..\..\class_features\NonCopyable.hpp"
-#include "Memory.hpp"
+
+#include <class_features\NonCopyable.hpp>
+#include <vk_interface\memory\Memory.hpp>
 
 namespace VKW
 {

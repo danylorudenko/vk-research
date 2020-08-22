@@ -2,29 +2,29 @@
 
 #include <memory>
 
-#include "..\class_features\NonCopyable.hpp"
-#include "..\system\DynamicLibrary.hpp"
+#include <class_features\NonCopyable.hpp>
+#include <system\DynamicLibrary.hpp>
 
-#include "ImportTable.hpp"
-#include "Instance.hpp"
-#include "Device.hpp"
-#include "Surface.hpp"
-#include "Swapchain.hpp"
-#include "memory\MemoryController.hpp"
-#include "resources\ResourcesController.hpp"
-#include "image\ImagesProvider.hpp"
-#include "buffer\BuffersProvider.hpp"
-#include "pipeline\DescriptorLayoutController.hpp"
-#include "runtime\DescriptorSetController.hpp"
-#include "worker\WorkersProvider.hpp"
-#include "runtime\FramedDescriptorsHub.hpp"
-#include "ResourceRendererProxy.hpp"
-#include "runtime\ResourceBindingService.hpp"
-#include "pipeline\RenderPassController.hpp"
-#include "resources\FramebufferController.hpp"
-#include "pipeline\PipelineFactory.hpp"
-#include "pipeline\ShaderModuleFactory.hpp"
-#include "runtime\PresentationController.hpp"
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Instance.hpp>
+#include <vk_interface\Device.hpp>
+#include <vk_interface\Surface.hpp>
+#include <vk_interface\Swapchain.hpp>
+#include <vk_interface\memory\MemoryController.hpp>
+#include <vk_interface\resources\ResourcesController.hpp>
+#include <vk_interface\image\ImagesProvider.hpp>
+#include <vk_interface\buffer\BuffersProvider.hpp>
+#include <vk_interface\pipeline\DescriptorLayoutController.hpp>
+#include <vk_interface\runtime\DescriptorSetController.hpp>
+#include <vk_interface\worker\WorkersProvider.hpp>
+#include <vk_interface\runtime\FramedDescriptorsHub.hpp>
+#include <vk_interface\ResourceRendererProxy.hpp>
+#include <vk_interface\runtime\ResourceBindingService.hpp>
+#include <vk_interface\pipeline\RenderPassController.hpp>
+#include <vk_interface\resources\FramebufferController.hpp>
+#include <vk_interface\pipeline\PipelineFactory.hpp>
+#include <vk_interface\pipeline\ShaderModuleFactory.hpp>
+#include <vk_interface\runtime\PresentationController.hpp>
 
 class IOManager;
 

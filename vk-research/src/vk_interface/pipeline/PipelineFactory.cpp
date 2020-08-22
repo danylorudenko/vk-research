@@ -2,10 +2,10 @@
 
 #include <utility>
 
-#include "..\Device.hpp"
-#include "..\ImportTable.hpp"
-#include "RenderPassController.hpp"
-#include "ShaderModuleFactory.hpp"
+#include <vk_interface\Device.hpp>
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\pipeline\RenderPassController.hpp>
+#include <vk_interface\pipeline\ShaderModuleFactory.hpp>
 
 namespace VKW
 {

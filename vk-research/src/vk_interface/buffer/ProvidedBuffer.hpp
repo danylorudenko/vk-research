@@ -1,7 +1,7 @@
 #pragma once
 
-#include "BufferView.hpp"
-#include "..\resources\Resource.hpp"
+#include <vk_interface\buffer\BufferView.hpp>
+#include <vk_interface\resources\Resource.hpp>
 
 namespace VKW
 {

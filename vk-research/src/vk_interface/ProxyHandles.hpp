@@ -2,9 +2,10 @@
 
 #include <cstdint>
 #include <limits>
-#include "image\ImageView.hpp"
-#include "buffer\BufferView.hpp"
-#include "runtime\FramedDescriptorsHub.hpp"
+
+#include <vk_interface\image\ImageView.hpp>
+#include <vk_interface\buffer\BufferView.hpp>
+#include <vk_interface\runtime\FramedDescriptorsHub.hpp>
 
 namespace VKW
 {

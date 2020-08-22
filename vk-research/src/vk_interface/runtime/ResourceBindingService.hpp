@@ -1,12 +1,12 @@
 #pragma once
 
-#include "..\..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
 #include <cstdint>
 #include <limits>
 #include <vector>
 
-#include "DescriptorSet.hpp"
+#include <vk_interface\runtime\DescriptorSet.hpp>
 
 namespace VKW
 {

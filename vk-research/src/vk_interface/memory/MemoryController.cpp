@@ -1,7 +1,8 @@
 #include "MemoryController.hpp"
-#include "..\Device.hpp"
-#include "..\ImportTable.hpp"
-#include "..\Tools.hpp"
+
+#include <vk_interface\Device.hpp>
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Tools.hpp>
 
 #include <algorithm>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\Device.hpp"
+#include <vk_interface\Device.hpp>
 
 #include <vulkan\vulkan.h>
 

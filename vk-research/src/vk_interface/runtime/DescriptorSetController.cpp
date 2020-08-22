@@ -1,12 +1,14 @@
 #include "DescriptorSetController.hpp"
+
 #include <utility>
 #include <cassert>
-#include "..\ImportTable.hpp"
-#include "..\Device.hpp"
-#include "..\image\ImageView.hpp"
-#include "..\pipeline\DescriptorLayoutController.hpp"
-#include "..\image\ImagesProvider.hpp"
-#include "..\buffer\BuffersProvider.hpp"
+
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Device.hpp>
+#include <vk_interface\image\ImageView.hpp>
+#include <vk_interface\pipeline\DescriptorLayoutController.hpp>
+#include <vk_interface\image\ImagesProvider.hpp>
+#include <vk_interface\buffer\BuffersProvider.hpp>
 
 
 namespace VKW

@@ -1,10 +1,11 @@
 #pragma once
 
-#include "..\..\class_features\NonCopyable.hpp"
-#include "DescriptorSet.hpp"
-#include "..\image\ImageView.hpp"
-#include "..\buffer\BufferView.hpp"
-#include "..\resources\ResourcesController.hpp"
+#include <class_features\NonCopyable.hpp>
+
+#include <vk_interface\runtime\DescriptorSet.hpp>
+#include <vk_interface\image\ImageView.hpp>
+#include <vk_interface\buffer\BufferView.hpp>
+#include <vk_interface\resources\ResourcesController.hpp>
 
 #include <vector>
 

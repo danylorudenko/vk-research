@@ -1,9 +1,10 @@
 #pragma once
 
-#include "..\class_features\NonCopyable.hpp"
-#include "Pass.hpp"
-#include "..\vk_interface\ProxyHandles.hpp"
-#include "..\vk_interface\VkInterfaceConstants.hpp"
+#include <class_features\NonCopyable.hpp>
+#include <vk_interface\ProxyHandles.hpp>
+#include <vk_interface\VkInterfaceConstants.hpp>
+
+#include <renderer\Pass.hpp>
 
 class IOManager;
 

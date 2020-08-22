@@ -1,10 +1,12 @@
-#include <utility>
 #include "Root.hpp"
-#include "..\vk_interface\ResourceRendererProxy.hpp"
-#include "..\vk_interface\worker\Worker.hpp"
-#include "..\vk_interface\Loader.hpp"
-#include "..\vk_interface\Swapchain.hpp"
-#include "..\vk_interface\VkInterfaceConstants.hpp"
+
+#include <vk_interface\buffer\ProvidedBuffer.hpp>
+#include <vk_interface\ResourceRendererProxy.hpp>
+#include <vk_interface\worker\Worker.hpp>
+#include <vk_interface\Loader.hpp>
+#include <vk_interface\Swapchain.hpp>
+#include <vk_interface\VkInterfaceConstants.hpp>
+
 #include "CustomTempBlurPass.hpp"
 
 namespace Render

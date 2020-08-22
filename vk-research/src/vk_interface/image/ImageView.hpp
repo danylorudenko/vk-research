@@ -1,7 +1,6 @@
 #pragma once
 
-#include "..\resources\Resource.hpp"
-#include "..\resources\ResourcesController.hpp"
+#include <vk_interface\resources\Resource.hpp>
 
 namespace VKW
 {

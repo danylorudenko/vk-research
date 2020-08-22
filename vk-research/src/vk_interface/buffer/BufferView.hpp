@@ -1,12 +1,13 @@
 #pragma once
 
 #include <vulkan\vulkan.h>
-
-#include "ProvidedBuffer.hpp"
+#include <cstdint>
 
 namespace VKW
 {
 
+struct ProvidedBuffer;
+struct BufferView;
 
 struct BufferView
 {

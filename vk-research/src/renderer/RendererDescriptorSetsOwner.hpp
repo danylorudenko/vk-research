@@ -1,10 +1,9 @@
 #pragma once
 
 
-#include "RendererDescriptorSetScope.hpp"
-#include "RendererDescriptorSet.hpp"
-#include "..\vk_interface\ProxyHandles.hpp"
-
+#include <vk_interface\ProxyHandles.hpp>
+#include <renderer\RendererDescriptorSetScope.hpp>
+#include <renderer\RendererDescriptorSet.hpp>
 
 
 namespace Render

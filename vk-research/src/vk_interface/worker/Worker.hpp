@@ -4,10 +4,10 @@
 #include <vector>
 #include <vulkan\vulkan.h>
 
-#include "..\..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
-#include "..\Device.hpp"
-#include "WorkerFrame.hpp"
+#include <vk_interface\Device.hpp>
+#include <vk_interface\worker\WorkerFrame.hpp>
 
 namespace VKW
 {

@@ -1,14 +1,11 @@
 #pragma once
 
-#include "..\..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
-#include <vulkan\vulkan.h>
-#include <vector>
-
-#include "Pipeline.hpp"
-#include "RenderPass.hpp"
-#include "ShaderModule.hpp"
-#include "DescriptorLayoutController.hpp"
+#include <vk_interface\pipeline\Pipeline.hpp>
+#include <vk_interface\pipeline\RenderPass.hpp>
+#include <vk_interface\pipeline\ShaderModule.hpp>
+#include <vk_interface\pipeline\DescriptorLayoutController.hpp>
 
 namespace VKW
 {

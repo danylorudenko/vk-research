@@ -1,14 +1,17 @@
 #include "Pass.hpp"
-#include "Root.hpp"
-#include "..\vk_interface\ResourceRendererProxy.hpp"
-#include "..\vk_interface\pipeline\RenderPassController.hpp"
-#include "..\vk_interface\pipeline\PipelineFactory.hpp"
-#include "..\vk_interface\pipeline\Pipeline.hpp"
-#include "..\vk_interface\ImportTable.hpp"
-#include "..\vk_interface\Device.hpp"
-#include "..\vk_interface\worker\Worker.hpp"
-#include "..\vk_interface\ImportTable.hpp"
-#include "..\vk_interface\Device.hpp"
+
+#include <renderer\Root.hpp>
+
+#include <vk_interface/buffer/ProvidedBuffer.hpp>
+#include <vk_interface\ResourceRendererProxy.hpp>
+#include <vk_interface\pipeline\RenderPassController.hpp>
+#include <vk_interface\pipeline\PipelineFactory.hpp>
+#include <vk_interface\pipeline\Pipeline.hpp>
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Device.hpp>
+#include <vk_interface\worker\Worker.hpp>
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\Device.hpp>
 
 #include <utility>
 

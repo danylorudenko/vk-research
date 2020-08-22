@@ -1,12 +1,13 @@
 #include "BuffersProvider.hpp"
-#include "ProvidedBuffer.hpp"
+
+#include <vk_interface/buffer/ProvidedBuffer.hpp>
 
 #include <utility>
 #include <algorithm>
 
-#include "..\Device.hpp"
-#include "..\ImportTable.hpp"
-#include "..\resources\ResourcesController.hpp"
+#include <vk_interface\Device.hpp>
+#include <vk_interface\ImportTable.hpp>
+#include <vk_interface\resources\ResourcesController.hpp>
 
 namespace VKW
 {

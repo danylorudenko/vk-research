@@ -1,7 +1,7 @@
 #pragma once
 
-#include "..\class_features\NonCopyable.hpp"
-#include "ResourceUsage.hpp"
+#include <class_features\NonCopyable.hpp>
+#include <renderer\ResourceUsage.hpp>
 
 namespace Render
 {

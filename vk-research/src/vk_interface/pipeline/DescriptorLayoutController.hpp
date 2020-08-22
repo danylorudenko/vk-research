@@ -1,7 +1,7 @@
 #pragma once
 
-#include "..\..\class_features\NonCopyable.hpp"
-#include "DescriptorLayout.hpp"
+#include <class_features\NonCopyable.hpp>
+#include <vk_interface\pipeline\DescriptorLayout.hpp>
 
 #include <vector>
 

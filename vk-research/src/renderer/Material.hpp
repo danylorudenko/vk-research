@@ -1,8 +1,8 @@
 #pragma once
 
-#include "MaterialTemplate.hpp"
-#include "RendererDescriptorSetsOwner.hpp"
-#include "RootDef.hpp"
+#include <renderer\MaterialTemplate.hpp>
+#include <renderer\RendererDescriptorSetsOwner.hpp>
+#include <renderer\RootDef.hpp>
 
 namespace Render
 {

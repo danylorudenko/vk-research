@@ -1,10 +1,9 @@
 #pragma once
 
-#include "..\..\class_features\NonCopyable.hpp"
-#include "BufferView.hpp"
-#include "..\resources\ResourcesController.hpp"
+#include <class_features\NonCopyable.hpp>
 
-#include <vector>
+#include <vk_interface\buffer\BufferView.hpp>
+#include <vk_interface\resources\ResourcesController.hpp>
 
 namespace VKW
 {

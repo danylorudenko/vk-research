@@ -1,7 +1,8 @@
 #pragma once
 
-#include "..\..\class_features\NonCopyable.hpp"
-#include "Resource.hpp"
+#include <class_features\NonCopyable.hpp>
+
+#include <vk_interface\resources\Resource.hpp>
 
 #include <cstdint>
 #include <vector>

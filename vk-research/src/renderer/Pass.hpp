@@ -1,10 +1,11 @@
 #pragma once
 
-#include "..\class_features\NonCopyable.hpp"
-#include "..\vk_interface\pipeline\RenderPassController.hpp"
-#include "..\vk_interface\ResourceRendererProxy.hpp"
-#include "Material.hpp"
-#include "RootDef.hpp"
+#include <class_features\NonCopyable.hpp>
+#include <vk_interface\pipeline\RenderPassController.hpp>
+#include <vk_interface\ResourceRendererProxy.hpp>
+
+#include <renderer\Material.hpp>
+#include <renderer\RootDef.hpp>
 
 namespace VKW
 {

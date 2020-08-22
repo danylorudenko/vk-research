@@ -3,10 +3,10 @@
 #include <memory>
 #include <utility>
 
-#include "..\..\class_features\NonCopyable.hpp"
+#include <class_features\NonCopyable.hpp>
 
-#include "WorkerGroup.hpp"
-#include "..\Device.hpp"
+#include <vk_interface\Device.hpp>
+#include <vk_interface\worker\WorkerGroup.hpp>
 
 namespace VKW
 {

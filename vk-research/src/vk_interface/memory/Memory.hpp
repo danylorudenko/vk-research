@@ -1,9 +1,7 @@
 #pragma once
 
 #include <limits>
-#include <cstdint>
-#include <vulkan\vulkan.h>
-#include "..\Tools.hpp"
+#include <vk_interface\Tools.hpp>
 
 namespace VKW
 {

@@ -3,7 +3,8 @@
 #include <vulkan\vulkan.h>
 #include <vector>
 #include <Windows.h>
-#include "..\class_features\NonCopyable.hpp"
+
+#include <class_features\NonCopyable.hpp>
 
 namespace VKW
 {
