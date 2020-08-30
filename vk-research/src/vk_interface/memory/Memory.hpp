@@ -6,7 +6,15 @@
 namespace VKW
 {
 
-enum MemoryUsage
+enum class MemoryClass
+{
+    DeviceMemory,
+    CpuUploadMemory,
+    CpuReadbackMemory,
+    MAX
+};
+
+enum class MemoryUsage
 {
     VERTEX_INDEX = 0,
     UPLOAD_BUFFER,
@@ -42,6 +50,8 @@ struct MemoryPage
 
     std::uint32_t bindCount_ = 0;
     VkDeviceSize nextFreeOffset_ = 0;
+
+    VkDeviceSize GetFreeMemorySize() const { return size_ - nextFreeOffset_; }
 };
 
 struct MemoryPageHandle

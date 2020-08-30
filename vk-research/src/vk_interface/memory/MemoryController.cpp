@@ -50,12 +50,17 @@ MemoryController::~MemoryController()
 
 void MemoryController::AssignDefaultPageSizes()
 {
-    defaultPageSizes_[VERTEX_INDEX] = 1024 * 1024;
-    defaultPageSizes_[UPLOAD_BUFFER] = 1024 * 1024 * 5;
-    defaultPageSizes_[UNIFORM] = 1024 * 512;
-    defaultPageSizes_[SAMPLE_TEXTURE] = 1024 * 1024 * 64;
-    defaultPageSizes_[DEPTH_STENCIL_ATTACHMENT] = 1024 * 1024 * 16;
-    defaultPageSizes_[COLOR_ATTACHMENT] = 1024 * 1024 * 64;
+    defaultPageSizes_[(int)MemoryUsage::VERTEX_INDEX]             = 1024 * 1024;
+    defaultPageSizes_[(int)MemoryUsage::UPLOAD_BUFFER]            = 1024 * 1024 * 5;
+    defaultPageSizes_[(int)MemoryUsage::UNIFORM]                  = 1024 * 512;
+    defaultPageSizes_[(int)MemoryUsage::SAMPLE_TEXTURE]           = 1024 * 1024 * 64;
+    defaultPageSizes_[(int)MemoryUsage::DEPTH_STENCIL_ATTACHMENT] = 1024 * 1024 * 16;
+    defaultPageSizes_[(int)MemoryUsage::COLOR_ATTACHMENT]         = 1024 * 1024 * 64;
+}
+
+void MemoryController::ClassifyDeviceMemoryTypes()
+{
+    
 }
 
 MemoryPage* MemoryController::GetPage(MemoryPageHandle handle)
@@ -70,25 +75,15 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
     switch (desc.usage_)
     {
     case MemoryUsage::VERTEX_INDEX:
-        accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
+    case MemoryUsage::SAMPLE_TEXTURE:
+    case MemoryUsage::STORAGE:
+    case MemoryUsage::DEPTH_STENCIL_ATTACHMENT:
+    case MemoryUsage::COLOR_ATTACHMENT:
+        accessFlags = MemoryAccessBits::GPU_LOCAL;
         break;
     case MemoryUsage::UPLOAD_BUFFER:
-        accessFlags = BitwiseEnumOR32(MemoryAccessBits::CPU_WRITE, accessFlags);
-        break;
     case MemoryUsage::UNIFORM:
-        accessFlags = BitwiseEnumOR32(MemoryAccessBits::CPU_WRITE, accessFlags);
-        break;
-    case MemoryUsage::SAMPLE_TEXTURE:
-        accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
-        break;
-    case MemoryUsage::STORAGE:
-        accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
-        break;
-    case MemoryUsage::DEPTH_STENCIL_ATTACHMENT:
-        accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
-        break;
-    case MemoryUsage::COLOR_ATTACHMENT:
-        accessFlags = BitwiseEnumOR32(MemoryAccessBits::GPU_LOCAL, accessFlags);
+        accessFlags = MemoryAccessBits::CPU_WRITE;
         break;
     default:
         assert(false && "Unsupported MemoryUsage");
@@ -100,9 +95,9 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
     auto const allocationsCount = allocations_.size();
     for (auto i = 0u; i < allocationsCount; ++i) {
         auto const& page = allocations_[i];
-        auto const accessValid = (page->accessFlags_ & accessFlags) == accessFlags;
-        auto const sizeValid = desc.size_ <= (page->size_ - page->nextFreeOffset_);
-        auto const usageValid = desc.usage_ == page->usage_;
+        auto const accessValid  = (page->accessFlags_ & accessFlags) == accessFlags;
+        auto const sizeValid    = desc.size_ <= page->GetFreeMemorySize();
+        auto const usageValid   = desc.usage_ == page->usage_; // TODO: so many usage types, but actually we're just going to two flag combinations
 
         if (accessValid && sizeValid && usageValid) {
             validAllocation = i;
@@ -114,7 +109,7 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
         GetNextFreePageRegion(MemoryPageHandle{ allocations_[validAllocation] }, desc, regionOut);
     }
     else {
-        auto const defaultPageSize = defaultPageSizes_[desc.usage_];
+        auto const defaultPageSize = defaultPageSizes_[(int)desc.usage_];
         auto const requestedSize = desc.size_ + desc.alignment_;
         auto const pageSize = requestedSize > defaultPageSize ? requestedSize : defaultPageSize;
 
@@ -125,7 +120,7 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
 
 void MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
 {
-    auto const size = desc.size_ + desc.alignment_;
+    std::uint64_t const size = desc.size_ + desc.alignment_;
 
     auto& page = *pageHandle.page_;
     regionOut.pageHandle_ = pageHandle;
@@ -175,12 +170,12 @@ MemoryPageHandle MemoryController::AllocPage(MemoryAccessBits accessFlags, Memor
     
     if (accessFlags & MemoryAccessBits::CPU_READBACK)
         memoryFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-    
-    auto const memoryTypesCount = device_->Properties().memoryProperties.memoryTypeCount;
-    auto const* memoryTypes = device_->Properties().memoryProperties.memoryTypes;
+
+    std::uint32_t const memoryTypesCount = device_->Properties().memoryProperties2.memoryProperties.memoryTypeCount;
+    VkMemoryType const* memoryTypes = device_->Properties().memoryProperties2.memoryProperties.memoryTypes;
 
     std::uint32_t typeIndex = VK_MAX_MEMORY_TYPES;
-    for (auto i = 0u; i < memoryTypesCount; ++i) {
+    for (std::uint32_t i = 0u; i < memoryTypesCount; ++i) {
         // first fit
         if ((memoryTypes[i].propertyFlags & memoryFlags) == memoryFlags) {
             typeIndex = i;

@@ -54,12 +54,14 @@ private:
     void GetNextFreePageRegion(MemoryPageHandle page, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
 
     void AssignDefaultPageSizes();
+    void ClassifyDeviceMemoryTypes();
 
 private:
-    ImportTable* table_;
-    Device* device_;
+    ImportTable*    table_;
+    Device*         device_;
 
-    VkDeviceSize defaultPageSizes_[MemoryUsage::MAX];
+    VkDeviceSize    defaultPageSizes_[(int)MemoryUsage::MAX];
+    std::uint32_t   memoryClassTypes[(int)MemoryClass::MAX];
 
     std::vector<MemoryPage*> allocations_;
 };

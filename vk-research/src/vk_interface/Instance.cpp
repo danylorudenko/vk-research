@@ -69,7 +69,7 @@ Instance::Instance(InstanceDesc const& desc)
     applicationInfo.pNext = nullptr;
     applicationInfo.pApplicationName = "VulkanResearch";
     applicationInfo.pEngineName = "VulkanEngine";
-    applicationInfo.apiVersion = VK_MAKE_VERSION(1, 0, 0);
+    applicationInfo.apiVersion = VK_MAKE_VERSION(1, 1, 0);
     applicationInfo.applicationVersion = 0;
     applicationInfo.engineVersion = 0;
 
@@ -275,12 +275,6 @@ VkBool32 Instance::DebugCallback(
         break;
     case VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_MODE_KHR_EXT:
         objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_MODE_KHR_EXT";
-        break;
-    case VK_DEBUG_REPORT_OBJECT_TYPE_OBJECT_TABLE_NVX_EXT:
-        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_OBJECT_TABLE_NVX_EXT";
-        break;
-    case VK_DEBUG_REPORT_OBJECT_TYPE_INDIRECT_COMMANDS_LAYOUT_NVX_EXT:
-        objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_INDIRECT_COMMANDS_LAYOUT_NVX_EXT";
         break;
     case VK_DEBUG_REPORT_OBJECT_TYPE_VALIDATION_CACHE_EXT_EXT:
         objTypeStr = "VK_DEBUG_REPORT_OBJECT_TYPE_VALIDATION_CACHE_EXT_EXT";

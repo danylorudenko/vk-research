@@ -43,7 +43,11 @@ Device::Device(DeviceDesc const& desc)
 
         auto validPhysicalDevices = std::vector<VkPhysicalDevice>{};
         auto deviceProperties = std::make_unique<PhysicalDeviceProperties>();
+        deviceProperties->memoryBudgetProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
+        deviceProperties->memoryBudgetProperties.pNext = nullptr;
 
+        deviceProperties->memoryProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        deviceProperties->memoryProperties2.pNext = &deviceProperties->memoryBudgetProperties;
 
         for (auto i = 0u; i < physicalDeviceCount; ++i) {
             
@@ -328,8 +332,21 @@ void Device::RequestDeviceProperties(
     VkPhysicalDevice targetDevice,
     VKW::Device::PhysicalDeviceProperties& deviceProperties)
 {
+    SetMemZero(deviceProperties.properties);
+    SetMemZero(deviceProperties.memoryProperties2);
+    SetMemZero(deviceProperties.memoryBudgetProperties);
+    SetMemZero(deviceProperties.features);
+    deviceProperties.queueFamilyProperties.clear();
+    deviceProperties.extensionProperties.clear();
+
+    deviceProperties.memoryBudgetProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
+    deviceProperties.memoryBudgetProperties.pNext = nullptr;
+
+    deviceProperties.memoryProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+    deviceProperties.memoryProperties2.pNext = &deviceProperties.memoryBudgetProperties;
+
     table_->vkGetPhysicalDeviceProperties(targetDevice, &deviceProperties.properties);
-    table_->vkGetPhysicalDeviceMemoryProperties(targetDevice, &deviceProperties.memoryProperties);
+    table_->vkGetPhysicalDeviceMemoryProperties2(targetDevice, &deviceProperties.memoryProperties2);
     table_->vkGetPhysicalDeviceFeatures(targetDevice, &deviceProperties.features);
 
     auto queuePropsCount = 0u;
@@ -480,17 +497,24 @@ void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const
     std::cout << "\t\t" << "residencyStandard3DBlockShape: " << properties.sparseProperties.residencyStandard3DBlockShape << std::endl << std::endl;
 
 
-    auto const& memoryProperties = deviceProperties.memoryProperties; 
+    auto const& memoryProperties2 = deviceProperties.memoryProperties2; 
+    auto const& memoryProperties = memoryProperties2.memoryProperties;
+    auto const& memoryBudgetPropertiesEXT = *((VkPhysicalDeviceMemoryBudgetPropertiesEXT*)memoryProperties2.pNext);
     
     std::cout << "\t" << "Memory Properties: " << std::endl;
     std::cout << "\t\t" << "memoryHeapCount: " << memoryProperties.memoryHeapCount << std::endl;
     for (auto i = 0u; i < memoryProperties.memoryHeapCount; ++i) {
         std::cout << "\t\t\tHeap " << i << ": " << std::endl;
         std::cout << "\t\t\t\tsize: " << memoryProperties.memoryHeaps[i].size << std::endl;
+        std::cout << "\t\t\t\tbudget_EXT: " << memoryBudgetPropertiesEXT.heapBudget[i] << std::endl;
+        std::cout << "\t\t\t\tusage_EXT: " << memoryBudgetPropertiesEXT.heapUsage[i] << std::endl;
         std::cout << "\t\t\t\tflag VK_MEMORY_HEAP_DEVICE_LOCAL_BIT: " << static_cast<bool>(memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) << std::endl;
         std::cout << "\t\t\t\tflag VK_MEMORY_HEAP_MULTI_INSTANCE_BIT: " << static_cast<bool>(memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT) << std::endl;
         std::cout << "\t\t\t\tflag VK_MEMORY_HEAP_MULTI_INSTANCE_BIT_KHR: " << static_cast<bool>(memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT_KHR) << std::endl << std::endl;
+
     }
+
+
 
     std::cout << "\t\t" << "memoryTypeCount: " << memoryProperties.memoryTypeCount << std::endl;
     for (auto i = 0u; i < memoryProperties.memoryTypeCount; ++i) {

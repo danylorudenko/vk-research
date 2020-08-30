@@ -68,3 +68,6 @@ inline T BitwiseEnumOR64(T lhs, T rhs)
 {
     return BitwiseEnumAND<std::uint64_t>(lhs, rhs);
 }
+
+#define SetMemZero(mem) std::memset(&mem, 0, sizeof(mem));
+#define SetMemZeroArray(mem) std::memset(mem, 0, sizeof(mem));

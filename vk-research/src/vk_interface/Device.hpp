@@ -50,7 +50,8 @@ public:
     struct PhysicalDeviceProperties
     {
         VkPhysicalDeviceProperties properties;
-        VkPhysicalDeviceMemoryProperties memoryProperties;
+        VkPhysicalDeviceMemoryProperties2 memoryProperties2;
+        VkPhysicalDeviceMemoryBudgetPropertiesEXT memoryBudgetProperties;
         std::vector<VkQueueFamilyProperties> queueFamilyProperties;
         std::vector<VkExtensionProperties> extensionProperties;
         std::vector<std::uint32_t> presentationFamilies;
