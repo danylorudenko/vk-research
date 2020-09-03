@@ -43,11 +43,6 @@ Device::Device(DeviceDesc const& desc)
 
         auto validPhysicalDevices = std::vector<VkPhysicalDevice>{};
         auto deviceProperties = std::make_unique<PhysicalDeviceProperties>();
-        deviceProperties->memoryBudgetProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
-        deviceProperties->memoryBudgetProperties.pNext = nullptr;
-
-        deviceProperties->memoryProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-        deviceProperties->memoryProperties2.pNext = &deviceProperties->memoryBudgetProperties;
 
         for (auto i = 0u; i < physicalDeviceCount; ++i) {
             
@@ -339,14 +334,22 @@ void Device::RequestDeviceProperties(
     deviceProperties.queueFamilyProperties.clear();
     deviceProperties.extensionProperties.clear();
 
-    deviceProperties.memoryBudgetProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
-    deviceProperties.memoryBudgetProperties.pNext = nullptr;
-
-    deviceProperties.memoryProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-    deviceProperties.memoryProperties2.pNext = &deviceProperties.memoryBudgetProperties;
-
     table_->vkGetPhysicalDeviceProperties(targetDevice, &deviceProperties.properties);
-    table_->vkGetPhysicalDeviceMemoryProperties2(targetDevice, &deviceProperties.memoryProperties2);
+    if (IsAPI11Supported(deviceProperties.properties))
+    {
+        deviceProperties.memoryBudgetProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
+        deviceProperties.memoryBudgetProperties.pNext = nullptr;
+
+        deviceProperties.memoryProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
+        deviceProperties.memoryProperties2.pNext = &deviceProperties.memoryBudgetProperties;
+        
+        table_->vkGetPhysicalDeviceMemoryProperties2(targetDevice, &deviceProperties.memoryProperties2);
+    }
+    else
+    {
+        table_->vkGetPhysicalDeviceMemoryProperties(targetDevice, &deviceProperties.memoryProperties2.memoryProperties);
+    }
+
     table_->vkGetPhysicalDeviceFeatures(targetDevice, &deviceProperties.features);
 
     auto queuePropsCount = 0u;
@@ -370,6 +373,17 @@ void Device::RequestDeviceProperties(
     VK_ASSERT(table_->vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, deviceProperties.extensionProperties.data()));
 }
 
+bool Device::IsAPI11Supported(VkPhysicalDeviceProperties const& physicalDeviceProperties)
+{
+    std::uint32_t const physicalDeviceApiVersion_MAJOR = VK_VERSION_MAJOR(physicalDeviceProperties.apiVersion);
+    std::uint32_t const physicalDeviceApiVersion_MINOR = VK_VERSION_MINOR(physicalDeviceProperties.apiVersion);
+
+    if (physicalDeviceApiVersion_MAJOR >= 1 && physicalDeviceApiVersion_MINOR >= 1)
+        return true;
+    else
+        return false;
+}
+
 void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const& deviceProperties)
 {
     auto const& properties = deviceProperties.properties;
@@ -379,7 +393,7 @@ void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const
     std::cout << "\t" << "Device ID: " << properties.deviceID << std::endl;
     std::cout << "\t" << "Type: " << properties.deviceType << std::endl;
     std::cout << "\t" << "Driver version: " << properties.driverVersion << std::endl;
-    std::cout << "\t" << "API Version: " << properties.apiVersion << std::endl;
+    std::cout << "\t" << "API Version: " << VK_VERSION_MAJOR(properties.apiVersion) << '.' << VK_VERSION_MINOR(properties.apiVersion) << '.' << VK_VERSION_PATCH(properties.apiVersion) << std::endl;
 
     std::cout << "\t" << "Device limits: " << std::endl;
     std::cout << "\t\t" << "maxImageDimension1D:                              " << properties.limits.maxImageDimension1D << std::endl;
@@ -506,8 +520,11 @@ void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const
     for (auto i = 0u; i < memoryProperties.memoryHeapCount; ++i) {
         std::cout << "\t\t\tHeap " << i << ": " << std::endl;
         std::cout << "\t\t\t\tsize: " << memoryProperties.memoryHeaps[i].size << std::endl;
-        std::cout << "\t\t\t\tbudget_EXT: " << memoryBudgetPropertiesEXT.heapBudget[i] << std::endl;
-        std::cout << "\t\t\t\tusage_EXT: " << memoryBudgetPropertiesEXT.heapUsage[i] << std::endl;
+        if (IsAPI11Supported(properties))
+        {
+            std::cout << "\t\t\t\tbudget_EXT: " << memoryBudgetPropertiesEXT.heapBudget[i] << std::endl;
+            std::cout << "\t\t\t\tusage_EXT: " << memoryBudgetPropertiesEXT.heapUsage[i] << std::endl;
+        }
         std::cout << "\t\t\t\tflag VK_MEMORY_HEAP_DEVICE_LOCAL_BIT: " << static_cast<bool>(memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) << std::endl;
         std::cout << "\t\t\t\tflag VK_MEMORY_HEAP_MULTI_INSTANCE_BIT: " << static_cast<bool>(memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT) << std::endl;
         std::cout << "\t\t\t\tflag VK_MEMORY_HEAP_MULTI_INSTANCE_BIT_KHR: " << static_cast<bool>(memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT_KHR) << std::endl << std::endl;

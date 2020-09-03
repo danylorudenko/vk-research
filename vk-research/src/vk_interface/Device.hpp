@@ -79,6 +79,8 @@ public:
     void PrintPhysicalDeviceFormatProperties(VkFormat format);
 
 private:
+    static bool IsAPI11Supported(VkPhysicalDeviceProperties const& physicalDeviceProperties);
+
     static void PrintPhysicalDeviceData(
         VKW::Device::PhysicalDeviceProperties const& deviceProperties);
 
