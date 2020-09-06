@@ -236,6 +236,11 @@ Device::operator bool() const
     return device_ != VK_NULL_HANDLE;
 }
 
+bool Device::IsAPI11Supported() const
+{
+    return IsAPI11SupportedByPhysicalDevice(physicalDeviceProperties_.properties);
+}
+
 void Device::PrintPhysicalDeviceFormatProperties(VkFormat format)
 {
     VkFormatProperties fProps;
@@ -335,7 +340,7 @@ void Device::RequestDeviceProperties(
     deviceProperties.extensionProperties.clear();
 
     table_->vkGetPhysicalDeviceProperties(targetDevice, &deviceProperties.properties);
-    if (IsAPI11Supported(deviceProperties.properties))
+    if (IsAPI11SupportedByPhysicalDevice(deviceProperties.properties))
     {
         deviceProperties.memoryBudgetProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
         deviceProperties.memoryBudgetProperties.pNext = nullptr;
@@ -373,7 +378,7 @@ void Device::RequestDeviceProperties(
     VK_ASSERT(table_->vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, deviceProperties.extensionProperties.data()));
 }
 
-bool Device::IsAPI11Supported(VkPhysicalDeviceProperties const& physicalDeviceProperties)
+bool Device::IsAPI11SupportedByPhysicalDevice(VkPhysicalDeviceProperties const& physicalDeviceProperties)
 {
     std::uint32_t const physicalDeviceApiVersion_MAJOR = VK_VERSION_MAJOR(physicalDeviceProperties.apiVersion);
     std::uint32_t const physicalDeviceApiVersion_MINOR = VK_VERSION_MINOR(physicalDeviceProperties.apiVersion);
@@ -387,11 +392,33 @@ bool Device::IsAPI11Supported(VkPhysicalDeviceProperties const& physicalDevicePr
 void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const& deviceProperties)
 {
     auto const& properties = deviceProperties.properties;
+    char const* deviceTypeStr = nullptr;
+
+    switch (properties.deviceType)
+    {
+    case VK_PHYSICAL_DEVICE_TYPE_OTHER:
+        deviceTypeStr = "VK_PHYSICAL_DEVICE_TYPE_OTHER";
+        break;
+    case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+        deviceTypeStr = "VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU";
+        break;
+    case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+        deviceTypeStr = "VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU";
+        break;
+    case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+        deviceTypeStr = "VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU";
+        break;
+    case VK_PHYSICAL_DEVICE_TYPE_CPU:
+        deviceTypeStr = "VK_PHYSICAL_DEVICE_TYPE_CPU";
+        break;
+    default:
+        deviceTypeStr = "Unknown";
+    }
 
     std::cout << "PHYSICAL DEVICE NAME: " << properties.deviceName << std::endl << std::endl;
     std::cout << "\t" << "Vendor ID: " << properties.vendorID << std::endl;
     std::cout << "\t" << "Device ID: " << properties.deviceID << std::endl;
-    std::cout << "\t" << "Type: " << properties.deviceType << std::endl;
+    std::cout << "\t" << "Type: " << deviceTypeStr << std::endl;
     std::cout << "\t" << "Driver version: " << properties.driverVersion << std::endl;
     std::cout << "\t" << "API Version: " << VK_VERSION_MAJOR(properties.apiVersion) << '.' << VK_VERSION_MINOR(properties.apiVersion) << '.' << VK_VERSION_PATCH(properties.apiVersion) << std::endl;
 
@@ -520,7 +547,7 @@ void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const
     for (auto i = 0u; i < memoryProperties.memoryHeapCount; ++i) {
         std::cout << "\t\t\tHeap " << i << ": " << std::endl;
         std::cout << "\t\t\t\tsize: " << memoryProperties.memoryHeaps[i].size << std::endl;
-        if (IsAPI11Supported(properties))
+        if (IsAPI11SupportedByPhysicalDevice(properties))
         {
             std::cout << "\t\t\t\tbudget_EXT: " << memoryBudgetPropertiesEXT.heapBudget[i] << std::endl;
             std::cout << "\t\t\t\tusage_EXT: " << memoryBudgetPropertiesEXT.heapUsage[i] << std::endl;

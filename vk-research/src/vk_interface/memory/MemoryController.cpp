@@ -5,6 +5,7 @@
 #include <vk_interface\Tools.hpp>
 
 #include <algorithm>
+#include <limits>
 
 namespace VKW
 {
@@ -20,6 +21,7 @@ MemoryController::MemoryController(MemoryControllerDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
 {
+    ClassifyDeviceMemoryTypes();
     AssignDefaultPageSizes();
 }
 
@@ -58,9 +60,173 @@ void MemoryController::AssignDefaultPageSizes()
     defaultPageSizes_[(int)MemoryUsage::COLOR_ATTACHMENT]         = 1024 * 1024 * 64;
 }
 
+VkDeviceSize GetMemoryTypeBudget(Device const& device ,std::uint32_t memoryType)
+{
+    VkPhysicalDeviceMemoryProperties2 const& memoryProperties2 = device.Properties().memoryProperties2;
+    VkPhysicalDeviceMemoryProperties const& memoryProperties = memoryProperties2.memoryProperties;
+    VkPhysicalDeviceMemoryBudgetPropertiesEXT const* budgetProperties = (VkPhysicalDeviceMemoryBudgetPropertiesEXT*)memoryProperties2.pNext;
+
+    std::uint32_t const heapIndex = memoryProperties.memoryTypes[memoryType].heapIndex;
+
+    VkDeviceSize const typeHeapSize = device.IsAPI11Supported()
+        ? budgetProperties->heapBudget[heapIndex] - budgetProperties->heapUsage[heapIndex]
+        : memoryProperties.memoryHeaps[heapIndex].size;
+
+    return typeHeapSize;
+}
+
 void MemoryController::ClassifyDeviceMemoryTypes()
 {
-    
+    VkPhysicalDeviceMemoryProperties2 const& memoryProperties2 = device_->Properties().memoryProperties2;
+    VkPhysicalDeviceMemoryProperties const& memoryProperties = memoryProperties2.memoryProperties;
+    VkPhysicalDeviceMemoryBudgetPropertiesEXT const* budgetProperties = (VkPhysicalDeviceMemoryBudgetPropertiesEXT*)memoryProperties2.pNext;
+
+    std::uint32_t constexpr INVALID_ID      = std::numeric_limits<std::uint32_t>::max();
+
+    std::uint32_t deviceFastMemoryClassType  = INVALID_ID;
+    std::uint32_t cpuUniformMemoryClassType  = INVALID_ID;
+    std::uint32_t cpuStagingMemoryClassType  = INVALID_ID;
+    std::uint32_t cpuReadbackClassType       = INVALID_ID;
+
+    VkDeviceSize const typesCount = memoryProperties.memoryTypeCount;
+
+    // MemoryClass::DeviceFastMemory
+    for (std::uint32_t i = 0; i < typesCount; i++)
+    {
+        VkMemoryType const& memoryType = memoryProperties.memoryTypes[i];
+        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+        {
+            if (deviceFastMemoryClassType == INVALID_ID)
+            {
+                deviceFastMemoryClassType = i;
+                continue;
+            }
+
+            VkDeviceSize const thisTypeHeapSize = GetMemoryTypeBudget(*device_, i);
+            VkDeviceSize const prevTypeHeapSize = GetMemoryTypeBudget(*device_, deviceFastMemoryClassType);
+
+            std::uint32_t const prevTypeRelatedToHost = memoryProperties.memoryTypes[deviceFastMemoryClassType].propertyFlags & (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
+            std::uint32_t const thisTypeRelatedToHost = memoryType.propertyFlags & (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
+
+            if (prevTypeRelatedToHost && !thisTypeRelatedToHost)
+                deviceFastMemoryClassType = i;
+        }
+    }
+    memoryClassTypes[(int)MemoryClass::DeviceFastMemory] = deviceFastMemoryClassType;
+
+    // MemoryClass::CpuUniformMemory // better be coherent and non-cached
+    for (std::uint32_t i = 0; i < typesCount; i++)
+    {
+        VkMemoryType const& memoryType = memoryProperties.memoryTypes[i];
+
+        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+        {
+            if (cpuUniformMemoryClassType == INVALID_ID)
+            {
+                cpuUniformMemoryClassType = i;
+                continue;
+            }
+
+            //VkDeviceSize const thisTypeHeapSize = GetMemoryTypeBudget(*device_, i);
+            //VkDeviceSize const prevTypeHeapSize = GetMemoryTypeBudget(*device_, cpuUniformMemoryClassType);
+
+            std::uint32_t const prevTypeHostCoherent = memoryProperties.memoryTypes[cpuUniformMemoryClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            std::uint32_t const thisTypeHostCoherent = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+            std::uint32_t const prevTypeHostCached = memoryProperties.memoryTypes[cpuUniformMemoryClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+            std::uint32_t const thisTypeHostCached = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+
+            // most preferable: coherent and non-chached
+            if ((!thisTypeHostCached && prevTypeHostCached) && (thisTypeHostCoherent && !prevTypeHostCoherent))
+            {
+                cpuUniformMemoryClassType = i;
+                break;
+            }
+            // just coherent is better too
+            if ((thisTypeHostCoherent && !prevTypeHostCoherent) || thisTypeHostCoherent)
+            {
+                cpuUniformMemoryClassType = i;
+                continue;
+            }
+        }
+    }
+    memoryClassTypes[(int)MemoryClass::CpuUniformMemory] = cpuUniformMemoryClassType;
+
+    // MemoryClass::CpuStagingMemory // better be coherent
+    for (std::uint32_t i = 0; i < typesCount; i++)
+    {
+        VkMemoryType const& memoryType = memoryProperties.memoryTypes[i];
+
+        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+        {
+            if (cpuStagingMemoryClassType == INVALID_ID)
+            {
+                cpuStagingMemoryClassType = i;
+                continue;
+            }
+
+            //VkDeviceSize const thisTypeHeapSize = GetMemoryTypeBudget(*device_, i);
+            //VkDeviceSize const prevTypeHeapSize = GetMemoryTypeBudget(*device_, cpuUniformMemoryClassType);
+
+            std::uint32_t const prevTypeHostCoherent = memoryProperties.memoryTypes[cpuStagingMemoryClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            std::uint32_t const thisTypeHostCoherent = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+            std::uint32_t const prevTypeHostCached = memoryProperties.memoryTypes[cpuStagingMemoryClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+            std::uint32_t const thisTypeHostCached = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+
+            // most preferable: coherent and non-chached
+            if ((!thisTypeHostCached && prevTypeHostCached) && (thisTypeHostCoherent && !prevTypeHostCoherent))
+            {
+                cpuStagingMemoryClassType = i;
+                break;
+            }
+            // just coherent is better too
+            if ((thisTypeHostCoherent && !prevTypeHostCoherent) || thisTypeHostCoherent)
+            {
+                cpuStagingMemoryClassType = i;
+                continue;
+            }
+        }
+    }
+    memoryClassTypes[(int)MemoryClass::CpuStagingMemory] = cpuStagingMemoryClassType;
+
+    // MemoryClass::CpuReadbackMemory // beter be cached
+    for (std::uint32_t i = 0; i < typesCount; i++)
+    {
+        VkMemoryType const& memoryType = memoryProperties.memoryTypes[i];
+
+        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+        {
+            if (cpuReadbackClassType == INVALID_ID)
+            {
+                cpuReadbackClassType = i;
+                continue;
+            }
+
+            //VkDeviceSize const thisTypeHeapSize = GetMemoryTypeBudget(*device_, i);
+            //VkDeviceSize const prevTypeHeapSize = GetMemoryTypeBudget(*device_, cpuUniformMemoryClassType);
+
+            std::uint32_t const prevTypeHostCoherent = memoryProperties.memoryTypes[cpuReadbackClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            std::uint32_t const thisTypeHostCoherent = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+            std::uint32_t const prevTypeHostCached = memoryProperties.memoryTypes[cpuReadbackClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+            std::uint32_t const thisTypeHostCached = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+
+            // most preferable: host-cached and non-coherent
+            if ((thisTypeHostCached && !prevTypeHostCached) && (!thisTypeHostCoherent && prevTypeHostCoherent))
+            {
+                cpuReadbackClassType = i;
+                break;
+            }
+            // just cached is okay too
+            if ((thisTypeHostCached && !prevTypeHostCached) || thisTypeHostCached)
+            {
+                cpuReadbackClassType = i;
+                continue;
+            }
+        }
+    }
+    memoryClassTypes[(int)MemoryClass::CpuReadbackMemory] = cpuReadbackClassType;
 }
 
 MemoryPage* MemoryController::GetPage(MemoryPageHandle handle)
@@ -71,6 +237,7 @@ MemoryPage* MemoryController::GetPage(MemoryPageHandle handle)
 void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
 {
     MemoryAccessBits accessFlags = MemoryAccessBits::NONE;
+    MemoryClass memoryClass = MemoryClass::MAX;
 
     switch (desc.usage_)
     {
@@ -80,10 +247,12 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
     case MemoryUsage::DEPTH_STENCIL_ATTACHMENT:
     case MemoryUsage::COLOR_ATTACHMENT:
         accessFlags = MemoryAccessBits::GPU_LOCAL;
+        memoryClass = MemoryClass::DeviceFastMemory;
         break;
     case MemoryUsage::UPLOAD_BUFFER:
     case MemoryUsage::UNIFORM:
         accessFlags = MemoryAccessBits::CPU_WRITE;
+        memoryClass = MemoryClass::CpuUniformMemory;
         break;
     default:
         assert(false && "Unsupported MemoryUsage");

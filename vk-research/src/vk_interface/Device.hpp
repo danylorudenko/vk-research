@@ -76,10 +76,11 @@ public:
     VkPhysicalDevice PhysicalDeviceHandle() const;
     operator bool() const;
 
+    bool IsAPI11Supported() const;
     void PrintPhysicalDeviceFormatProperties(VkFormat format);
 
 private:
-    static bool IsAPI11Supported(VkPhysicalDeviceProperties const& physicalDeviceProperties);
+    static bool IsAPI11SupportedByPhysicalDevice(VkPhysicalDeviceProperties const& physicalDeviceProperties);
 
     static void PrintPhysicalDeviceData(
         VKW::Device::PhysicalDeviceProperties const& deviceProperties);

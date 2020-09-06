@@ -8,8 +8,9 @@ namespace VKW
 
 enum class MemoryClass
 {
-    DeviceMemory,
-    CpuUploadMemory,
+    DeviceFastMemory,
+    CpuUniformMemory,
+    CpuStagingMemory,
     CpuReadbackMemory,
     MAX
 };
