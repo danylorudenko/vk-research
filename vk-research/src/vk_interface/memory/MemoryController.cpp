@@ -29,7 +29,6 @@ MemoryController::MemoryController(MemoryController&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
 {
-    AssignDefaultPageSizes();
     operator=(std::move(rhs));
 }
 
@@ -37,6 +36,8 @@ MemoryController& MemoryController::operator=(MemoryController&& rhs)
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
+    ToolCopyMemoryArray(rhs.memoryClassTypes_, memoryClassTypes_);
+    ToolCopyMemoryArray(rhs.defaultPageSizes_, defaultPageSizes_);
     std::swap(allocations_, rhs.allocations_);
 
     return *this;
@@ -52,12 +53,10 @@ MemoryController::~MemoryController()
 
 void MemoryController::AssignDefaultPageSizes()
 {
-    defaultPageSizes_[(int)MemoryUsage::VERTEX_INDEX]             = 1024 * 1024;
-    defaultPageSizes_[(int)MemoryUsage::UPLOAD_BUFFER]            = 1024 * 1024 * 5;
-    defaultPageSizes_[(int)MemoryUsage::UNIFORM]                  = 1024 * 512;
-    defaultPageSizes_[(int)MemoryUsage::SAMPLE_TEXTURE]           = 1024 * 1024 * 64;
-    defaultPageSizes_[(int)MemoryUsage::DEPTH_STENCIL_ATTACHMENT] = 1024 * 1024 * 16;
-    defaultPageSizes_[(int)MemoryUsage::COLOR_ATTACHMENT]         = 1024 * 1024 * 64;
+    defaultPageSizes_[(int)MemoryClass::DeviceFastMemory]         = 1024 * 1024 * 64;
+    defaultPageSizes_[(int)MemoryClass::CpuStagingMemory]         = 1024 * 1024 * 32;
+    defaultPageSizes_[(int)MemoryClass::CpuUniformMemory]         = 1024 * 1024 * 32;
+    defaultPageSizes_[(int)MemoryClass::CpuReadbackMemory]        = 1024 * 1024 * 32;
 }
 
 VkDeviceSize GetMemoryTypeBudget(Device const& device ,std::uint32_t memoryType)
@@ -112,7 +111,7 @@ void MemoryController::ClassifyDeviceMemoryTypes()
                 deviceFastMemoryClassType = i;
         }
     }
-    memoryClassTypes[(int)MemoryClass::DeviceFastMemory] = deviceFastMemoryClassType;
+    memoryClassTypes_[(int)MemoryClass::DeviceFastMemory] = deviceFastMemoryClassType;
 
     // MemoryClass::CpuUniformMemory // better be coherent and non-cached
     for (std::uint32_t i = 0; i < typesCount; i++)
@@ -150,7 +149,7 @@ void MemoryController::ClassifyDeviceMemoryTypes()
             }
         }
     }
-    memoryClassTypes[(int)MemoryClass::CpuUniformMemory] = cpuUniformMemoryClassType;
+    memoryClassTypes_[(int)MemoryClass::CpuUniformMemory] = cpuUniformMemoryClassType;
 
     // MemoryClass::CpuStagingMemory // better be coherent
     for (std::uint32_t i = 0; i < typesCount; i++)
@@ -188,7 +187,7 @@ void MemoryController::ClassifyDeviceMemoryTypes()
             }
         }
     }
-    memoryClassTypes[(int)MemoryClass::CpuStagingMemory] = cpuStagingMemoryClassType;
+    memoryClassTypes_[(int)MemoryClass::CpuStagingMemory] = cpuStagingMemoryClassType;
 
     // MemoryClass::CpuReadbackMemory // beter be cached
     for (std::uint32_t i = 0; i < typesCount; i++)
@@ -226,7 +225,7 @@ void MemoryController::ClassifyDeviceMemoryTypes()
             }
         }
     }
-    memoryClassTypes[(int)MemoryClass::CpuReadbackMemory] = cpuReadbackClassType;
+    memoryClassTypes_[(int)MemoryClass::CpuReadbackMemory] = cpuReadbackClassType;
 }
 
 MemoryPage* MemoryController::GetPage(MemoryPageHandle handle)
@@ -236,39 +235,16 @@ MemoryPage* MemoryController::GetPage(MemoryPageHandle handle)
 
 void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
 {
-    MemoryAccessBits accessFlags = MemoryAccessBits::NONE;
-    MemoryClass memoryClass = MemoryClass::MAX;
-
-    switch (desc.usage_)
-    {
-    case MemoryUsage::VERTEX_INDEX:
-    case MemoryUsage::SAMPLE_TEXTURE:
-    case MemoryUsage::STORAGE:
-    case MemoryUsage::DEPTH_STENCIL_ATTACHMENT:
-    case MemoryUsage::COLOR_ATTACHMENT:
-        accessFlags = MemoryAccessBits::GPU_LOCAL;
-        memoryClass = MemoryClass::DeviceFastMemory;
-        break;
-    case MemoryUsage::UPLOAD_BUFFER:
-    case MemoryUsage::UNIFORM:
-        accessFlags = MemoryAccessBits::CPU_WRITE;
-        memoryClass = MemoryClass::CpuUniformMemory;
-        break;
-    default:
-        assert(false && "Unsupported MemoryUsage");
-    }
-
     std::uint32_t constexpr INVALID_ALLOCATION = std::numeric_limits<std::uint32_t>::max();
 
     std::uint32_t validAllocation = INVALID_ALLOCATION;
     auto const allocationsCount = allocations_.size();
     for (auto i = 0u; i < allocationsCount; ++i) {
-        auto const& page = allocations_[i];
-        auto const accessValid  = (page->accessFlags_ & accessFlags) == accessFlags;
-        auto const sizeValid    = desc.size_ <= page->GetFreeMemorySize();
-        auto const usageValid   = desc.usage_ == page->usage_; // TODO: so many usage types, but actually we're just going to two flag combinations
+        MemoryPage const* page = allocations_[i];
+        bool const classValid  = page->memoryClass == desc.memoryClass_;
+        bool const sizeValid   = desc.size_ <= page->GetFreeMemorySize();
 
-        if (accessValid && sizeValid && usageValid) {
+        if (classValid && sizeValid ) {
             validAllocation = i;
             break;
         }
@@ -278,11 +254,11 @@ void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, Mem
         GetNextFreePageRegion(MemoryPageHandle{ allocations_[validAllocation] }, desc, regionOut);
     }
     else {
-        auto const defaultPageSize = defaultPageSizes_[(int)desc.usage_];
-        auto const requestedSize = desc.size_ + desc.alignment_;
-        auto const pageSize = requestedSize > defaultPageSize ? requestedSize : defaultPageSize;
+        std::uint64_t const defaultPageSize = defaultPageSizes_[(int)desc.memoryClass_];
+        std::uint64_t const requestedSize = desc.size_ + desc.alignment_;
+        std::uint64_t const pageSize = requestedSize > defaultPageSize ? requestedSize : defaultPageSize;
 
-        MemoryPageHandle newPage = AllocPage(accessFlags, desc.usage_, pageSize);
+        MemoryPageHandle newPage = AllocPage(desc.memoryClass_, pageSize);
         GetNextFreePageRegion(newPage, desc, regionOut);
     }
 }
@@ -291,7 +267,11 @@ void MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle, Memory
 {
     std::uint64_t const size = desc.size_ + desc.alignment_;
 
-    auto& page = *pageHandle.page_;
+    MemoryPage& page = *pageHandle.page_;
+
+    VkMemoryPropertyFlags const pageFlags = device_->Properties().memoryProperties2.memoryProperties.memoryTypes[memoryClassTypes_[(int)page.memoryClass]].propertyFlags;
+    assert((desc.memoryTypeBits_ & pageFlags) && "Memory class of this MemoryPage has not fulfilled the allocation requirements.");
+
     regionOut.pageHandle_ = pageHandle;
     regionOut.offset_ = RoundToMultipleOfPOT(page.nextFreeOffset_, desc.alignment_);
     regionOut.size_ = size;
@@ -304,7 +284,7 @@ void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
 {
     auto const regionMemoryAllocation = region.pageHandle_.page_->deviceMemory_;
 
-    std::uint32_t INVALID_PAGE = std::numeric_limits<std::uint32_t>::max();
+    std::uint32_t constexpr INVALID_PAGE = std::numeric_limits<std::uint32_t>::max();
 
     std::uint32_t pageIndex = INVALID_PAGE;
     for (auto i = 0u; i < allocations_.size(); ++i) {
@@ -324,35 +304,10 @@ void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
     region.offset_ = 0;
 }
 
-MemoryPageHandle MemoryController::AllocPage(MemoryAccessBits accessFlags, MemoryUsage usage, std::uint64_t size)
-{    
-    VkMemoryPropertyFlags memoryFlags = VK_FLAGS_NONE;
+MemoryPageHandle MemoryController::AllocPage(MemoryClass memoryClass, std::uint64_t size)
+{
+    std::uint32_t const typeIndex = memoryClassTypes_[(int)memoryClass];
 
-    if (accessFlags & MemoryAccessBits::CPU_COHERENT)
-        memoryFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-    if (accessFlags & MemoryAccessBits::GPU_LOCAL)
-        memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-
-    if (accessFlags & MemoryAccessBits::CPU_WRITE)
-        memoryFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-    
-    if (accessFlags & MemoryAccessBits::CPU_READBACK)
-        memoryFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-
-    std::uint32_t const memoryTypesCount = device_->Properties().memoryProperties2.memoryProperties.memoryTypeCount;
-    VkMemoryType const* memoryTypes = device_->Properties().memoryProperties2.memoryProperties.memoryTypes;
-
-    std::uint32_t typeIndex = VK_MAX_MEMORY_TYPES;
-    for (std::uint32_t i = 0u; i < memoryTypesCount; ++i) {
-        // first fit
-        if ((memoryTypes[i].propertyFlags & memoryFlags) == memoryFlags) {
-            typeIndex = i;
-            break;
-        }
-    }
-
-    assert(typeIndex != VK_MAX_MEMORY_TYPES && "Could'nt find memory type for allocation.");
 
     VkMemoryAllocateInfo info;
     info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -363,6 +318,7 @@ MemoryPageHandle MemoryController::AllocPage(MemoryAccessBits accessFlags, Memor
     VkDeviceMemory deviceMemory = VK_NULL_HANDLE;
     VK_ASSERT(table_->vkAllocateMemory(device_->Handle(), &info, nullptr, &deviceMemory));
 
+    VkMemoryPropertyFlags memoryFlags = device_->Properties().memoryProperties2.memoryProperties.memoryTypes[typeIndex].propertyFlags;
 
     void* mappedMemory = nullptr;
     if (memoryFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
@@ -371,13 +327,9 @@ MemoryPageHandle MemoryController::AllocPage(MemoryAccessBits accessFlags, Memor
 
     MemoryPage* memory = new MemoryPage{};
     memory->deviceMemory_ = deviceMemory;
-    memory->size_ = info.allocationSize;
-    memory->memoryTypeId_ = typeIndex;
-    memory->propertyFlags_ = memoryTypes[typeIndex].propertyFlags;
-    memory->accessFlags_ = accessFlags;
-    memory->usage_ = usage;
+    memory->size_ = size;
+    memory->memoryClass = memoryClass;
     memory->mappedMemoryPtr_ = mappedMemory;
-    
     memory->bindCount_ = 0;
     memory->nextFreeOffset_ = 0;
 

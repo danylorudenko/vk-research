@@ -76,19 +76,19 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     switch (desc.usage_)
     {
     case BufferUsage::VERTEX_INDEX:
-        regionDesc.usage_ = MemoryUsage::VERTEX_INDEX;
+        regionDesc.memoryClass_ = MemoryClass::DeviceFastMemory;
         vkBufferCreateInfo.usage |= (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
         break;
     case BufferUsage::VERTEX_INDEX_WRITABLE:
-        regionDesc.usage_ = MemoryUsage::UPLOAD_BUFFER;
+        regionDesc.memoryClass_ = MemoryClass::CpuStagingMemory;
         vkBufferCreateInfo.usage |= (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
         break;
     case BufferUsage::UNIFORM:
-        regionDesc.usage_ = MemoryUsage::UNIFORM;
+        regionDesc.memoryClass_ = MemoryClass::CpuUniformMemory;
         vkBufferCreateInfo.usage |= (VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
         break;
     case BufferUsage::UPLOAD_BUFFER:
-        regionDesc.usage_ = MemoryUsage::UPLOAD_BUFFER;
+        regionDesc.memoryClass_ = MemoryClass::CpuStagingMemory;
         vkBufferCreateInfo.usage |= (VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
         break;
     }
@@ -144,31 +144,31 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     {
     case ImageUsage::TEXTURE:
         info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-        memoryDesc.usage_ = MemoryUsage::SAMPLE_TEXTURE;
+        memoryDesc.memoryClass_ = MemoryClass::DeviceFastMemory;
         break;
         
     case ImageUsage::STORAGE_IMAGE:
     case ImageUsage::STORAGE_IMAGE_READONLY:
         info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
-        memoryDesc.usage_ = MemoryUsage::STORAGE;
+        memoryDesc.memoryClass_ = MemoryClass::DeviceFastMemory;
         break;
 
     case ImageUsage::RENDER_TARGET:
         info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
-        memoryDesc.usage_ = MemoryUsage::COLOR_ATTACHMENT;
+        memoryDesc.memoryClass_ = MemoryClass::DeviceFastMemory;
         break;
 
     case ImageUsage::DEPTH:
     case ImageUsage::STENCIL:
     case ImageUsage::DEPTH_STENCIL:
         info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-        memoryDesc.usage_ = MemoryUsage::DEPTH_STENCIL_ATTACHMENT;
+        memoryDesc.memoryClass_ = MemoryClass::DeviceFastMemory;
         break;
 
     case ImageUsage::UPLOAD_IMAGE:
         info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         info.tiling = VK_IMAGE_TILING_LINEAR;
-        memoryDesc.usage_ = MemoryUsage::UPLOAD_BUFFER;
+        memoryDesc.memoryClass_ = MemoryClass::CpuStagingMemory;
         break;
     default:
         assert(false && "Non-supported usage for image.");

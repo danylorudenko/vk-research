@@ -332,10 +332,10 @@ void Device::RequestDeviceProperties(
     VkPhysicalDevice targetDevice,
     VKW::Device::PhysicalDeviceProperties& deviceProperties)
 {
-    SetMemZero(deviceProperties.properties);
-    SetMemZero(deviceProperties.memoryProperties2);
-    SetMemZero(deviceProperties.memoryBudgetProperties);
-    SetMemZero(deviceProperties.features);
+    ToolSetMemZero(deviceProperties.properties);
+    ToolSetMemZero(deviceProperties.memoryProperties2);
+    ToolSetMemZero(deviceProperties.memoryBudgetProperties);
+    ToolSetMemZero(deviceProperties.features);
     deviceProperties.queueFamilyProperties.clear();
     deviceProperties.extensionProperties.clear();
 

@@ -16,7 +16,7 @@ struct MemoryPageRegionDesc
     std::uint64_t size_;
     std::uint64_t alignment_;
     std::uint32_t memoryTypeBits_;
-    MemoryUsage usage_;
+    MemoryClass memoryClass_;
 };
 
 
@@ -48,7 +48,7 @@ public:
     MemoryPage* GetPage(MemoryPageHandle handle);
 
 private:
-    MemoryPageHandle AllocPage(MemoryAccessBits access, MemoryUsage usage, std::uint64_t size);
+    MemoryPageHandle AllocPage(MemoryClass memoryClass, std::uint64_t size);
     void FreePage(MemoryPageHandle pageIndex);
 
     void GetNextFreePageRegion(MemoryPageHandle page, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
@@ -60,8 +60,8 @@ private:
     ImportTable*    table_;
     Device*         device_;
 
-    VkDeviceSize    defaultPageSizes_[(int)MemoryUsage::MAX];
-    std::uint32_t   memoryClassTypes[(int)MemoryClass::MAX];
+    std::uint32_t   memoryClassTypes_[(int)MemoryClass::MAX];
+    VkDeviceSize    defaultPageSizes_[(int)MemoryClass::MAX];
 
     std::vector<MemoryPage*> allocations_;
 };

@@ -69,5 +69,8 @@ inline T BitwiseEnumOR64(T lhs, T rhs)
     return BitwiseEnumAND<std::uint64_t>(lhs, rhs);
 }
 
-#define SetMemZero(mem) std::memset(&mem, 0, sizeof(mem));
-#define SetMemZeroArray(mem) std::memset(mem, 0, sizeof(mem));
+#define ToolSetMemZero(mem) std::memset(&mem, 0, sizeof(mem));
+#define ToolSetMemZeroArray(mem) std::memset(mem, 0, sizeof(mem));
+
+#define ToolCopyMemory(dest, src) std::memcpy(&dest, &src, sizeof(src));
+#define ToolCopyMemoryArray(dest, src) std::memcpy(dest, src, sizeof(src));

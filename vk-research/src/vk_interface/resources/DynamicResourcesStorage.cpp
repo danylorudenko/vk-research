@@ -88,7 +88,7 @@ DynamicResourceStorage::StorageHandle DynamicResourceStorage::AllocateStorage(st
     memoryDesc.size_ = memRequirements.size;
     memoryDesc.alignment_ = memRequirements.alignment;
     memoryDesc.memoryTypeBits_ = memRequirements.memoryTypeBits;
-    memoryDesc.usage_ = MemoryUsage::UNIFORM;
+    memoryDesc.memoryClass_ = MemoryClass::CpuUniformMemory;
     
     MemoryRegion memory{ {}, 0, 0 };
     memoryController_->ProvideMemoryRegion(memoryDesc, memory);
