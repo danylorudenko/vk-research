@@ -69,6 +69,20 @@ inline T BitwiseEnumOR64(T lhs, T rhs)
     return BitwiseEnumAND<std::uint64_t>(lhs, rhs);
 }
 
+// VmaCountBitsSet
+// Returns number of bits set to 1 in (v).
+static inline uint32_t ToolCountBitsSet(std::uint32_t v)
+{
+    std::uint32_t c = v - ((v >> 1) & 0x55555555);
+    c = ((c >> 2) & 0x33333333) + (c & 0x33333333);
+    c = ((c >> 4) + c) & 0x0F0F0F0F;
+    c = ((c >> 8) + c) & 0x00FF00FF;
+    c = ((c >> 16) + c) & 0x0000FFFF;
+    return c;
+}
+
+std::uint32_t constexpr TOOL_INVALID_ID = std::numeric_limits<std::uint32_t>::max();
+
 #define ToolSetMemZero(mem) std::memset(&mem, 0, sizeof(mem));
 #define ToolSetMemZeroArray(mem) std::memset(mem, 0, sizeof(mem));
 

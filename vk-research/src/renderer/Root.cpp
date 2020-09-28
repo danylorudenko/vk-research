@@ -200,7 +200,9 @@ void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
     VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
 
-    if(memoryPage->propertyFlags_ & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+    VkMemoryType const& memoryType = loader_->device_->Properties().memoryProperties2.memoryProperties.memoryTypes[(int)memoryPage->memoryClass];
+
+    if(memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
         return;
 
     VKW::ImportTable* table = loader_->table_.get();
@@ -236,7 +238,9 @@ void Root::FlushBuffer(ResourceKey const& key, std::uint32_t frame)
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
     VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
 
-    if (memoryPage->propertyFlags_ & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+    VkMemoryType const& memoryType = loader_->device_->Properties().memoryProperties2.memoryProperties.memoryTypes[(int)memoryPage->memoryClass];
+
+    if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
         return;
 
     VKW::ImportTable* table = loader_->table_.get();
@@ -272,7 +276,9 @@ void Root::FlushImage(ResourceKey const& key, std::uint32_t frame)
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
     VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
 
-    if (memoryPage->propertyFlags_ & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+    VkMemoryType const& memoryType = loader_->device_->Properties().memoryProperties2.memoryProperties.memoryTypes[(int)memoryPage->memoryClass];
+
+    if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
         return;
 
     VKW::ImportTable* table = loader_->table_.get();

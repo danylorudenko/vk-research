@@ -53,8 +53,9 @@ private:
 
     void GetNextFreePageRegion(MemoryPageHandle page, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
 
-    void AssignDefaultPageSizes();
-    void ClassifyDeviceMemoryTypes();
+    void AssignDefaultProperties();
+    void ClassifyDeviceMemoryTypesAll();
+    std::uint32_t FindBestMemoryType(std::uint32_t mandatoryFlags, std::uint32_t preferebleFlags, std::uint32_t nonPreferableFlags);
 
 private:
     ImportTable*    table_;
