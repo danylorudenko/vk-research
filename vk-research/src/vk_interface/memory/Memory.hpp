@@ -1,7 +1,9 @@
 #pragma once
 
 #include <limits>
+
 #include <vk_interface\Tools.hpp>
+#include <vulkan/vulkan.h>
 
 namespace VKW
 {
@@ -28,8 +30,25 @@ struct MemoryPage
     VkDeviceSize GetFreeMemorySize() const { return size_ - nextFreeOffset_; }
 };
 
-struct MemoryPageHandle
+class MemoryController;
+
+class MemoryPageHandle
 {
+public:
+    MemoryPageHandle();
+    MemoryPageHandle(MemoryPage* page);
+
+    MemoryPageHandle(MemoryPageHandle const& rhs);
+    MemoryPageHandle& operator=(MemoryPageHandle const& rhs);
+
+    MemoryPageHandle(MemoryPageHandle&& rhs);
+    MemoryPageHandle& operator=(MemoryPageHandle&& rhs);
+
+    ~MemoryPageHandle();
+
+    MemoryPage* GetPage() const;
+
+private:
     MemoryPage* page_;
 };
 

@@ -518,13 +518,13 @@ VKW::ImageResource* ResourceRendererProxy::GetResource(VKW::ImageResourceHandle 
 VKW::MemoryPage* ResourceRendererProxy::GetMemoryPage(VKW::BufferResourceHandle handle)
 {
     VKW::BufferResource* resource = GetResource(handle);
-    return memoryController_->GetPage(resource->memory_.pageHandle_);
+    return resource->memory_.pageHandle_.GetPage();
 }
 
 VKW::MemoryPage* ResourceRendererProxy::GetMemoryPage(VKW::ImageResourceHandle handle)
 {
     VKW::ImageResource* resource = GetResource(handle);
-    return memoryController_->GetPage(resource->memory_.pageHandle_);
+    return resource->memory_.pageHandle_.GetPage();
 }
 
 void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)

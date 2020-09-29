@@ -15,7 +15,7 @@ struct MemoryPageRegionDesc
 {
     std::uint64_t size_;
     std::uint64_t alignment_;
-    std::uint32_t memoryTypeBits_;
+    std::uint32_t memoryTypeBits_; // for asserts
     MemoryClass memoryClass_;
 };
 
@@ -42,16 +42,14 @@ public:
 
     ~MemoryController();
 
-    void ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
+    MemoryRegion ProvideMemoryRegion(MemoryPageRegionDesc const& desc);
     void ReleaseMemoryRegion(MemoryRegion& region);
-
-    MemoryPage* GetPage(MemoryPageHandle handle);
 
 private:
     MemoryPageHandle AllocPage(MemoryClass memoryClass, std::uint64_t size);
     void FreePage(MemoryPageHandle pageIndex);
 
-    void GetNextFreePageRegion(MemoryPageHandle page, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
+    MemoryRegion GetNextFreePageRegion(MemoryPageHandle page, MemoryPageRegionDesc const& desc);
 
     void AssignDefaultProperties();
     void ClassifyDeviceMemoryTypesAll();

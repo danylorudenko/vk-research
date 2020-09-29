@@ -105,12 +105,8 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     regionDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
     assert(IsPowerOf2(regionDesc.alignment_) && "Alignemnt is not power of 2!");
 
-
-    MemoryRegion memoryRegion;
-    memoryController_->ProvideMemoryRegion(regionDesc, memoryRegion);
-
-    MemoryPage const* page = memoryController_->GetPage(memoryRegion.pageHandle_);
-    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, page->deviceMemory_, memoryRegion.offset_));
+    MemoryRegion memoryRegion = memoryController_->ProvideMemoryRegion(regionDesc);
+    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, memoryRegion.pageHandle_.GetPage()->deviceMemory_, memoryRegion.offset_));
 
     BufferResource* resource = new BufferResource{ vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion };
     buffers_.emplace_back(resource);
@@ -186,11 +182,8 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     memoryDesc.alignment_ = memoryRequirements.alignment;
     memoryDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
 
-    MemoryRegion memoryRegion;
-    memoryController_->ProvideMemoryRegion(memoryDesc, memoryRegion);
-
-    MemoryPage const* page = memoryController_->GetPage(memoryRegion.pageHandle_);
-    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, page->deviceMemory_, memoryRegion.offset_));
+    MemoryRegion memoryRegion = memoryController_->ProvideMemoryRegion(memoryDesc);
+    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, memoryRegion.pageHandle_.GetPage()->deviceMemory_, memoryRegion.offset_));
 
     ImageResource* imageResource = new ImageResource{ vkImage, desc.format_, desc.width_, desc.height_, memoryRegion };
     images_.emplace_back(imageResource);
