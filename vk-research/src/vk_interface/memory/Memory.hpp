@@ -35,8 +35,8 @@ class MemoryController;
 class MemoryPageHandle
 {
 public:
-    MemoryPageHandle();
-    MemoryPageHandle(MemoryPage* page);
+    explicit MemoryPageHandle();
+    explicit MemoryPageHandle(MemoryPage* page);
 
     MemoryPageHandle(MemoryPageHandle const& rhs);
     MemoryPageHandle& operator=(MemoryPageHandle const& rhs);

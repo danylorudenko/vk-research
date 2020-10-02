@@ -12,6 +12,10 @@ namespace VKW
 
 struct Framebuffer
 {
+    Framebuffer() = default;
+
+    ~Framebuffer() = default;
+
     VkFramebuffer handle_ = VK_NULL_HANDLE;
 
     std::uint32_t width_;

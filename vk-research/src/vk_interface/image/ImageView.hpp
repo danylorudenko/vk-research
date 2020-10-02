@@ -17,8 +17,23 @@ struct ImageView
     ImageResourceHandle resource_;
 };
 
-struct ImageViewHandle
+class ImageViewHandle
 {
+public:
+    explicit ImageViewHandle();
+    explicit ImageViewHandle(ImageView* view);
+
+    ImageViewHandle(ImageViewHandle const& rhs);
+    ImageViewHandle(ImageViewHandle&& rhs);
+
+    ImageViewHandle& operator=(ImageViewHandle const& rhs);
+    ImageViewHandle& operator=(ImageViewHandle&& rhs);
+
+    ~ImageViewHandle();
+
+    ImageView* GetView() const;
+
+private:
     ImageView* view_;
 };
 

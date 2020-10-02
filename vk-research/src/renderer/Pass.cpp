@@ -52,7 +52,7 @@ GraphicsPass::GraphicsPass(GraphicsPassDesc const& desc)
     for (auto i = 0u; i < colorAttachmentCount; ++i) {
 
         VKW::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.colorAttachments_[i].handle_.id_];
-        VKW::ImageView* imageView = desc.imagesProvider_->GetImageView(imageViewHandle);
+        VKW::ImageView* imageView = imageViewHandle.GetView();
         colorAttachmentDescs[i].format_ = imageView->format_;
         colorAttachmentDescs[i].usage_ = desc.colorAttachments_[i].usage_;
     }
@@ -61,7 +61,7 @@ GraphicsPass::GraphicsPass(GraphicsPassDesc const& desc)
 
     if (desc.depthStencilAttachment_ != nullptr) {
         VKW::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.depthStencilAttachment_->id_];
-        VKW::ImageView* imageView = desc.imagesProvider_->GetImageView(imageViewHandle);
+        VKW::ImageView* imageView = imageViewHandle.GetView();
         vkRenderPassDesc.depthStencilAttachment_ = &depthStencilAttachmentDesc;
         vkRenderPassDesc.depthStencilAttachment_->format_ = imageView->format_;
     }
@@ -243,7 +243,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
             assert(renderItem.indexCount_ >= 0 && "GraphicsPass: renderItem.indexCount < 0");
             if (renderItem.vertexCount_ > 0) {
                 VKW::BufferView* vertexBufferView = root_->FindGlobalBuffer(renderItem.vertexBufferKey_, contextId);
-                VKW::BufferResource* vertexBuffer = resourceProxy_->GetResource(vertexBufferView->providedBuffer_->bufferResource_);
+                VKW::BufferResource* vertexBuffer = vertexBufferView->providedBuffer_->bufferResource_.GetResource();
 
                 VkBuffer vkBuffer = vertexBuffer->handle_;
                 VkDeviceSize offset = vertexBufferView->offset_ + renderItem.vertexBindOffset_;
@@ -252,7 +252,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
 
             if (renderItem.indexCount_ > 0) {
                 VKW::BufferView* indexBufferView = root_->FindGlobalBuffer(renderItem.indexBufferKey_, contextId);
-                VKW::BufferResource* indexBuffer = resourceProxy_->GetResource(indexBufferView->providedBuffer_->bufferResource_);
+                VKW::BufferResource* indexBuffer = indexBufferView->providedBuffer_->bufferResource_.GetResource();
 
                 VkBuffer vkBuffer = indexBuffer->handle_;
                 VkDeviceSize offset = indexBufferView->offset_;
@@ -336,8 +336,8 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
     std::uint32_t bufferBarriersCount = 0;
     VkBufferMemoryBarrier bufferBarriers[MAX_BARRIERS];
 
-    std::uint32_t imageBarriersCount = 0;
-    VkImageMemoryBarrier imageBarriers[MAX_BARRIERS];
+    //std::uint32_t imageBarriersCount = 0;
+    //VkImageMemoryBarrier imageBarriers[MAX_BARRIERS];
     
     //struct VkBufferMemoryBarrier {
     //    VkStructureType    sType;
@@ -376,7 +376,7 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
         case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ_AFTER_WRITE:
         {
             VKW::BufferView* view = root_->FindGlobalBuffer(usageData.resourceKey_, contextId);
-            VKW::BufferResource* resource = resourceProxy_->GetResource(view->providedBuffer_->bufferResource_);
+            VKW::BufferResource* resource = view->providedBuffer_->bufferResource_.GetResource();
 
             auto& barrier = bufferBarriers[bufferBarriersCount++];
             barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -390,12 +390,8 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
             barrier.size = view->size_;
         }
             break;
-        case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_READ:
-            break;
-        case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_WRITE:
-            break;
-        case COMPUTE_PASS_RESOURCE_USAGE_IMAGE_READ_AFTER_WRITE:
-            break;
+        default:
+            assert(false && "OOpsie.");
         }
     }
 }

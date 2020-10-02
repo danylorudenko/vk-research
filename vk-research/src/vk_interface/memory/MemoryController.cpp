@@ -302,24 +302,22 @@ MemoryRegion MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle
 
 void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
 {
-    auto const regionMemoryAllocation = region.pageHandle_.GetPage()->deviceMemory_;
+    VkDeviceMemory const regionMemoryAllocation = region.pageHandle_.GetPage()->deviceMemory_;
 
-    std::uint32_t constexpr INVALID_PAGE = std::numeric_limits<std::uint32_t>::max();
-
-    std::uint32_t pageIndex = INVALID_PAGE;
-    for (auto i = 0u; i < allocations_.size(); ++i) {
+    std::uint32_t pageIndex = TOOL_INVALID_ID;
+    for (std::uint32_t i = 0u; i < allocations_.size(); ++i) {
         if (regionMemoryAllocation == allocations_[i]->deviceMemory_) {
             pageIndex = i;
         }
     }
 
-    if (pageIndex != INVALID_PAGE) {
+    if (pageIndex != TOOL_INVALID_ID) {
         if (--allocations_[pageIndex]->bindCount_ == 0) {
             FreePage(MemoryPageHandle{ allocations_[pageIndex] });
         }
     }
 
-    region.pageHandle_ = {};
+    region.pageHandle_ = MemoryPageHandle{};
     region.size_ = 0;
     region.offset_ = 0;
 }
@@ -394,17 +392,17 @@ MemoryPageHandle MemoryController::AllocPage(MemoryClass memoryClass, std::uint6
 
 void MemoryController::FreePage(MemoryPageHandle pageHandle)
 {
-    std::uint32_t deletedPageIndex = std::numeric_limits<std::uint32_t>::max();
+    std::uint32_t deletedPageIndex = TOOL_INVALID_ID;
 
     std::uint32_t const allocationsCount = static_cast<std::uint32_t>(allocations_.size());
-    for (auto i = 0u; i < allocationsCount; ++i) {
+    for (std::uint32_t i = 0u; i < allocationsCount; ++i) {
         if (pageHandle.GetPage() == allocations_[i]) {
             deletedPageIndex = i;
             break;
         }
     }
     
-    auto* page = allocations_[deletedPageIndex];
+    MemoryPage* page = allocations_[deletedPageIndex];
     table_->vkFreeMemory(device_->Handle(), page->deviceMemory_, nullptr);
 
     delete page;

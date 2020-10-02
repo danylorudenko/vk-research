@@ -70,9 +70,6 @@ public:
     ImageResourceHandle CreateImage(ImageDesc const& desc);
     void FreeImage(ImageResourceHandle handle);
 
-    BufferResource* GetBuffer(BufferResourceHandle handle);
-    ImageResource* GetImage(ImageResourceHandle handle);
-
     ~ResourcesController();
 
 private:

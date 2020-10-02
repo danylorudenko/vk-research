@@ -147,7 +147,7 @@ void VulkanApplicationDelegate::update()
     cameraData.cameraFowDegrees = 60.0f;
 
     VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
-    VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
+    VKW::ImageResource* colorBufferResource = colorBufferView->resource_.GetResource();
     cameraData.width = (float)colorBufferResource->width_;
     cameraData.height = (float)colorBufferResource->height_;
 
@@ -238,7 +238,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 
     VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
-    VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
+    VKW::ImageResource* colorBufferResource = colorBufferView->resource_.GetResource();
 
     VKW::ImageViewDesc depthBufferDesc;
     depthBufferDesc.usage_ = VKW::ImageUsage::DEPTH;
@@ -513,7 +513,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     renderRoot_->CopyStagingBufferToGPUTexture(uploadBufferKey, backgroundTextureName, 0);
     VKW::ImageView* backgroundImageView = renderRoot_->FindGlobalImage(backgroundTextureName, 0);
-    VKW::ImageResource* backgroundImageResource = renderRoot_->ResourceProxy()->GetResource(backgroundImageView->resource_);
+    VKW::ImageResource* backgroundImageResource = backgroundImageView->resource_.GetResource();
     VkImageLayout backgroundImageLayout = VK_IMAGE_LAYOUT_GENERAL;
     renderRoot_->ImageLayoutTransition(0, 1, &backgroundImageResource->handle_, &backgroundImageLayout);
 
@@ -545,7 +545,7 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
         
         VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
-        VKW::ImageResource* colorBufferResource = renderRoot_->ResourceProxy()->GetResource(colorBufferView->resource_);
+        VKW::ImageResource* colorBufferResource = colorBufferView->resource_.GetResource();
 
         //ImGui::SetNextWindowContentWidth(100.0f);
         ImGui::SetNextWindowPos(ImVec2((float)colorBufferResource->width_ - 10.0f, 0.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));

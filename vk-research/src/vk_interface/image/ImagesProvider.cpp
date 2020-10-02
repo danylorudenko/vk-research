@@ -100,11 +100,6 @@ VkSampler ImagesProvider::DefaultSamplerHandle() const
     return defaultSampler_;
 }
 
-ImageView* ImagesProvider::GetImageView(ImageViewHandle handle)
-{
-    return handle.view_;
-}
-
 ImageViewHandle ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDesc const& desc)
 {
     VkImageView vkImageView = VK_NULL_HANDLE;
@@ -141,7 +136,6 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
         imageDesc.height_ = descs[i].height_;
         imageDesc.usage_ = descs[i].usage_;
         ImageResourceHandle imageResourceHandle = resourcesController_->CreateImage(imageDesc);
-        ImageResource* imageResource = resourcesController_->GetImage(imageResourceHandle);
 
         VkImageAspectFlags aspectFlags;
         switch (descs[i].usage_) {
@@ -168,7 +162,7 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
         VkImageViewCreateInfo viewInfo;
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.pNext = nullptr;
-        viewInfo.image = imageResource->handle_;
+        viewInfo.image = imageResourceHandle.GetResource()->handle_;
         viewInfo.format = descs[i].format_;
         viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
         viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
@@ -191,7 +185,7 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
 
         imageViewContainers_.emplace_back(container);
 
-        results[i].view_ = imageView;
+        results[i] = ImageViewHandle{ imageView };
     }
 }
 
@@ -202,7 +196,7 @@ void ImagesProvider::ReleaseImageViews(std::uint32_t count, ImageViewHandle* han
             imageViewContainers_.begin(),
             imageViewContainers_.end(),
             [handles, i](ImageViewContainer const& container) {
-            return container.view_ == handles[i].view_;
+            return container.view_ == handles[i].GetView();
         });
 
         assert(imageViewContIt != imageViewContainers_.end() && "Can't release ImageView.");

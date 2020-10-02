@@ -193,7 +193,7 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
 
 void ResourcesController::FreeBuffer(BufferResourceHandle handle)
 {
-    auto bufferIt = std::find(buffers_.begin(), buffers_.end(), handle.resource_);
+    auto bufferIt = std::find(buffers_.begin(), buffers_.end(), handle.GetResource());
     assert(bufferIt != buffers_.end() && "Can't free BufferResource.");
 
     auto& buffer = *bufferIt;
@@ -207,11 +207,11 @@ void ResourcesController::FreeBuffer(BufferResourceHandle handle)
 void ResourcesController::FreeImage(ImageResourceHandle handle)
 {
     // TODO this is for the case of swapchain. dirty hack
-    if (handle.resource_ == nullptr) {
+    if (handle.GetResource() == nullptr) {
         return;
     }
     
-    auto imageIt = std::find(images_.cbegin(), images_.cend(), handle.resource_);
+    auto imageIt = std::find(images_.cbegin(), images_.cend(), handle.GetResource());
     assert(imageIt != images_.end() && "Can't free ImageResource");
 
     auto& image = *imageIt;
@@ -220,16 +220,6 @@ void ResourcesController::FreeImage(ImageResourceHandle handle)
     delete image;
 
     images_.erase(imageIt);
-}
-
-BufferResource* ResourcesController::GetBuffer(BufferResourceHandle handle)
-{
-    return handle.resource_;
-}
-
-ImageResource* ResourcesController::GetImage(ImageResourceHandle handle)
-{
-    return handle.resource_;
 }
 
 }

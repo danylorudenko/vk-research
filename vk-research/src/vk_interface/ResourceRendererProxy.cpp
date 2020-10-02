@@ -221,7 +221,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
                 switch (wds.descriptorType) {
                 case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
                 {
-                    ImageView* imageView = imagesProvider_->GetImageView(descriptions[j].frames_[i].imageDesc_.imageViewHandle_);
+                    ImageView* imageView = descriptions[j].frames_[i].imageDesc_.imageViewHandle_.GetView();
                     VkSampler sampler = descriptions[j].frames_[0].imageDesc_.sampler_;
 
                     DecorateImageViewWriteDesc(wds, descriptorData[j], imageView->handle_, descriptions[j].frames_[i].imageDesc_.layout_);
@@ -230,7 +230,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
                 break;
                 case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
                 {
-                    ImageView* imageView = imagesProvider_->GetImageView(descriptions[j].frames_[i].imageDesc_.imageViewHandle_);
+                    ImageView* imageView = descriptions[j].frames_[i].imageDesc_.imageViewHandle_.GetView();
                     DecorateImageViewWriteDesc(wds, descriptorData[j], imageView->handle_, descriptions[j].frames_[i].imageDesc_.layout_);
                 }
                 break;
@@ -276,7 +276,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
             switch (wds.descriptorType) {
             case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
             {
-                ImageView* imageView = imagesProvider_->GetImageView(descriptions[i].frames_[0].imageDesc_.imageViewHandle_);
+                ImageView* imageView = descriptions[i].frames_[0].imageDesc_.imageViewHandle_.GetView();
                 VkSampler sampler = descriptions[i].frames_[0].imageDesc_.sampler_;
 
                 DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_, descriptions[i].frames_[0].imageDesc_.layout_);
@@ -285,7 +285,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
             break;
             case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
             {
-                ImageView* imageView = imagesProvider_->GetImageView(descriptions[i].frames_[0].imageDesc_.imageViewHandle_);
+                ImageView* imageView = descriptions[i].frames_[0].imageDesc_.imageViewHandle_.GetView();
                 DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_, descriptions[i].frames_[0].imageDesc_.layout_);
             }
             break;
@@ -451,8 +451,7 @@ ImageViewHandle ResourceRendererProxy::GetImageViewHandle(ProxyImageHandle handl
 
 ImageView* ResourceRendererProxy::GetImageView(ProxyImageHandle handle, std::uint32_t context)
 {
-    ImageViewHandle imageViewHandle = framedDescriptorsHub_->contexts_[context].imageViews_[handle.id_];
-    return imagesProvider_->GetImageView(imageViewHandle);
+    return framedDescriptorsHub_->contexts_[context].imageViews_[handle.id_].GetView();
 }
 
 VkSampler ResourceRendererProxy::GetDefaultSampler()
@@ -505,33 +504,11 @@ Framebuffer* ResourceRendererProxy::GetFramebuffer(ProxyFramebufferHandle handle
     return framebufferController_->GetFramebuffer(framebufferHandle);
 }
 
-VKW::BufferResource* ResourceRendererProxy::GetResource(VKW::BufferResourceHandle handle)
-{
-    return resourcesController_->GetBuffer(handle);
-}
-
-VKW::ImageResource* ResourceRendererProxy::GetResource(VKW::ImageResourceHandle handle)
-{
-    return resourcesController_->GetImage(handle);
-}
-
-VKW::MemoryPage* ResourceRendererProxy::GetMemoryPage(VKW::BufferResourceHandle handle)
-{
-    VKW::BufferResource* resource = GetResource(handle);
-    return resource->memory_.pageHandle_.GetPage();
-}
-
-VKW::MemoryPage* ResourceRendererProxy::GetMemoryPage(VKW::ImageResourceHandle handle)
-{
-    VKW::ImageResource* resource = GetResource(handle);
-    return resource->memory_.pageHandle_.GetPage();
-}
-
 void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)
 {
     VKW::BufferView const* view = GetBufferView(handle, context);
-    VKW::BufferResource const* resource = GetResource(view->providedBuffer_->bufferResource_);
-    VKW::MemoryPage const* memoryPage = GetMemoryPage(view->providedBuffer_->bufferResource_);
+    VKW::BufferResource const* resource = view->providedBuffer_->bufferResource_.GetResource();
+    VKW::MemoryPage const* memoryPage = view->providedBuffer_->bufferResource_.GetMemoryPage();
 
     std::uint64_t const mappingOffset = resource->memory_.offset_ + view->offset_;
 
@@ -544,8 +521,8 @@ void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint3
 void ResourceRendererProxy::FlushBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)
 {
     VKW::BufferView const* view = GetBufferView(handle, context);
-    VKW::BufferResource const* resource = GetResource(view->providedBuffer_->bufferResource_);
-    VKW::MemoryPage const* memoryPage = GetMemoryPage(view->providedBuffer_->bufferResource_);
+    VKW::BufferResource const* resource = view->providedBuffer_->bufferResource_.GetResource();
+    VKW::MemoryPage const* memoryPage = view->providedBuffer_->bufferResource_.GetMemoryPage();
 
     std::uint64_t const mappingOffset = resource->memory_.offset_ + view->offset_;
 

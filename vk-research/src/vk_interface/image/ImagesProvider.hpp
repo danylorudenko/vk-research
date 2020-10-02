@@ -55,8 +55,6 @@ public:
     void AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs, ImageViewHandle* results);
     void ReleaseImageViews(std::uint32_t count, ImageViewHandle* handles);
 
-    ImageView* GetImageView(ImageViewHandle handle);
-
     VkSampler DefaultSamplerHandle() const;
 
     ~ImagesProvider();

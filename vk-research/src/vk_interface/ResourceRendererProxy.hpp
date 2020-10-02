@@ -30,7 +30,7 @@ struct FramedDescriptorsHub;
 // descriptions
 struct ProxyDescriptorWriteDesc
 {
-    union Union 
+    struct FrameDesc 
     {
         struct ImageDesc 
         {
@@ -114,12 +114,6 @@ public:
 
     ProxyFramebufferHandle CreateFramebuffer(ProxyFramebufferDesc const& desc);
     Framebuffer* GetFramebuffer(ProxyFramebufferHandle handle, std::uint32_t context);
-
-    VKW::BufferResource* GetResource(VKW::BufferResourceHandle handle);
-    VKW::ImageResource* GetResource(VKW::ImageResourceHandle handle);
-
-    VKW::MemoryPage* GetMemoryPage(VKW::BufferResourceHandle handle);
-    VKW::MemoryPage* GetMemoryPage(VKW::ImageResourceHandle handle);
 
     void* MapBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context);
     void FlushBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context);
