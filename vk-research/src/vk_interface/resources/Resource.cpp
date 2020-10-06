@@ -3,8 +3,8 @@
 namespace VKW
 {
 
-BufferResource::BufferResource(VkBuffer handle, std::uint32_t size, MemoryRegion const& memory)
-    : handle_{ handle }, size_{ size }, memory_{ memory }
+BufferResource::BufferResource(VkBuffer handle, std::uint32_t size, MemoryPageRegion const& memory)
+    : handle_{ handle }, size_{ size }, memoryRegion_{ memory }
 {
 
 }
@@ -36,16 +36,21 @@ BufferResource* BufferResourceHandle::GetResource() const
 
 MemoryPage* BufferResourceHandle::GetMemoryPage() const
 {
-    return resource_->memory_.pageHandle_.GetPage();
+    return resource_->memoryRegion_.pageHandle_.GetPage();
+}
+
+MemoryPageRegion const& BufferResourceHandle::GetMemoryPageRegion() const
+{
+    return resource_->memoryRegion_;
 }
 
 
-ImageResource::ImageResource(VkImage handle, VkFormat format, std::uint32_t width, std::uint32_t height, MemoryRegion const& memory)
+ImageResource::ImageResource(VkImage handle, VkFormat format, std::uint32_t width, std::uint32_t height, MemoryPageRegion const& memory)
     : handle_{ handle }
     , format_{ format }
     , width_{ width }
     , height_{ height }
-    , memory_{ memory }
+    , memoryRegion_{ memory }
 {
 
 }
@@ -77,7 +82,12 @@ ImageResource* ImageResourceHandle::GetResource() const
 
 MemoryPage* ImageResourceHandle::GetMemoryPage() const
 {
-    return resource_->memory_.pageHandle_.GetPage();
+    return resource_->memoryRegion_.pageHandle_.GetPage();
+}
+
+MemoryPageRegion const& ImageResourceHandle::GetMemoryPageRegion() const
+{
+    return resource_->memoryRegion_;
 }
 
 }

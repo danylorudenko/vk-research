@@ -12,18 +12,11 @@ namespace VKW
 
 struct BufferResource
 {
-    BufferResource(VkBuffer handle, std::uint32_t size, MemoryRegion const& memory);
+    BufferResource(VkBuffer handle, std::uint32_t size, MemoryPageRegion const& memory);
 
     VkBuffer handle_ = VK_NULL_HANDLE;
     std::uint32_t size_ = 0;
-    MemoryRegion memory_;
-};
-
-struct SubbufferResource
-{
-    VkBuffer handle_ = VK_NULL_HANDLE;
-    std::uint32_t offset_ = 0;
-    std::uint32_t size_ = 0;
+    MemoryPageRegion memoryRegion_;
 };
 
 class BufferResourceHandle
@@ -41,8 +34,9 @@ public:
     ~BufferResourceHandle();
 
 
-    BufferResource* GetResource() const;
-    MemoryPage*     GetMemoryPage() const;
+    BufferResource*         GetResource() const;
+    MemoryPage*             GetMemoryPage() const;
+    MemoryPageRegion const& GetMemoryPageRegion() const;
 
 private:
     BufferResource* resource_ = nullptr;
@@ -52,13 +46,13 @@ private:
 
 struct ImageResource
 {
-    ImageResource(VkImage handle, VkFormat format, std::uint32_t width, std::uint32_t height, MemoryRegion const& memory);
+    ImageResource(VkImage handle, VkFormat format, std::uint32_t width, std::uint32_t height, MemoryPageRegion const& memory);
 
     VkImage handle_ = VK_NULL_HANDLE;
     VkFormat format_;
     std::uint32_t width_ = 0;
     std::uint32_t height_ = 0;
-    MemoryRegion memory_;
+    MemoryPageRegion memoryRegion_;
 };
 
 struct ImageResourceHandle
@@ -75,8 +69,9 @@ public:
 
     ~ImageResourceHandle();
 
-    ImageResource*  GetResource() const;
-    MemoryPage*     GetMemoryPage() const;
+    ImageResource*              GetResource() const;
+    MemoryPage*                 GetMemoryPage() const;
+    MemoryPageRegion const&     GetMemoryPageRegion() const;
 
 private:
     ImageResource* resource_ = nullptr;

@@ -510,7 +510,7 @@ void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint3
     VKW::BufferResource const* resource = view->providedBuffer_->bufferResource_.GetResource();
     VKW::MemoryPage const* memoryPage = view->providedBuffer_->bufferResource_.GetMemoryPage();
 
-    std::uint64_t const mappingOffset = resource->memory_.offset_ + view->offset_;
+    std::uint64_t const mappingOffset = resource->memoryRegion_.offset_ + view->offset_;
 
     void* result = nullptr;
     VK_ASSERT(table_->vkMapMemory(device_->Handle(), memoryPage->deviceMemory_, mappingOffset, view->size_, VK_FLAGS_NONE, &result));
@@ -524,7 +524,7 @@ void ResourceRendererProxy::FlushBuffer(VKW::ProxyBufferHandle handle, std::uint
     VKW::BufferResource const* resource = view->providedBuffer_->bufferResource_.GetResource();
     VKW::MemoryPage const* memoryPage = view->providedBuffer_->bufferResource_.GetMemoryPage();
 
-    std::uint64_t const mappingOffset = resource->memory_.offset_ + view->offset_;
+    std::uint64_t const mappingOffset = resource->memoryRegion_.offset_ + view->offset_;
 
     VkMappedMemoryRange range;
     range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;

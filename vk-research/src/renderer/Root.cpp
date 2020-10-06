@@ -154,7 +154,7 @@ void* Root::MapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 
     UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
     VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VKW::MemoryPageRegion const* memoryRegion = GetViewMemory(view);
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
 
     std::uint64_t const offset = memoryRegion->offset_ + view->offset_;
@@ -198,7 +198,7 @@ void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     UniformBuffer uniformBuffer = uniformBuffers_[handle.id_];
     VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, frame);
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VKW::MemoryPageRegion const* memoryRegion = GetViewMemory(view);
 
     VkMemoryType const& memoryType = loader_->device_->Properties().memoryProperties2.memoryProperties.memoryTypes[(int)memoryPage->memoryClass];
 
@@ -223,7 +223,7 @@ void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
 void* Root::MapBuffer(ResourceKey const& key, std::uint32_t frame)
 {
     VKW::BufferView* view = FindGlobalBuffer(key, frame);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VKW::MemoryPageRegion const* memoryRegion = GetViewMemory(view);
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
 
     std::uint64_t const offset = memoryRegion->offset_ + view->offset_;
@@ -236,7 +236,7 @@ void Root::FlushBuffer(ResourceKey const& key, std::uint32_t frame)
 {
     VKW::BufferView* view = FindGlobalBuffer(key, frame);
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VKW::MemoryPageRegion const* memoryRegion = GetViewMemory(view);
 
     VkMemoryType const& memoryType = loader_->device_->Properties().memoryProperties2.memoryProperties.memoryTypes[(int)memoryPage->memoryClass];
 
@@ -261,7 +261,7 @@ void Root::FlushBuffer(ResourceKey const& key, std::uint32_t frame)
 void* Root::MapImage(ResourceKey const& key, std::uint32_t frame)
 {
     VKW::ImageView* view = FindGlobalImage(key, frame);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VKW::MemoryPageRegion const* memoryRegion = GetViewMemory(view);
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
 
     std::uint64_t const offset = memoryRegion->offset_;
@@ -274,7 +274,7 @@ void Root::FlushImage(ResourceKey const& key, std::uint32_t frame)
 {
     VKW::ImageView* view = FindGlobalImage(key, frame);
     VKW::MemoryPage const* memoryPage = GetViewMemoryPage(view);
-    VKW::MemoryRegion const* memoryRegion = GetViewMemory(view);
+    VKW::MemoryPageRegion const* memoryRegion = GetViewMemory(view);
 
     VkMemoryType const& memoryType = loader_->device_->Properties().memoryProperties2.memoryProperties.memoryTypes[(int)memoryPage->memoryClass];
 
@@ -302,11 +302,11 @@ VKW::BufferResource* Root::GetViewResource(VKW::BufferView* view)
     return resourceHandle.GetResource();
 }
 
-VKW::MemoryRegion* Root::GetViewMemory(VKW::BufferView* view)
+VKW::MemoryPageRegion* Root::GetViewMemory(VKW::BufferView* view)
 {
     VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
     VKW::BufferResource* bufferResource = resourceHandle.GetResource();
-    return &bufferResource->memory_;
+    return &bufferResource->memoryRegion_;
 }
 
 VKW::MemoryPage* Root::GetViewMemoryPage(VKW::BufferView* view)
@@ -319,11 +319,11 @@ VKW::ImageResource* Root::GetViewResource(VKW::ImageView* view)
     return view->resource_.GetResource();
 }
 
-VKW::MemoryRegion* Root::GetViewMemory(VKW::ImageView* view)
+VKW::MemoryPageRegion* Root::GetViewMemory(VKW::ImageView* view)
 {
     VKW::ImageResourceHandle resourceHandle = view->resource_;
     VKW::ImageResource* imageResource = resourceHandle.GetResource();
-    return &imageResource->memory_;
+    return &imageResource->memoryRegion_;
 }
 
 VKW::MemoryPage* Root::GetViewMemoryPage(VKW::ImageView* view)

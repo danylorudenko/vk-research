@@ -53,7 +53,7 @@ private:
 };
 
 
-struct MemoryRegion
+struct MemoryPageRegion
 {
     MemoryPageHandle pageHandle_;
     std::uint64_t offset_ = 0;

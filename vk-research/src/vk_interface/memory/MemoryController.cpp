@@ -257,7 +257,7 @@ void MemoryController::ClassifyDeviceMemoryTypesAll()
     memoryClassTypes_[(int)MemoryClass::CpuReadback] = cpuReadbackClassType;
 }
 
-MemoryRegion MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc)
+MemoryPageRegion MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc)
 {
     std::uint32_t validAllocation = TOOL_INVALID_ID;
     auto const allocationsCount = allocations_.size();
@@ -285,7 +285,7 @@ MemoryRegion MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& d
     }
 }
 
-MemoryRegion MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle, MemoryPageRegionDesc const& desc)
+MemoryPageRegion MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle, MemoryPageRegionDesc const& desc)
 {
     std::uint64_t const size = desc.size_ + desc.alignment_;
 
@@ -297,10 +297,10 @@ MemoryRegion MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle
     page.nextFreeOffset_ += size;
     ++page.bindCount_;
 
-    return MemoryRegion{ pageHandle, RoundToMultipleOfPOT(page.nextFreeOffset_, desc.alignment_), size };
+    return MemoryPageRegion{ pageHandle, RoundToMultipleOfPOT(page.nextFreeOffset_, desc.alignment_), size };
 }
 
-void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
+void MemoryController::ReleaseMemoryRegion(MemoryPageRegion& region)
 {
     VkDeviceMemory const regionMemoryAllocation = region.pageHandle_.GetPage()->deviceMemory_;
 

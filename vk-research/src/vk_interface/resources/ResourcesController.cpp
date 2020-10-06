@@ -47,13 +47,13 @@ ResourcesController::~ResourcesController()
     
     for (auto& bufferResource : buffers_) {
         table_->vkDestroyBuffer(device, bufferResource->handle_, nullptr);
-        memoryController_->ReleaseMemoryRegion(bufferResource->memory_);
+        memoryController_->ReleaseMemoryRegion(bufferResource->memoryRegion_);
         delete bufferResource;
     }
 
     for (auto& imageResource : images_) {
         table_->vkDestroyImage(device, imageResource->handle_, nullptr);
-        memoryController_->ReleaseMemoryRegion(imageResource->memory_);
+        memoryController_->ReleaseMemoryRegion(imageResource->memoryRegion_);
         delete imageResource;
     }
 }
@@ -105,7 +105,7 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     regionDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
     assert(IsPowerOf2(regionDesc.alignment_) && "Alignemnt is not power of 2!");
 
-    MemoryRegion memoryRegion = memoryController_->ProvideMemoryRegion(regionDesc);
+    MemoryPageRegion memoryRegion = memoryController_->ProvideMemoryRegion(regionDesc);
     VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, memoryRegion.pageHandle_.GetPage()->deviceMemory_, memoryRegion.offset_));
 
     BufferResource* resource = new BufferResource{ vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion };
@@ -182,7 +182,7 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     memoryDesc.alignment_ = memoryRequirements.alignment;
     memoryDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
 
-    MemoryRegion memoryRegion = memoryController_->ProvideMemoryRegion(memoryDesc);
+    MemoryPageRegion memoryRegion = memoryController_->ProvideMemoryRegion(memoryDesc);
     VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, memoryRegion.pageHandle_.GetPage()->deviceMemory_, memoryRegion.offset_));
 
     ImageResource* imageResource = new ImageResource{ vkImage, desc.format_, desc.width_, desc.height_, memoryRegion };
