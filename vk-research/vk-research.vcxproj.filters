@@ -60,9 +60,6 @@
     <ClCompile Include="src\vk_interface\worker\WorkersProvider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vk_interface\resources\DynamicResourcesStorage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\vk_interface\runtime\ResourceBindingService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -118,9 +115,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\vk_interface\runtime\PresentationController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\vk_interface\resources\ResourceTransferService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\vk_interface\pipeline\DescriptorLayoutController.cpp">
@@ -269,9 +263,6 @@
     <ClInclude Include="src\vk_interface\resources\Resource.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk_interface\resources\DynamicResourcesStorage.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\vk_interface\memory\Memory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -342,9 +333,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\runtime\PresentationController.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vk_interface\resources\ResourceTransferService.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_interface\runtime\DescriptorSetController.hpp">
