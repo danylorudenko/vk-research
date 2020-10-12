@@ -298,37 +298,32 @@ void Root::FlushImage(ResourceKey const& key, std::uint32_t frame)
 
 VKW::BufferResource* Root::GetViewResource(VKW::BufferView* view)
 {
-    VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
-    return resourceHandle.GetResource();
+    return view->providedBuffer_->buffer_;
 }
 
 VKW::MemoryPageRegion* Root::GetViewMemory(VKW::BufferView* view)
 {
-    VKW::BufferResourceHandle resourceHandle = view->providedBuffer_->bufferResource_;
-    VKW::BufferResource* bufferResource = resourceHandle.GetResource();
-    return &bufferResource->memoryRegion_;
+    return &view->providedBuffer_->buffer_->memoryRegion_;
 }
 
 VKW::MemoryPage* Root::GetViewMemoryPage(VKW::BufferView* view)
 {
-    return view->providedBuffer_->bufferResource_.GetMemoryPage();
+    return view->providedBuffer_->buffer_->memoryRegion_.page_;
 }
 
 VKW::ImageResource* Root::GetViewResource(VKW::ImageView* view)
 {
-    return view->resource_.GetResource();
+    return view->resource_;
 }
 
 VKW::MemoryPageRegion* Root::GetViewMemory(VKW::ImageView* view)
 {
-    VKW::ImageResourceHandle resourceHandle = view->resource_;
-    VKW::ImageResource* imageResource = resourceHandle.GetResource();
-    return &imageResource->memoryRegion_;
+    return &view->resource_->memoryRegion_;
 }
 
 VKW::MemoryPage* Root::GetViewMemoryPage(VKW::ImageView* view)
 {
-    return view->resource_.GetMemoryPage();
+    return view->resource_->memoryRegion_.page_;
 }
 
 void Root::DefineGlobalBuffer(ResourceKey const& key, VKW::BufferViewDesc const& desc)
@@ -417,7 +412,7 @@ void Root::DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc
     passDesc.colorAttachmentCount_ = desc.colorAttachmentsCount_;
     for (auto i = 0u; i < passDesc.colorAttachmentCount_; ++i) {
         VKW::ImageView* attachmentView = FindGlobalImage(desc.colorAttachments_[i].resourceKey_, 0);
-        VKW::ImageResource* attachmentResource = attachmentView->resource_.GetResource();
+        VKW::ImageResource* attachmentResource = attachmentView->resource_;
 
         if (i > 0) {
             assert(passDesc.width_ == attachmentResource->width_ && "All attachments in pass must have same dimentions!");
@@ -809,8 +804,8 @@ void Root::CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey cons
     VKW::BufferView* srcView = FindGlobalBuffer(src, context);
     VKW::BufferView* dstView = FindGlobalBuffer(dst, context);
     
-    VKW::BufferResource* srcBuffer = srcView->providedBuffer_->bufferResource_.GetResource();
-    VKW::BufferResource* dstBuffer = dstView->providedBuffer_->bufferResource_.GetResource();
+    VKW::BufferResource* srcBuffer = srcView->providedBuffer_->buffer_;
+    VKW::BufferResource* dstBuffer = dstView->providedBuffer_->buffer_;
     
     VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
 
@@ -868,8 +863,8 @@ void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey con
     VKW::BufferView* srcView = FindGlobalBuffer(src, context);
     VKW::ImageView* dstView = FindGlobalImage(dst, context);
 
-    VKW::BufferResource* srcBuffer = srcView->providedBuffer_->bufferResource_.GetResource();
-    VKW::ImageResource* dstImage = dstView->resource_.GetResource();
+    VKW::BufferResource* srcBuffer = srcView->providedBuffer_->buffer_;
+    VKW::ImageResource* dstImage = dstView->resource_;
 
     VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
     
@@ -938,8 +933,8 @@ void Root::BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint3
     VKW::ImageView* srcView = FindGlobalImage(src, context);
     VKW::ImageView* dstView = FindGlobalImage(dst, context);
 
-    VKW::ImageResource* srcImage = srcView->resource_.GetResource();
-    VKW::ImageResource* dstImage = dstView->resource_.GetResource();
+    VKW::ImageResource* srcImage = srcView->resource_;
+    VKW::ImageResource* dstImage = dstView->resource_;
     
     VkImageMemoryBarrier imageBarriers[3];
     imageBarriers[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -1083,7 +1078,7 @@ void Root::EndRenderGraph(VKW::PresentationContext const& presentationContext, V
     // we can do transfer here
     
     VKW::ImageView* colorBufferView = FindGlobalImage(GetDefaultSceneColorOutput(), contextId);
-    VKW::ImageResource* colorBufferResource = colorBufferView->resource_.GetResource();
+    VKW::ImageResource* colorBufferResource = colorBufferView->resource_;
     VkImage colorBufferHandle = colorBufferResource->handle_; // this to transfer src then back to color attachment (maybe without the last one)
     VkImage swapchainImageHandle = loader_->swapchain_->Image(contextId).image_;
 

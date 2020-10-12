@@ -507,8 +507,8 @@ Framebuffer* ResourceRendererProxy::GetFramebuffer(ProxyFramebufferHandle handle
 void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)
 {
     VKW::BufferView const* view = GetBufferView(handle, context);
-    VKW::BufferResource const* resource = view->providedBuffer_->bufferResource_.GetResource();
-    VKW::MemoryPage const* memoryPage = view->providedBuffer_->bufferResource_.GetMemoryPage();
+    VKW::BufferResource const* resource = view->providedBuffer_->buffer_;
+    VKW::MemoryPage const* memoryPage = view->providedBuffer_->buffer_->memoryRegion_.page_;
 
     std::uint64_t const mappingOffset = resource->memoryRegion_.offset_ + view->offset_;
 
@@ -521,8 +521,8 @@ void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint3
 void ResourceRendererProxy::FlushBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)
 {
     VKW::BufferView const* view = GetBufferView(handle, context);
-    VKW::BufferResource const* resource = view->providedBuffer_->bufferResource_.GetResource();
-    VKW::MemoryPage const* memoryPage = view->providedBuffer_->bufferResource_.GetMemoryPage();
+    VKW::BufferResource const* resource = view->providedBuffer_->buffer_;
+    VKW::MemoryPage const* memoryPage = view->providedBuffer_->buffer_->memoryRegion_.page_;
 
     std::uint64_t const mappingOffset = resource->memoryRegion_.offset_ + view->offset_;
 

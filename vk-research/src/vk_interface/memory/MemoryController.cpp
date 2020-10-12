@@ -257,7 +257,7 @@ void MemoryController::ClassifyDeviceMemoryTypesAll()
     memoryClassTypes_[(int)MemoryClass::CpuReadback] = cpuReadbackClassType;
 }
 
-MemoryPageRegion MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc)
+MemoryPageRegion MemoryController::AllocateMemoryRegion(MemoryPageRegionDesc const& desc)
 {
     std::uint32_t validAllocation = TOOL_INVALID_ID;
     auto const allocationsCount = allocations_.size();
@@ -273,36 +273,34 @@ MemoryPageRegion MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc cons
     }
 
     if (validAllocation != TOOL_INVALID_ID) {
-        return GetNextFreePageRegion(MemoryPageHandle{ allocations_[validAllocation] }, desc);
+        return GetNextFreePageRegion(allocations_[validAllocation], desc);
     }
     else {
         std::uint64_t const defaultPageSize = defaultPageSizes_[(int)desc.memoryClass_];
         std::uint64_t const requestedSize = desc.size_ + desc.alignment_;
         std::uint64_t const pageSize = requestedSize > defaultPageSize ? requestedSize : defaultPageSize;
 
-        MemoryPageHandle newPage = AllocPage(desc.memoryClass_, pageSize);
+        MemoryPage* newPage = AllocPage(desc.memoryClass_, pageSize);
         return GetNextFreePageRegion(newPage, desc);
     }
 }
 
-MemoryPageRegion MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle, MemoryPageRegionDesc const& desc)
+MemoryPageRegion MemoryController::GetNextFreePageRegion(MemoryPage* page, MemoryPageRegionDesc const& desc)
 {
     std::uint64_t const size = desc.size_ + desc.alignment_;
 
-    MemoryPage& page = *pageHandle.GetPage();
-
-    std::uint32_t const memoryTypeId = memoryClassTypes_[(int)page.memoryClass];
+    std::uint32_t const memoryTypeId = memoryClassTypes_[(int)page->memoryClass];
     assert((desc.memoryTypeBits_ & (1 << memoryTypeId)) && "Memory class of this MemoryPage has not fulfilled the allocation requirements."); 
 
-    page.nextFreeOffset_ += size;
-    ++page.bindCount_;
+    page->nextFreeOffset_ += size;
+    ++page->bindCount_;
 
-    return MemoryPageRegion{ pageHandle, RoundToMultipleOfPOT(page.nextFreeOffset_, desc.alignment_), size };
+    return MemoryPageRegion{ page, RoundToMultipleOfPOT(page->nextFreeOffset_, desc.alignment_), size };
 }
 
 void MemoryController::ReleaseMemoryRegion(MemoryPageRegion& region)
 {
-    VkDeviceMemory const regionMemoryAllocation = region.pageHandle_.GetPage()->deviceMemory_;
+    VkDeviceMemory const regionMemoryAllocation = region.page_->deviceMemory_;
 
     std::uint32_t pageIndex = TOOL_INVALID_ID;
     for (std::uint32_t i = 0u; i < allocations_.size(); ++i) {
@@ -313,16 +311,16 @@ void MemoryController::ReleaseMemoryRegion(MemoryPageRegion& region)
 
     if (pageIndex != TOOL_INVALID_ID) {
         if (--allocations_[pageIndex]->bindCount_ == 0) {
-            FreePage(MemoryPageHandle{ allocations_[pageIndex] });
+            FreePage(allocations_[pageIndex]);
         }
     }
 
-    region.pageHandle_ = MemoryPageHandle{};
+    region.page_ = nullptr;
     region.size_ = 0;
     region.offset_ = 0;
 }
 
-MemoryPageHandle MemoryController::AllocPage(MemoryClass memoryClass, std::uint64_t size)
+MemoryPage* MemoryController::AllocPage(MemoryClass memoryClass, std::uint64_t size)
 {
     std::uint32_t typeIndex = memoryClassTypes_[(int)memoryClass];
     if (typeIndex == TOOL_INVALID_ID)
@@ -387,26 +385,21 @@ MemoryPageHandle MemoryController::AllocPage(MemoryClass memoryClass, std::uint6
 
     allocations_.emplace_back(memory);
 
-    return MemoryPageHandle{ memory };
+    return memory;
 }
 
-void MemoryController::FreePage(MemoryPageHandle pageHandle)
+void MemoryController::FreePage(MemoryPage* page)
 {
     std::uint32_t deletedPageIndex = TOOL_INVALID_ID;
 
     std::uint32_t const allocationsCount = static_cast<std::uint32_t>(allocations_.size());
-    for (std::uint32_t i = 0u; i < allocationsCount; ++i) {
-        if (pageHandle.GetPage() == allocations_[i]) {
-            deletedPageIndex = i;
-            break;
-        }
-    }
-    
-    MemoryPage* page = allocations_[deletedPageIndex];
+    auto allocationIt = std::find(allocations_.begin(), allocations_.end(), page);
+    assert(allocationIt != allocations_.end() && "There's no such GPU memory allocation.");
+
     table_->vkFreeMemory(device_->Handle(), page->deviceMemory_, nullptr);
 
     delete page;
-    allocations_.erase(allocations_.begin() + deletedPageIndex);
+    allocations_.erase(allocationIt);
 }
 
 }

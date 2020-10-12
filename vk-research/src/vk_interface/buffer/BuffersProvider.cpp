@@ -12,8 +12,8 @@
 namespace VKW
 {
 
-ProvidedBuffer::ProvidedBuffer(BufferResourceHandle resource, std::uint32_t referenceCount)
-    : bufferResource_{ resource }
+ProvidedBuffer::ProvidedBuffer(BufferResource* resource, std::uint32_t referenceCount)
+    : buffer_{ resource }
     , referenceCount_{ referenceCount }
 {
 
@@ -69,7 +69,7 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
     BufferDesc bufferDesc;
     bufferDesc.size_ = totalBufferSize;
     bufferDesc.usage_ = desc[0].usage_;
-    BufferResourceHandle bufferRes = resourcesController_->CreateBuffer(bufferDesc);
+    BufferResource* bufferRes = resourcesController_->CreateBuffer(bufferDesc);
     auto* providedBuffer = new ProvidedBuffer{ bufferRes, buffersCount };
     providedBuffers_.push_back(providedBuffer);
 
@@ -84,7 +84,7 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
     std::uint32_t prevOffset = 0;
     for (auto i = 0u; i < buffersCount; ++i) {
         viewInfo.flags = VK_FLAGS_NONE;
-        viewInfo.buffer = bufferRes.GetResource()->handle_;
+        viewInfo.buffer = bufferRes->handle_;
         viewInfo.format = format;
         //viewInfo.offset = desc[i].offset_;
         viewInfo.offset = prevOffset;
@@ -126,7 +126,7 @@ void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferViewHandle 
 
 
         if (--providedBuffer.referenceCount_ == 0) {
-            resourcesController_->FreeBuffer(providedBuffer.bufferResource_);
+            resourcesController_->FreeBuffer(providedBuffer.buffer_);
             delete *providedBufferIt;
             providedBuffers_.erase(providedBufferIt);
         }
@@ -142,7 +142,7 @@ BufferView* BuffersProvider::GetView(BufferViewHandle handle)
 
 BufferResource* BuffersProvider::GetViewResource(BufferViewHandle handle)
 {
-    return handle.view_->providedBuffer_->bufferResource_.GetResource();
+    return handle.view_->providedBuffer_->buffer_;
 }
 
 BuffersProvider::~BuffersProvider()
@@ -154,7 +154,7 @@ BuffersProvider::~BuffersProvider()
     }
 
     for (auto const& providedBuffer : providedBuffers_) {
-        resourcesController_->FreeBuffer(providedBuffer->bufferResource_);
+        resourcesController_->FreeBuffer(providedBuffer->buffer_);
         delete providedBuffer;
     }
 }

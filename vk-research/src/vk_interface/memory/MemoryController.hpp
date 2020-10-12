@@ -42,14 +42,14 @@ public:
 
     ~MemoryController();
 
-    MemoryPageRegion ProvideMemoryRegion(MemoryPageRegionDesc const& desc);
+    MemoryPageRegion AllocateMemoryRegion(MemoryPageRegionDesc const& desc);
     void ReleaseMemoryRegion(MemoryPageRegion& region);
 
 private:
-    MemoryPageHandle AllocPage(MemoryClass memoryClass, std::uint64_t size);
-    void FreePage(MemoryPageHandle pageIndex);
+    MemoryPage* AllocPage(MemoryClass memoryClass, std::uint64_t size);
+    void FreePage(MemoryPage* page);
 
-    MemoryPageRegion GetNextFreePageRegion(MemoryPageHandle page, MemoryPageRegionDesc const& desc);
+    MemoryPageRegion GetNextFreePageRegion(MemoryPage* page, MemoryPageRegionDesc const& desc);
 
     void AssignDefaultProperties();
     void ClassifyDeviceMemoryTypesAll();

@@ -58,17 +58,17 @@ ResourcesController::~ResourcesController()
     }
 }
 
-BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
+BufferResource* ResourcesController::CreateBuffer(BufferDesc const& desc)
 {
     VkBufferCreateInfo vkBufferCreateInfo;
-    vkBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    vkBufferCreateInfo.pNext = nullptr;
-    vkBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    vkBufferCreateInfo.queueFamilyIndexCount = 0;
-    vkBufferCreateInfo.pQueueFamilyIndices = nullptr;
-    vkBufferCreateInfo.size = desc.size_;
-    vkBufferCreateInfo.flags = VK_FLAGS_NONE;
-    vkBufferCreateInfo.usage = VK_FLAGS_NONE; // temp value, assigned below
+    vkBufferCreateInfo.sType                    = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    vkBufferCreateInfo.pNext                    = nullptr;
+    vkBufferCreateInfo.sharingMode              = VK_SHARING_MODE_EXCLUSIVE;
+    vkBufferCreateInfo.queueFamilyIndexCount    = 0;
+    vkBufferCreateInfo.pQueueFamilyIndices      = nullptr;
+    vkBufferCreateInfo.size                     = desc.size_;
+    vkBufferCreateInfo.flags                    = VK_FLAGS_NONE;
+    vkBufferCreateInfo.usage                    = VK_FLAGS_NONE; // temp value, assigned below
 
 
     MemoryPageRegionDesc regionDesc;
@@ -105,65 +105,65 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     regionDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
     assert(IsPowerOf2(regionDesc.alignment_) && "Alignemnt is not power of 2!");
 
-    MemoryPageRegion memoryRegion = memoryController_->ProvideMemoryRegion(regionDesc);
-    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, memoryRegion.pageHandle_.GetPage()->deviceMemory_, memoryRegion.offset_));
+    MemoryPageRegion memoryRegion = memoryController_->AllocateMemoryRegion(regionDesc);
+    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));
 
     BufferResource* resource = new BufferResource{ vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion };
-    buffers_.emplace_back(resource);
+    buffers_.emplace(resource);
 
-    return BufferResourceHandle{ resource };
+    return resource;
 }
 
-ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
+ImageResource* ResourcesController::CreateImage(ImageDesc const& desc)
 {
     VkImageCreateInfo info;
-    info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    info.pNext = nullptr;
-    info.format = desc.format_;
-    info.imageType = VK_IMAGE_TYPE_2D;
-    info.extent.width = desc.width_;
-    info.extent.height = desc.height_;
-    info.extent.depth = 1;
-    info.arrayLayers = 1;
-    info.mipLevels = 1;
-    info.tiling = VK_IMAGE_TILING_OPTIMAL;
-    info.samples = VK_SAMPLE_COUNT_1_BIT;
-    info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    info.queueFamilyIndexCount = 0;
-    info.pQueueFamilyIndices = nullptr;
-    info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    info.flags = VK_FLAGS_NONE;
+    info.sType                      = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    info.pNext                      = nullptr;
+    info.format                     = desc.format_;
+    info.imageType                  = VK_IMAGE_TYPE_2D;
+    info.extent.width               = desc.width_;
+    info.extent.height              = desc.height_;
+    info.extent.depth               = 1;
+    info.arrayLayers                = 1;
+    info.mipLevels                  = 1;
+    info.tiling                     = VK_IMAGE_TILING_OPTIMAL;
+    info.samples                    = VK_SAMPLE_COUNT_1_BIT;
+    info.sharingMode                = VK_SHARING_MODE_EXCLUSIVE;
+    info.queueFamilyIndexCount      = 0;
+    info.pQueueFamilyIndices        = nullptr;
+    info.initialLayout              = VK_IMAGE_LAYOUT_UNDEFINED;
+    info.flags                      = VK_FLAGS_NONE;
 
     MemoryPageRegionDesc memoryDesc;
 
     switch (desc.usage_)
     {
     case ImageUsage::TEXTURE:
-        info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        info.usage              = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         memoryDesc.memoryClass_ = MemoryClass::DeviceFast;
         break;
         
     case ImageUsage::STORAGE_IMAGE:
     case ImageUsage::STORAGE_IMAGE_READONLY:
-        info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+        info.usage              = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         memoryDesc.memoryClass_ = MemoryClass::DeviceFast;
         break;
 
     case ImageUsage::RENDER_TARGET:
-        info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+        info.usage              = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         memoryDesc.memoryClass_ = MemoryClass::DeviceFast;
         break;
 
     case ImageUsage::DEPTH:
     case ImageUsage::STENCIL:
     case ImageUsage::DEPTH_STENCIL:
-        info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        info.usage              = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
         memoryDesc.memoryClass_ = MemoryClass::DeviceFast;
         break;
 
     case ImageUsage::UPLOAD_IMAGE:
-        info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-        info.tiling = VK_IMAGE_TILING_LINEAR;
+        info.usage              = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        info.tiling             = VK_IMAGE_TILING_LINEAR;
         memoryDesc.memoryClass_ = MemoryClass::CpuStaging;
         break;
     default:
@@ -182,18 +182,18 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     memoryDesc.alignment_ = memoryRequirements.alignment;
     memoryDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
 
-    MemoryPageRegion memoryRegion = memoryController_->ProvideMemoryRegion(memoryDesc);
-    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, memoryRegion.pageHandle_.GetPage()->deviceMemory_, memoryRegion.offset_));
+    MemoryPageRegion memoryRegion = memoryController_->AllocateMemoryRegion(memoryDesc);
+    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));
 
     ImageResource* imageResource = new ImageResource{ vkImage, desc.format_, desc.width_, desc.height_, memoryRegion };
-    images_.emplace_back(imageResource);
+    images_.emplace(imageResource);
 
-    return ImageResourceHandle{ imageResource };
+    return imageResource;
 }
 
-void ResourcesController::FreeBuffer(BufferResourceHandle handle)
+void ResourcesController::FreeBuffer(BufferResource* resource)
 {
-    auto bufferIt = std::find(buffers_.begin(), buffers_.end(), handle.GetResource());
+    auto bufferIt = buffers_.find(resource);
     assert(bufferIt != buffers_.end() && "Can't free BufferResource.");
 
     auto& buffer = *bufferIt;
@@ -204,14 +204,9 @@ void ResourcesController::FreeBuffer(BufferResourceHandle handle)
     buffers_.erase(bufferIt);
 }
 
-void ResourcesController::FreeImage(ImageResourceHandle handle)
+void ResourcesController::FreeImage(ImageResource* resource)
 {
-    // TODO this is for the case of swapchain. dirty hack
-    if (handle.GetResource() == nullptr) {
-        return;
-    }
-    
-    auto imageIt = std::find(images_.cbegin(), images_.cend(), handle.GetResource());
+    auto imageIt = images_.find(resource);
     assert(imageIt != images_.end() && "Can't free ImageResource");
 
     auto& image = *imageIt;

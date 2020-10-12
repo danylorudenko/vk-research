@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <class_features\NonCopyable.hpp>
 
 #include <vk_interface\buffer\BufferView.hpp>

@@ -4,7 +4,7 @@
 #include <vk_interface\resources\Resource.hpp>
 
 #include <vulkan\vulkan.h>
-#include <vector>
+#include <set>
 
 namespace VKW
 {
@@ -64,11 +64,11 @@ public:
     ResourcesController(ResourcesController&& rhs);
     ResourcesController& operator=(ResourcesController&& rhs);
 
-    BufferResourceHandle CreateBuffer(BufferDesc const& desc);
-    void FreeBuffer(BufferResourceHandle handle);
+    BufferResource* CreateBuffer(BufferDesc const& desc);
+    void FreeBuffer(BufferResource* handle);
 
-    ImageResourceHandle CreateImage(ImageDesc const& desc);
-    void FreeImage(ImageResourceHandle handle);
+    ImageResource* CreateImage(ImageDesc const& desc);
+    void FreeImage(ImageResource* handle);
 
     ~ResourcesController();
 
@@ -78,8 +78,8 @@ private:
 
     MemoryController* memoryController_;
 
-    std::vector<BufferResource*> buffers_;
-    std::vector<ImageResource*> images_;
+    std::set<BufferResource*> buffers_;
+    std::set<ImageResource*> images_;
 
 
 };

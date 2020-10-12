@@ -9,9 +9,9 @@ namespace VKW
 struct ProvidedBuffer
 {
 public:
-    ProvidedBuffer(BufferResourceHandle resource, std::uint32_t referenceCount = 0);
+    ProvidedBuffer(BufferResource* resource, std::uint32_t referenceCount = 0);
 
-    BufferResourceHandle bufferResource_;
+    BufferResource* buffer_;
     std::uint32_t referenceCount_;
 };
 

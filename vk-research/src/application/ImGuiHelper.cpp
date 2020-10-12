@@ -64,7 +64,7 @@ ImGuiHelper::~ImGuiHelper()
 void ImGuiHelper::Init()
 {
     VKW::ImageView* colorBufferView = root_->FindGlobalImage(root_->GetDefaultSceneColorOutput(), 0);
-    VKW::ImageResource* colorBufferResource = colorBufferView->resource_.GetResource();
+    VKW::ImageResource* colorBufferResource = colorBufferView->resource_;
 
     std::uint32_t viewportWidth = colorBufferResource->width_ - root_->GetDefaultSceneColorBufferThreeshold();
     std::uint32_t viewportHeight = colorBufferResource->height_ - root_->GetDefaultSceneColorBufferThreeshold();
@@ -127,7 +127,7 @@ void ImGuiHelper::Init()
     root_->CopyStagingBufferToGPUTexture(IMGUI_TEXTURE_STAGING_BUFFER_KEY, IMGUI_TEXTURE_KEY, 0);
 
     VKW::ImageView* imguiTextureView = root_->FindGlobalImage(IMGUI_TEXTURE_KEY, 0);
-    VKW::ImageResource* imguiTextureResource = imguiTextureView->resource_.GetResource();
+    VKW::ImageResource* imguiTextureResource = imguiTextureView->resource_;
     VkImageLayout targetLayout = VK_IMAGE_LAYOUT_GENERAL;
     root_->ImageLayoutTransition(0, 1, &imguiTextureResource->handle_, &targetLayout);
 
