@@ -2,7 +2,6 @@
 
 #include <renderer\Root.hpp>
 
-#include <vk_interface/buffer/ProvidedBuffer.hpp>
 #include <vk_interface\ResourceRendererProxy.hpp>
 #include <vk_interface\pipeline\RenderPassController.hpp>
 #include <vk_interface\pipeline\PipelineFactory.hpp>
@@ -243,7 +242,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
             assert(renderItem.indexCount_ >= 0 && "GraphicsPass: renderItem.indexCount < 0");
             if (renderItem.vertexCount_ > 0) {
                 VKW::BufferView* vertexBufferView = root_->FindGlobalBuffer(renderItem.vertexBufferKey_, contextId);
-                VKW::BufferResource* vertexBuffer = vertexBufferView->providedBuffer_->buffer_;
+                VKW::BufferResource* vertexBuffer = vertexBufferView->bufferResource_;
 
                 VkBuffer vkBuffer = vertexBuffer->handle_;
                 VkDeviceSize offset = vertexBufferView->offset_ + renderItem.vertexBindOffset_;
@@ -252,7 +251,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
 
             if (renderItem.indexCount_ > 0) {
                 VKW::BufferView* indexBufferView = root_->FindGlobalBuffer(renderItem.indexBufferKey_, contextId);
-                VKW::BufferResource* indexBuffer = indexBufferView->providedBuffer_->buffer_;
+                VKW::BufferResource* indexBuffer = indexBufferView->bufferResource_;
 
                 VkBuffer vkBuffer = indexBuffer->handle_;
                 VkDeviceSize offset = indexBufferView->offset_;
@@ -376,7 +375,7 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
         case COMPUTE_PASS_RESOURCE_USAGE_BUFFER_READ_AFTER_WRITE:
         {
             VKW::BufferView* view = root_->FindGlobalBuffer(usageData.resourceKey_, contextId);
-            VKW::BufferResource* resource = view->providedBuffer_->buffer_;
+            VKW::BufferResource* resource = view->bufferResource_;
 
             auto& barrier = bufferBarriers[bufferBarriersCount++];
             barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;

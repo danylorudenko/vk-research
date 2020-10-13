@@ -13,7 +13,7 @@ namespace VKW
 
 struct FramedDescriptors
 {
-    std::vector<BufferViewHandle> bufferViews_;
+    std::vector<BufferView*> bufferViews_;
     std::vector<ImageViewHandle> imageViews_;
     std::vector<DescriptorSetHandle> descriptorSets_;
     std::vector<FramebufferHandle> framebuffers_;

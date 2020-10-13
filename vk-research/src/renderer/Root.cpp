@@ -1,6 +1,5 @@
 #include "Root.hpp"
 
-#include <vk_interface\buffer\ProvidedBuffer.hpp>
 #include <vk_interface\ResourceRendererProxy.hpp>
 #include <vk_interface\worker\Worker.hpp>
 #include <vk_interface\Loader.hpp>
@@ -298,17 +297,17 @@ void Root::FlushImage(ResourceKey const& key, std::uint32_t frame)
 
 VKW::BufferResource* Root::GetViewResource(VKW::BufferView* view)
 {
-    return view->providedBuffer_->buffer_;
+    return view->bufferResource_;
 }
 
 VKW::MemoryPageRegion* Root::GetViewMemory(VKW::BufferView* view)
 {
-    return &view->providedBuffer_->buffer_->memoryRegion_;
+    return &view->bufferResource_->memoryRegion_;
 }
 
 VKW::MemoryPage* Root::GetViewMemoryPage(VKW::BufferView* view)
 {
-    return view->providedBuffer_->buffer_->memoryRegion_.page_;
+    return view->bufferResource_->memoryRegion_.page_;
 }
 
 VKW::ImageResource* Root::GetViewResource(VKW::ImageView* view)
@@ -608,7 +607,7 @@ void Root::Decorate_VKWProxyDescriptorWriteDesc_UniformBuffer(VKW::ProxyDescript
         
         VKW::BufferView* view = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, i);
 
-        pureBufferDesc.pureBufferViewHandle_ = resourceProxy_->GetBufferViewHandle(uniformBuffer.proxyBufferViewHandle_, i);
+        pureBufferDesc.bufferView_ = resourceProxy_->GetBufferView(uniformBuffer.proxyBufferViewHandle_, i);
         pureBufferDesc.offset_ = 0;
         //pureBufferDesc.offset_ = static_cast<std::uint32_t>(view->offset_);
         pureBufferDesc.size_ = static_cast<std::uint32_t>(view->size_);
@@ -804,8 +803,8 @@ void Root::CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey cons
     VKW::BufferView* srcView = FindGlobalBuffer(src, context);
     VKW::BufferView* dstView = FindGlobalBuffer(dst, context);
     
-    VKW::BufferResource* srcBuffer = srcView->providedBuffer_->buffer_;
-    VKW::BufferResource* dstBuffer = dstView->providedBuffer_->buffer_;
+    VKW::BufferResource* srcBuffer = srcView->bufferResource_;
+    VKW::BufferResource* dstBuffer = dstView->bufferResource_;
     
     VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);
 
@@ -863,7 +862,7 @@ void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey con
     VKW::BufferView* srcView = FindGlobalBuffer(src, context);
     VKW::ImageView* dstView = FindGlobalImage(dst, context);
 
-    VKW::BufferResource* srcBuffer = srcView->providedBuffer_->buffer_;
+    VKW::BufferResource* srcBuffer = srcView->bufferResource_;
     VKW::ImageResource* dstImage = dstView->resource_;
 
     VKW::WorkerFrameCommandReciever commandReciever = mainWorkerTemp_->StartExecutionFrame(context);

@@ -5,7 +5,6 @@
 #include <vk_interface\Swapchain.hpp>
 #include <vk_interface\memory\MemoryController.hpp>
 #include <vk_interface\buffer\BuffersProvider.hpp>
-#include <vk_interface\buffer\ProvidedBuffer.hpp>
 #include <vk_interface\image\ImagesProvider.hpp>
 #include <vk_interface\pipeline\DescriptorLayoutController.hpp>
 #include <vk_interface\runtime\DescriptorSetController.hpp>
@@ -243,7 +242,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
                 case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
                 {
                     auto& bufferInfo = descriptions[j].frames_[i].pureBufferDesc_;
-                    BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
+                    BufferResource* bufferResource = bufferInfo.bufferView_->bufferResource_;
                     DecorateBufferWriteDesc(wds, descriptorData[j], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
                 }
                 break;
@@ -298,7 +297,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
             case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
             {
                 auto& bufferInfo = descriptions[i].frames_[0].pureBufferDesc_;
-                BufferResource* bufferResource = buffersProvider_->GetViewResource(bufferInfo.pureBufferViewHandle_);
+                BufferResource* bufferResource = bufferInfo.bufferView_->bufferResource_;
                 DecorateBufferWriteDesc(wds, descriptorData[i], bufferResource->handle_, bufferInfo.offset_, bufferInfo.size_);
             }
             break;
@@ -358,7 +357,7 @@ void ResourceRendererProxy::DecorateBufferWriteDesc(VkWriteDescriptorSet& dst, D
 ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferViewDesc const& decs)
 {
     BufferViewDesc viewDescs[CONSTANTS::MAX_FRAMES_BUFFERING];
-    BufferViewHandle views[CONSTANTS::MAX_FRAMES_BUFFERING];
+    BufferView* views[CONSTANTS::MAX_FRAMES_BUFFERING];
 
     bool framedResource = false;
     switch (decs.usage_) {
@@ -394,12 +393,6 @@ ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferViewDesc const& decs
 }
 
 BufferView* ResourceRendererProxy::GetBufferView(ProxyBufferHandle handle, std::uint32_t context)
-{
-    BufferViewHandle bufferViewHandle = framedDescriptorsHub_->contexts_[context].bufferViews_[handle.id_];
-    return buffersProvider_->GetView(bufferViewHandle);
-}
-
-BufferViewHandle ResourceRendererProxy::GetBufferViewHandle(ProxyBufferHandle handle, std::uint32_t context)
 {
     return framedDescriptorsHub_->contexts_[context].bufferViews_[handle.id_];
 }
@@ -507,8 +500,8 @@ Framebuffer* ResourceRendererProxy::GetFramebuffer(ProxyFramebufferHandle handle
 void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)
 {
     VKW::BufferView const* view = GetBufferView(handle, context);
-    VKW::BufferResource const* resource = view->providedBuffer_->buffer_;
-    VKW::MemoryPage const* memoryPage = view->providedBuffer_->buffer_->memoryRegion_.page_;
+    VKW::BufferResource const* resource = view->bufferResource_;
+    VKW::MemoryPage const* memoryPage = view->bufferResource_->memoryRegion_.page_;
 
     std::uint64_t const mappingOffset = resource->memoryRegion_.offset_ + view->offset_;
 
@@ -521,8 +514,8 @@ void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint3
 void ResourceRendererProxy::FlushBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)
 {
     VKW::BufferView const* view = GetBufferView(handle, context);
-    VKW::BufferResource const* resource = view->providedBuffer_->buffer_;
-    VKW::MemoryPage const* memoryPage = view->providedBuffer_->buffer_->memoryRegion_.page_;
+    VKW::BufferResource const* resource = view->bufferResource_;
+    VKW::MemoryPage const* memoryPage = view->bufferResource_->memoryRegion_.page_;
 
     std::uint64_t const mappingOffset = resource->memoryRegion_.offset_ + view->offset_;
 

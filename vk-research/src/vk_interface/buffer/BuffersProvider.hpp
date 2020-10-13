@@ -42,11 +42,8 @@ public:
     BuffersProvider(BuffersProvider&& rhs);
     BuffersProvider& operator=(BuffersProvider&& rhs);
     
-    void AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferViewHandle* results);
-    void ReleaseViews(std::uint32_t buffersCount, BufferViewHandle const* handles);
-
-    BufferView* GetView(BufferViewHandle handle);
-    BufferResource* GetViewResource(BufferViewHandle handle);
+    void AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferView** results);
+    void ReleaseViews(std::uint32_t buffersCount, BufferView** views);
 
     ~BuffersProvider();
 
@@ -57,7 +54,6 @@ private:
     ResourcesController* resourcesController_;
 
     std::vector<BufferView*> bufferViews_;
-    std::vector<ProvidedBuffer*> providedBuffers_;
 };
 
 }

@@ -42,11 +42,11 @@ struct ProxyDescriptorWriteDesc
 
         struct BufferViewDesc 
         {
-            BufferViewHandle bufferViewHandle_;
+            BufferView* bufferView_;
         } bufferView_;
 
         struct PureBufferDesc {
-            BufferViewHandle pureBufferViewHandle_;
+            BufferView* bufferView_;
             std::uint32_t offset_;
             std::uint32_t size_;
         } pureBufferDesc_;
@@ -104,7 +104,6 @@ public:
 
     ProxyBufferHandle CreateBuffer(BufferViewDesc const& desc);
     BufferView* GetBufferView(ProxyBufferHandle handle, std::uint32_t context);
-    BufferViewHandle GetBufferViewHandle(ProxyBufferHandle handle, std::uint32_t context);
 
     ProxyImageHandle CreateImage(ImageViewDesc const& desc);
     ImageViewHandle GetImageViewHandle(ProxyImageHandle handle, std::uint32_t context);

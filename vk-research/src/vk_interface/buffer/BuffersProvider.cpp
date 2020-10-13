@@ -1,7 +1,5 @@
 #include "BuffersProvider.hpp"
 
-#include <vk_interface/buffer/ProvidedBuffer.hpp>
-
 #include <utility>
 #include <algorithm>
 
@@ -11,13 +9,6 @@
 
 namespace VKW
 {
-
-ProvidedBuffer::ProvidedBuffer(BufferResource* resource, std::uint32_t referenceCount)
-    : buffer_{ resource }
-    , referenceCount_{ referenceCount }
-{
-
-}
 
 BuffersProvider::BuffersProvider()
     : table_{ nullptr }
@@ -50,12 +41,11 @@ BuffersProvider& BuffersProvider::operator=(BuffersProvider&& rhs)
     std::swap(resourcesController_, rhs.resourcesController_);
 
     std::swap(bufferViews_, rhs.bufferViews_);
-    std::swap(providedBuffers_, rhs.providedBuffers_);
 
     return *this;
 }
 
-void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferViewHandle* results)
+void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferView** results)
 {
     std::uint32_t totalBufferSize = desc[0].size_;
     VkFormat const format = desc[0].format_;
@@ -70,8 +60,7 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
     bufferDesc.size_ = totalBufferSize;
     bufferDesc.usage_ = desc[0].usage_;
     BufferResource* bufferRes = resourcesController_->CreateBuffer(bufferDesc);
-    auto* providedBuffer = new ProvidedBuffer{ bufferRes, buffersCount };
-    providedBuffers_.push_back(providedBuffer);
+    std::uint32_t* referenceCounter = new std::uint32_t{ buffersCount };
 
 
     VkDevice const device = device_->Handle();
@@ -95,68 +84,39 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
             VK_ASSERT(table_->vkCreateBufferView(device, &viewInfo, nullptr, &view));
         }
         
-        BufferView* resultView = new BufferView{ view, format, viewInfo.offset, viewInfo.range, providedBuffer };
+        BufferView* resultView = new BufferView{ view, format, viewInfo.offset, viewInfo.range, bufferRes, referenceCounter };
         bufferViews_.push_back(resultView);
-
-        results[i].view_ = resultView;
+        
+        results[i] = resultView;
     }
 
 }
 
-void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferViewHandle const* handles)
+void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferView** views)
 {
     VkDevice const device = device_->Handle();
 
     for (auto i = 0u; i < buffersCount; ++i) {
-        auto viewIt = std::find(bufferViews_.cbegin(), bufferViews_.cend(), handles[i].view_);
-        assert(viewIt != bufferViews_.cend() && "Can't find BufferView to release.");
+        BufferView* view = views[i];
 
-        auto providedBufferIt = std::find(providedBuffers_.cbegin(), providedBuffers_.cend(), handles[i].view_->providedBuffer_);
-        assert(providedBufferIt != providedBuffers_.cend() && "Can't find any buffer attached to the view.");
-
-        BufferView const& view = **viewIt; // pointer in iterator
-        ProvidedBuffer& providedBuffer = **providedBufferIt; // same
-
-        if (view.handle_ != VK_NULL_HANDLE) {
-            table_->vkDestroyBufferView(device, view.handle_, nullptr);
+        if (view->handle_ != VK_NULL_HANDLE) {
+            table_->vkDestroyBufferView(device, view->handle_, nullptr);
         }
         
-        delete *viewIt;
-        bufferViews_.erase(viewIt);
-
-
-        if (--providedBuffer.referenceCount_ == 0) {
-            resourcesController_->FreeBuffer(providedBuffer.buffer_);
-            delete *providedBufferIt;
-            providedBuffers_.erase(providedBufferIt);
+        if (--view->bufferResourceReferenceCount_ == 0)
+        {
+            resourcesController_->FreeBuffer(view->bufferResource_);
         }
 
+        delete view;
+        views[i] = nullptr;
     }
 
-}
-
-BufferView* BuffersProvider::GetView(BufferViewHandle handle)
-{
-    return handle.view_;
-}
-
-BufferResource* BuffersProvider::GetViewResource(BufferViewHandle handle)
-{
-    return handle.view_->providedBuffer_->buffer_;
 }
 
 BuffersProvider::~BuffersProvider()
 {
-    VkDevice const device = device_->Handle();
-    for (auto const& view : bufferViews_) {
-        table_->vkDestroyBufferView(device, view->handle_, nullptr);
-        delete view;
-    }
-
-    for (auto const& providedBuffer : providedBuffers_) {
-        resourcesController_->FreeBuffer(providedBuffer->buffer_);
-        delete providedBuffer;
-    }
+    ReleaseViews(static_cast<std::uint32_t>(bufferViews_.size()), bufferViews_.data());
 }
 
 }
