@@ -21,7 +21,7 @@ class DescriptorLayoutController;
 
 struct DescriptorSetDesc
 {
-    DescriptorSetLayoutHandle layout_;
+    DescriptorSetLayout* layout_;
 };
 
 

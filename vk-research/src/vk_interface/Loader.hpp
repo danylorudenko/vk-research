@@ -19,7 +19,6 @@
 #include <vk_interface\worker\WorkersProvider.hpp>
 #include <vk_interface\runtime\FramedDescriptorsHub.hpp>
 #include <vk_interface\ResourceRendererProxy.hpp>
-#include <vk_interface\runtime\ResourceBindingService.hpp>
 #include <vk_interface\pipeline\RenderPassController.hpp>
 #include <vk_interface\resources\FramebufferController.hpp>
 #include <vk_interface\pipeline\PipelineFactory.hpp>
@@ -83,9 +82,6 @@ public:
     std::unique_ptr<VKW::WorkersProvider> workersProvider_;
 
     std::unique_ptr<VKW::PresentationController> presentationController_;
-
-
-    //std::unique_ptr<VKW::ResourceBindingService> resourceBindingService_;
 
 };
 

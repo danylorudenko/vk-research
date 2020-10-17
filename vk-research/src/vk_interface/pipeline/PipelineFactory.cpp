@@ -87,8 +87,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     static VkRect2D scissorRects[Pipeline::MAX_VIEWPORTS];
     static VkPipelineColorBlendAttachmentState colorBlendAttachmentInfo[RenderPass::MAX_ATTACHMENTS];
     
-    PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
-    PipelineLayout* layout = descriptorLayoutController_->GetPipelineLayout(layoutHandle);
+    PipelineLayout* layout = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
     RenderPass* renderPass = renderPassController_->GetRenderPass(desc.renderPass_);
 
     static VkGraphicsPipelineCreateInfo graphicsPipelineInfo;
@@ -344,7 +343,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
     auto* result = new Pipeline{};
     result->vkPipeline_ = vkPipeline;
-    result->layoutHandle = layoutHandle;
+    result->layout_ = layout;
 
     pipelines_.emplace_back(result);
 
@@ -354,8 +353,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 PipelineHandle PipelineFactory::CreateComputePipeline(ComputePipelineDesc const& desc)
 {
     ShaderModule* shaderModule = shaderModuleFactory_->AccessModule(desc.shaderStage_.shaderModuleHandle_);
-    PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
-    PipelineLayout* layout = descriptorLayoutController_->GetPipelineLayout(layoutHandle);
+    PipelineLayout* layout = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
 
     VkComputePipelineCreateInfo pipelineInfo;
     pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -378,7 +376,7 @@ PipelineHandle PipelineFactory::CreateComputePipeline(ComputePipelineDesc const&
 
     Pipeline* result = new Pipeline{};
     result->vkPipeline_ = pipeline;
-    result->layoutHandle = layoutHandle;
+    result->layout_ = layout;
 
     pipelines_.emplace_back(result);
     return PipelineHandle{ result };

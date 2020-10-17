@@ -8,7 +8,7 @@ namespace Render
 
 struct SetLayout
 {
-    VKW::DescriptorSetLayoutHandle vkwSetLayoutHandle_;
+    VKW::DescriptorSetLayout* vkwSetLayoutHandle_;
 
     std::uint32_t membersCount_;
     struct Member

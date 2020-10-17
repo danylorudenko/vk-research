@@ -192,7 +192,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
         }
 
         VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(pipeline.pipelineHandle_);
-        VKW::PipelineLayout const* vkwPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwPipeline->layoutHandle);
+        VKW::PipelineLayout const* vkwPipelineLayout = vkwPipeline->layout_;
         VkPipelineLayout const vkPipelineLayout = vkwPipelineLayout->handle_;
 
         VkCommandBuffer const commandBuffer = commandReciever->commandBuffer_;

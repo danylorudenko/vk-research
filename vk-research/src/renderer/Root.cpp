@@ -437,12 +437,11 @@ BasePass& Root::FindPass(PassKey const& key)
 
 void Root::DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc)
 {
-    VKW::DescriptorSetLayoutHandle handle = layoutController_->CreateDescriptorSetLayout(desc);
+    VKW::DescriptorSetLayout* layout = layoutController_->CreateDescriptorSetLayout(desc);
     SetLayout& set = setLayoutMap_[key];
-    set.vkwSetLayoutHandle_ = handle;
+    set.vkwSetLayoutHandle_ = layout;
     set.membersCount_ = desc.membersCount_;
     
-    VKW::DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(handle);
     std::uint32_t const membersCount = layout->membersCount_;
     for (std::uint32_t i = 0; i < membersCount; ++i) {
         set.membersInfo_[i].type_ = desc.membersDesc_[i].type_;
@@ -514,7 +513,7 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     
     VKW::PipelineHandle const vkwPipelineHandle = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
     VKW::Pipeline const* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
-    VKW::PipelineLayoutHandle const vkwPipelineLayoutHandle = vkwPipeline->layoutHandle;
+    VKW::PipelineLayout* const vkwPipelineLayoutHandle = vkwPipeline->layout_;
 
 
     pipeline.layoutHandle_ = vkwPipelineLayoutHandle;
@@ -547,7 +546,7 @@ void Root::DefineComputePipeline(PipelineKey const& key, ComputePipelineDesc con
     VKW::PipelineHandle vkwPipelineHandle = pipelineFactory_->CreateComputePipeline(vkwDesc);
     VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
 
-    pipeline.layoutHandle_ = vkwPipeline->layoutHandle;
+    pipeline.layoutHandle_ = vkwPipeline->layout_;
     pipeline.pipelineHandle_ = vkwPipelineHandle;
     pipeline.properties_.pipelineDynamicStateFlags_ = 0;
 }
@@ -571,7 +570,7 @@ void Root::DefineMaterialTemplate(MaterialTemplateKey const& key, MaterialTempla
         perPassData.passKey_ = perPassDataDesc.passKey_;
         
         Pipeline& pipeline = FindPipeline(perPassDataDesc.pipelineKey_);
-        VKW::PipelineLayout* vkwPipelineLayout = layoutController_->GetPipelineLayout(pipeline.layoutHandle_);
+        VKW::PipelineLayout* vkwPipelineLayout = pipeline.layoutHandle_;
         
         perPassData.pipelineKey_ = perPassDataDesc.pipelineKey_;
 

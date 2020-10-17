@@ -47,19 +47,19 @@ DescriptorLayoutController::~DescriptorLayoutController()
 {
     VkDevice const device = device_->Handle();
 
-    for (auto const& pipelineLayout : pipelineLayouts_) {
+    for (PipelineLayout* pipelineLayout : pipelineLayouts_) {
         table_->vkDestroyPipelineLayout(device, pipelineLayout->handle_, nullptr);
         delete pipelineLayout;
     }
 
-    for (auto const& setLayout : setLayouts_) {
+    for (DescriptorSetLayout* setLayout : setLayouts_) {
         table_->vkDestroyDescriptorSetLayout(device, setLayout->handle_, nullptr);
         delete setLayout;
     }
 
 }
 
-DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(DescriptorSetLayoutDesc const& desc)
+DescriptorSetLayout* DescriptorLayoutController::CreateDescriptorSetLayout(DescriptorSetLayoutDesc const& desc)
 {
     VkFlags stageFlags = VK_FLAGS_NONE;
     switch (desc.stage_)
@@ -128,14 +128,14 @@ DescriptorSetLayoutHandle DescriptorLayoutController::CreateDescriptorSetLayout(
         result->membersInfo_[i].binding_ = bindings[i].binding;
     }
 
-    setLayouts_.push_back(result);
+    setLayouts_.emplace(result);
 
-    return DescriptorSetLayoutHandle{ result };
+    return result;
 }
 
-void DescriptorLayoutController::ReleaseDescriptorSetLayout(DescriptorSetLayoutHandle handle)
+void DescriptorLayoutController::ReleaseDescriptorSetLayout(DescriptorSetLayout* layout)
 {
-    auto setLayoutIt = std::find(setLayouts_.begin(), setLayouts_.end(), handle.layout_);
+    auto setLayoutIt = std::find(setLayouts_.begin(), setLayouts_.end(), layout);
     if (setLayoutIt == setLayouts_.end()) {
         assert(false && "Attempt to release invalid DescriptorSetLayoutHandle.");
     }
@@ -147,11 +147,11 @@ void DescriptorLayoutController::ReleaseDescriptorSetLayout(DescriptorSetLayoutH
     setLayouts_.erase(setLayoutIt);
 }
 
-PipelineLayoutHandle DescriptorLayoutController::CreatePipelineLayout(PipelineLayoutDesc const& desc)
+PipelineLayout* DescriptorLayoutController::CreatePipelineLayout(PipelineLayoutDesc const& desc)
 {
     VkDescriptorSetLayout layouts[PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     for (auto i = 0u; i < desc.membersCount_; ++i) {
-        DescriptorSetLayout* layout = desc.members_[i].layout_;
+        DescriptorSetLayout* layout = desc.members_[i];
         layouts[i] = layout->handle_;
     }
 
@@ -175,33 +175,19 @@ PipelineLayoutHandle DescriptorLayoutController::CreatePipelineLayout(PipelineLa
         result->setLayoutMembers_[i] = desc.members_[i];
     }
 
-    pipelineLayouts_.push_back(result);
+    pipelineLayouts_.emplace(result);
 
-    return PipelineLayoutHandle{ result };
+    return result;
 }
 
-void DescriptorLayoutController::ReleasePipelineLayout(PipelineLayoutHandle handle)
+void DescriptorLayoutController::ReleasePipelineLayout(PipelineLayout* layout)
 {
-    auto layoutIt = std::find(pipelineLayouts_.begin(), pipelineLayouts_.end(), handle.layout_);
-    if (layoutIt == pipelineLayouts_.end()) {
-        assert(false && "Attempt to release invalid PipelineLayout.");
-    }
+    assert((pipelineLayouts_.find(layout) != pipelineLayouts_.end()) && "Attempt to release invalid PipelineLayout.");
 
-    PipelineLayout* layout = *layoutIt;
     table_->vkDestroyPipelineLayout(device_->Handle(), layout->handle_, nullptr);
 
     delete layout;
-    pipelineLayouts_.erase(layoutIt);
-}
-
-DescriptorSetLayout* DescriptorLayoutController::GetDescriptorSetLayout(DescriptorSetLayoutHandle handle)
-{
-    return handle.layout_;
-}
-
-PipelineLayout* DescriptorLayoutController::GetPipelineLayout(PipelineLayoutHandle handle)
-{
-    return handle.layout_;
+    pipelineLayouts_.erase(layout);
 }
 
 }

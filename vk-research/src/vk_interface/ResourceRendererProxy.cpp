@@ -105,18 +105,17 @@ ProxyImageHandle ResourceRendererProxy::RegisterSwapchainImageViews(Swapchain* s
     return ProxyImageHandle{ id };
 }
 
-ProxySetHandle ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout)
+ProxySetHandle ResourceRendererProxy::CreateSet(DescriptorSetLayout* layout)
 {
     // Here, based on the contents of the layout i should decide, 
     // wheather the descriptorset should be framed
-    
-    DescriptorSetLayout* layoutPtr = layoutController_->GetDescriptorSetLayout(layout);
-    std::uint32_t const layoutMembersCount = layoutPtr->membersCount_;
+
+    std::uint32_t const layoutMembersCount = layout->membersCount_;
 
     bool framedSet = false;
     for (auto i = 0u; i < layoutMembersCount; ++i) {
 
-        auto& layoutMember = layoutPtr->membersInfo_[i];
+        auto& layoutMember = layout->membersInfo_[i];
 
         switch (layoutMember.type_) {
         case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
@@ -188,7 +187,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
 
     DescriptorSetHandle firstFrameSetHandle = framedDescriptorsHub_->contexts_[0].descriptorSets_[setHandle.id_];
     DescriptorSet* firstFrameSet = descriptorSetsController_->GetDescriptorSet(firstFrameSetHandle);
-    DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(firstFrameSet->layout_);
+    DescriptorSetLayout* layout = firstFrameSet->layout_;
 
     auto const setMembersCount = layout->membersCount_;
 

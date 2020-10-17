@@ -98,7 +98,7 @@ public:
 
     ProxyImageHandle RegisterSwapchainImageViews(Swapchain* swapchain);
 
-    ProxySetHandle CreateSet(DescriptorSetLayoutHandle layout);
+    ProxySetHandle CreateSet(DescriptorSetLayout* layout);
     void WriteSet(ProxySetHandle handle, ProxyDescriptorWriteDesc* descriptions);
     DescriptorSetHandle GetDescriptorSetHandle(ProxySetHandle handle, std::uint32_t context);
     DescriptorSet* GetDescriptorSet(ProxySetHandle handle, std::uint32_t context);

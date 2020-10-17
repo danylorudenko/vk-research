@@ -3,7 +3,7 @@
 #include <class_features\NonCopyable.hpp>
 #include <vk_interface\pipeline\DescriptorLayout.hpp>
 
-#include <vector>
+#include <unordered_set>
 
 namespace VKW
 {
@@ -44,7 +44,7 @@ struct DescriptorSetLayoutDesc
 struct PipelineLayoutDesc
 {
     std::uint32_t membersCount_;
-    DescriptorSetLayoutHandle members_[PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
+    DescriptorSetLayout* members_[PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
 };
 
 struct DescriptorLayoutControllerDesc
@@ -65,21 +65,18 @@ public:
 
     ~DescriptorLayoutController();
 
-    DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutDesc const& desc);
-    void ReleaseDescriptorSetLayout(DescriptorSetLayoutHandle handle);
+    DescriptorSetLayout* CreateDescriptorSetLayout(DescriptorSetLayoutDesc const& desc);
+    void ReleaseDescriptorSetLayout(DescriptorSetLayout* handle);
 
-    PipelineLayoutHandle CreatePipelineLayout(PipelineLayoutDesc const& desc);
-    void ReleasePipelineLayout(PipelineLayoutHandle handle);
+    PipelineLayout* CreatePipelineLayout(PipelineLayoutDesc const& desc);
+    void ReleasePipelineLayout(PipelineLayout* handle);
 
-    DescriptorSetLayout* GetDescriptorSetLayout(DescriptorSetLayoutHandle handle);
-    PipelineLayout* GetPipelineLayout(PipelineLayoutHandle handle);
-    
 private:
     ImportTable* table_;
     Device* device_;
 
-    std::vector<DescriptorSetLayout*> setLayouts_;
-    std::vector<PipelineLayout*> pipelineLayouts_;
+    std::unordered_set<DescriptorSetLayout*> setLayouts_;
+    std::unordered_set<PipelineLayout*> pipelineLayouts_;
 };
 
 }

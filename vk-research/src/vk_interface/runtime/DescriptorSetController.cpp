@@ -105,8 +105,7 @@ DescriptorSetController::~DescriptorSetController()
 
 DescriptorSetHandle DescriptorSetController::AllocDescriptorSet(DescriptorSetDesc const& desc)
 {
-    DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(desc.layout_);
-    VkDescriptorSetLayout vkLayout = layout->handle_;
+    VkDescriptorSetLayout vkLayout = desc.layout_->handle_;
 
     VkDescriptorSetAllocateInfo allocInfo;
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
