@@ -104,7 +104,6 @@ Loader::Loader(LoaderDesc const& desc)
     VKW::ImagesProviderDesc imagesProviderDesc;
     imagesProviderDesc.table_ = table_.get();
     imagesProviderDesc.device_ = device_.get();
-    imagesProviderDesc.swapchain_ = swapchain_.get();
     imagesProviderDesc.resourcesController_ = resourcesController_.get();
 
     imagesProvider_ = std::make_unique<VKW::ImagesProvider>(imagesProviderDesc);

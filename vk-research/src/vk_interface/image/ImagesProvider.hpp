@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
-#include <utility>
+#include <unordered_set>
+
 #include <class_features\NonCopyable.hpp>
 
 #include <vk_interface\image\ImageView.hpp>
@@ -38,7 +38,6 @@ struct ImagesProviderDesc
     ImportTable* table_;
     Device* device_;
     Surface* surface_;
-    Swapchain* swapchain_;
     ResourcesController* resourcesController_;
 };
 
@@ -51,30 +50,22 @@ public:
     ImagesProvider(ImagesProvider&& rhs);
     ImagesProvider& operator=(ImagesProvider&& rhs);
 
-    ImageViewHandle RegisterSwapchainImageView(SwapchainImageViewDesc const& desc);
-    void AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs, ImageViewHandle* results);
-    void ReleaseImageViews(std::uint32_t count, ImageViewHandle* handles);
+    ImageView* RegisterSwapchainImageView(SwapchainImageViewDesc const& desc, Swapchain* swapchain);
+    void CreateViewsAndCreateImages(std::uint32_t count, ImageViewDesc const* descs, ImageView** results);
+    void ReleaseViewsAndImages(std::uint32_t count, ImageView** views);
 
     VkSampler DefaultSamplerHandle() const;
 
     ~ImagesProvider();
 
-
 private:
-    struct ImageViewContainer
-    {
-        ImageView* view_;
-    };
-
-private:
-    ImportTable* table_;
-    Device* device_;
-    Swapchain* swapchain_;
+    ImportTable*        table_;
+    Device*             device_;
     ResourcesController* resourcesController_;
 
     VkSampler defaultSampler_;
 
-    std::vector<ImageViewContainer> imageViewContainers_;
+    std::unordered_set<ImageView*> imageViews_;
 };
 
 }

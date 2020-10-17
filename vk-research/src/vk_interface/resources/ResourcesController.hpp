@@ -4,7 +4,7 @@
 #include <vk_interface\resources\Resource.hpp>
 
 #include <vulkan\vulkan.h>
-#include <set>
+#include <unordered_set>
 
 namespace VKW
 {
@@ -78,8 +78,8 @@ private:
 
     MemoryController* memoryController_;
 
-    std::set<BufferResource*> buffers_;
-    std::set<ImageResource*> images_;
+    std::unordered_set<BufferResource*> buffers_;
+    std::unordered_set<ImageResource*>  images_;
 
 
 };

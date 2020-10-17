@@ -22,8 +22,8 @@ struct Framebuffer
     std::uint32_t height_;
 
     std::uint32_t colorAttachmentsCount_;
-    ImageViewHandle colorAttachments_[RenderPass::MAX_COLOR_ATTACHMENTS];
-    ImageViewHandle depthStencilAttachment_;
+    ImageView* colorAttachments_[RenderPass::MAX_COLOR_ATTACHMENTS];
+    ImageView* depthStencilAttachment_;
 };
 
 struct FramebufferHandle

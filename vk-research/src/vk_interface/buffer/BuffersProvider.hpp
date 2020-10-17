@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <unordered_set>
 
 #include <class_features\NonCopyable.hpp>
 
@@ -42,8 +42,8 @@ public:
     BuffersProvider(BuffersProvider&& rhs);
     BuffersProvider& operator=(BuffersProvider&& rhs);
     
-    void AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferView** results);
-    void ReleaseViews(std::uint32_t buffersCount, BufferView** views);
+    void CreateViewsAndCreateBuffers(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferView** results);
+    void ReleaseViewsAndBuffers(std::uint32_t buffersCount, BufferView** views);
 
     ~BuffersProvider();
 
@@ -53,7 +53,7 @@ private:
     Device* device_;
     ResourcesController* resourcesController_;
 
-    std::vector<BufferView*> bufferViews_;
+    std::unordered_set<BufferView*> bufferViews_;
 };
 
 }

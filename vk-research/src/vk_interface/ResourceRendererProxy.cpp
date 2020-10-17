@@ -90,7 +90,7 @@ std::uint32_t ResourceRendererProxy::FramesCount() const
     return framedDescriptorsHub_->framesCount_;
 }
 
-ProxyImageHandle ResourceRendererProxy::RegisterSwapchainImageViews()
+ProxyImageHandle ResourceRendererProxy::RegisterSwapchainImageViews(Swapchain* swapchain)
 {
     std::uint32_t const id = framedDescriptorsHub_->imageViewsNextId_++;
     std::uint32_t const buffering = framedDescriptorsHub_->framesCount_;
@@ -98,8 +98,8 @@ ProxyImageHandle ResourceRendererProxy::RegisterSwapchainImageViews()
         SwapchainImageViewDesc imDesc;
         imDesc.index_ = i;
 
-        ImageViewHandle viewHandle = imagesProvider_->RegisterSwapchainImageView(imDesc);
-        framedDescriptorsHub_->contexts_[i].imageViews_.push_back(viewHandle);
+        ImageView* view = imagesProvider_->RegisterSwapchainImageView(imDesc, swapchain);
+        framedDescriptorsHub_->contexts_[i].imageViews_.push_back(view);
     }
 
     return ProxyImageHandle{ id };
@@ -220,7 +220,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
                 switch (wds.descriptorType) {
                 case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
                 {
-                    ImageView* imageView = descriptions[j].frames_[i].imageDesc_.imageViewHandle_.GetView();
+                    ImageView* imageView = descriptions[j].frames_[i].imageDesc_.imageView_;
                     VkSampler sampler = descriptions[j].frames_[0].imageDesc_.sampler_;
 
                     DecorateImageViewWriteDesc(wds, descriptorData[j], imageView->handle_, descriptions[j].frames_[i].imageDesc_.layout_);
@@ -229,7 +229,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
                 break;
                 case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
                 {
-                    ImageView* imageView = descriptions[j].frames_[i].imageDesc_.imageViewHandle_.GetView();
+                    ImageView* imageView = descriptions[j].frames_[i].imageDesc_.imageView_;
                     DecorateImageViewWriteDesc(wds, descriptorData[j], imageView->handle_, descriptions[j].frames_[i].imageDesc_.layout_);
                 }
                 break;
@@ -275,7 +275,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
             switch (wds.descriptorType) {
             case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
             {
-                ImageView* imageView = descriptions[i].frames_[0].imageDesc_.imageViewHandle_.GetView();
+                ImageView* imageView = descriptions[i].frames_[0].imageDesc_.imageView_;
                 VkSampler sampler = descriptions[i].frames_[0].imageDesc_.sampler_;
 
                 DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_, descriptions[i].frames_[0].imageDesc_.layout_);
@@ -284,7 +284,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
             break;
             case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
             {
-                ImageView* imageView = descriptions[i].frames_[0].imageDesc_.imageViewHandle_.GetView();
+                ImageView* imageView = descriptions[i].frames_[0].imageDesc_.imageView_;
                 DecorateImageViewWriteDesc(wds, descriptorData[i], imageView->handle_, descriptions[i].frames_[0].imageDesc_.layout_);
             }
             break;
@@ -373,7 +373,7 @@ ProxyBufferHandle ResourceRendererProxy::CreateBuffer(BufferViewDesc const& decs
         viewDescs[i] = decs;
     }
     
-    buffersProvider_->AcquireViews(resourceFrames, viewDescs, views);
+    buffersProvider_->CreateViewsAndCreateBuffers(resourceFrames, viewDescs, views);
 
     auto const proxyId = framedDescriptorsHub_->bufferViewsNextId_++;
     if (framedResource) {
@@ -400,7 +400,7 @@ BufferView* ResourceRendererProxy::GetBufferView(ProxyBufferHandle handle, std::
 ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
 {
     ImageViewDesc imageViewDescs[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
-    ImageViewHandle imageViewHandles[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
+    ImageView* imageViews[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
     
     bool framedResource = false;
     switch (desc.usage_) {
@@ -418,33 +418,28 @@ ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
         imageViewDescs[i] = desc;
     }
 
-    imagesProvider_->AcquireImageViews(requiredImagesCount, imageViewDescs, imageViewHandles);
+    imagesProvider_->CreateViewsAndCreateImages(requiredImagesCount, imageViewDescs, imageViews);
     
     auto const proxyId = framedDescriptorsHub_->imageViewsNextId_++;
     if (framedResource) {
         for (std::uint32_t i = 0u; i < framesCount; ++i) {
             assert(framedDescriptorsHub_->contexts_[i].imageViews_.size() == proxyId && "Unsyncronized write to FramedDescriptors::bufferViews_.");
-            framedDescriptorsHub_->contexts_[i].imageViews_.emplace_back(imageViewHandles[i]);
+            framedDescriptorsHub_->contexts_[i].imageViews_.emplace_back(imageViews[i]);
         }
     }
     else {
         for (std::uint32_t i = 0u; i < framesCount; ++i) {
             assert(framedDescriptorsHub_->contexts_[i].imageViews_.size() == proxyId && "Unsyncronized write to FramedDescriptors::bufferViews_.");
-            framedDescriptorsHub_->contexts_[i].imageViews_.emplace_back(imageViewHandles[0]);
+            framedDescriptorsHub_->contexts_[i].imageViews_.emplace_back(imageViews[0]);
         }
     }
     
     return ProxyImageHandle{ proxyId };
 }
 
-ImageViewHandle ResourceRendererProxy::GetImageViewHandle(ProxyImageHandle handle, std::uint32_t context)
-{
-    return framedDescriptorsHub_->contexts_[context].imageViews_[handle.id_];
-}
-
 ImageView* ResourceRendererProxy::GetImageView(ProxyImageHandle handle, std::uint32_t context)
 {
-    return framedDescriptorsHub_->contexts_[context].imageViews_[handle.id_].GetView();
+    return framedDescriptorsHub_->contexts_[context].imageViews_[handle.id_];
 }
 
 VkSampler ResourceRendererProxy::GetDefaultSampler()
@@ -464,24 +459,24 @@ ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebuffer
         auto& frameResources = framedDescriptorsHub_->contexts_[i];
         assert(frameResources.framebuffers_.size() == id && "Unsynchronized access to FramedDescriptors::framebuffers_");
         
-        ImageViewHandle colorAttachmentHandles[RenderPass::MAX_COLOR_ATTACHMENTS];
+        ImageView* colorAttachments[RenderPass::MAX_COLOR_ATTACHMENTS];
         for (auto j = 0u; j < renderPassColorAttachmentsCount; ++j) {
-            colorAttachmentHandles[j] = frameResources.imageViews_[desc.colorAttachments_[j].id_];
+            colorAttachments[j] = frameResources.imageViews_[desc.colorAttachments_[j].id_];
         }
 
-        ImageViewHandle* depthStancilAttachmentHandle = nullptr;
+        ImageView* depthStancilAttachment = nullptr;
         if (renderPass->depthStencilAttachmentInfo_.usage_ == RENDER_PASS_ATTACHMENT_USAGE_DEPTH_STENCIL) {
             ProxyImageHandle* depthStencilProxyHandle = desc.depthStencilAttachment_;
-            depthStancilAttachmentHandle = &frameResources.imageViews_[depthStencilProxyHandle->id_];
-            assert(depthStancilAttachmentHandle != nullptr && "ResourceRendererProxy::CreateFramebuffer: null depth stencil attachment handle!)");
+            depthStancilAttachment = frameResources.imageViews_[depthStencilProxyHandle->id_];
+            assert(depthStancilAttachment != nullptr && "ResourceRendererProxy::CreateFramebuffer: null depth stencil attachment handle!)");
         }
 
         FramebufferDesc vkFBDesc;
         vkFBDesc.renderPass_ = desc.renderPass_;
         vkFBDesc.width_ = desc.width_;
         vkFBDesc.height_ = desc.height_;
-        vkFBDesc.colorAttachments_ = colorAttachmentHandles;
-        vkFBDesc.depthStencilAttachment_ = depthStancilAttachmentHandle;
+        vkFBDesc.colorAttachments_ = colorAttachments;
+        vkFBDesc.depthStencilAttachment_ = depthStancilAttachment;
 
         FramebufferHandle framebufferHandle = framebufferController_->CreateFramebuffer(vkFBDesc);
 

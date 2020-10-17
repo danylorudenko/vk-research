@@ -50,8 +50,7 @@ GraphicsPass::GraphicsPass(GraphicsPassDesc const& desc)
     vkRenderPassDesc.colorAttachmentsCount_ = colorAttachmentCount;
     for (auto i = 0u; i < colorAttachmentCount; ++i) {
 
-        VKW::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.colorAttachments_[i].handle_.id_];
-        VKW::ImageView* imageView = imageViewHandle.GetView();
+        VKW::ImageView* imageView = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.colorAttachments_[i].handle_.id_];
         colorAttachmentDescs[i].format_ = imageView->format_;
         colorAttachmentDescs[i].usage_ = desc.colorAttachments_[i].usage_;
     }
@@ -59,8 +58,7 @@ GraphicsPass::GraphicsPass(GraphicsPassDesc const& desc)
     vkRenderPassDesc.colorAttachments_ = colorAttachmentDescs;
 
     if (desc.depthStencilAttachment_ != nullptr) {
-        VKW::ImageViewHandle imageViewHandle = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.depthStencilAttachment_->id_];
-        VKW::ImageView* imageView = imageViewHandle.GetView();
+        VKW::ImageView* imageView = desc.framedDescriptorsHub_->contexts_[0].imageViews_[desc.depthStencilAttachment_->id_];
         vkRenderPassDesc.depthStencilAttachment_ = &depthStencilAttachmentDesc;
         vkRenderPassDesc.depthStencilAttachment_->format_ = imageView->format_;
     }

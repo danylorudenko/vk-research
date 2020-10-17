@@ -181,16 +181,16 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     {
         // color input
         VKW::ProxyImageHandle colorBufferImageHandle = root_->FindGlobalImage(sceneColorBuffer_);
-        blurSetDesc[0].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(colorBufferImageHandle, i);
+        blurSetDesc[0].frames_[i].imageDesc_.imageView_ = resourceProxy_->GetImageView(colorBufferImageHandle, i);
         blurSetDesc[0].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
 
         // output
         VKW::ProxyImageHandle horizontalProxyImageHandle = root_->FindGlobalImage(blurBuffer_);
-        blurSetDesc[1].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(horizontalProxyImageHandle, i);
+        blurSetDesc[1].frames_[i].imageDesc_.imageView_ = resourceProxy_->GetImageView(horizontalProxyImageHandle, i);
         blurSetDesc[1].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
 
         VKW::ProxyImageHandle blurMaskProxyImageHandle = root_->FindGlobalImage(blurMaskTexture_);
-        blurSetDesc[2].frames_[i].imageDesc_.imageViewHandle_ = resourceProxy_->GetImageViewHandle(blurMaskProxyImageHandle, i);
+        blurSetDesc[2].frames_[i].imageDesc_.imageView_ = resourceProxy_->GetImageView(blurMaskProxyImageHandle, i);
         blurSetDesc[2].frames_[i].imageDesc_.layout_ = VK_IMAGE_LAYOUT_GENERAL;
 
         UniformBuffer& mixFactorUniformBuffer = root_->FindUniformBuffer(mixFactorUniformBuffer_);

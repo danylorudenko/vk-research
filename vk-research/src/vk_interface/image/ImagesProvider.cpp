@@ -15,7 +15,6 @@ namespace VKW
 ImagesProvider::ImagesProvider()
     : table_{ nullptr }
     , device_{ nullptr }
-    , swapchain_{ nullptr }
     , defaultSampler_{ VK_NULL_HANDLE }
     , resourcesController_{ nullptr }
 {
@@ -25,7 +24,6 @@ ImagesProvider::ImagesProvider()
 ImagesProvider::ImagesProvider(ImagesProviderDesc const& desc)
     : table_{ desc.table_ }
     , device_{ desc.device_ }
-    , swapchain_{ desc.swapchain_ }
     , defaultSampler_{ VK_NULL_HANDLE }
     , resourcesController_{ desc.resourcesController_ }
 {
@@ -56,7 +54,6 @@ ImagesProvider::ImagesProvider(ImagesProviderDesc const& desc)
 ImagesProvider::ImagesProvider(ImagesProvider&& rhs)
     : table_{ nullptr }
     , device_{ nullptr }
-    , swapchain_{ nullptr }
     , defaultSampler_{ VK_NULL_HANDLE }
     , resourcesController_{ nullptr }
 {
@@ -67,11 +64,10 @@ ImagesProvider& ImagesProvider::operator=(ImagesProvider&& rhs)
 {
     std::swap(table_, rhs.table_);
     std::swap(device_, rhs.device_);
-    std::swap(swapchain_, rhs.swapchain_);
     std::swap(defaultSampler_, rhs.defaultSampler_);
     std::swap(resourcesController_, rhs.resourcesController_);
 
-    std::swap(imageViewContainers_, rhs.imageViewContainers_);
+    std::swap(imageViews_, rhs.imageViews_);
 
     return *this;
 }
@@ -80,8 +76,7 @@ ImagesProvider::~ImagesProvider()
 {
     VkDevice const device = device_->Handle();
     
-    for (auto const& imageViewCont : imageViewContainers_) {
-        ImageView* imageView = imageViewCont.view_;
+    for (ImageView* imageView : imageViews_) {
         ImageResource* imageResource = imageView->resource_;
         table_->vkDestroyImageView(device, imageView->handle_, nullptr);
         delete imageView;
@@ -104,7 +99,7 @@ VkSampler ImagesProvider::DefaultSamplerHandle() const
     return defaultSampler_;
 }
 
-ImageViewHandle ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDesc const& desc)
+ImageView* ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDesc const& desc, Swapchain* swapchain)
 {
     VkImageView vkImageView = VK_NULL_HANDLE;
 
@@ -112,8 +107,8 @@ ImageViewHandle ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDes
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.pNext = nullptr;
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.image = swapchain_->Image(desc.index_).image_;
-    viewInfo.format = swapchain_->Format();
+    viewInfo.image = swapchain->Image(desc.index_).image_;
+    viewInfo.format = swapchain->Format();
     viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
     viewInfo.flags = VK_FLAGS_NONE;
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -124,14 +119,14 @@ ImageViewHandle ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDes
 
     VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkImageView));
 
-    ImageView* imageView = new ImageView{ vkImageView, swapchain_->Format(), VK_IMAGE_VIEW_TYPE_2D, viewInfo.subresourceRange, nullptr };
+    ImageView* imageView = new ImageView{ vkImageView, swapchain->Format(), VK_IMAGE_VIEW_TYPE_2D, viewInfo.subresourceRange, nullptr };
     
-    imageViewContainers_.emplace_back(ImageViewContainer{ imageView });
+    imageViews_.emplace(imageView);
     
-    return ImageViewHandle{ imageView };
+    return imageView;
 }
 
-void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs, ImageViewHandle* results)
+void ImagesProvider::CreateViewsAndCreateImages(std::uint32_t count, ImageViewDesc const* descs, ImageView** results)
 {
     for (std::uint32_t i = 0; i < count; ++i) {
         ImageDesc imageDesc;
@@ -184,35 +179,25 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
 
         ImageView* imageView = new ImageView{ vkView, viewInfo.format, viewInfo.viewType, viewInfo.subresourceRange, imageResource };
 
-        ImageViewContainer container;
-        container.view_ = imageView;
+        imageViews_.emplace(imageView);
 
-        imageViewContainers_.emplace_back(container);
-
-        results[i] = ImageViewHandle{ imageView };
+        results[i] = imageView;
     }
 }
 
-void ImagesProvider::ReleaseImageViews(std::uint32_t count, ImageViewHandle* handles)
+void ImagesProvider::ReleaseViewsAndImages(std::uint32_t count, ImageView** views)
 {
     for (std::uint32_t i = 0; i < count; ++i) {
-        auto imageViewContIt = std::find_if(
-            imageViewContainers_.begin(),
-            imageViewContainers_.end(),
-            [handles, i](ImageViewContainer const& container) {
-            return container.view_ == handles[i].GetView();
-        });
+        ImageView* imageView = views[i];
 
-        assert(imageViewContIt != imageViewContainers_.end() && "Can't release ImageView.");
+        auto result = imageViews_.erase(imageView);
+        assert(result > 0 && "Failed to release ImageView.");
 
-        ImageView* imageView = imageViewContIt->view_;
         table_->vkDestroyImageView(device_->Handle(), imageView->handle_, nullptr);
 
         resourcesController_->FreeImage(imageView->resource_);
         delete imageView;
-
-
-        imageViewContainers_.erase(imageViewContIt);
+        views[i] = nullptr;
     }
 }
 

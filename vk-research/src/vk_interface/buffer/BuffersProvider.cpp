@@ -1,7 +1,8 @@
 #include "BuffersProvider.hpp"
 
-#include <utility>
 #include <algorithm>
+#include <utility>
+#include <vector>
 
 #include <vk_interface\Device.hpp>
 #include <vk_interface\ImportTable.hpp>
@@ -45,7 +46,7 @@ BuffersProvider& BuffersProvider::operator=(BuffersProvider&& rhs)
     return *this;
 }
 
-void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferView** results)
+void BuffersProvider::CreateViewsAndCreateBuffers(std::uint32_t buffersCount, BufferViewDesc const* desc, BufferView** results)
 {
     std::uint32_t totalBufferSize = desc[0].size_;
     VkFormat const format = desc[0].format_;
@@ -85,19 +86,22 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
         }
         
         BufferView* resultView = new BufferView{ view, format, viewInfo.offset, viewInfo.range, bufferRes, referenceCounter };
-        bufferViews_.push_back(resultView);
+        bufferViews_.emplace(resultView);
         
         results[i] = resultView;
     }
 
 }
 
-void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferView** views)
+void BuffersProvider::ReleaseViewsAndBuffers(std::uint32_t buffersCount, BufferView** views)
 {
     VkDevice const device = device_->Handle();
 
     for (auto i = 0u; i < buffersCount; ++i) {
         BufferView* view = views[i];
+
+        auto result = bufferViews_.erase(view);
+        assert(result > 0 && "Failed to release BufferView");
 
         if (view->handle_ != VK_NULL_HANDLE) {
             table_->vkDestroyBufferView(device, view->handle_, nullptr);
@@ -116,7 +120,9 @@ void BuffersProvider::ReleaseViews(std::uint32_t buffersCount, BufferView** view
 
 BuffersProvider::~BuffersProvider()
 {
-    ReleaseViews(static_cast<std::uint32_t>(bufferViews_.size()), bufferViews_.data());
+    std::vector<BufferView*> viewsToRelease{ bufferViews_.begin(), bufferViews_.end() };
+
+    ReleaseViewsAndBuffers(static_cast<std::uint32_t>(viewsToRelease.size()), viewsToRelease.data());
 }
 
 }

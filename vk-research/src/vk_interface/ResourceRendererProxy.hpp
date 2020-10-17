@@ -13,6 +13,7 @@ namespace VKW
 
 class ImportTable;
 class Device;
+class Swapchain;
 class BuffersProvider;
 class ImagesProvider;
 class RenderPassController;
@@ -34,7 +35,7 @@ struct ProxyDescriptorWriteDesc
     {
         struct ImageDesc 
         {
-            ImageViewHandle imageViewHandle_;
+            ImageView* imageView_;
             VkSampler sampler_;
             VkImageLayout layout_;
         } 
@@ -95,7 +96,7 @@ public:
 
     std::uint32_t FramesCount() const;
 
-    ProxyImageHandle RegisterSwapchainImageViews();
+    ProxyImageHandle RegisterSwapchainImageViews(Swapchain* swapchain);
 
     ProxySetHandle CreateSet(DescriptorSetLayoutHandle layout);
     void WriteSet(ProxySetHandle handle, ProxyDescriptorWriteDesc* descriptions);
@@ -106,7 +107,6 @@ public:
     BufferView* GetBufferView(ProxyBufferHandle handle, std::uint32_t context);
 
     ProxyImageHandle CreateImage(ImageViewDesc const& desc);
-    ImageViewHandle GetImageViewHandle(ProxyImageHandle handle, std::uint32_t context);
     ImageView* GetImageView(ProxyImageHandle handle, std::uint32_t context);
 
     VkSampler GetDefaultSampler();

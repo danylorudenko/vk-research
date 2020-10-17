@@ -40,7 +40,7 @@ Root::Root(RootDesc const& desc)
     , mainWorkerTemp_{ desc.mainWorkerTemp_ }
     , nextUniformBufferId_{ 0u }
 {
-    VKW::ProxyImageHandle swapchainView = resourceProxy_->RegisterSwapchainImageViews();
+    VKW::ProxyImageHandle swapchainView = resourceProxy_->RegisterSwapchainImageViews(loader_->swapchain_.get());
     globalImages_[SWAPCHAIN_IMAGE_KEY] = swapchainView;
 
 
@@ -620,9 +620,7 @@ void Root::Decorate_VKWProxyDescriptorWriteDesc_Texture(VKW::ProxyDescriptorWrit
     for (std::uint32_t i = 0; i < framesCount; ++i) {
         VKW::ProxyDescriptorWriteDesc::FrameDesc::ImageDesc& imageDesc = writeDesc.frames_[i].imageDesc_;
 
-        VKW::ImageViewHandle imageViewHandle = resourceProxy_->GetImageViewHandle(proxyImageHandle, i);
-        
-        imageDesc.imageViewHandle_ = imageViewHandle;
+        imageDesc.imageView_ = resourceProxy_->GetImageView(proxyImageHandle, i);
         imageDesc.sampler_ = resourceProxy_->GetDefaultSampler();
         imageDesc.layout_ = VK_IMAGE_LAYOUT_GENERAL;
     }
