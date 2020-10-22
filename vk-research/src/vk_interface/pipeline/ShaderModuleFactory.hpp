@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <unordered_set>
 #include <vk_interface\pipeline\ShaderModule.hpp>
 
 class IOManager;
@@ -33,10 +33,8 @@ public:
     ShaderModuleFactory(ShaderModuleFactory&& rhs);
     ShaderModuleFactory& operator=(ShaderModuleFactory&& rhs);
 
-    ShaderModuleHandle LoadModule(ShaderModuleDesc const& desc);
-    void UnloadModule(ShaderModuleHandle module);
-
-    ShaderModule* AccessModule(ShaderModuleHandle handle) const;
+    ShaderModule* LoadModule(ShaderModuleDesc const& desc);
+    void UnloadModule(ShaderModule* module);
 
     ~ShaderModuleFactory();
 
@@ -45,7 +43,7 @@ private:
     Device* device_;
     IOManager* ioManager_;
 
-    std::vector<ShaderModule*> loadedModules_;
+    std::unordered_set<ShaderModule*> loadedModules_;
 };
 
 }

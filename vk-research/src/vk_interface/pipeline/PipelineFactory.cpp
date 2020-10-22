@@ -104,7 +104,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
     graphicsPipelineInfo.stageCount = desc.shaderStagesCount_;
     for (auto i = 0u; i < desc.shaderStagesCount_; ++i) {
-        ShaderModule* shModule = shaderModuleFactory_->AccessModule(desc.shaderStages_[i].shaderModuleHandle_);
+        ShaderModule* shModule = desc.shaderStages_[i].shaderModuleHandle_;
         
         auto& vkShStage = shaderStagesInfo[i];
         vkShStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -352,7 +352,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
 PipelineHandle PipelineFactory::CreateComputePipeline(ComputePipelineDesc const& desc)
 {
-    ShaderModule* shaderModule = shaderModuleFactory_->AccessModule(desc.shaderStage_.shaderModuleHandle_);
+    ShaderModule* shaderModule = desc.shaderStage_.shaderModuleHandle_;
     PipelineLayout* layout = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
 
     VkComputePipelineCreateInfo pipelineInfo;

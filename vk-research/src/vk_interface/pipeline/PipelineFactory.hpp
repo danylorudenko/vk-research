@@ -27,7 +27,7 @@ struct PipelineFactoryDesc
 
 struct ShaderStageInfo
 {
-    ShaderModuleHandle shaderModuleHandle_;
+    ShaderModule* shaderModuleHandle_;
 };
 
 struct VertexInputInfo

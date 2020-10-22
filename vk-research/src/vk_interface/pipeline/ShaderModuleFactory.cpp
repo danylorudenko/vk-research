@@ -53,7 +53,7 @@ ShaderModuleFactory::~ShaderModuleFactory()
     }
 }
 
-ShaderModuleHandle ShaderModuleFactory::LoadModule(ShaderModuleDesc const& desc)
+ShaderModule* ShaderModuleFactory::LoadModule(ShaderModuleDesc const& desc)
 {
     ByteBuffer buffer{ 8192 };
     auto dataSize = ioManager_->ReadFileToBuffer(desc.shaderPath_, buffer);
@@ -71,30 +71,20 @@ ShaderModuleHandle ShaderModuleFactory::LoadModule(ShaderModuleDesc const& desc)
     auto* resultModule = new ShaderModule{ vkModule };
     resultModule->entryPoint_ = DEFAULT_SHADER_ENTRY_POINT;
     resultModule->type_ = desc.type_;
-    loadedModules_.emplace_back(resultModule);
+    loadedModules_.emplace(resultModule);
 
-    return { resultModule };
+    return resultModule;
 }
 
-void ShaderModuleFactory::UnloadModule(ShaderModuleHandle module)
+void ShaderModuleFactory::UnloadModule(ShaderModule* module)
 {
-    auto deletedModule = module.handle_;
-    
-    std::size_t const modulesCount = loadedModules_.size();
-    for (auto i = 0u; i < modulesCount; ++i) {
-        auto localHandle = loadedModules_[i]->handle_;
-        if (localHandle == deletedModule->handle_) {
-            table_->vkDestroyShaderModule(device_->Handle(), localHandle, nullptr);
-            loadedModules_.erase(loadedModules_.begin() + i);
-            delete deletedModule;
-            return;
-        }
-    }
-}
+    auto moduleIt = loadedModules_.find(module);
+    assert(moduleIt != loadedModules_.end() && "Can't delete this shader module.");
 
-ShaderModule* ShaderModuleFactory::AccessModule(ShaderModuleHandle handle) const
-{
-    return handle.handle_;
+    table_->vkDestroyShaderModule(device_->Handle(), module->handle_, nullptr);
+    loadedModules_.erase(module);
+
+    delete module;
 }
 
 }
