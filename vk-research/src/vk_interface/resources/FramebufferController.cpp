@@ -99,7 +99,7 @@ FramebufferHandle FramebufferController::CreateFramebuffer(FramebufferDesc const
     fbInfo.layers = 1;
 
     VkFramebuffer vkFramebuffer = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkCreateFramebuffer(device_->Handle(), &fbInfo, nullptr, &vkFramebuffer));
+    ERR_GUARD_VK(table_->vkCreateFramebuffer(device_->Handle(), &fbInfo, nullptr, &vkFramebuffer));
 
     Framebuffer* framebuffer = new Framebuffer();
     framebuffer->handle_ = vkFramebuffer;

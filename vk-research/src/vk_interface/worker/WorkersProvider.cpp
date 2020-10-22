@@ -93,7 +93,7 @@ WorkersProvider& WorkersProvider::operator=(WorkersProvider&& rhs)
 
 WorkersProvider::~WorkersProvider()
 {
-    VK_ASSERT(table_->vkDeviceWaitIdle(device_->Handle()));
+    ERR_GUARD_VK(table_->vkDeviceWaitIdle(device_->Handle()));
 }
 
 Worker* WorkersProvider::GetWorker(WorkerType type, std::uint32_t index)

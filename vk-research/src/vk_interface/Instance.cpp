@@ -33,9 +33,9 @@ Instance::Instance(InstanceDesc const& desc)
 
 
     {
-        VK_ASSERT(table_->vkEnumerateInstanceLayerProperties(&layerPropertiesCount, nullptr));
+        ERR_GUARD_VK(table_->vkEnumerateInstanceLayerProperties(&layerPropertiesCount, nullptr));
         instanceLayerProperties.resize(layerPropertiesCount);
-        VK_ASSERT(table_->vkEnumerateInstanceLayerProperties(&layerPropertiesCount, instanceLayerProperties.data()));
+        ERR_GUARD_VK(table_->vkEnumerateInstanceLayerProperties(&layerPropertiesCount, instanceLayerProperties.data()));
 
         for (auto const& requiredLayer : desc.requiredInstanceLayers_) {
             auto const result = std::find_if(instanceLayerProperties.begin(), instanceLayerProperties.end(), [&requiredLayer](auto const& layer)
@@ -49,9 +49,9 @@ Instance::Instance(InstanceDesc const& desc)
 
 
     {
-        VK_ASSERT(table_->vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, nullptr));
+        ERR_GUARD_VK(table_->vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, nullptr));
         extensionProperties.resize(extensionPropertiesCount);
-        VK_ASSERT(table_->vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, extensionProperties.data()));
+        ERR_GUARD_VK(table_->vkEnumerateInstanceExtensionProperties(nullptr, &extensionPropertiesCount, extensionProperties.data()));
 
         for (auto const& requiredExtension : desc.requiredInstanceExtensions_) {
             auto const result = std::find_if(extensionProperties.begin(), extensionProperties.end(), [&requiredExtension](auto const& extensionProp)
@@ -98,7 +98,7 @@ Instance::Instance(InstanceDesc const& desc)
     instanceCreateInfo.enabledExtensionCount = static_cast<std::uint32_t>(enabledExtensions.size());
     instanceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
 
-    VK_ASSERT(table_->vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
+    ERR_GUARD_VK(table_->vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
 
     table_->GetInstanceProcAddresses(instance_);
 
@@ -116,7 +116,7 @@ Instance::Instance(InstanceDesc const& desc)
             VK_DEBUG_REPORT_DEBUG_BIT_EXT*/;
         debugCallbackCreateInfo.pUserData = nullptr;
 
-        VK_ASSERT(table_->vkCreateDebugReportCallbackEXT(instance_, &debugCallbackCreateInfo, nullptr, &debugCallback_));
+        ERR_GUARD_VK(table_->vkCreateDebugReportCallbackEXT(instance_, &debugCallbackCreateInfo, nullptr, &debugCallback_));
     }
 }
 

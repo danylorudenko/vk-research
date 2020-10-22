@@ -168,7 +168,7 @@ void* Root::MapUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     //VkDevice const vkDevice = loader_->device_->Handle();
     //
     //void* mappedRange = nullptr;
-    //VK_ASSERT(table->vkMapMemory(vkDevice, deviceMemory, offset, size, VK_FLAGS_NONE, &mappedRange));
+    //ERR_GUARD_VK(table->vkMapMemory(vkDevice, deviceMemory, offset, size, VK_FLAGS_NONE, &mappedRange));
     //assert(mappedRange != nullptr && "Can't map uniform buffer.");
     //
     //return mappedRange;
@@ -216,7 +216,7 @@ void Root::FlushUniformBuffer(UniformBufferHandle handle, std::uint32_t frame)
     range.memory = deviceMemory;
     range.size = VK_WHOLE_SIZE;
     range.offset = offset;
-    VK_ASSERT(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
+    ERR_GUARD_VK(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
 }
 
 void* Root::MapBuffer(ResourceKey const& key, std::uint32_t frame)
@@ -254,7 +254,7 @@ void Root::FlushBuffer(ResourceKey const& key, std::uint32_t frame)
     range.memory = deviceMemory;
     range.size = VK_WHOLE_SIZE;
     range.offset = offset;
-    VK_ASSERT(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
+    ERR_GUARD_VK(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
 }
 
 void* Root::MapImage(ResourceKey const& key, std::uint32_t frame)
@@ -292,7 +292,7 @@ void Root::FlushImage(ResourceKey const& key, std::uint32_t frame)
     range.memory = deviceMemory;
     range.size = VK_WHOLE_SIZE;
     range.offset = offset;
-    VK_ASSERT(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
+    ERR_GUARD_VK(table->vkFlushMappedMemoryRanges(vkDevice, 1, &range));
 }
 
 VKW::BufferResource* Root::GetViewResource(VKW::BufferView* view)
@@ -792,7 +792,7 @@ void Root::ImageLayoutTransition(std::uint32_t context, std::uint32_t imagesCoun
 
     mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
 
-    VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
+    ERR_GUARD_VK(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
 }
 
 void Root::CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context)
@@ -851,7 +851,7 @@ void Root::CopyStagingBufferToGPUBuffer(ResourceKey const& src, ResourceKey cons
 
     mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
 
-    VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
+    ERR_GUARD_VK(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
 }
 
 void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context)
@@ -921,7 +921,7 @@ void Root::CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey con
 
     mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
 
-    VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
+    ERR_GUARD_VK(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
 }
 
 void Root::BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context, VkImageLayout dstEndImageLayout, VkAccessFlags dstEndAccessFlags)
@@ -1031,7 +1031,7 @@ void Root::BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint3
 
     mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
 
-    VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
+    ERR_GUARD_VK(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
 }
 
 VKW::ResourceRendererProxy* Root::ResourceProxy() const

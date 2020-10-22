@@ -118,7 +118,7 @@ DescriptorSetLayout* DescriptorLayoutController::CreateDescriptorSetLayout(Descr
     setInfo.flags = VK_FLAGS_NONE;
 
     VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkCreateDescriptorSetLayout(device_->Handle(), &setInfo, nullptr, &setLayout));
+    ERR_GUARD_VK(table_->vkCreateDescriptorSetLayout(device_->Handle(), &setInfo, nullptr, &setLayout));
 
     DescriptorSetLayout* result = new DescriptorSetLayout{};
     result->handle_ = setLayout;
@@ -166,7 +166,7 @@ PipelineLayout* DescriptorLayoutController::CreatePipelineLayout(PipelineLayoutD
     cInfo.pSetLayouts = layouts;
 
     VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkCreatePipelineLayout(device_->Handle(), &cInfo, nullptr, &pipelineLayout));
+    ERR_GUARD_VK(table_->vkCreatePipelineLayout(device_->Handle(), &cInfo, nullptr, &pipelineLayout));
 
     auto* result = new PipelineLayout{};
     result->handle_ = pipelineLayout;

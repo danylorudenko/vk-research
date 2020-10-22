@@ -82,7 +82,7 @@ void BuffersProvider::CreateViewsAndCreateBuffers(std::uint32_t buffersCount, Bu
         viewInfo.range = desc[i].size_;
 
         if (format != VK_FORMAT_UNDEFINED) {
-            VK_ASSERT(table_->vkCreateBufferView(device, &viewInfo, nullptr, &view));
+            ERR_GUARD_VK(table_->vkCreateBufferView(device, &viewInfo, nullptr, &view));
         }
         
         BufferView* resultView = new BufferView{ view, format, viewInfo.offset, viewInfo.range, bufferRes, referenceCounter };

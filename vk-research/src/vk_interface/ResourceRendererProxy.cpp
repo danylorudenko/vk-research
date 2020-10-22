@@ -500,7 +500,7 @@ void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint3
     std::uint64_t const mappingOffset = resource->memoryRegion_.offset_ + view->offset_;
 
     void* result = nullptr;
-    VK_ASSERT(table_->vkMapMemory(device_->Handle(), memoryPage->deviceMemory_, mappingOffset, view->size_, VK_FLAGS_NONE, &result));
+    ERR_GUARD_VK(table_->vkMapMemory(device_->Handle(), memoryPage->deviceMemory_, mappingOffset, view->size_, VK_FLAGS_NONE, &result));
 
     return result;
 }
@@ -520,7 +520,7 @@ void ResourceRendererProxy::FlushBuffer(VKW::ProxyBufferHandle handle, std::uint
     range.offset = mappingOffset;
     range.size = VK_WHOLE_SIZE;
 
-    VK_ASSERT(table_->vkFlushMappedMemoryRanges(device_->Handle(), 1, &range));
+    ERR_GUARD_VK(table_->vkFlushMappedMemoryRanges(device_->Handle(), 1, &range));
 }
 
 }

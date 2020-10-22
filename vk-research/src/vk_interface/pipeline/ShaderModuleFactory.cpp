@@ -66,7 +66,7 @@ ShaderModule* ShaderModuleFactory::LoadModule(ShaderModuleDesc const& desc)
     info.flags = VK_FLAGS_NONE;
     info.codeSize = dataSize;
     info.pCode = buffer.As<std::uint32_t const*>();
-    VK_ASSERT(table_->vkCreateShaderModule(device_->Handle(), &info, nullptr, &vkModule));
+    ERR_GUARD_VK(table_->vkCreateShaderModule(device_->Handle(), &info, nullptr, &vkModule));
 
     auto* resultModule = new ShaderModule{ vkModule };
     resultModule->entryPoint_ = DEFAULT_SHADER_ENTRY_POINT;

@@ -29,7 +29,7 @@ WorkerFrame::WorkerFrame(WorkerFrameDesc const& desc)
     fenceInfo.pNext = nullptr;
     fenceInfo.flags = VK_FLAGS_NONE;
 
-    VK_ASSERT(table_->vkCreateFence(device_->Handle(), &fenceInfo, nullptr, &fence_));
+    ERR_GUARD_VK(table_->vkCreateFence(device_->Handle(), &fenceInfo, nullptr, &fence_));
 
 
     VkSemaphoreCreateInfo semaphoreInfo;
@@ -37,7 +37,7 @@ WorkerFrame::WorkerFrame(WorkerFrameDesc const& desc)
     semaphoreInfo.pNext = nullptr;
     semaphoreInfo.flags = VK_FLAGS_NONE;
     
-    VK_ASSERT(table_->vkCreateSemaphore(device_->Handle(), &semaphoreInfo, nullptr, &frameCompleteSemaphore_));
+    ERR_GUARD_VK(table_->vkCreateSemaphore(device_->Handle(), &semaphoreInfo, nullptr, &frameCompleteSemaphore_));
 }
 
 WorkerFrame::WorkerFrame(WorkerFrame&& rhs)
@@ -74,14 +74,14 @@ WorkerFrameCommandReciever WorkerFrame::Begin()
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     beginInfo.pInheritanceInfo = nullptr;
 
-    VK_ASSERT(table_->vkBeginCommandBuffer(commandBuffer_, &beginInfo));
+    ERR_GUARD_VK(table_->vkBeginCommandBuffer(commandBuffer_, &beginInfo));
 
     return WorkerFrameCommandReciever{ commandBuffer_ };
 }
 
 void WorkerFrame::End()
 {
-    VK_ASSERT(table_->vkEndCommandBuffer(commandBuffer_));
+    ERR_GUARD_VK(table_->vkEndCommandBuffer(commandBuffer_));
 }
 
 WorkerFrameCompleteSemaphore WorkerFrame::Execute(VkQueue queue, VkSemaphore waitSemaphore, bool signaling)
@@ -102,7 +102,7 @@ WorkerFrameCompleteSemaphore WorkerFrame::Execute(VkQueue queue, VkSemaphore wai
     ResetFence();
     inExecution_ = true;
 
-    VK_ASSERT(table_->vkQueueSubmit(queue, 1, &submitInfo, fence_));
+    ERR_GUARD_VK(table_->vkQueueSubmit(queue, 1, &submitInfo, fence_));
 
     return WorkerFrameCompleteSemaphore{ frameCompleteSemaphore_ };
 }
@@ -110,13 +110,13 @@ WorkerFrameCompleteSemaphore WorkerFrame::Execute(VkQueue queue, VkSemaphore wai
 void WorkerFrame::WaitForFence()
 {
     if (inExecution_) {
-        VK_ASSERT(table_->vkWaitForFences(device_->Handle(), 1, &fence_, false, std::numeric_limits<std::uint64_t>::max()));
+        ERR_GUARD_VK(table_->vkWaitForFences(device_->Handle(), 1, &fence_, false, std::numeric_limits<std::uint64_t>::max()));
     }
 }
 
 void WorkerFrame::ResetFence()
 {
-    VK_ASSERT(table_->vkResetFences(device_->Handle(), 1, &fence_));
+    ERR_GUARD_VK(table_->vkResetFences(device_->Handle(), 1, &fence_));
 }
 
 WorkerFrame::~WorkerFrame()

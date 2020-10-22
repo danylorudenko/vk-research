@@ -30,7 +30,7 @@ WorkerGroup::WorkerGroup(WorkerGroupDesc const& desc)
     commandPoolInfo.queueFamilyIndex = familyIndex_;
     commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-    VK_ASSERT(table_->vkCreateCommandPool(device_->Handle(), &commandPoolInfo, nullptr, &commandPool_));
+    ERR_GUARD_VK(table_->vkCreateCommandPool(device_->Handle(), &commandPoolInfo, nullptr, &commandPool_));
 
     for (auto i = 0u; i < desc.workersCount_; ++i) {
         WorkerDesc workerDesc;
@@ -92,7 +92,7 @@ void WorkerGroup::AllocCommandBuffers(std::uint32_t count, VkCommandBuffer* buff
     allocInfo.commandBufferCount = count;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
-    VK_ASSERT(table_->vkAllocateCommandBuffers(device_->Handle(), &allocInfo, buffers));
+    ERR_GUARD_VK(table_->vkAllocateCommandBuffers(device_->Handle(), &allocInfo, buffers));
 }
 
 void WorkerGroup::FreeCommandBuffers(std::uint32_t count, VkCommandBuffer* buffers)

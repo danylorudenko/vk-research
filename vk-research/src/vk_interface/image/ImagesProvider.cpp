@@ -47,7 +47,7 @@ ImagesProvider::ImagesProvider(ImagesProviderDesc const& desc)
     samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
     samplerInfo.unnormalizedCoordinates = VK_FALSE;
 
-    VK_ASSERT(table_->vkCreateSampler(device_->Handle(), &samplerInfo, nullptr, &defaultSampler_));
+    ERR_GUARD_VK(table_->vkCreateSampler(device_->Handle(), &samplerInfo, nullptr, &defaultSampler_));
  
 }
 
@@ -117,7 +117,7 @@ ImageView* ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDesc con
     viewInfo.subresourceRange.layerCount = 1;
     viewInfo.subresourceRange.levelCount = 1;
 
-    VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkImageView));
+    ERR_GUARD_VK(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkImageView));
 
     ImageView* imageView = new ImageView{ vkImageView, swapchain->Format(), VK_IMAGE_VIEW_TYPE_2D, viewInfo.subresourceRange, nullptr };
     
@@ -175,7 +175,7 @@ void ImagesProvider::CreateViewsAndCreateImages(std::uint32_t count, ImageViewDe
         VkImageView vkView = VK_NULL_HANDLE;
 
         if (descs[i].usage_ != ImageUsage::UPLOAD_IMAGE)
-            VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkView));
+            ERR_GUARD_VK(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkView));
 
         ImageView* imageView = new ImageView{ vkView, viewInfo.format, viewInfo.viewType, viewInfo.subresourceRange, imageResource };
 

@@ -163,7 +163,7 @@ RenderPassHandle RenderPassController::AssembleRenderPass(RenderPassDesc const& 
     rpInfo.pSubpasses = &spInfo;
     
     VkRenderPass renderPass = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkCreateRenderPass(device_->Handle(), &rpInfo, nullptr, &renderPass));
+    ERR_GUARD_VK(table_->vkCreateRenderPass(device_->Handle(), &rpInfo, nullptr, &renderPass));
 
     renderPasses_.emplace_back(renderPass, desc.colorAttachmentsCount_, colorAttachmentsInfo, depthStencilAttachmentInfo);
 

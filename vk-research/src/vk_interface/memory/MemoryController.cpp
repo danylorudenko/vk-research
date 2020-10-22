@@ -366,13 +366,13 @@ MemoryPage* MemoryController::AllocPage(MemoryClass memoryClass, std::uint64_t s
     info.memoryTypeIndex = typeIndex;
 
     VkDeviceMemory deviceMemory = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkAllocateMemory(device_->Handle(), &info, nullptr, &deviceMemory));
+    ERR_GUARD_VK(table_->vkAllocateMemory(device_->Handle(), &info, nullptr, &deviceMemory));
 
     VkMemoryPropertyFlags memoryFlags = device_->Properties().memoryProperties2.memoryProperties.memoryTypes[typeIndex].propertyFlags;
 
     void* mappedMemory = nullptr;
     if (memoryFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-        VK_ASSERT(table_->vkMapMemory(device_->Handle(), deviceMemory, 0, VK_WHOLE_SIZE, VK_FLAGS_NONE, &mappedMemory));
+        ERR_GUARD_VK(table_->vkMapMemory(device_->Handle(), deviceMemory, 0, VK_WHOLE_SIZE, VK_FLAGS_NONE, &mappedMemory));
     }
 
     MemoryPage* memory = new MemoryPage{};

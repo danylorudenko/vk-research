@@ -339,7 +339,7 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
     
 
     VkPipeline vkPipeline = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkCreateGraphicsPipelines(device_->Handle(), VK_NULL_HANDLE, 1, &graphicsPipelineInfo, nullptr, &vkPipeline));
+    ERR_GUARD_VK(table_->vkCreateGraphicsPipelines(device_->Handle(), VK_NULL_HANDLE, 1, &graphicsPipelineInfo, nullptr, &vkPipeline));
 
     auto* result = new Pipeline{};
     result->vkPipeline_ = vkPipeline;
@@ -371,7 +371,7 @@ PipelineHandle PipelineFactory::CreateComputePipeline(ComputePipelineDesc const&
     pipelineInfo.basePipelineIndex = -1;
 
     VkPipeline pipeline = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkCreateComputePipelines(device_->Handle(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline));
+    ERR_GUARD_VK(table_->vkCreateComputePipelines(device_->Handle(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline));
 
 
     Pipeline* result = new Pipeline{};

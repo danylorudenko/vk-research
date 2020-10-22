@@ -40,7 +40,7 @@ PresentationController::PresentationController(PresentationControllerDesc const&
     std::uint32_t const semaphoresCount = swapchainImagesCount * 2;
     for (auto i = 0u; i < semaphoresCount; ++i) {
         VkSemaphore semaphore = VK_NULL_HANDLE;
-        VK_ASSERT(table_->vkCreateSemaphore(device, &sInfo, nullptr, &semaphore));
+        ERR_GUARD_VK(table_->vkCreateSemaphore(device, &sInfo, nullptr, &semaphore));
         semaphoresQueue_.emplace_back(semaphore);
     }
 
@@ -85,7 +85,7 @@ PresentationContext PresentationController::AcquireNewPresentationContext()
 
     std::uint32_t imageIndex = 0;
 
-    VK_ASSERT(table_->vkAcquireNextImageKHR(
+    ERR_GUARD_VK(table_->vkAcquireNextImageKHR(
         device_->Handle(), 
         swapchain_->Handle(), 
         std::numeric_limits<std::uint64_t>::max() / 2, // https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#vkAcquireNextImageKHR: timeout must not be UINT64_MAX
@@ -117,7 +117,7 @@ void PresentationController::PresentContextId(std::uint32_t contextId, WorkerFra
     pInfo.pImageIndices = &imageIndex;
     pInfo.pResults = &results;
 
-    VK_ASSERT(table_->vkQueuePresentKHR(presentQueue, &pInfo));
+    ERR_GUARD_VK(table_->vkQueuePresentKHR(presentQueue, &pInfo));
 
 }
 

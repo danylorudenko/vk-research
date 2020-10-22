@@ -27,9 +27,9 @@ Device::Device(DeviceDesc const& desc)
     std::uint32_t physicalDeviceCount = 0;
     std::vector<VkPhysicalDevice> physicalDevices;
     {
-        VK_ASSERT(table_->vkEnumeratePhysicalDevices(desc.instance_->Handle(), &physicalDeviceCount, nullptr));
+        ERR_GUARD_VK(table_->vkEnumeratePhysicalDevices(desc.instance_->Handle(), &physicalDeviceCount, nullptr));
         physicalDevices.resize(physicalDeviceCount);
-        VK_ASSERT(table_->vkEnumeratePhysicalDevices(desc.instance_->Handle(), &physicalDeviceCount, physicalDevices.data()));
+        ERR_GUARD_VK(table_->vkEnumeratePhysicalDevices(desc.instance_->Handle(), &physicalDeviceCount, physicalDevices.data()));
     }
     
 
@@ -190,7 +190,7 @@ Device::Device(DeviceDesc const& desc)
         createInfo.enabledExtensionCount = static_cast<std::uint32_t>(requiredExtensionsC_str.size());
         createInfo.ppEnabledExtensionNames = requiredExtensionsC_str.data();
 
-        VK_ASSERT(table_->vkCreateDevice(physicalDevice_, &createInfo, nullptr, &device_));
+        ERR_GUARD_VK(table_->vkCreateDevice(physicalDevice_, &createInfo, nullptr, &device_));
 
         for (auto const arr : queuePrioritiesVec) {
             delete[] arr;
@@ -286,7 +286,7 @@ VKW::DeviceQueueFamilyInfo const& Device::GetQueueFamily(std::uint32_t index) co
 Device::~Device()
 {
     if (device_) {
-        VK_ASSERT(table_->vkDeviceWaitIdle(device_));
+        ERR_GUARD_VK(table_->vkDeviceWaitIdle(device_));
         table_->vkDestroyDevice(device_, nullptr);
         device_ = VK_NULL_HANDLE;
     }
@@ -373,9 +373,9 @@ void Device::RequestDeviceProperties(
 #endif
 
     auto extensionPropsCount = 0u;
-    VK_ASSERT(table_->vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, nullptr));
+    ERR_GUARD_VK(table_->vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, nullptr));
     deviceProperties.extensionProperties.resize(extensionPropsCount);
-    VK_ASSERT(table_->vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, deviceProperties.extensionProperties.data()));
+    ERR_GUARD_VK(table_->vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, deviceProperties.extensionProperties.data()));
 }
 
 bool Device::IsAPI11SupportedByPhysicalDevice(VkPhysicalDeviceProperties const& physicalDeviceProperties)

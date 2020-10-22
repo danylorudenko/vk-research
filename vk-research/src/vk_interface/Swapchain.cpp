@@ -60,7 +60,7 @@ Swapchain::Swapchain(SwapchainDesc const& desc)
     swapchainInfo.preTransform = surface_->SurfaceCapabilities().currentTransform;
     swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
     
-    VK_ASSERT(table_->vkCreateSwapchainKHR(device, &swapchainInfo, nullptr, &swapchain_));
+    ERR_GUARD_VK(table_->vkCreateSwapchainKHR(device, &swapchainInfo, nullptr, &swapchain_));
 
     swapchainFormat_ = validSurfaceFormat;
     width_ = surface_->SurfaceCapabilities().currentExtent.width;
@@ -70,10 +70,10 @@ Swapchain::Swapchain(SwapchainDesc const& desc)
     std::vector<VkImage> swapchainImages;
     std::uint32_t swapchainImagesCount = 0;
 
-    VK_ASSERT(table_->vkGetSwapchainImagesKHR(device, swapchain_, &swapchainImagesCount, nullptr));
+    ERR_GUARD_VK(table_->vkGetSwapchainImagesKHR(device, swapchain_, &swapchainImagesCount, nullptr));
     swapchainImages.resize(swapchainImagesCount);
     swapchainImageCount_ = swapchainImagesCount;
-    VK_ASSERT(table_->vkGetSwapchainImagesKHR(device, swapchain_, &swapchainImagesCount, swapchainImages.data()));
+    ERR_GUARD_VK(table_->vkGetSwapchainImagesKHR(device, swapchain_, &swapchainImagesCount, swapchainImages.data()));
 
     for (auto i = 0u; i < swapchainImagesCount; ++i) {
         

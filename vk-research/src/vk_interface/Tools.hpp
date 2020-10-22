@@ -5,7 +5,7 @@
 
 #define VK_FLAGS_NONE 0
 
-#define VK_ASSERT(result)                           \
+#define ERR_GUARD_VK(result)                           \
 {                                                   \
     VkResult r = result;                            \
     if (r != VK_SUCCESS) {                     \

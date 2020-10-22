@@ -32,7 +32,7 @@ Surface::Surface(SurfaceDesc const& desc)
     sInfo.hinstance = desc.hInstance_;
     sInfo.hwnd = desc.hwnd_;
     
-    VK_ASSERT(table_->vkCreateWin32SurfaceKHR(instance_->Handle(), &sInfo, nullptr, &surface));
+    ERR_GUARD_VK(table_->vkCreateWin32SurfaceKHR(instance_->Handle(), &sInfo, nullptr, &surface));
     surface_ = surface;
 #endif
 
@@ -40,22 +40,22 @@ Surface::Surface(SurfaceDesc const& desc)
         VkPhysicalDevice const phDevice = device_->PhysicalDeviceHandle();
 
         {
-            VK_ASSERT(table_->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(phDevice, surface_, &surfaceCapabilities_));
+            ERR_GUARD_VK(table_->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(phDevice, surface_, &surfaceCapabilities_));
         }
 
         {
             std::uint32_t modesCount = 0;
-            VK_ASSERT(table_->vkGetPhysicalDeviceSurfacePresentModesKHR(phDevice, surface_, &modesCount, nullptr));
+            ERR_GUARD_VK(table_->vkGetPhysicalDeviceSurfacePresentModesKHR(phDevice, surface_, &modesCount, nullptr));
             presentModes_.resize(modesCount);
-            VK_ASSERT(table_->vkGetPhysicalDeviceSurfacePresentModesKHR(phDevice, surface_, &modesCount, presentModes_.data()));
+            ERR_GUARD_VK(table_->vkGetPhysicalDeviceSurfacePresentModesKHR(phDevice, surface_, &modesCount, presentModes_.data()));
 
         }
 
         {
             std::uint32_t formatsCount = 0;
-            VK_ASSERT(table_->vkGetPhysicalDeviceSurfaceFormatsKHR(phDevice, surface_, &formatsCount, nullptr));
+            ERR_GUARD_VK(table_->vkGetPhysicalDeviceSurfaceFormatsKHR(phDevice, surface_, &formatsCount, nullptr));
             surfaceFormats_.resize(formatsCount);
-            VK_ASSERT(table_->vkGetPhysicalDeviceSurfaceFormatsKHR(phDevice, surface_, &formatsCount, surfaceFormats_.data()));
+            ERR_GUARD_VK(table_->vkGetPhysicalDeviceSurfaceFormatsKHR(phDevice, surface_, &formatsCount, surfaceFormats_.data()));
         }
 
         {
@@ -66,7 +66,7 @@ Surface::Surface(SurfaceDesc const& desc)
                 auto const familyIndex = device_->GetQueueFamily(i).familyIndex_;
 
                 VkBool32 familySupported = VK_FALSE;
-                VK_ASSERT(table_->vkGetPhysicalDeviceSurfaceSupportKHR(phDevice, familyIndex, surface_, &familySupported));
+                ERR_GUARD_VK(table_->vkGetPhysicalDeviceSurfaceSupportKHR(phDevice, familyIndex, surface_, &familySupported));
                 
                 if (familySupported == VK_TRUE) {
                     supportedQueueFamilies_.push_back(familyIndex);

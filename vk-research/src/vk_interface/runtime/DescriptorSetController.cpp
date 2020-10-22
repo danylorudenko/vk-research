@@ -64,7 +64,7 @@ DescriptorSetController::DescriptorSetController(DescriptorSetControllerDesc con
     poolInfo.poolSizeCount = sizeof(poolSizes) / sizeof(VkDescriptorPoolSize);
     poolInfo.pPoolSizes = poolSizes;
 
-    VK_ASSERT(table_->vkCreateDescriptorPool(device_->Handle(), &poolInfo, nullptr, &pool_));
+    ERR_GUARD_VK(table_->vkCreateDescriptorPool(device_->Handle(), &poolInfo, nullptr, &pool_));
 }
 
 DescriptorSetController::DescriptorSetController(DescriptorSetController&& rhs)
@@ -115,7 +115,7 @@ DescriptorSetHandle DescriptorSetController::AllocDescriptorSet(DescriptorSetDes
     allocInfo.pSetLayouts = &vkLayout;
     
     VkDescriptorSet vkSet = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkAllocateDescriptorSets(device_->Handle(), &allocInfo, &vkSet));
+    ERR_GUARD_VK(table_->vkAllocateDescriptorSets(device_->Handle(), &allocInfo, &vkSet));
 
     auto* result = new DescriptorSet{};
     result->handle_ = vkSet;
@@ -131,7 +131,7 @@ void DescriptorSetController::ReleaseDescriptorSet(DescriptorSetHandle handle)
     DescriptorSet* set = handle.handle_;
     VkDescriptorSet vkSet = set->handle_;
 
-    VK_ASSERT(table_->vkFreeDescriptorSets(device_->Handle(), pool_, 1, &vkSet));
+    ERR_GUARD_VK(table_->vkFreeDescriptorSets(device_->Handle(), pool_, 1, &vkSet));
 
     delete set;
 }

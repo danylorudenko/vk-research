@@ -95,7 +95,7 @@ BufferResource* ResourcesController::CreateBuffer(BufferDesc const& desc)
 
 
     VkBuffer vkBuffer = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkCreateBuffer(device_->Handle(), &vkBufferCreateInfo, nullptr, &vkBuffer));
+    ERR_GUARD_VK(table_->vkCreateBuffer(device_->Handle(), &vkBufferCreateInfo, nullptr, &vkBuffer));
 
     VkMemoryRequirements memoryRequirements;
     table_->vkGetBufferMemoryRequirements(device_->Handle(), vkBuffer, &memoryRequirements);
@@ -106,7 +106,7 @@ BufferResource* ResourcesController::CreateBuffer(BufferDesc const& desc)
     assert(IsPowerOf2(regionDesc.alignment_) && "Alignemnt is not power of 2!");
 
     MemoryPageRegion memoryRegion = memoryController_->AllocateMemoryRegion(regionDesc);
-    VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));
+    ERR_GUARD_VK(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));
 
     BufferResource* resource = new BufferResource{ vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion };
     buffers_.emplace(resource);
@@ -173,7 +173,7 @@ ImageResource* ResourcesController::CreateImage(ImageDesc const& desc)
 
 
     VkImage vkImage = VK_NULL_HANDLE;
-    VK_ASSERT(table_->vkCreateImage(device_->Handle(), &info, nullptr, &vkImage));
+    ERR_GUARD_VK(table_->vkCreateImage(device_->Handle(), &info, nullptr, &vkImage));
 
     VkMemoryRequirements memoryRequirements;
     table_->vkGetImageMemoryRequirements(device_->Handle(), vkImage, &memoryRequirements);
@@ -183,7 +183,7 @@ ImageResource* ResourcesController::CreateImage(ImageDesc const& desc)
     memoryDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
 
     MemoryPageRegion memoryRegion = memoryController_->AllocateMemoryRegion(memoryDesc);
-    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));
+    ERR_GUARD_VK(table_->vkBindImageMemory(device_->Handle(), vkImage, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));
 
     ImageResource* imageResource = new ImageResource{ vkImage, desc.format_, desc.width_, desc.height_, memoryRegion };
     images_.emplace(imageResource);
