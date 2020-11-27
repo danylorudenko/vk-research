@@ -379,73 +379,83 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 
     // background pipeline, shaders, materials, renderworkitem
-    Render::ShaderDesc backgroundVertexShaderDesc;
-    backgroundVertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
-    backgroundVertexShaderDesc.relativePath_ = "shader-src\\background.vert.spv";
+    Render::ShaderDesc planeVertexShaderDesc;
+    planeVertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
+    planeVertexShaderDesc.relativePath_ = "shader-src\\plane.vert.spv";
 
-    Render::ShaderDesc backgroundFragmentShaderDesc;
-    backgroundFragmentShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
-    backgroundFragmentShaderDesc.relativePath_ = "shader-src\\background.frag.spv";
+    Render::ShaderDesc planeFragmentShaderDesc;
+    planeFragmentShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
+    planeFragmentShaderDesc.relativePath_ = "shader-src\\plane.frag.spv";
 
-    renderRoot_->DefineShader("bvShader", backgroundVertexShaderDesc);
-    renderRoot_->DefineShader("bfShader", backgroundFragmentShaderDesc);
-
-
-
-    Render::GraphicsPipelineDesc pipelineBackroundDesc;
-
-    pipelineBackroundDesc.renderPass_ = passKey;
-    pipelineBackroundDesc.shaderStagesCount_ = 2;
-    pipelineBackroundDesc.shaderStages_[0] = "bvShader";
-    pipelineBackroundDesc.shaderStages_[1] = "bfShader";
+    renderRoot_->DefineShader("bvShader", planeVertexShaderDesc);
+    renderRoot_->DefineShader("bfShader", planeFragmentShaderDesc);
 
 
-    VKW::DescriptorSetLayoutDesc backgroundSetLayoutDesc;
-    backgroundSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
-    backgroundSetLayoutDesc.membersCount_ = 1;
-    backgroundSetLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
-    backgroundSetLayoutDesc.membersDesc_[0].binding_ = 0;
-    renderRoot_->DefineSetLayout(backgroundSetLayoutKey, backgroundSetLayoutDesc);
 
-    struct BackgroundVertex
+    Render::GraphicsPipelineDesc pipelinePlaneDesc;
+
+    pipelinePlaneDesc.renderPass_ = passKey;
+    pipelinePlaneDesc.shaderStagesCount_ = 2;
+    pipelinePlaneDesc.shaderStages_[0] = "bvShader";
+    pipelinePlaneDesc.shaderStages_[1] = "bfShader";
+
+
+    VKW::DescriptorSetLayoutDesc planeSetLayoutDesc;
+    planeSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
+    planeSetLayoutDesc.membersCount_ = 1;
+    planeSetLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
+    planeSetLayoutDesc.membersDesc_[0].binding_ = 0;
+    renderRoot_->DefineSetLayout(backgroundSetLayoutKey, planeSetLayoutDesc);
+
+    struct PlaneVertex
     {
-        float x;
-        float y;
-        float u;
-        float v;
+        float pos[3];
+        float norm[3];
+        float tan[3];
+        float bitan[3];
+        float uv[2];
     };
 
-    VKW::VertexInputInfo backgroundVInfo;
-    backgroundVInfo.binding_ = 0;
-    backgroundVInfo.stride_ = sizeof(BackgroundVertex);
-    backgroundVInfo.vertexAttributesCount_ = 2;
-    backgroundVInfo.vertexAttributes_[0].location_ = 0;
-    backgroundVInfo.vertexAttributes_[0].offset_ = 0;
-    backgroundVInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32_SFLOAT;
-    backgroundVInfo.vertexAttributes_[1].location_ = 1;
-    backgroundVInfo.vertexAttributes_[1].offset_ = offsetof(BackgroundVertex, u);
-    backgroundVInfo.vertexAttributes_[1].format_ = VK_FORMAT_R32G32_SFLOAT;
+    VKW::VertexInputInfo planeVertexInfo;
+    planeVertexInfo.binding_ = 0;
+    planeVertexInfo.stride_ = sizeof(PlaneVertex);
+    planeVertexInfo.vertexAttributesCount_ = 5;
+    planeVertexInfo.vertexAttributes_[0].location_ = 0;
+    planeVertexInfo.vertexAttributes_[0].offset_ = 0;
+    planeVertexInfo.vertexAttributes_[0].format_ = VK_FORMAT_R32G32B32_SFLOAT;
+    planeVertexInfo.vertexAttributes_[1].location_ = 1;
+    planeVertexInfo.vertexAttributes_[1].offset_ = offsetof(PlaneVertex, norm);
+    planeVertexInfo.vertexAttributes_[1].format_ = VK_FORMAT_R32G32B32_SFLOAT;
+    planeVertexInfo.vertexAttributes_[2].location_ = 2;
+    planeVertexInfo.vertexAttributes_[2].offset_ = offsetof(PlaneVertex, tan);
+    planeVertexInfo.vertexAttributes_[2].format_ = VK_FORMAT_R32G32B32_SFLOAT;
+    planeVertexInfo.vertexAttributes_[3].location_ = 3;
+    planeVertexInfo.vertexAttributes_[3].offset_ = offsetof(PlaneVertex, bitan);
+    planeVertexInfo.vertexAttributes_[3].format_ = VK_FORMAT_R32G32B32_SFLOAT;
+    planeVertexInfo.vertexAttributes_[4].location_ = 4;
+    planeVertexInfo.vertexAttributes_[4].offset_ = offsetof(PlaneVertex, uv);
+    planeVertexInfo.vertexAttributes_[4].format_ = VK_FORMAT_R32G32_SFLOAT;
 
     Render::PipelineLayoutDesc backgroundLayoutDesc;
     backgroundLayoutDesc.staticMembersCount_ = 0;
     backgroundLayoutDesc.instancedMembersCount_ = 1;
     backgroundLayoutDesc.instancedMembers_[0] = backgroundSetLayoutKey;
 
-    pipelineBackroundDesc.inputAssemblyInfo_ = &iaInfo;
-    pipelineBackroundDesc.vertexInputInfo_ = &backgroundVInfo;
-    pipelineBackroundDesc.viewportInfo_ = &vpInfo;
-    pipelineBackroundDesc.depthStencilInfo_ = &dsInfo;
-    pipelineBackroundDesc.layoutDesc_ = &backgroundLayoutDesc;
-    pipelineBackroundDesc.dynamicStateFlags_ = VK_FLAGS_NONE;
-    pipelineBackroundDesc.blendingState_ = VKW::PIPELINE_BLENDING_NONE;
+    pipelinePlaneDesc.inputAssemblyInfo_ = &iaInfo;
+    pipelinePlaneDesc.vertexInputInfo_ = &planeVertexInfo;
+    pipelinePlaneDesc.viewportInfo_ = &vpInfo;
+    pipelinePlaneDesc.depthStencilInfo_ = &dsInfo;
+    pipelinePlaneDesc.layoutDesc_ = &backgroundLayoutDesc;
+    pipelinePlaneDesc.dynamicStateFlags_ = VK_FLAGS_NONE;
+    pipelinePlaneDesc.blendingState_ = VKW::PIPELINE_BLENDING_NONE;
 
-    renderRoot_->DefineGraphicsPipeline(backgroundPipeKey, pipelineBackroundDesc);
+    renderRoot_->DefineGraphicsPipeline(backgroundPipeKey, pipelinePlaneDesc);
 
-    Render::MaterialTemplateDesc backgroundMaterialTemplateDesc;
-    backgroundMaterialTemplateDesc.perPassDataCount_ = 1;
-    backgroundMaterialTemplateDesc.perPassData_[0].passKey_ = passKey;
-    backgroundMaterialTemplateDesc.perPassData_[0].pipelineKey_ = backgroundPipeKey;
-    renderRoot_->DefineMaterialTemplate(backgroundMaterialTemplateKey, backgroundMaterialTemplateDesc);
+    Render::MaterialTemplateDesc planeMaterialTemplateDesc;
+    planeMaterialTemplateDesc.perPassDataCount_ = 1;
+    planeMaterialTemplateDesc.perPassData_[0].passKey_ = passKey;
+    planeMaterialTemplateDesc.perPassData_[0].pipelineKey_ = backgroundPipeKey;
+    renderRoot_->DefineMaterialTemplate(backgroundMaterialTemplateKey, planeMaterialTemplateDesc);
 
     Render::MaterialDesc backgroundMaterialDesc;
     backgroundMaterialDesc.templateKey_ = backgroundMaterialTemplateKey;
@@ -453,51 +463,54 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     
 
-    char const* backgroundVertexBufferName = "bcgvtx";
-    std::uint32_t constexpr BACKGOUND_VERTICES_COUNT = 6;
-    VKW::BufferViewDesc backgroundVertexBufferDesc;
-    backgroundVertexBufferDesc.format_ = VK_FORMAT_UNDEFINED;
-    backgroundVertexBufferDesc.size_ = sizeof(BackgroundVertex) * BACKGOUND_VERTICES_COUNT;
-    backgroundVertexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX;
-    renderRoot_->DefineGlobalBuffer(backgroundVertexBufferName, backgroundVertexBufferDesc);
+    char const* planeVertexBufferName = "plnvtx";
+    std::uint32_t constexpr PLANE_VERTICES_COUNT = 6;
+    VKW::BufferViewDesc planeVertexBufferDesc;
+    planeVertexBufferDesc.format_ = VK_FORMAT_UNDEFINED;
+    planeVertexBufferDesc.size_ = sizeof(PlaneVertex) * PLANE_VERTICES_COUNT;
+    planeVertexBufferDesc.usage_ = VKW::BufferUsage::VERTEX_INDEX;
+    renderRoot_->DefineGlobalBuffer(planeVertexBufferName, planeVertexBufferDesc);
 
-    BackgroundVertex backgroundVerticesData[BACKGOUND_VERTICES_COUNT];
-    backgroundVerticesData[0].x = -1.0f;
-    backgroundVerticesData[0].y = -1.0f;
-    backgroundVerticesData[0].u = 0.0f;
-    backgroundVerticesData[0].v = 0.0f;
+    PlaneVertex backgroundVerticesData[PLANE_VERTICES_COUNT];
+    backgroundVerticesData[0].pos[0] = -1.0f;
+    backgroundVerticesData[0].pos[1] = -1.0f;
+    backgroundVerticesData[0].pos[2] = 0.0f;
+    backgroundVerticesData[0].uv[0]  = 0.0f;
+    backgroundVerticesData[0].uv[1]  = 0.0f;
 
-    backgroundVerticesData[1].x = 1.0f;
-    backgroundVerticesData[1].y = 1.0f;
-    backgroundVerticesData[1].u = 1.0f;
-    backgroundVerticesData[1].v = 1.0f;
+    backgroundVerticesData[1].pos[0] = 1.0f;
+    backgroundVerticesData[1].pos[1] = 1.0f;
+    backgroundVerticesData[1].pos[2] = 0.0f;
+    backgroundVerticesData[1].uv[0]  = 1.0f;
+    backgroundVerticesData[1].uv[1]  = 1.0f;
 
-    backgroundVerticesData[2].x = -1.0f;
-    backgroundVerticesData[2].y = 1.0f;
-    backgroundVerticesData[2].u = 0.0f;
-    backgroundVerticesData[2].v = 1.0f;
+    backgroundVerticesData[2].pos[0] = -1.0f;
+    backgroundVerticesData[2].pos[1] = 1.0f;
+    backgroundVerticesData[2].pos[2] = 0.0f;
+    backgroundVerticesData[2].uv[0]  = 0.0f;
+    backgroundVerticesData[2].uv[1]  = 1.0f;
 
 
+    backgroundVerticesData[3].pos[0] = -1.0f;
+    backgroundVerticesData[3].pos[1] = -1.0f;
+    backgroundVerticesData[3].pos[2] =  0.0f;
+    backgroundVerticesData[3].uv[0] = 0.0f;
+    backgroundVerticesData[3].uv[1] = 0.0f;
 
+    backgroundVerticesData[5].pos[0] = 1.0f;
+    backgroundVerticesData[5].pos[1] = 1.0f;
+    backgroundVerticesData[5].pos[2] = 0.0f;
+    backgroundVerticesData[5].uv[0] = 1.0f;
+    backgroundVerticesData[5].uv[1] = 1.0f;
 
-    backgroundVerticesData[3].x = -1.0f;
-    backgroundVerticesData[3].y = -1.0f;
-    backgroundVerticesData[3].u = 0.0f;
-    backgroundVerticesData[3].v = 0.0f;
+    backgroundVerticesData[4].pos[0] = 1.0f;
+    backgroundVerticesData[4].pos[1] = -1.0f;
+    backgroundVerticesData[4].uv[0] = 1.0f;
+    backgroundVerticesData[4].uv[1] = 0.0f;
 
-    backgroundVerticesData[5].x = 1.0f;
-    backgroundVerticesData[5].y = 1.0f;
-    backgroundVerticesData[5].u = 1.0f;
-    backgroundVerticesData[5].v = 1.0f;
-
-    backgroundVerticesData[4].x = 1.0f;
-    backgroundVerticesData[4].y = -1.0f;
-    backgroundVerticesData[4].u = 1.0f;
-    backgroundVerticesData[4].v = 0.0f;
-
-    std::memcpy(mappedUploadBuffer, backgroundVerticesData, sizeof(BackgroundVertex) * BACKGOUND_VERTICES_COUNT);
+    std::memcpy(mappedUploadBuffer, backgroundVerticesData, sizeof(PlaneVertex) * PLANE_VERTICES_COUNT);
     renderRoot_->FlushBuffer(uploadBufferKey, 0);
-    renderRoot_->CopyStagingBufferToGPUBuffer(uploadBufferKey, backgroundVertexBufferName, 0);
+    renderRoot_->CopyStagingBufferToGPUBuffer(uploadBufferKey, planeVertexBufferName, 0);
 
     char const* backgroundTextureName = "bckground_texture";
     Data::Texture2D backgroundTextureData = ioManager_.ReadTexture2D("textures\\background.jpg", Data::TextureChannelVariations::TEXTURE_VARIATION_RGBA);
@@ -518,9 +531,9 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->ImageLayoutTransition(0, 1, &backgroundImageResource->handle_, &backgroundImageLayout);
 
     Render::RenderWorkItemDesc backgroundItemDesc;
-    backgroundItemDesc.vertexBufferKey_ = backgroundVertexBufferName;
+    backgroundItemDesc.vertexBufferKey_ = planeVertexBufferName;
     backgroundItemDesc.indexBufferKey_ = "";
-    backgroundItemDesc.vertexCount_ = BACKGOUND_VERTICES_COUNT;
+    backgroundItemDesc.vertexCount_ = PLANE_VERTICES_COUNT;
     backgroundItemDesc.vertexBindOffset_ = 0;
     backgroundItemDesc.indexCount_ = 0;
     backgroundItemDesc.indexBindOffset_ = 0;
