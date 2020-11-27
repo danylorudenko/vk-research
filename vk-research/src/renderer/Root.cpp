@@ -405,6 +405,14 @@ void Root::DefineCustomBlurPass(PassKey const& key, ResourceKey const& sceneColo
     renderPassMap_[key] = std::make_unique<CustomTempBlurPass>(desc);
 }
 
+//void Root::DefineCustomFogPass(PassKey const& key)
+//{
+//    CustomTempFogPassDesc desc;
+//    desc.root_ = this;
+//
+//    renderPassMap_[key] = std::make_unique<CustomTempFogPass>(desc);
+//}
+
 void Root::DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc)
 {
     GraphicsPassDesc passDesc;

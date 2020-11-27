@@ -42,7 +42,7 @@ public:
 
     ~MemoryController();
 
-    void ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
+    void AllocateMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut);
     void ReleaseMemoryRegion(MemoryRegion& region);
 
     MemoryPage* GetPage(MemoryPageHandle handle);

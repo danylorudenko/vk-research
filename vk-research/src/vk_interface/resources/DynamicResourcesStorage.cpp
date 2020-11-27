@@ -91,7 +91,7 @@ DynamicResourceStorage::StorageHandle DynamicResourceStorage::AllocateStorage(st
     memoryDesc.memoryClass_ = MemoryClass::CpuUniform;
     
     MemoryRegion memory{ {}, 0, 0 };
-    memoryController_->ProvideMemoryRegion(memoryDesc, memory);
+    memoryController_->AllocateMemoryRegion(memoryDesc, memory);
     auto const* page = memoryController_->GetPage(memory.pageHandle_);
 
     VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), buffer, page->deviceMemory_, memory.offset_));

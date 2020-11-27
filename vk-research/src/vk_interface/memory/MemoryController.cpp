@@ -93,7 +93,8 @@ std::uint32_t MemoryController::FindBestMemoryType(std::uint32_t mandatoryFlags,
         if((type.propertyFlags & mandatoryFlags) != mandatoryFlags)
             continue;
 
-        std::int32_t currentRating = static_cast<std::int32_t>(ToolCountBitsSet(preferableFlags & type.propertyFlags) - ToolCountBitsSet(nonPreferableFlags & type.propertyFlags));
+        std::int32_t currentRating = static_cast<std::int32_t>(ToolCountBitsSet(preferableFlags & type.propertyFlags) 
+            - ToolCountBitsSet(nonPreferableFlags & type.propertyFlags));
         if (currentRating > prevRating)
         {
             prevRating = currentRating;
@@ -262,7 +263,7 @@ MemoryPage* MemoryController::GetPage(MemoryPageHandle handle)
     return handle.page_;
 }
 
-void MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
+void MemoryController::AllocateMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
 {
     std::uint32_t constexpr INVALID_ALLOCATION = std::numeric_limits<std::uint32_t>::max();
 

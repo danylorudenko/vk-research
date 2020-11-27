@@ -107,7 +107,7 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
 
 
     MemoryRegion memoryRegion;
-    memoryController_->ProvideMemoryRegion(regionDesc, memoryRegion);
+    memoryController_->AllocateMemoryRegion(regionDesc, memoryRegion);
 
     MemoryPage const* page = memoryController_->GetPage(memoryRegion.pageHandle_);
     VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, page->deviceMemory_, memoryRegion.offset_));
@@ -121,22 +121,22 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
 ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
 {
     VkImageCreateInfo info;
-    info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    info.pNext = nullptr;
-    info.format = desc.format_;
-    info.imageType = VK_IMAGE_TYPE_2D;
-    info.extent.width = desc.width_;
-    info.extent.height = desc.height_;
-    info.extent.depth = 1;
-    info.arrayLayers = 1;
-    info.mipLevels = 1;
-    info.tiling = VK_IMAGE_TILING_OPTIMAL;
-    info.samples = VK_SAMPLE_COUNT_1_BIT;
-    info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    info.queueFamilyIndexCount = 0;
-    info.pQueueFamilyIndices = nullptr;
-    info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    info.flags = VK_FLAGS_NONE;
+    info.sType                  = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    info.pNext                  = nullptr;
+    info.format                 = desc.format_;
+    info.imageType              = VK_IMAGE_TYPE_2D;
+    info.extent.width           = desc.width_;
+    info.extent.height          = desc.height_;
+    info.extent.depth           = 1;
+    info.arrayLayers            = 1;
+    info.mipLevels              = 1;
+    info.tiling                 = VK_IMAGE_TILING_OPTIMAL;
+    info.samples                = VK_SAMPLE_COUNT_1_BIT;
+    info.sharingMode            = VK_SHARING_MODE_EXCLUSIVE;
+    info.queueFamilyIndexCount  = 0;
+    info.pQueueFamilyIndices    = nullptr;
+    info.initialLayout          = VK_IMAGE_LAYOUT_UNDEFINED;
+    info.flags                  = VK_FLAGS_NONE;
 
     MemoryPageRegionDesc memoryDesc;
 
@@ -149,12 +149,17 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
         
     case ImageUsage::STORAGE_IMAGE:
     case ImageUsage::STORAGE_IMAGE_READONLY:
-        info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+        info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | 
+            VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+
         memoryDesc.memoryClass_ = MemoryClass::DeviceFast;
         break;
 
     case ImageUsage::RENDER_TARGET:
-        info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+        info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | 
+            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | 
+            VK_IMAGE_USAGE_STORAGE_BIT;
+
         memoryDesc.memoryClass_ = MemoryClass::DeviceFast;
         break;
 
@@ -187,10 +192,11 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     memoryDesc.memoryTypeBits_ = memoryRequirements.memoryTypeBits;
 
     MemoryRegion memoryRegion;
-    memoryController_->ProvideMemoryRegion(memoryDesc, memoryRegion);
+    memoryController_->AllocateMemoryRegion(memoryDesc, memoryRegion);
 
     MemoryPage const* page = memoryController_->GetPage(memoryRegion.pageHandle_);
-    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, page->deviceMemory_, memoryRegion.offset_));
+    VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, page->deviceMemory_, 
+        memoryRegion.offset_));
 
     ImageResource* imageResource = new ImageResource{ vkImage, desc.format_, desc.width_, desc.height_, memoryRegion };
     images_.emplace_back(imageResource);

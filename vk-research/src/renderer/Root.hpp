@@ -228,6 +228,7 @@ public:
 
     void DefineRenderPass(PassKey const& key, RootGraphicsPassDesc const& desc);
     void DefineCustomBlurPass(PassKey const& key, ResourceKey const& sceneColorBuffer, IOManager* ioManager);
+    //void DefineCustomFogPass(PassKey const& key);
     BasePass& FindPass(PassKey const& key);
 
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);

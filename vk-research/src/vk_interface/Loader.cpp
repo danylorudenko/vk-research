@@ -26,7 +26,7 @@ Loader::Loader(LoaderDesc const& desc)
 
     auto instanceLayers = std::vector<std::string>{};
     if (desc.debug_) {
-        instanceLayers.emplace_back("VK_LAYER_LUNARG_standard_validation");
+        instanceLayers.emplace_back("VK_LAYER_KHRONOS_validation");
     }
 
 
