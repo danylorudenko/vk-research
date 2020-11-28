@@ -1,6 +1,8 @@
 #pragma once
 
 extern float IMGUI_USER_BLUR_SCALE;
+extern float IMGUI_USER_PLANE_POS[3];
+extern float IMGUI_USER_PLANE_ROT[3];
 
 enum IMGUI_USER_BLUR_TYPE
 {

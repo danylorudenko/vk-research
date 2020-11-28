@@ -21,8 +21,10 @@
 
 struct CustomData
 {
-    Render::UniformBufferWriterProxy uniformProxies[25];
-    Transform::TransformComponent* transformComponents_[25];
+    static constexpr std::uint32_t DRAGONS_COUNT = 9;
+
+    Render::UniformBufferWriterProxy uniformProxies[DRAGONS_COUNT + 1];
+    Transform::TransformComponent* transformComponents_[DRAGONS_COUNT + 1];
 };
 
 class VulkanApplicationDelegate

@@ -21,7 +21,7 @@ int main()
     delete application;
     delete appDelegate;
 
-    system("pause");
+    //system("pause");
 
     return 0;
 }

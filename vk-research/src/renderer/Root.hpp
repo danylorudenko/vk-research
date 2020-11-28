@@ -261,6 +261,8 @@ public:
     void CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
     void BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context, VkImageLayout dstEndLayout, VkAccessFlags dstEndAccessFlags);
 
+    void CreateImageFromFile(IOManager& ioManager, ResourceKey const& uploadBuffer, ResourceKey const& imageKey, std::string const& sourceFile, VkFormat format, VkImageLayout targetLayout, VKW::ImageUsage usage);
+
 
     VKW::ResourceRendererProxy* ResourceProxy() const;
 

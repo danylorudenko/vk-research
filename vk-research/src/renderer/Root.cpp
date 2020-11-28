@@ -1,5 +1,7 @@
 #include "Root.hpp"
 
+#include <io\IOManager.hpp>
+
 #include <vk_interface\buffer\ProvidedBuffer.hpp>
 #include <vk_interface\ResourceRendererProxy.hpp>
 #include <vk_interface\worker\Worker.hpp>
@@ -1052,6 +1054,27 @@ void Root::BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint3
     mainWorkerTemp_->ExecuteFrame(context, VK_NULL_HANDLE, false);
 
     VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
+}
+
+void Root::CreateImageFromFile(IOManager& ioManager, ResourceKey const& uploadBuffer, ResourceKey const& imageKey, std::string const& sourceFile, VkFormat format, VkImageLayout targetLayout, VKW::ImageUsage usage)
+{
+    void* mappedUploadBuffer = MapBuffer(uploadBuffer, 0);
+
+    Data::Texture2D textureData = ioManager.ReadTexture2D(sourceFile.c_str(), Data::TextureChannelVariations::TEXTURE_VARIATION_RGBA);
+    std::memcpy(mappedUploadBuffer, textureData.textureData_.data(), textureData.textureData_.size());
+
+    VKW::ImageViewDesc textureDesc;
+    textureDesc.format_ = format;
+    textureDesc.width_ = textureData.width_;
+    textureDesc.height_ = textureData.height_;
+    textureDesc.usage_ = VKW::ImageUsage::TEXTURE;
+    DefineGlobalImage(imageKey, textureDesc);
+
+    CopyStagingBufferToGPUTexture(uploadBuffer, imageKey, 0);
+    VKW::ImageView* imageView = FindGlobalImage(imageKey, 0);
+    VKW::ImageResource* imageResource = resourceProxy_->GetResource(imageView->resource_);
+    VkImageLayout imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    ImageLayoutTransition(0, 1, &imageResource->handle_, &imageLayout);
 }
 
 VKW::ResourceRendererProxy* Root::ResourceProxy() const

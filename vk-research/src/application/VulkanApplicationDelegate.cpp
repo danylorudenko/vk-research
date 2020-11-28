@@ -129,15 +129,20 @@ void VulkanApplicationDelegate::update()
 
     testcounter += 0.01f;
 
-    for (std::uint32_t x = 0; x < 5; ++x) {
-        for (std::uint32_t y = 0; y < 5; ++y) {
-            customData_.transformComponents_[x * 5 + y]->scale_ = glm::vec3(5.0f);
-            customData_.transformComponents_[x * 5 + y]->position_ = glm::vec3(-2.0f + x, -1.8f + y, -3.1f);
-            customData_.transformComponents_[x * 5 + y]->orientation_.z = glm::degrees(3.14f);
-            customData_.transformComponents_[x * 5 + y]->orientation_.y = glm::degrees(testcounter * 1.1f);
+    for (std::uint32_t x = 0; x < 3; ++x) {
+        for (std::uint32_t y = 0; y < 3; ++y) {
+            customData_.transformComponents_[x * 3 + y]->scale_ = glm::vec3(5.0f);
+            customData_.transformComponents_[x * 3 + y]->position_ = glm::vec3(-1.0f + x, -0.9f + y, -1.55f);
+            customData_.transformComponents_[x * 3 + y]->orientation_.z = glm::degrees(3.14f);
+            customData_.transformComponents_[x * 3 + y]->orientation_.y = glm::degrees(testcounter * 1.1f);
         }
     }
     
+    // plane transform
+    customData_.transformComponents_[CustomData::DRAGONS_COUNT]->scale_ = glm::vec3(0.5f);
+    customData_.transformComponents_[CustomData::DRAGONS_COUNT]->position_ = glm::vec3(IMGUI_USER_PLANE_POS[0], IMGUI_USER_PLANE_POS[1], IMGUI_USER_PLANE_POS[2]);
+    customData_.transformComponents_[CustomData::DRAGONS_COUNT]->orientation_ = glm::vec3(IMGUI_USER_PLANE_ROT[0], IMGUI_USER_PLANE_ROT[1], IMGUI_USER_PLANE_ROT[2]);
+
 
     //
     ////////////////////////////////////////////////////
@@ -179,13 +184,13 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     char constexpr indexBufferKey[] = "ind0";
     char constexpr passKey[] = "pass0";
     char constexpr dragonPipeKey[] = "pipe0";
-    char constexpr backgroundPipeKey[] = "pipe1";
+    char constexpr planePipeKey[] = "pipe1";
     char constexpr setLayoutKey[] = "set0";
-    char constexpr backgroundSetLayoutKey[] = "set1";
+    char constexpr planeSetLayoutKey[] = "set1";
     char constexpr materialTemplateKey[] = "templ0";
     char constexpr backgroundMaterialTemplateKey[] = "templ1";
     char constexpr materialKey[] = "mat0";
-    char constexpr backgroundMaterialKey[] = "mat1";
+    char constexpr planeMaterialKey[] = "mat1";
     char constexpr depthBufferKey[] = "dpth0";
 
     char constexpr blurPass[] = "blur";
@@ -357,8 +362,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 64;
 
-
-    for (std::uint32_t i = 0; i < 25; ++i) {
+    for (std::uint32_t i = 0; i < CustomData::DRAGONS_COUNT; ++i) {
         Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(dragonPipeKey, itemDesc);
 
         Render::RenderWorkItem* item = renderRoot_->FindRenderWorkItem(dragonPipeKey, renderItemHandle);
@@ -402,10 +406,12 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     VKW::DescriptorSetLayoutDesc planeSetLayoutDesc;
     planeSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
-    planeSetLayoutDesc.membersCount_ = 1;
+    planeSetLayoutDesc.membersCount_ = 2;
     planeSetLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
     planeSetLayoutDesc.membersDesc_[0].binding_ = 0;
-    renderRoot_->DefineSetLayout(backgroundSetLayoutKey, planeSetLayoutDesc);
+    planeSetLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
+    planeSetLayoutDesc.membersDesc_[1].binding_ = 1;
+    renderRoot_->DefineSetLayout(planeSetLayoutKey, planeSetLayoutDesc);
 
     struct PlaneVertex
     {
@@ -438,8 +444,9 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     Render::PipelineLayoutDesc backgroundLayoutDesc;
     backgroundLayoutDesc.staticMembersCount_ = 0;
-    backgroundLayoutDesc.instancedMembersCount_ = 1;
-    backgroundLayoutDesc.instancedMembers_[0] = backgroundSetLayoutKey;
+    backgroundLayoutDesc.instancedMembersCount_ = 2;
+    backgroundLayoutDesc.instancedMembers_[0] = planeSetLayoutKey;
+    backgroundLayoutDesc.instancedMembers_[1] = setLayoutKey;
 
     pipelinePlaneDesc.inputAssemblyInfo_ = &iaInfo;
     pipelinePlaneDesc.vertexInputInfo_ = &planeVertexInfo;
@@ -449,17 +456,17 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     pipelinePlaneDesc.dynamicStateFlags_ = VK_FLAGS_NONE;
     pipelinePlaneDesc.blendingState_ = VKW::PIPELINE_BLENDING_NONE;
 
-    renderRoot_->DefineGraphicsPipeline(backgroundPipeKey, pipelinePlaneDesc);
+    renderRoot_->DefineGraphicsPipeline(planePipeKey, pipelinePlaneDesc);
 
     Render::MaterialTemplateDesc planeMaterialTemplateDesc;
     planeMaterialTemplateDesc.perPassDataCount_ = 1;
     planeMaterialTemplateDesc.perPassData_[0].passKey_ = passKey;
-    planeMaterialTemplateDesc.perPassData_[0].pipelineKey_ = backgroundPipeKey;
+    planeMaterialTemplateDesc.perPassData_[0].pipelineKey_ = planePipeKey;
     renderRoot_->DefineMaterialTemplate(backgroundMaterialTemplateKey, planeMaterialTemplateDesc);
 
     Render::MaterialDesc backgroundMaterialDesc;
     backgroundMaterialDesc.templateKey_ = backgroundMaterialTemplateKey;
-    renderRoot_->DefineMaterial(backgroundMaterialKey, backgroundMaterialDesc);
+    renderRoot_->DefineMaterial(planeMaterialKey, backgroundMaterialDesc);
 
     
 
@@ -503,8 +510,9 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     backgroundVerticesData[5].uv[0] = 1.0f;
     backgroundVerticesData[5].uv[1] = 1.0f;
 
-    backgroundVerticesData[4].pos[0] = 1.0f;
+    backgroundVerticesData[4].pos[0] =  1.0f;
     backgroundVerticesData[4].pos[1] = -1.0f;
+    backgroundVerticesData[4].pos[2] =  0.0f;
     backgroundVerticesData[4].uv[0] = 1.0f;
     backgroundVerticesData[4].uv[1] = 0.0f;
 
@@ -512,36 +520,31 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->FlushBuffer(uploadBufferKey, 0);
     renderRoot_->CopyStagingBufferToGPUBuffer(uploadBufferKey, planeVertexBufferName, 0);
 
-    char const* backgroundTextureName = "bckground_texture";
-    Data::Texture2D backgroundTextureData = ioManager_.ReadTexture2D("textures\\background.jpg", Data::TextureChannelVariations::TEXTURE_VARIATION_RGBA);
-    std::memcpy(mappedUploadBuffer, backgroundTextureData.textureData_.data(), backgroundTextureData.textureData_.size());
+    char const* planeTextureName = "bckground_texture";
+    renderRoot_->CreateImageFromFile(ioManager_, uploadBufferKey, planeTextureName, "LFS\\Brick-2428.jpg", VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_GENERAL, VKW::ImageUsage::TEXTURE);
 
+    char const* bumpTextureName = "bump_texture";
+    renderRoot_->CreateImageFromFile(ioManager_, uploadBufferKey, bumpTextureName, "LFS\\Brick-2428-bump-map.jpg", VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_GENERAL, VKW::ImageUsage::TEXTURE);
 
-    VKW::ImageViewDesc backgroundTextureDesc;
-    backgroundTextureDesc.format_ = VK_FORMAT_R8G8B8A8_UNORM;
-    backgroundTextureDesc.width_ = backgroundTextureData.width_;
-    backgroundTextureDesc.height_ = backgroundTextureData.height_;
-    backgroundTextureDesc.usage_ = VKW::ImageUsage::TEXTURE;
-    renderRoot_->DefineGlobalImage(backgroundTextureName, backgroundTextureDesc);
+    Render::RenderWorkItemDesc planeItemDesc;
+    planeItemDesc.vertexBufferKey_ = planeVertexBufferName;
+    planeItemDesc.indexBufferKey_ = "";
+    planeItemDesc.vertexCount_ = PLANE_VERTICES_COUNT;
+    planeItemDesc.vertexBindOffset_ = 0;
+    planeItemDesc.indexCount_ = 0;
+    planeItemDesc.indexBindOffset_ = 0;
 
-    renderRoot_->CopyStagingBufferToGPUTexture(uploadBufferKey, backgroundTextureName, 0);
-    VKW::ImageView* backgroundImageView = renderRoot_->FindGlobalImage(backgroundTextureName, 0);
-    VKW::ImageResource* backgroundImageResource = renderRoot_->ResourceProxy()->GetResource(backgroundImageView->resource_);
-    VkImageLayout backgroundImageLayout = VK_IMAGE_LAYOUT_GENERAL;
-    renderRoot_->ImageLayoutTransition(0, 1, &backgroundImageResource->handle_, &backgroundImageLayout);
+    planeItemDesc.setOwnerDescs_[0].members_[0].texture2D_.imageKey_ = planeTextureName;
+    planeItemDesc.setOwnerDescs_[0].members_[1].texture2D_.imageKey_ = bumpTextureName;
+    planeItemDesc.setOwnerDescs_[1].members_[0].uniformBuffer_.size_ = 64;
 
-    Render::RenderWorkItemDesc backgroundItemDesc;
-    backgroundItemDesc.vertexBufferKey_ = planeVertexBufferName;
-    backgroundItemDesc.indexBufferKey_ = "";
-    backgroundItemDesc.vertexCount_ = PLANE_VERTICES_COUNT;
-    backgroundItemDesc.vertexBindOffset_ = 0;
-    backgroundItemDesc.indexCount_ = 0;
-    backgroundItemDesc.indexBindOffset_ = 0;
+    renderRoot_->RegisterMaterial(planeMaterialKey);
 
-    backgroundItemDesc.setOwnerDescs_[0].members_[0].texture2D_.imageKey_ = backgroundTextureName;
+    Render::RenderWorkItemHandle planeRenderItemHandle = renderRoot_->ConstructRenderWorkItem(planePipeKey, planeItemDesc);
+    Render::RenderWorkItem* item = renderRoot_->FindRenderWorkItem(planePipeKey, planeRenderItemHandle);
+    customData_.uniformProxies[CustomData::DRAGONS_COUNT] = Render::UniformBufferWriterProxy(renderRoot_.get(), item, 1, 0);
+    customData_.transformComponents_[CustomData::DRAGONS_COUNT] = transformationSystem_.CreateTransformComponent(nullptr, &customData_.uniformProxies[CustomData::DRAGONS_COUNT]);
 
-    renderRoot_->RegisterMaterial(backgroundMaterialKey);
-    Render::RenderWorkItemHandle backgroundRenderItemHandle = renderRoot_->ConstructRenderWorkItem(backgroundPipeKey, backgroundItemDesc);
 }
 
 void VulkanApplicationDelegate::InitImGui()
@@ -578,18 +581,49 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         }
         
 
-        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always, ImVec2(0.0f, 0.0f));
-        ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(0.0f, 100.0f));
         
         ImGuiWindowFlags blurWindowFlags = 
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
         if (ImGui::Begin("Blur scale", nullptr, blurWindowFlags))
         {
+            static float TEST_FLOAT = 0.0f;
             ImGui::SetNextItemWidth(100.0f);
-            ImGui::SliderFloat("", &IMGUI_USER_BLUR_SCALE, 0.0f, 1.0f);
+            ImGui::SliderFloat("Scale", &IMGUI_USER_BLUR_SCALE, 0.0f, 1.0f);
             
             ImGui::RadioButton("Fast blur", (int*)&IMGUI_USER_BLUR, (int)IMGUI_USER_BLUR_TYPE_FAST); ImGui::SameLine();
             ImGui::RadioButton("Full blur", (int*)&IMGUI_USER_BLUR, (int)IMGUI_USER_BLUR_TYPE_FULL); ImGui::SameLine();
+
+            ImGui::End();
+        }
+
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 100.0f), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
+
+        if (ImGui::Begin("Plane Settings", nullptr, ImGuiWindowFlags_NoResize))
+        {
+            ImGui::Text("Plane position");
+            
+            char label_buf[16];
+            char const x_char = 'x';
+
+            for (std::uint32_t i = 0; i < 3; i++)
+            {
+                ImGui::SetNextItemWidth(200.0f);
+                std::sprintf(label_buf, "pos_%c", x_char + i);
+                ImGui::SliderFloat(label_buf, IMGUI_USER_PLANE_POS + i, -2.0f, 2.0f);
+            }
+
+            ImGui::NewLine();
+            ImGui::Text("Plane euler rotation");
+
+            for (std::uint32_t i = 0; i < 3; i++)
+            {
+                ImGui::SetNextItemWidth(200.0f);
+                std::sprintf(label_buf, "rot_%c", x_char + i);
+                ImGui::SliderFloat(label_buf, IMGUI_USER_PLANE_ROT + i, -180.0f, 180.0f);
+            }
 
             ImGui::End();
         }
