@@ -147,8 +147,8 @@ void VulkanApplicationDelegate::update()
     //
     ////////////////////////////////////////////////////
     Transform::TransformSystemCameraData cameraData;
-    cameraData.cameraPos = glm::vec3(0.0f);
-    cameraData.cameraEuler = glm::vec3(0.0f);
+    cameraData.cameraPos = glm::vec3(IMGUI_USER_CAMERA_POS[0], IMGUI_USER_CAMERA_POS[1], IMGUI_USER_CAMERA_POS[2]);
+    cameraData.cameraEuler = glm::vec3(IMGUI_USER_CAMERA_ROT[0], IMGUI_USER_CAMERA_ROT[1], IMGUI_USER_CAMERA_ROT[2]);
     cameraData.cameraFowDegrees = 60.0f;
 
     VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
@@ -360,7 +360,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     itemDesc.indexCount_ = indexDataSizeBytes / sizeof(std::uint32_t);
     itemDesc.indexBindOffset_ = 0;
 
-    itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 64;
+    itemDesc.setOwnerDescs_[0].members_[0].uniformBuffer_.size_ = 160;
 
     for (std::uint32_t i = 0; i < CustomData::DRAGONS_COUNT; ++i) {
         Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(dragonPipeKey, itemDesc);
@@ -406,11 +406,13 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     VKW::DescriptorSetLayoutDesc planeSetLayoutDesc;
     planeSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
-    planeSetLayoutDesc.membersCount_ = 2;
+    planeSetLayoutDesc.membersCount_ = 3;
     planeSetLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
     planeSetLayoutDesc.membersDesc_[0].binding_ = 0;
     planeSetLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
     planeSetLayoutDesc.membersDesc_[1].binding_ = 1;
+    planeSetLayoutDesc.membersDesc_[2].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
+    planeSetLayoutDesc.membersDesc_[2].binding_ = 2;
     renderRoot_->DefineSetLayout(planeSetLayoutKey, planeSetLayoutDesc);
 
     struct PlaneVertex
@@ -482,18 +484,45 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     backgroundVerticesData[0].pos[0] = -1.0f;
     backgroundVerticesData[0].pos[1] = -1.0f;
     backgroundVerticesData[0].pos[2] = 0.0f;
+    backgroundVerticesData[0].norm[0] = 0.0f;
+    backgroundVerticesData[0].norm[1] = 0.0f;
+    backgroundVerticesData[0].norm[2] = 1.0f;
+    backgroundVerticesData[0].tan[0] = 1.0f;
+    backgroundVerticesData[0].tan[1] = 0.0f;
+    backgroundVerticesData[0].tan[2] = 0.0f;
+    backgroundVerticesData[0].bitan[0] = 0.0f;
+    backgroundVerticesData[0].bitan[1] = 1.0f;
+    backgroundVerticesData[0].bitan[2] = 0.0f;
     backgroundVerticesData[0].uv[0]  = 0.0f;
     backgroundVerticesData[0].uv[1]  = 0.0f;
 
     backgroundVerticesData[1].pos[0] = 1.0f;
     backgroundVerticesData[1].pos[1] = 1.0f;
     backgroundVerticesData[1].pos[2] = 0.0f;
+    backgroundVerticesData[1].norm[0] = 0.0f;
+    backgroundVerticesData[1].norm[1] = 0.0f;
+    backgroundVerticesData[1].norm[2] = 1.0f;
+    backgroundVerticesData[1].tan[0] = 1.0f;
+    backgroundVerticesData[1].tan[1] = 0.0f;
+    backgroundVerticesData[1].tan[2] = 0.0f;
+    backgroundVerticesData[1].bitan[0] = 0.0f;
+    backgroundVerticesData[1].bitan[1] = 1.0f;
+    backgroundVerticesData[1].bitan[2] = 0.0f;
     backgroundVerticesData[1].uv[0]  = 1.0f;
     backgroundVerticesData[1].uv[1]  = 1.0f;
 
     backgroundVerticesData[2].pos[0] = -1.0f;
     backgroundVerticesData[2].pos[1] = 1.0f;
     backgroundVerticesData[2].pos[2] = 0.0f;
+    backgroundVerticesData[2].norm[0] = 0.0f;
+    backgroundVerticesData[2].norm[1] = 0.0f;
+    backgroundVerticesData[2].norm[2] = 1.0f;
+    backgroundVerticesData[2].tan[0] = 1.0f;
+    backgroundVerticesData[2].tan[1] = 0.0f;
+    backgroundVerticesData[2].tan[2] = 0.0f;
+    backgroundVerticesData[2].bitan[0] = 0.0f;
+    backgroundVerticesData[2].bitan[1] = 1.0f;
+    backgroundVerticesData[2].bitan[2] = 0.0f;
     backgroundVerticesData[2].uv[0]  = 0.0f;
     backgroundVerticesData[2].uv[1]  = 1.0f;
 
@@ -501,18 +530,45 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     backgroundVerticesData[3].pos[0] = -1.0f;
     backgroundVerticesData[3].pos[1] = -1.0f;
     backgroundVerticesData[3].pos[2] =  0.0f;
+    backgroundVerticesData[3].norm[0] = 0.0f;
+    backgroundVerticesData[3].norm[1] = 0.0f;
+    backgroundVerticesData[3].norm[2] = 1.0f;
+    backgroundVerticesData[3].tan[0] = 1.0f;
+    backgroundVerticesData[3].tan[1] = 0.0f;
+    backgroundVerticesData[3].tan[2] = 0.0f;
+    backgroundVerticesData[3].bitan[0] = 0.0f;
+    backgroundVerticesData[3].bitan[1] = 1.0f;
+    backgroundVerticesData[3].bitan[2] = 0.0f;
     backgroundVerticesData[3].uv[0] = 0.0f;
     backgroundVerticesData[3].uv[1] = 0.0f;
 
     backgroundVerticesData[5].pos[0] = 1.0f;
     backgroundVerticesData[5].pos[1] = 1.0f;
     backgroundVerticesData[5].pos[2] = 0.0f;
+    backgroundVerticesData[5].norm[0] = 0.0f;
+    backgroundVerticesData[5].norm[1] = 0.0f;
+    backgroundVerticesData[5].norm[2] = 1.0f;
+    backgroundVerticesData[5].tan[0] = 1.0f;
+    backgroundVerticesData[5].tan[1] = 0.0f;
+    backgroundVerticesData[5].tan[2] = 0.0f;
+    backgroundVerticesData[5].bitan[0] = 0.0f;
+    backgroundVerticesData[5].bitan[1] = 1.0f;
+    backgroundVerticesData[5].bitan[2] = 0.0f;
     backgroundVerticesData[5].uv[0] = 1.0f;
     backgroundVerticesData[5].uv[1] = 1.0f;
 
     backgroundVerticesData[4].pos[0] =  1.0f;
     backgroundVerticesData[4].pos[1] = -1.0f;
     backgroundVerticesData[4].pos[2] =  0.0f;
+    backgroundVerticesData[4].norm[0] = 0.0f;
+    backgroundVerticesData[4].norm[1] = 0.0f;
+    backgroundVerticesData[4].norm[2] = 1.0f;
+    backgroundVerticesData[4].tan[0] = 1.0f;
+    backgroundVerticesData[4].tan[1] = 0.0f;
+    backgroundVerticesData[4].tan[2] = 0.0f;
+    backgroundVerticesData[4].bitan[0] = 0.0f;
+    backgroundVerticesData[4].bitan[1] = 1.0f;
+    backgroundVerticesData[4].bitan[2] = 0.0f;
     backgroundVerticesData[4].uv[0] = 1.0f;
     backgroundVerticesData[4].uv[1] = 0.0f;
 
@@ -521,10 +577,13 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     renderRoot_->CopyStagingBufferToGPUBuffer(uploadBufferKey, planeVertexBufferName, 0);
 
     char const* planeTextureName = "bckground_texture";
-    renderRoot_->CreateImageFromFile(ioManager_, uploadBufferKey, planeTextureName, "LFS\\Brick-2428.jpg", VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_GENERAL, VKW::ImageUsage::TEXTURE);
+    renderRoot_->CreateImageFromFile(ioManager_, uploadBufferKey, planeTextureName, "LFS\\Subway_Tiles_002_basecolor.jpg", VK_FORMAT_R8G8B8A8_UNORM, Data::TextureChannelVariations::TEXTURE_VARIATION_RGBA, VK_IMAGE_LAYOUT_GENERAL, VKW::ImageUsage::TEXTURE);
 
     char const* bumpTextureName = "bump_texture";
-    renderRoot_->CreateImageFromFile(ioManager_, uploadBufferKey, bumpTextureName, "LFS\\Brick-2428-bump-map.jpg", VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_GENERAL, VKW::ImageUsage::TEXTURE);
+    renderRoot_->CreateImageFromFile(ioManager_, uploadBufferKey, bumpTextureName, "LFS\\Subway_Tiles_002_height.png", VK_FORMAT_R8_UNORM, Data::TextureChannelVariations::TEXTURE_VARIATION_GRAY, VK_IMAGE_LAYOUT_GENERAL, VKW::ImageUsage::TEXTURE);
+
+    char const* normalTextureName = "normal_texture";
+    renderRoot_->CreateImageFromFile(ioManager_, uploadBufferKey, normalTextureName, "LFS\\Subway_Tiles_002_normal.jpg", VK_FORMAT_R8G8B8A8_UNORM, Data::TextureChannelVariations::TEXTURE_VARIATION_RGBA, VK_IMAGE_LAYOUT_GENERAL, VKW::ImageUsage::TEXTURE);
 
     Render::RenderWorkItemDesc planeItemDesc;
     planeItemDesc.vertexBufferKey_ = planeVertexBufferName;
@@ -536,7 +595,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     planeItemDesc.setOwnerDescs_[0].members_[0].texture2D_.imageKey_ = planeTextureName;
     planeItemDesc.setOwnerDescs_[0].members_[1].texture2D_.imageKey_ = bumpTextureName;
-    planeItemDesc.setOwnerDescs_[1].members_[0].uniformBuffer_.size_ = 64;
+    planeItemDesc.setOwnerDescs_[0].members_[2].texture2D_.imageKey_ = normalTextureName;
+    planeItemDesc.setOwnerDescs_[1].members_[0].uniformBuffer_.size_ = 160;
 
     renderRoot_->RegisterMaterial(planeMaterialKey);
 
@@ -599,10 +659,16 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         }
 
         ImGui::SetNextWindowPos(ImVec2(0.0f, 100.0f), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(0.0f, 250.0f), ImGuiCond_Always);
 
         if (ImGui::Begin("Plane Settings", nullptr, ImGuiWindowFlags_NoResize))
         {
+            if(ImGui::Button("Reset", ImVec2(50.0, 20.0f)))
+            {
+                ZeroMemory(IMGUI_USER_PLANE_POS, sizeof(IMGUI_USER_PLANE_POS));
+                ZeroMemory(IMGUI_USER_PLANE_ROT, sizeof(IMGUI_USER_PLANE_ROT));
+            }
+
             ImGui::Text("Plane position");
             
             char label_buf[16];
@@ -622,8 +688,66 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
             {
                 ImGui::SetNextItemWidth(200.0f);
                 std::sprintf(label_buf, "rot_%c", x_char + i);
-                ImGui::SliderFloat(label_buf, IMGUI_USER_PLANE_ROT + i, -180.0f, 180.0f);
+                ImGui::SliderFloat(label_buf, IMGUI_USER_PLANE_ROT + i, -80.0f, 80.0f);
             }
+
+            ImGui::End();
+        }
+
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 350.0f), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
+
+        if (ImGui::Begin("Camera Controls", nullptr, ImGuiWindowFlags_NoResize))
+        {
+            if (ImGui::Button("Reset", ImVec2(50.0, 20.0f)))
+            {
+                ZeroMemory(IMGUI_USER_CAMERA_POS, sizeof(IMGUI_USER_CAMERA_POS));
+                ZeroMemory(IMGUI_USER_CAMERA_ROT, sizeof(IMGUI_USER_CAMERA_ROT));
+            }
+
+            ImGui::PushButtonRepeat(true);
+            if (ImGui::ArrowButton("up", ImGuiDir_Up))
+                IMGUI_USER_CAMERA_POS[2] += 0.01f;
+
+            ImGui::SameLine();
+
+            if (ImGui::ArrowButton("left", ImGuiDir_Left))
+                IMGUI_USER_CAMERA_POS[0] += 0.01f;
+
+            ImGui::SameLine(0.0f, 20.0f);
+
+            if(ImGui::ArrowButton("upr", ImGuiDir_Up))
+                IMGUI_USER_CAMERA_ROT[0] += 0.05f;
+
+            ImGui::SameLine();
+
+            if(ImGui::ArrowButton("leftr", ImGuiDir_Left))
+                IMGUI_USER_CAMERA_ROT[1] -= 0.05f;
+
+            // new line
+
+            if (ImGui::ArrowButton("down", ImGuiDir_Down))
+                IMGUI_USER_CAMERA_POS[2] -= 0.01f;
+
+            ImGui::SameLine();
+
+            if (ImGui::ArrowButton("right", ImGuiDir_Right))
+                IMGUI_USER_CAMERA_POS[0] -= 0.01f;
+
+            ImGui::SameLine(0.0f, 20.0f);
+
+            if (ImGui::ArrowButton("downr", ImGuiDir_Down))
+                IMGUI_USER_CAMERA_ROT[0] -= 0.05f;
+
+            ImGui::SameLine();
+
+            if (ImGui::ArrowButton("rightr", ImGuiDir_Right))
+                IMGUI_USER_CAMERA_ROT[1] += 0.05f;
+
+            ImGui::PopButtonRepeat();
+
+            ImGui::Text("Camera pos: %.2f, %.2f, %.2f", IMGUI_USER_CAMERA_POS[0], IMGUI_USER_CAMERA_POS[1], IMGUI_USER_CAMERA_POS[2]);
+            ImGui::Text("Camera rot: %.2f, %.2f, %.2f", IMGUI_USER_CAMERA_ROT[0], IMGUI_USER_CAMERA_ROT[1], IMGUI_USER_CAMERA_ROT[2]);
 
             ImGui::End();
         }

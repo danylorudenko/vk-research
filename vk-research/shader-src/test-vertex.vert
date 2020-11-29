@@ -5,7 +5,7 @@ layout(location = 1) in vec3 in_v_norm;
 
 layout(location = 0) out vec3 out_v_norm;
 
-layout (set=0, binding=0) uniform TransformUniform
+layout (set=0, binding=0, std140) uniform TransformUniform
 {
 	mat4 mvp_mat;
 } transformUniform;

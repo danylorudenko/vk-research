@@ -1056,11 +1056,11 @@ void Root::BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint3
     VK_ASSERT(VulkanFuncTable()->vkDeviceWaitIdle(loader_->device_->Handle()));
 }
 
-void Root::CreateImageFromFile(IOManager& ioManager, ResourceKey const& uploadBuffer, ResourceKey const& imageKey, std::string const& sourceFile, VkFormat format, VkImageLayout targetLayout, VKW::ImageUsage usage)
+void Root::CreateImageFromFile(IOManager& ioManager, ResourceKey const& uploadBuffer, ResourceKey const& imageKey, std::string const& sourceFile, VkFormat format, Data::TextureChannelVariations channels, VkImageLayout targetLayout, VKW::ImageUsage usage)
 {
     void* mappedUploadBuffer = MapBuffer(uploadBuffer, 0);
 
-    Data::Texture2D textureData = ioManager.ReadTexture2D(sourceFile.c_str(), Data::TextureChannelVariations::TEXTURE_VARIATION_RGBA);
+    Data::Texture2D textureData = ioManager.ReadTexture2D(sourceFile.c_str(), channels);
     std::memcpy(mappedUploadBuffer, textureData.textureData_.data(), textureData.textureData_.size());
 
     VKW::ImageViewDesc textureDesc;

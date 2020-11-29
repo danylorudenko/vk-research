@@ -6,6 +6,8 @@
 #include <map>
 #include <memory>
 
+#include <data\Texture2D.hpp>
+
 #include <renderer\RootDef.hpp>
 #include <vk_interface\ProxyHandles.hpp>
 #include <vk_interface\buffer\BuffersProvider.hpp>
@@ -261,7 +263,7 @@ public:
     void CopyStagingBufferToGPUTexture(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context);
     void BlitImages(ResourceKey const& src, ResourceKey const& dst, std::uint32_t context, VkImageLayout dstEndLayout, VkAccessFlags dstEndAccessFlags);
 
-    void CreateImageFromFile(IOManager& ioManager, ResourceKey const& uploadBuffer, ResourceKey const& imageKey, std::string const& sourceFile, VkFormat format, VkImageLayout targetLayout, VKW::ImageUsage usage);
+    void CreateImageFromFile(IOManager& ioManager, ResourceKey const& uploadBuffer, ResourceKey const& imageKey, std::string const& sourceFile, VkFormat format, Data::TextureChannelVariations channels, VkImageLayout targetLayout, VKW::ImageUsage usage);
 
 
     VKW::ResourceRendererProxy* ResourceProxy() const;

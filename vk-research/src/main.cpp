@@ -13,7 +13,7 @@ int main()
     
     bool imguiEnabled = true;
     
-    auto* appDelegate = new VulkanApplicationDelegate{ instance, "Vulkan Application", 800, 600, 2, debug, imguiEnabled };
+    auto* appDelegate = new VulkanApplicationDelegate{ instance, "Vulkan Application", 1600, 900, 2, debug, imguiEnabled };
     auto* application = new Application{ appDelegate };
 
     application->run();
