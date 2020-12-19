@@ -93,7 +93,8 @@ std::uint32_t MemoryController::FindBestMemoryType(std::uint32_t mandatoryFlags,
         if((type.propertyFlags & mandatoryFlags) != mandatoryFlags)
             continue;
 
-        std::int32_t currentRating = static_cast<std::int32_t>(ToolCountBitsSet(preferableFlags & type.propertyFlags) - ToolCountBitsSet(nonPreferableFlags & type.propertyFlags));
+        std::int32_t currentRating = static_cast<std::int32_t>(ToolCountBitsSet(preferableFlags & type.propertyFlags) 
+            - ToolCountBitsSet(nonPreferableFlags & type.propertyFlags));
         if (currentRating > prevRating)
         {
             prevRating = currentRating;
@@ -257,9 +258,11 @@ void MemoryController::ClassifyDeviceMemoryTypesAll()
     memoryClassTypes_[(int)MemoryClass::CpuReadback] = cpuReadbackClassType;
 }
 
-MemoryRegion MemoryController::ProvideMemoryRegion(MemoryPageRegionDesc const& desc)
+void MemoryController::AllocateMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
 {
-    std::uint32_t validAllocation = TOOL_INVALID_ID;
+    std::uint32_t constexpr INVALID_ALLOCATION = std::numeric_limits<std::uint32_t>::max();
+
+    std::uint32_t validAllocation = INVALID_ALLOCATION;
     auto const allocationsCount = allocations_.size();
     for (auto i = 0u; i < allocationsCount; ++i) {
         MemoryPage const* page = allocations_[i];

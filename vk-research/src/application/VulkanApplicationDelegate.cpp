@@ -178,7 +178,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     char constexpr vertexBufferKey[] = "vert0";
     char constexpr indexBufferKey[] = "ind0";
     char constexpr passKey[] = "pass0";
-    char constexpr pipeKey[] = "pipe0";
+    char constexpr dragonPipeKey[] = "pipe0";
     char constexpr backgroundPipeKey[] = "pipe1";
     char constexpr setLayoutKey[] = "set0";
     char constexpr backgroundSetLayoutKey[] = "set1";
@@ -333,13 +333,13 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     pipelineDesc.dynamicStateFlags_ = VK_FLAGS_NONE;
     pipelineDesc.blendingState_ = VKW::PIPELINE_BLENDING_NONE;
 
-    renderRoot_->DefineGraphicsPipeline(pipeKey, pipelineDesc);
+    renderRoot_->DefineGraphicsPipeline(dragonPipeKey, pipelineDesc);
     
     
     Render::MaterialTemplateDesc materialTemplateDesc;
     materialTemplateDesc.perPassDataCount_ = 1;
     materialTemplateDesc.perPassData_[0].passKey_ = passKey;
-    materialTemplateDesc.perPassData_[0].pipelineKey_ = pipeKey;
+    materialTemplateDesc.perPassData_[0].pipelineKey_ = dragonPipeKey;
     renderRoot_->DefineMaterialTemplate(materialTemplateKey, materialTemplateDesc);
 
     Render::MaterialDesc materialDesc;
@@ -359,9 +359,9 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 
     for (std::uint32_t i = 0; i < 25; ++i) {
-        Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(pipeKey, itemDesc);
+        Render::RenderWorkItemHandle renderItemHandle = renderRoot_->ConstructRenderWorkItem(dragonPipeKey, itemDesc);
 
-        Render::RenderWorkItem* item = renderRoot_->FindRenderWorkItem(pipeKey, renderItemHandle);
+        Render::RenderWorkItem* item = renderRoot_->FindRenderWorkItem(dragonPipeKey, renderItemHandle);
         customData_.uniformProxies[i] = Render::UniformBufferWriterProxy(renderRoot_.get(), item, 0, 0);
 
         customData_.transformComponents_[i] = transformationSystem_.CreateTransformComponent(nullptr, &customData_.uniformProxies[i]);
