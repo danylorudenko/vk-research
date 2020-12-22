@@ -105,165 +105,7 @@ std::uint32_t MemoryController::FindBestMemoryType(std::uint32_t mandatoryFlags,
     return memoryTypeIndex;
 }
 
-// not used
-void MemoryController::ClassifyDeviceMemoryTypesAll()
-{
-    VkPhysicalDeviceMemoryProperties2 const& memoryProperties2 = device_->Properties().memoryProperties2;
-    VkPhysicalDeviceMemoryProperties const& memoryProperties = memoryProperties2.memoryProperties;
-    VkPhysicalDeviceMemoryBudgetPropertiesEXT const* budgetProperties = (VkPhysicalDeviceMemoryBudgetPropertiesEXT*)memoryProperties2.pNext;
-
-    std::uint32_t deviceFastMemoryClassType  = TOOL_INVALID_ID;
-    std::uint32_t cpuUniformMemoryClassType  = TOOL_INVALID_ID;
-    std::uint32_t cpuStagingMemoryClassType  = TOOL_INVALID_ID;
-    std::uint32_t cpuReadbackClassType       = TOOL_INVALID_ID;
-
-    VkDeviceSize const typesCount = memoryProperties.memoryTypeCount;
-
-    // MemoryClass::DeviceFast
-    for (std::uint32_t i = 0; i < typesCount; i++)
-    {
-        VkMemoryType const& memoryType = memoryProperties.memoryTypes[i];
-        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
-        {
-            if (deviceFastMemoryClassType == TOOL_INVALID_ID)
-            {
-                deviceFastMemoryClassType = i;
-                continue;
-            }
-
-            VkDeviceSize const thisTypeHeapSize = GetMemoryTypeBudget(*device_, i);
-            VkDeviceSize const prevTypeHeapSize = GetMemoryTypeBudget(*device_, deviceFastMemoryClassType);
-
-            bool const prevTypeRelatedToHost = memoryProperties.memoryTypes[deviceFastMemoryClassType].propertyFlags & (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
-            bool const thisTypeRelatedToHost = memoryType.propertyFlags & (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
-
-            if (prevTypeRelatedToHost && !thisTypeRelatedToHost)
-                deviceFastMemoryClassType = i;
-        }
-    }
-    memoryClassTypes_[(int)MemoryClass::DeviceFast] = deviceFastMemoryClassType;
-
-    // MemoryClass::CpuUniform // better be coherent and non-cached
-    for (std::uint32_t i = 0; i < typesCount; i++)
-    {
-        VkMemoryType const& memoryType = memoryProperties.memoryTypes[i];
-
-        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-        {
-            if (cpuUniformMemoryClassType == TOOL_INVALID_ID)
-            {
-                cpuUniformMemoryClassType = i;
-                continue;
-            }
-
-            //VkDeviceSize const thisTypeHeapSize = GetMemoryTypeBudget(*device_, i);
-            //VkDeviceSize const prevTypeHeapSize = GetMemoryTypeBudget(*device_, cpuUniformMemoryClassType);
-
-            bool const prevTypeHostCoherent = memoryProperties.memoryTypes[cpuUniformMemoryClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            bool const thisTypeHostCoherent = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-            bool const prevTypeHostCached = memoryProperties.memoryTypes[cpuUniformMemoryClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-            bool const thisTypeHostCached = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-
-            // most preferable: coherent and non-chached
-            if ((!thisTypeHostCached && prevTypeHostCached) && (thisTypeHostCoherent && !prevTypeHostCoherent))
-            {
-                cpuUniformMemoryClassType = i;
-                break;
-            }
-            // just coherent is better too
-            if ((thisTypeHostCoherent && !prevTypeHostCoherent) || thisTypeHostCoherent)
-            {
-                cpuUniformMemoryClassType = i;
-                continue;
-            }
-        }
-    }
-    memoryClassTypes_[(int)MemoryClass::CpuUniform] = cpuUniformMemoryClassType;
-
-    // MemoryClass::CpuStaging // better be coherent
-    for (std::uint32_t i = 0; i < typesCount; i++)
-    {
-        VkMemoryType const& memoryType = memoryProperties.memoryTypes[i];
-
-        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-        {
-            if (cpuStagingMemoryClassType == TOOL_INVALID_ID)
-            {
-                cpuStagingMemoryClassType = i;
-                continue;
-            }
-
-            //VkDeviceSize const thisTypeHeapSize = GetMemoryTypeBudget(*device_, i);
-            //VkDeviceSize const prevTypeHeapSize = GetMemoryTypeBudget(*device_, cpuUniformMemoryClassType);
-
-            bool const prevTypeHostCoherent = memoryProperties.memoryTypes[cpuStagingMemoryClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            bool const thisTypeHostCoherent = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-            bool const prevTypeHostCached = memoryProperties.memoryTypes[cpuStagingMemoryClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-            bool const thisTypeHostCached = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-
-            // most preferable: coherent and non-chached
-            if ((!thisTypeHostCached && prevTypeHostCached) && (thisTypeHostCoherent && !prevTypeHostCoherent))
-            {
-                cpuStagingMemoryClassType = i;
-                break;
-            }
-            // just coherent is better too
-            if ((thisTypeHostCoherent && !prevTypeHostCoherent) || thisTypeHostCoherent)
-            {
-                cpuStagingMemoryClassType = i;
-                continue;
-            }
-        }
-    }
-    memoryClassTypes_[(int)MemoryClass::CpuStaging] = cpuStagingMemoryClassType;
-
-    // MemoryClass::CpuReadback // beter be cached
-    for (std::uint32_t i = 0; i < typesCount; i++)
-    {
-        VkMemoryType const& memoryType = memoryProperties.memoryTypes[i];
-
-        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-        {
-            if (cpuReadbackClassType == TOOL_INVALID_ID)
-            {
-                cpuReadbackClassType = i;
-                continue;
-            }
-
-            //VkDeviceSize const thisTypeHeapSize = GetMemoryTypeBudget(*device_, i);
-            //VkDeviceSize const prevTypeHeapSize = GetMemoryTypeBudget(*device_, cpuUniformMemoryClassType);
-
-            bool const prevTypeHostCoherent = memoryProperties.memoryTypes[cpuReadbackClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            bool const thisTypeHostCoherent = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-            bool const prevTypeHostCached = memoryProperties.memoryTypes[cpuReadbackClassType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-            bool const thisTypeHostCached = memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-
-            // most preferable: host-cached and non-coherent
-            if ((thisTypeHostCached && !prevTypeHostCached) && (!thisTypeHostCoherent && prevTypeHostCoherent))
-            {
-                cpuReadbackClassType = i;
-                break;
-            }
-            // just cached is okay too
-            if ((thisTypeHostCached && !prevTypeHostCached) || thisTypeHostCached)
-            {
-                cpuReadbackClassType = i;
-                continue;
-            }
-        }
-    }
-    memoryClassTypes_[(int)MemoryClass::CpuReadback] = cpuReadbackClassType;
-}
-
-MemoryPage* MemoryController::GetPage(MemoryPageHandle handle)
-{
-    return handle.page_;
-}
-
-void MemoryController::AllocateMemoryRegion(MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
+MemoryRegion MemoryController::AllocateMemoryRegion(MemoryPageRegionDesc const& desc)
 {
     std::uint32_t constexpr INVALID_ALLOCATION = std::numeric_limits<std::uint32_t>::max();
 
@@ -281,38 +123,36 @@ void MemoryController::AllocateMemoryRegion(MemoryPageRegionDesc const& desc, Me
     }
 
     if (validAllocation != INVALID_ALLOCATION) {
-        GetNextFreePageRegion(MemoryPageHandle{ allocations_[validAllocation] }, desc, regionOut);
+        return GetNextFreePageRegion(allocations_[validAllocation], desc);
     }
     else {
         std::uint64_t const defaultPageSize = defaultPageSizes_[(int)desc.memoryClass_];
         std::uint64_t const requestedSize = desc.size_ + desc.alignment_;
         std::uint64_t const pageSize = requestedSize > defaultPageSize ? requestedSize : defaultPageSize;
 
-        MemoryPageHandle newPage = AllocPage(desc.memoryClass_, pageSize);
-        GetNextFreePageRegion(newPage, desc, regionOut);
+        MemoryPage* newPage = AllocPage(desc.memoryClass_, pageSize);
+        return GetNextFreePageRegion(newPage, desc);
     }
 }
 
-void MemoryController::GetNextFreePageRegion(MemoryPageHandle pageHandle, MemoryPageRegionDesc const& desc, MemoryRegion& regionOut)
+MemoryRegion MemoryController::GetNextFreePageRegion(MemoryPage* page, MemoryPageRegionDesc const& desc)
 {
     std::uint64_t const size = desc.size_ + desc.alignment_;
 
-    MemoryPage& page = *pageHandle.page_;
-
-    std::uint32_t const memoryTypeId = memoryClassTypes_[(int)page.memoryClass];
+    std::uint32_t const memoryTypeId = memoryClassTypes_[(int)page->memoryClass];
     assert((desc.memoryTypeBits_ & (1 << memoryTypeId)) && "Memory class of this MemoryPage has not fulfilled the allocation requirements."); 
 
-    regionOut.pageHandle_ = pageHandle;
-    regionOut.offset_ = RoundToMultipleOfPOT(page.nextFreeOffset_, desc.alignment_);
-    regionOut.size_ = size;
+    MemoryRegion result{ page, RoundToMultipleOfPOT(page->nextFreeOffset_, desc.alignment_), size };
 
-    page.nextFreeOffset_ += size;
-    ++page.bindCount_;
+    page->nextFreeOffset_ += size;
+    ++page->bindCount_;
+    
+    return result;
 }
 
 void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
 {
-    auto const regionMemoryAllocation = region.pageHandle_.page_->deviceMemory_;
+    auto const regionMemoryAllocation = region.page_->deviceMemory_;
 
     std::uint32_t constexpr INVALID_PAGE = std::numeric_limits<std::uint32_t>::max();
 
@@ -325,16 +165,16 @@ void MemoryController::ReleaseMemoryRegion(MemoryRegion& region)
 
     if (pageIndex != INVALID_PAGE) {
         if (--allocations_[pageIndex]->bindCount_ == 0) {
-            FreePage(MemoryPageHandle{ allocations_[pageIndex] });
+            FreePage(allocations_[pageIndex]);
         }
     }
 
-    region.pageHandle_ = {};
+    region.page_ = nullptr;
     region.size_ = 0;
     region.offset_ = 0;
 }
 
-MemoryPageHandle MemoryController::AllocPage(MemoryClass memoryClass, std::uint64_t size)
+MemoryPage* MemoryController::AllocPage(MemoryClass memoryClass, std::uint64_t size)
 {
     std::uint32_t typeIndex = memoryClassTypes_[(int)memoryClass];
     if (typeIndex == TOOL_INVALID_ID)
@@ -399,22 +239,24 @@ MemoryPageHandle MemoryController::AllocPage(MemoryClass memoryClass, std::uint6
 
     allocations_.emplace_back(memory);
 
-    return MemoryPageHandle{ memory };
+    return memory;
 }
 
-void MemoryController::FreePage(MemoryPageHandle pageHandle)
+void MemoryController::FreePage(MemoryPage* page)
 {
-    std::uint32_t deletedPageIndex = std::numeric_limits<std::uint32_t>::max();
+    std::uint32_t deletedPageIndex = TOOL_INVALID_ID;
 
     std::uint32_t const allocationsCount = static_cast<std::uint32_t>(allocations_.size());
     for (auto i = 0u; i < allocationsCount; ++i) {
-        if (pageHandle.page_ == allocations_[i]) {
+        if (page == allocations_[i]) {
             deletedPageIndex = i;
             break;
         }
     }
-    
-    auto* page = allocations_[deletedPageIndex];
+
+    if (deletedPageIndex == TOOL_INVALID_ID)
+        assert(false && "MemoryController::FreePage can't delete the page.");
+
     table_->vkFreeMemory(device_->Handle(), page->deviceMemory_, nullptr);
 
     delete page;

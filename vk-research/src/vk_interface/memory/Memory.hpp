@@ -28,15 +28,9 @@ struct MemoryPage
     VkDeviceSize GetFreeMemorySize() const { return size_ - nextFreeOffset_; }
 };
 
-struct MemoryPageHandle
-{
-    MemoryPage* page_;
-};
-
-
 struct MemoryRegion
 {
-    MemoryPageHandle pageHandle_;
+    MemoryPage* page_;
     std::uint64_t offset_ = 0;
     std::uint64_t size_ = 0;
 };
