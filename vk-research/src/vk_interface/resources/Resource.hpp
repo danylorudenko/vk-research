@@ -17,6 +17,8 @@ struct BufferResource
     VkBuffer handle_ = VK_NULL_HANDLE;
     std::uint32_t size_ = 0;
     MemoryRegion memory_;
+
+    MemoryPage* GetMemoryPage() const;
 };
 
 struct SubbufferResource
@@ -24,11 +26,6 @@ struct SubbufferResource
     VkBuffer handle_ = VK_NULL_HANDLE;
     std::uint32_t offset_ = 0;
     std::uint32_t size_ = 0;
-};
-
-struct BufferResourceHandle
-{
-    BufferResource* resource_ = nullptr;
 };
 
 
@@ -42,11 +39,8 @@ struct ImageResource
     std::uint32_t width_ = 0;
     std::uint32_t height_ = 0;
     MemoryRegion memory_;
-};
 
-struct ImageResourceHandle
-{
-    ImageResource* resource_ = nullptr;
+    MemoryPage* GetMemoryPage() const;
 };
 
 }

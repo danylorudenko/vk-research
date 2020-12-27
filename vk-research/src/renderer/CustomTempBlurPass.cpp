@@ -91,7 +91,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     root_->DefineComputePipeline(blurFullPipeline_, blurFullPipelineDesc);
 
     VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, 0);
-    VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
+    VKW::ImageResource* sceneColorBufferResource = sceneColorBufferView->resource_;
 
     std::uint32_t const width = sceneColorBufferResource->width_;
     std::uint32_t const height = sceneColorBufferResource->height_;
@@ -122,7 +122,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     root_->DefineGlobalImage(maskUploadImage, maskUploadImageDesc);
 
     VKW::ImageView* maskUploadImageView = root_->FindGlobalImage(maskUploadImage, 0);
-    VKW::ImageResource* maskUploadImageResource = resourceProxy_->GetResource(maskUploadImageView->resource_);
+    VKW::ImageResource* maskUploadImageResource = maskUploadImageView->resource_;
 
     VkImageSubresource maskSubresource;
     maskSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -145,7 +145,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
 
 
     VKW::ImageView* colorBufferImageView = root_->FindGlobalImage(sceneColorBuffer_, 0);
-    VKW::ImageResource* colorBufferResource = resourceProxy_->GetResource(colorBufferImageView->resource_);
+    VKW::ImageResource* colorBufferResource = colorBufferImageView->resource_;
     VKW::ImageViewDesc maskImageDesc;
     maskImageDesc.format_ = VK_FORMAT_R8_UNORM;
     maskImageDesc.width_ = colorBufferResource->width_;
@@ -165,7 +165,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     for (std::uint32_t i = 0; i < framesCount; ++i)
     {
         VKW::ImageView* blurBufferImageView = root_->FindGlobalImage(blurBuffer_, i);
-        VKW::ImageResource* blurBufferImageResource = resourceProxy_->GetResource(blurBufferImageView->resource_);
+        VKW::ImageResource* blurBufferImageResource = blurBufferImageView->resource_;
         transitionImages[i] = blurBufferImageResource->handle_;
         imageLayouts[i] = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
     }
@@ -268,10 +268,10 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 
 
     VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, contextId);
-    VKW::ImageResource* sceneColorBufferResource = resourceProxy_->GetResource(sceneColorBufferView->resource_);
+    VKW::ImageResource* sceneColorBufferResource = sceneColorBufferView->resource_;
 
     VKW::ImageView* blurBufferView = root_->FindGlobalImage(blurBuffer_, contextId);
-    VKW::ImageResource* blurBufferResource = resourceProxy_->GetResource(blurBufferView->resource_);
+    VKW::ImageResource* blurBufferResource = blurBufferView->resource_;
 
     VKW::DescriptorSet* vkwBlurDescriptorSet = resourceProxy_->GetDescriptorSet(blurDescriptorSet_, contextId);
 

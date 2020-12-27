@@ -58,7 +58,7 @@ ResourcesController::~ResourcesController()
     }
 }
 
-BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
+BufferResource* ResourcesController::CreateBuffer(BufferDesc const& desc)
 {
     VkBufferCreateInfo vkBufferCreateInfo;
     vkBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -110,12 +110,12 @@ BufferResourceHandle ResourcesController::CreateBuffer(BufferDesc const& desc)
     VK_ASSERT(table_->vkBindBufferMemory(device_->Handle(), vkBuffer, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));
 
     BufferResource* resource = new BufferResource{ vkBuffer, static_cast<std::uint32_t>(desc.size_), memoryRegion };
-    buffers_.emplace_back(resource);
+    buffers_.emplace(resource);
 
-    return BufferResourceHandle{ resource };
+    return resource;
 }
 
-ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
+ImageResource* ResourcesController::CreateImage(ImageDesc const& desc)
 {
     VkImageCreateInfo info;
     info.sType                  = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -192,17 +192,15 @@ ImageResourceHandle ResourcesController::CreateImage(ImageDesc const& desc)
     VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));
 
     ImageResource* imageResource = new ImageResource{ vkImage, desc.format_, desc.width_, desc.height_, memoryRegion };
-    images_.emplace_back(imageResource);
+    images_.emplace(imageResource);
 
-    return ImageResourceHandle{ imageResource };
+    return imageResource;
 }
 
-void ResourcesController::FreeBuffer(BufferResourceHandle handle)
+void ResourcesController::FreeBuffer(BufferResource* buffer)
 {
-    auto bufferIt = std::find(buffers_.begin(), buffers_.end(), handle.resource_);
+    auto bufferIt = buffers_.find(buffer);
     assert(bufferIt != buffers_.end() && "Can't free BufferResource.");
-
-    auto& buffer = *bufferIt;
 
     table_->vkDestroyBuffer(device_->Handle(), buffer->handle_, nullptr);
     delete buffer;
@@ -210,32 +208,15 @@ void ResourcesController::FreeBuffer(BufferResourceHandle handle)
     buffers_.erase(bufferIt);
 }
 
-void ResourcesController::FreeImage(ImageResourceHandle handle)
+void ResourcesController::FreeImage(ImageResource* image)
 {
-    // TODO this is for the case of swapchain. dirty hack
-    if (handle.resource_ == nullptr) {
-        return;
-    }
-    
-    auto imageIt = std::find(images_.cbegin(), images_.cend(), handle.resource_);
+    auto imageIt = images_.find(image);
     assert(imageIt != images_.end() && "Can't free ImageResource");
-
-    auto& image = *imageIt;
 
     table_->vkDestroyImage(device_->Handle(), image->handle_, nullptr);
     delete image;
 
     images_.erase(imageIt);
-}
-
-BufferResource* ResourcesController::GetBuffer(BufferResourceHandle handle)
-{
-    return handle.resource_;
-}
-
-ImageResource* ResourcesController::GetImage(ImageResourceHandle handle)
-{
-    return handle.resource_;
 }
 
 }

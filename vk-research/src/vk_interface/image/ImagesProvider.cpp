@@ -45,7 +45,7 @@ ImagesProvider::ImagesProvider(ImagesProviderDesc const& desc)
     samplerInfo.compareEnable = VK_FALSE;
     samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
     samplerInfo.minLod = 0.0f;
-    samplerInfo.maxLod = 1.0f; // ????????
+    samplerInfo.maxLod = 1.0f; // TODO: ???????????????
     samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
     samplerInfo.unnormalizedCoordinates = VK_FALSE;
 
@@ -82,11 +82,12 @@ ImagesProvider::~ImagesProvider()
     
     for (auto const& imageViewCont : imageViewContainers_) {
         ImageView* imageView = imageViewCont.view_;
-        ImageResourceHandle imageResource = imageView->resource_;
+        ImageResource* imageResource = imageView->resource_;
         table_->vkDestroyImageView(device, imageView->handle_, nullptr);
         delete imageView;
 
-        resourcesController_->FreeImage(imageResource);
+        if (!imageViewCont.isSwapchain_)
+            resourcesController_->FreeImage(imageResource);
     }
 
     if (defaultSampler_ != VK_NULL_HANDLE) {
@@ -125,9 +126,9 @@ ImageViewHandle ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDes
 
     VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkImageView));
 
-    ImageView* imageView = new ImageView{ vkImageView, swapchain_->Format(), VK_IMAGE_VIEW_TYPE_2D, viewInfo.subresourceRange, ImageResourceHandle{} };
+    ImageView* imageView = new ImageView{ vkImageView, swapchain_->Format(), VK_IMAGE_VIEW_TYPE_2D, viewInfo.subresourceRange, nullptr };
     
-    imageViewContainers_.emplace_back(ImageViewContainer{ imageView });
+    imageViewContainers_.emplace_back(ImageViewContainer{ imageView, true });
     
     return ImageViewHandle{ imageView };
 }
@@ -140,8 +141,7 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
         imageDesc.width_ = descs[i].width_;
         imageDesc.height_ = descs[i].height_;
         imageDesc.usage_ = descs[i].usage_;
-        ImageResourceHandle imageResourceHandle = resourcesController_->CreateImage(imageDesc);
-        ImageResource* imageResource = resourcesController_->GetImage(imageResourceHandle);
+        ImageResource* imageResource = resourcesController_->CreateImage(imageDesc);
 
         VkImageAspectFlags aspectFlags;
         switch (descs[i].usage_) {
@@ -184,12 +184,9 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
         if (descs[i].usage_ != ImageUsage::UPLOAD_IMAGE)
             VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkView));
 
-        ImageView* imageView = new ImageView{ vkView, viewInfo.format, viewInfo.viewType, viewInfo.subresourceRange, imageResourceHandle };
+        ImageView* imageView = new ImageView{ vkView, viewInfo.format, viewInfo.viewType, viewInfo.subresourceRange, imageResource };
 
-        ImageViewContainer container;
-        container.view_ = imageView;
-
-        imageViewContainers_.emplace_back(container);
+        imageViewContainers_.emplace_back(ImageViewContainer{ imageView, false });
 
         results[i].view_ = imageView;
     }
@@ -208,7 +205,7 @@ void ImagesProvider::ReleaseImageViews(std::uint32_t count, ImageViewHandle* han
         assert(imageViewContIt != imageViewContainers_.end() && "Can't release ImageView.");
 
         ImageView* imageView = imageViewContIt->view_;
-        ImageResourceHandle imageResource = imageView->resource_;
+        ImageResource* imageResource = imageView->resource_;
         table_->vkDestroyImageView(device_->Handle(), imageView->handle_, nullptr);
         delete imageView;
 

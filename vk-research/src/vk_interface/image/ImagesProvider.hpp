@@ -66,6 +66,7 @@ private:
     struct ImageViewContainer
     {
         ImageView* view_;
+        bool isSwapchain_;
     };
 
 private:

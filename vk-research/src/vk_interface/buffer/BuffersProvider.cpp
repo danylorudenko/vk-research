@@ -12,7 +12,7 @@
 namespace VKW
 {
 
-ProvidedBuffer::ProvidedBuffer(BufferResourceHandle resource, std::uint32_t referenceCount)
+ProvidedBuffer::ProvidedBuffer(BufferResource* resource, std::uint32_t referenceCount)
     : bufferResource_{ resource }
     , referenceCount_{ referenceCount }
 {
@@ -69,7 +69,7 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
     BufferDesc bufferDesc;
     bufferDesc.size_ = totalBufferSize;
     bufferDesc.usage_ = desc[0].usage_;
-    BufferResourceHandle bufferRes = resourcesController_->CreateBuffer(bufferDesc);
+    BufferResource* bufferRes = resourcesController_->CreateBuffer(bufferDesc);
     auto* providedBuffer = new ProvidedBuffer{ bufferRes, buffersCount };
     providedBuffers_.push_back(providedBuffer);
 
@@ -83,9 +83,8 @@ void BuffersProvider::AcquireViews(std::uint32_t buffersCount, BufferViewDesc co
 
     std::uint32_t prevOffset = 0;
     for (auto i = 0u; i < buffersCount; ++i) {
-        BufferResource const* resource = resourcesController_->GetBuffer(bufferRes);
         viewInfo.flags = VK_FLAGS_NONE;
-        viewInfo.buffer = resource->handle_;
+        viewInfo.buffer = bufferRes->handle_;
         viewInfo.format = format;
         //viewInfo.offset = desc[i].offset_;
         viewInfo.offset = prevOffset;
@@ -143,8 +142,7 @@ BufferView* BuffersProvider::GetView(BufferViewHandle handle)
 
 BufferResource* BuffersProvider::GetViewResource(BufferViewHandle handle)
 {
-    BufferResourceHandle resourceHandle = handle.view_->providedBuffer_->bufferResource_;
-    return resourcesController_->GetBuffer(resourceHandle);
+    return handle.view_->providedBuffer_->bufferResource_;
 }
 
 BuffersProvider::~BuffersProvider()

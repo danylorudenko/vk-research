@@ -505,31 +505,11 @@ Framebuffer* ResourceRendererProxy::GetFramebuffer(ProxyFramebufferHandle handle
     return framebufferController_->GetFramebuffer(framebufferHandle);
 }
 
-VKW::BufferResource* ResourceRendererProxy::GetResource(VKW::BufferResourceHandle handle)
-{
-    return resourcesController_->GetBuffer(handle);
-}
-
-VKW::ImageResource* ResourceRendererProxy::GetResource(VKW::ImageResourceHandle handle)
-{
-    return resourcesController_->GetImage(handle);
-}
-
-VKW::MemoryPage* ResourceRendererProxy::GetMemoryPage(VKW::BufferResourceHandle handle)
-{
-    return GetResource(handle)->memory_.page_;
-}
-
-VKW::MemoryPage* ResourceRendererProxy::GetMemoryPage(VKW::ImageResourceHandle handle)
-{
-    return GetResource(handle)->memory_.page_;
-}
-
 void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)
 {
     VKW::BufferView const* view = GetBufferView(handle, context);
-    VKW::BufferResource const* resource = GetResource(view->providedBuffer_->bufferResource_);
-    VKW::MemoryPage const* memoryPage = GetMemoryPage(view->providedBuffer_->bufferResource_);
+    VKW::BufferResource const* resource = view->providedBuffer_->bufferResource_;
+    VKW::MemoryPage const* memoryPage = view->providedBuffer_->bufferResource_->GetMemoryPage();
 
     std::uint64_t const mappingOffset = resource->memory_.offset_ + view->offset_;
 
@@ -542,8 +522,8 @@ void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint3
 void ResourceRendererProxy::FlushBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)
 {
     VKW::BufferView const* view = GetBufferView(handle, context);
-    VKW::BufferResource const* resource = GetResource(view->providedBuffer_->bufferResource_);
-    VKW::MemoryPage const* memoryPage = GetMemoryPage(view->providedBuffer_->bufferResource_);
+    VKW::BufferResource const* resource = view->providedBuffer_->bufferResource_;
+    VKW::MemoryPage const* memoryPage = view->providedBuffer_->bufferResource_->GetMemoryPage();
 
     std::uint64_t const mappingOffset = resource->memory_.offset_ + view->offset_;
 
