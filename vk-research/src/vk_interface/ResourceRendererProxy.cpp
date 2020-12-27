@@ -491,7 +491,7 @@ ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebuffer
         vkFBDesc.colorAttachments_ = colorAttachmentHandles;
         vkFBDesc.depthStencilAttachment_ = depthStancilAttachmentHandle;
 
-        FramebufferHandle framebufferHandle = framebufferController_->CreateFramebuffer(vkFBDesc);
+        Framebuffer* framebufferHandle = framebufferController_->CreateFramebuffer(vkFBDesc);
 
         frameResources.framebuffers_.emplace_back(framebufferHandle);
     }
@@ -501,8 +501,7 @@ ProxyFramebufferHandle ResourceRendererProxy::CreateFramebuffer(ProxyFramebuffer
 
 Framebuffer* ResourceRendererProxy::GetFramebuffer(ProxyFramebufferHandle handle, std::uint32_t context)
 {
-    FramebufferHandle framebufferHandle = framedDescriptorsHub_->contexts_[context].framebuffers_[handle.id_];
-    return framebufferController_->GetFramebuffer(framebufferHandle);
+    return framedDescriptorsHub_->contexts_[context].framebuffers_[handle.id_];
 }
 
 void* ResourceRendererProxy::MapBuffer(VKW::ProxyBufferHandle handle, std::uint32_t context)

@@ -22,10 +22,6 @@ struct Framebuffer
     ImageViewHandle depthStencilAttachment_;
 };
 
-struct FramebufferHandle
-{
-    Framebuffer* framebuffer_;
-};
 
 
 }

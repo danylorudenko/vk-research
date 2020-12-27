@@ -62,12 +62,7 @@ FramebufferController::~FramebufferController()
     }
 }
 
-Framebuffer* FramebufferController::GetFramebuffer(FramebufferHandle handle)
-{
-    return handle.framebuffer_;
-}
-
-FramebufferHandle FramebufferController::CreateFramebuffer(FramebufferDesc const& desc)
+Framebuffer* FramebufferController::CreateFramebuffer(FramebufferDesc const& desc)
 {
     RenderPass const* renderPass = renderPassController_->GetRenderPass(desc.renderPass_);
 
@@ -115,7 +110,7 @@ FramebufferHandle FramebufferController::CreateFramebuffer(FramebufferDesc const
 
     framebuffers_.emplace_back(framebuffer);
 
-    return FramebufferHandle{ framebuffer };
+    return framebuffer;
 }
 
 }

@@ -50,10 +50,8 @@ public:
 
     ~FramebufferController();
 
-    FramebufferHandle CreateFramebuffer(FramebufferDesc const& desc);
-    void FreeFramebuffer(FramebufferHandle handle);
-
-    Framebuffer* GetFramebuffer(FramebufferHandle handle);
+    Framebuffer* CreateFramebuffer(FramebufferDesc const& desc);
+    void FreeFramebuffer(Framebuffer* handle);
 
 private:
     ImportTable* table_;
