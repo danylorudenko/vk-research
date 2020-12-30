@@ -96,10 +96,7 @@ ProxyImageHandle ResourceRendererProxy::RegisterSwapchainImageViews()
     std::uint32_t const id = framedDescriptorsHub_->imageViewsNextId_++;
     std::uint32_t const buffering = framedDescriptorsHub_->framesCount_;
     for (auto i = 0u; i < buffering; ++i) {
-        SwapchainImageViewDesc imDesc;
-        imDesc.index_ = i;
-
-        ImageView* viewHandle = imagesProvider_->RegisterSwapchainImageView(imDesc);
+        ImageView* viewHandle = imagesProvider_->RegisterSwapchainImageView(i);
         framedDescriptorsHub_->contexts_[i].imageViews_.push_back(viewHandle);
     }
 
@@ -404,12 +401,11 @@ BufferViewHandle ResourceRendererProxy::GetBufferViewHandle(ProxyBufferHandle ha
     return framedDescriptorsHub_->contexts_[context].bufferViews_[handle.id_];
 }
 
-ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
+ProxyImageHandle ResourceRendererProxy::CreateImage(VkFormat format, std::uint32_t width, std::uint32_t height, ImageUsage usage)
 {
-    ImageViewDesc imageViewDescs[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
     
     bool framedResource = false;
-    switch (desc.usage_) {
+    switch (usage) {
     case VKW::ImageUsage::RENDER_TARGET:
     case VKW::ImageUsage::DEPTH:
     case VKW::ImageUsage::STENCIL:
@@ -420,11 +416,8 @@ ProxyImageHandle ResourceRendererProxy::CreateImage(ImageViewDesc const& desc)
 
     std::uint32_t const framesCount = framedDescriptorsHub_->framesCount_;
     std::uint32_t const requiredImagesCount = framedResource ? framesCount : 1;
-    for (std::uint32_t i = 0; i < requiredImagesCount; ++i) {
-        imageViewDescs[i] = desc;
-    }
 
-    std::vector<ImageView*> imageViews = imagesProvider_->AcquireImageViews(requiredImagesCount, imageViewDescs);
+    std::vector<ImageView*> imageViews = imagesProvider_->AllocateImagesAndViews(requiredImagesCount, format, width, height, usage);
     
     auto const proxyId = framedDescriptorsHub_->imageViewsNextId_++;
     if (framedResource) {

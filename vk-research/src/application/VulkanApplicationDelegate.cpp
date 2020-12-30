@@ -245,12 +245,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
     VKW::ImageResource* colorBufferResource = colorBufferView->resource_;
 
-    VKW::ImageViewDesc depthBufferDesc;
-    depthBufferDesc.usage_ = VKW::ImageUsage::DEPTH;
-    depthBufferDesc.format_ = VK_FORMAT_D16_UNORM;
-    depthBufferDesc.width_ = colorBufferResource->width_;
-    depthBufferDesc.height_ = colorBufferResource->height_;
-    renderRoot_->DefineGlobalImage(depthBufferKey, depthBufferDesc);
+    renderRoot_->DefineGlobalImage(depthBufferKey, VK_FORMAT_D16_UNORM, colorBufferResource->width_, colorBufferResource->height_, VKW::ImageUsage::DEPTH);
 
     Render::RootGraphicsPassDesc passDesc;
     passDesc.colorAttachmentsCount_ = 1;

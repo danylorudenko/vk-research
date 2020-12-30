@@ -15,24 +15,6 @@ class Device;
 class Swapchain;
 class Surface;
 
-struct SwapchainImageViewDesc
-{
-    std::uint32_t index_;
-};
-
-struct ImageViewDesc
-{
-    VkFormat format_;
-    std::uint32_t width_;
-    std::uint32_t height_;
-    //std::uint32_t depth_;
-    //std::uint32_t arrayLayers_;
-    //std::uint32_t mipmaps_;
-    ImageUsage usage_;
-};
-
-
-
 struct ImagesProviderDesc
 {
     ImportTable* table_;
@@ -51,9 +33,10 @@ public:
     ImagesProvider(ImagesProvider&& rhs);
     ImagesProvider& operator=(ImagesProvider&& rhs);
 
-    ImageView* RegisterSwapchainImageView(SwapchainImageViewDesc const& desc);
-    std::vector<ImageView*> AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs);
-    void ReleaseImageViews(std::uint32_t count, ImageView** handles);
+    ImageView* RegisterSwapchainImageView(std::uint32_t index);
+    std::vector<ImageView*> AllocateImagesAndViews(std::uint32_t count, VkFormat format, std::uint32_t width, std::uint32_t height, ImageUsage usage);
+    void ReleaseImagesAndViews(std::uint32_t count, ImageView** handles);
+    void ReleaseImagesAndViews(std::vector<ImageView*> handles);
 
     VkSampler DefaultSamplerHandle() const;
 

@@ -107,12 +107,7 @@ void ImGuiHelper::Init()
     io.Fonts->GetTexDataAsAlpha8(&textureData, &imguiAtlasWidth, &imguiAtlasHeight, &imguiPixelBytes);
     assert(imguiPixelBytes == 1 && "ImGuiHelper: bytesPerPixel > 1, something went wrong");
 
-    VKW::ImageViewDesc imageDesc;
-    imageDesc.width_ = imguiAtlasWidth;
-    imageDesc.height_ = imguiAtlasHeight;
-    imageDesc.format_ = VK_FORMAT_R8_UNORM;
-    imageDesc.usage_ = VKW::ImageUsage::TEXTURE;
-    root_->DefineGlobalImage(IMGUI_TEXTURE_KEY, imageDesc);
+    root_->DefineGlobalImage(IMGUI_TEXTURE_KEY, VK_FORMAT_R8_UNORM, imguiAtlasWidth, imguiAtlasHeight, VKW::ImageUsage::TEXTURE);
 
     VKW::BufferViewDesc stagingBufferDesc;
     stagingBufferDesc.format_ = VK_FORMAT_UNDEFINED;

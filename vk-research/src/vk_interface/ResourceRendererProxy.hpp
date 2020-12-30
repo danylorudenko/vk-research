@@ -106,7 +106,7 @@ public:
     BufferView* GetBufferView(ProxyBufferHandle handle, std::uint32_t context);
     BufferViewHandle GetBufferViewHandle(ProxyBufferHandle handle, std::uint32_t context);
 
-    ProxyImageHandle CreateImage(ImageViewDesc const& desc);
+    ProxyImageHandle CreateImage(VkFormat format, std::uint32_t width, std::uint32_t height, ImageUsage usage);
     ImageView* GetImageView(ProxyImageHandle handle, std::uint32_t context);
 
     VkSampler GetDefaultSampler();

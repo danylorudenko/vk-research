@@ -46,22 +46,21 @@ Root::Root(RootDesc const& desc)
     VKW::ProxyImageHandle swapchainView = resourceProxy_->RegisterSwapchainImageViews();
     globalImages_[SWAPCHAIN_IMAGE_KEY] = swapchainView;
 
+    VKW::Swapchain* swapchain = loader_->swapchain_.get();
 
-    VKW::ImageViewDesc finalColorDesc;
-    finalColorDesc.format_ = loader_->swapchain_->Format();
-    finalColorDesc.width_ = loader_->swapchain_->Width() + COLOR_BUFFER_THREESHOLD * 2;
-    finalColorDesc.height_ = loader_->swapchain_->Height() + COLOR_BUFFER_THREESHOLD * 2;
-    finalColorDesc.usage_ = VKW::ImageUsage::RENDER_TARGET;
-
-    DefineGlobalImage(GetDefaultSceneColorOutput(), finalColorDesc);
+    DefineGlobalImage(
+        GetDefaultSceneColorOutput(), swapchain->Format(), 
+        swapchain->Width() + COLOR_BUFFER_THREESHOLD * 2,
+        swapchain->Height() + COLOR_BUFFER_THREESHOLD * 2,
+        VKW::ImageUsage::RENDER_TARGET);
 
     VkImage swapchainImages[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
     VkImageLayout imageLayouts[VKW::CONSTANTS::MAX_FRAMES_BUFFERING];
 
-    std::uint32_t const swapchainImagesCount = loader_->swapchain_->ImageCount();
+    std::uint32_t const swapchainImagesCount = swapchain->ImageCount();
     for (std::uint32_t i = 0; i < swapchainImagesCount; ++i) 
     {
-        swapchainImages[i] = loader_->swapchain_->Image(i).image_;
+        swapchainImages[i] = swapchain->Image(i).image_;
         imageLayouts[i] = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     }
 
@@ -354,9 +353,9 @@ std::uint32_t Root::GetDefaultSceneColorBufferThreeshold() const
     return COLOR_BUFFER_THREESHOLD;
 }
 
-void Root::DefineGlobalImage(ResourceKey const& key, VKW::ImageViewDesc const& desc)
+void Root::DefineGlobalImage(ResourceKey const& key, VkFormat format, std::uint32_t width, std::uint32_t height, VKW::ImageUsage usage)
 {
-    VKW::ProxyImageHandle imageHandle = resourceProxy_->CreateImage(desc);
+    VKW::ProxyImageHandle imageHandle = resourceProxy_->CreateImage(format, width, height, usage);
     globalImages_[key] = imageHandle;
 }
 
@@ -1042,12 +1041,7 @@ void Root::CreateImageFromFile(IOManager& ioManager, ResourceKey const& uploadBu
     Data::Texture2D textureData = ioManager.ReadTexture2D(sourceFile.c_str(), channels);
     std::memcpy(mappedUploadBuffer, textureData.textureData_.data(), textureData.textureData_.size());
 
-    VKW::ImageViewDesc textureDesc;
-    textureDesc.format_ = format;
-    textureDesc.width_ = textureData.width_;
-    textureDesc.height_ = textureData.height_;
-    textureDesc.usage_ = VKW::ImageUsage::TEXTURE;
-    DefineGlobalImage(imageKey, textureDesc);
+    DefineGlobalImage(imageKey, format, textureData.width_, textureData.height_, VKW::ImageUsage::TEXTURE);
 
     CopyStagingBufferToGPUTexture(uploadBuffer, imageKey, 0);
     VKW::ImageView* imageView = FindGlobalImage(imageKey, 0);

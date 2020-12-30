@@ -97,12 +97,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     std::uint32_t const height = sceneColorBufferResource->height_;
     VkFormat const format = sceneColorBufferResource->format_;
 
-    VKW::ImageViewDesc blurBuffersDesc;
-    blurBuffersDesc.format_ = format;
-    blurBuffersDesc.width_ = width;
-    blurBuffersDesc.height_ = height;
-    blurBuffersDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE;
-    root_->DefineGlobalImage(blurBuffer_, blurBuffersDesc);
+    root_->DefineGlobalImage(blurBuffer_, format, width, height, VKW::ImageUsage::STORAGE_IMAGE);
 
     mixFactorUniformBuffer_ = root_->AcquireUniformBuffer(8);
 
@@ -114,12 +109,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     //Data::Texture2D maskTexture2DData = ioManager_->ReadTexture2D("textures\\mask4.png", Data::TEXTURE_VARIATION_GRAY);
 
     char const* maskUploadImage = "msku";
-    VKW::ImageViewDesc maskUploadImageDesc;
-    maskUploadImageDesc.format_ = VK_FORMAT_R8_UNORM;
-    maskUploadImageDesc.usage_ = VKW::ImageUsage::UPLOAD_IMAGE;
-    maskUploadImageDesc.width_ = maskTexture2DData.width_;
-    maskUploadImageDesc.height_ = maskTexture2DData.height_;
-    root_->DefineGlobalImage(maskUploadImage, maskUploadImageDesc);
+    root_->DefineGlobalImage(maskUploadImage, VK_FORMAT_R8_UNORM, maskTexture2DData.width_, maskTexture2DData.height_, VKW::ImageUsage::UPLOAD_IMAGE);
 
     VKW::ImageView* maskUploadImageView = root_->FindGlobalImage(maskUploadImage, 0);
     VKW::ImageResource* maskUploadImageResource = maskUploadImageView->resource_;
@@ -146,15 +136,10 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
 
     VKW::ImageView* colorBufferImageView = root_->FindGlobalImage(sceneColorBuffer_, 0);
     VKW::ImageResource* colorBufferResource = colorBufferImageView->resource_;
-    VKW::ImageViewDesc maskImageDesc;
-    maskImageDesc.format_ = VK_FORMAT_R8_UNORM;
-    maskImageDesc.width_ = colorBufferResource->width_;
-    maskImageDesc.height_ = colorBufferResource->height_;
-    maskImageDesc.usage_ = VKW::ImageUsage::STORAGE_IMAGE_READONLY;
-    root_->DefineGlobalImage(blurMaskTexture_, maskImageDesc);
+    root_->DefineGlobalImage(blurMaskTexture_, VK_FORMAT_R8_UNORM, colorBufferResource->width_, colorBufferResource->height_, VKW::ImageUsage::STORAGE_IMAGE_READONLY);
     root_->BlitImages(maskUploadImage, blurMaskTexture_, 0, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_READ_BIT);
 
-    
+
 
 
     // transitioning pass image to neede IMAGE_LAYOUTs

@@ -101,7 +101,7 @@ VkSampler ImagesProvider::DefaultSamplerHandle() const
     return defaultSampler_;
 }
 
-ImageView* ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDesc const& desc)
+ImageView* ImagesProvider::RegisterSwapchainImageView(std::uint32_t index)
 {
     VkImageView vkImageView = VK_NULL_HANDLE;
 
@@ -109,7 +109,7 @@ ImageView* ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDesc con
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.pNext = nullptr;
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.image = swapchain_->Image(desc.index_).image_;
+    viewInfo.image = swapchain_->Image(index).image_;
     viewInfo.format = swapchain_->Format();
     viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
     viewInfo.flags = VK_FLAGS_NONE;
@@ -128,58 +128,59 @@ ImageView* ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDesc con
     return imageView;
 }
 
-std::vector<ImageView*> ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs)
+std::vector<ImageView*> ImagesProvider::AllocateImagesAndViews(std::uint32_t count, VkFormat format, std::uint32_t width, std::uint32_t height, ImageUsage usage)
 {
     std::vector<ImageView*> results;
     results.reserve(count);
 
+    ImageDesc imageDesc;
+    imageDesc.format_ = format;
+    imageDesc.width_ = width;
+    imageDesc.height_ = height;
+    imageDesc.usage_ = usage;
+
+    VkImageAspectFlags aspectFlags;
+    switch (usage) {
+    case ImageUsage::RENDER_TARGET:
+    case ImageUsage::TEXTURE:
+    case ImageUsage::STORAGE_IMAGE:
+    case ImageUsage::STORAGE_IMAGE_READONLY:
+    case ImageUsage::UPLOAD_IMAGE:
+        aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+        break;
+    case ImageUsage::DEPTH:
+        aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
+        break;
+    case ImageUsage::STENCIL:
+        aspectFlags = VK_IMAGE_ASPECT_STENCIL_BIT;
+        break;
+    case ImageUsage::DEPTH_STENCIL:
+        aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+        break;
+    default:
+        assert(false && "Image usage not supported");
+    }
+
+    VkImageViewCreateInfo viewInfo;
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.pNext = nullptr;
+    viewInfo.image = VK_NULL_HANDLE;
+    viewInfo.format = format;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+    viewInfo.flags = VK_FLAGS_NONE;
+    viewInfo.subresourceRange.aspectMask = aspectFlags;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+    viewInfo.subresourceRange.levelCount = 1;
+
     for (std::uint32_t i = 0; i < count; ++i) {
-        ImageDesc imageDesc;
-        imageDesc.format_ = descs[i].format_;
-        imageDesc.width_ = descs[i].width_;
-        imageDesc.height_ = descs[i].height_;
-        imageDesc.usage_ = descs[i].usage_;
         ImageResource* imageResource = resourcesController_->CreateImage(imageDesc);
-
-        VkImageAspectFlags aspectFlags;
-        switch (descs[i].usage_) {
-        case ImageUsage::RENDER_TARGET:
-        case ImageUsage::TEXTURE:
-        case ImageUsage::STORAGE_IMAGE:
-        case ImageUsage::STORAGE_IMAGE_READONLY:
-        case ImageUsage::UPLOAD_IMAGE:
-            aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-            break;
-        case ImageUsage::DEPTH:
-            aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
-            break;
-        case ImageUsage::STENCIL:
-            aspectFlags = VK_IMAGE_ASPECT_STENCIL_BIT;
-            break;
-        case ImageUsage::DEPTH_STENCIL:
-            aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-            break;
-        default:
-            assert(false && "Image usage not supported");
-        }
-
-        VkImageViewCreateInfo viewInfo;
-        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        viewInfo.pNext = nullptr;
         viewInfo.image = imageResource->handle_;
-        viewInfo.format = descs[i].format_;
-        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
-        viewInfo.flags = VK_FLAGS_NONE;
-        viewInfo.subresourceRange.aspectMask = aspectFlags;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.layerCount = 1;
-        viewInfo.subresourceRange.levelCount = 1;
-
         VkImageView vkView = VK_NULL_HANDLE;
 
-        if (descs[i].usage_ != ImageUsage::UPLOAD_IMAGE)
+        if (usage != ImageUsage::UPLOAD_IMAGE)
             VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewInfo, nullptr, &vkView));
 
         ImageView* imageView = new ImageView{ vkView, viewInfo.format, viewInfo.viewType, viewInfo.subresourceRange, imageResource };
@@ -192,7 +193,7 @@ std::vector<ImageView*> ImagesProvider::AcquireImageViews(std::uint32_t count, I
     return results;
 }
 
-void ImagesProvider::ReleaseImageViews(std::uint32_t count, ImageView** handles)
+void ImagesProvider::ReleaseImagesAndViews(std::uint32_t count, ImageView** handles)
 {
     for (std::uint32_t i = 0; i < count; ++i) {
         auto imageViewContIt = std::find_if(
@@ -213,6 +214,11 @@ void ImagesProvider::ReleaseImageViews(std::uint32_t count, ImageView** handles)
 
         imageViewContainers_.erase(imageViewContIt);
     }
+}
+
+void ImagesProvider::ReleaseImagesAndViews(std::vector<ImageView*> handles)
+{
+    ReleaseImagesAndViews((std::uint32_t)handles.size(), handles.data());
 }
 
 }
