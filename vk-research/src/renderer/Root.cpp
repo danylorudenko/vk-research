@@ -459,15 +459,10 @@ Shader& Root::FindShader(ShaderKey const& key)
     return shaderMap_[key];
 }
 
-void Root::DefineShader(ShaderKey const& key, ShaderDesc const& desc)
+void Root::DefineShader(ShaderKey const& key, const char* relativePath, VKW::ShaderModuleType type)
 {
     Shader& shader = shaderMap_[key];
-
-    VKW::ShaderModuleDesc moduleDesc;
-    moduleDesc.shaderPath_ = desc.relativePath_.c_str();
-    moduleDesc.type_ = desc.type_;
-
-    shader.vkwShaderModuleHandle_ = shaderModuleFactory_->LoadModule(moduleDesc);
+    shader.shaderModule_ = shaderModuleFactory_->LoadModule(relativePath, type);
 }
 
 void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc const& desc)
@@ -502,7 +497,7 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     vkwDesc.shaderStagesCount_ = desc.shaderStagesCount_;
     for (std::uint32_t i = 0u; i < desc.shaderStagesCount_; ++i) {
         Shader& shader = FindShader(desc.shaderStages_[i]);
-        vkwDesc.shaderStages_[i] = VKW::ShaderStageInfo{ shader.vkwShaderModuleHandle_ };
+        vkwDesc.shaderStages_[i] = shader.shaderModule_;
     }
     vkwDesc.viewportInfo_ = desc.viewportInfo_;
     vkwDesc.layoutDesc_ = &vkwLayoutDesc;
@@ -541,7 +536,7 @@ void Root::DefineComputePipeline(PipelineKey const& key, ComputePipelineDesc con
     VKW::ComputePipelineDesc vkwDesc;
     vkwDesc.optimized_ = desc.optimized_;
     vkwDesc.layoutDesc_ = &vkwLayoutDesc;
-    vkwDesc.shaderStage_ = desc.shaderStage_;
+    vkwDesc.shaderModule_ = desc.shader_;
 
     VKW::PipelineHandle vkwPipelineHandle = pipelineFactory_->CreateComputePipeline(vkwDesc);
     VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);

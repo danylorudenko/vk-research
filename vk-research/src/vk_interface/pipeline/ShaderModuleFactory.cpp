@@ -53,10 +53,10 @@ ShaderModuleFactory::~ShaderModuleFactory()
     }
 }
 
-ShaderModuleHandle ShaderModuleFactory::LoadModule(ShaderModuleDesc const& desc)
+ShaderModule* ShaderModuleFactory::LoadModule(char const* shaderPath, ShaderModuleType type)
 {
     ByteBuffer buffer{ 8192 };
-    auto dataSize = ioManager_->ReadFileToBuffer(desc.shaderPath_, buffer);
+    auto dataSize = ioManager_->ReadFileToBuffer(shaderPath, buffer);
     
     VkShaderModule vkModule = VK_NULL_HANDLE;
 
@@ -68,33 +68,26 @@ ShaderModuleHandle ShaderModuleFactory::LoadModule(ShaderModuleDesc const& desc)
     info.pCode = buffer.As<std::uint32_t const*>();
     VK_ASSERT(table_->vkCreateShaderModule(device_->Handle(), &info, nullptr, &vkModule));
 
-    auto* resultModule = new ShaderModule{ vkModule };
+    ShaderModule* resultModule = new ShaderModule{ vkModule };
     resultModule->entryPoint_ = DEFAULT_SHADER_ENTRY_POINT;
-    resultModule->type_ = desc.type_;
+    resultModule->type_ = type;
     loadedModules_.emplace_back(resultModule);
 
-    return { resultModule };
+    return resultModule;
 }
 
-void ShaderModuleFactory::UnloadModule(ShaderModuleHandle module)
+void ShaderModuleFactory::UnloadModule(ShaderModule* module)
 {
-    auto deletedModule = module.handle_;
-    
     std::size_t const modulesCount = loadedModules_.size();
     for (auto i = 0u; i < modulesCount; ++i) {
         auto localHandle = loadedModules_[i]->handle_;
-        if (localHandle == deletedModule->handle_) {
+        if (localHandle == module->handle_) {
             table_->vkDestroyShaderModule(device_->Handle(), localHandle, nullptr);
             loadedModules_.erase(loadedModules_.begin() + i);
-            delete deletedModule;
+            delete module;
             return;
         }
     }
-}
-
-ShaderModule* ShaderModuleFactory::AccessModule(ShaderModuleHandle handle) const
-{
-    return handle.handle_;
 }
 
 }

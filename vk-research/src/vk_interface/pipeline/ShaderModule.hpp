@@ -21,10 +21,4 @@ struct ShaderModule
     ShaderModuleType type_;
     std::string entryPoint_;
 };
-
-struct ShaderModuleHandle
-{
-    ShaderModule* handle_ = nullptr;
-};
-
 }

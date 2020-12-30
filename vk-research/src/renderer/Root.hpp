@@ -70,12 +70,6 @@ struct RootDesc
     VKW::Worker* mainWorkerTemp_;
 };
 
-struct ShaderDesc
-{
-    VKW::ShaderModuleType type_;
-    std::string relativePath_;
-};
-
 struct PipelineLayoutDesc
 {
     std::uint32_t staticMembersCount_;
@@ -106,7 +100,7 @@ struct GraphicsPipelineDesc
 struct ComputePipelineDesc
 {
     bool optimized_;
-    VKW::ShaderStageInfo shaderStage_;
+    VKW::ShaderModule* shader_;
     PipelineLayoutDesc* layoutDesc_;
 };
 
@@ -234,7 +228,7 @@ public:
     void DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc);
     SetLayout& FindSetLayout(SetLayoutKey const& key);
 
-    void DefineShader(ShaderKey const& key, ShaderDesc const& desc);
+    void DefineShader(ShaderKey const& key, char const* relativePath, VKW::ShaderModuleType type);
     Shader& FindShader(ShaderKey const& key);
 
     void DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc const& desc);

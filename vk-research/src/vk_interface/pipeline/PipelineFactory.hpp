@@ -25,11 +25,6 @@ struct PipelineFactoryDesc
     DescriptorLayoutController* descriptorLayoutController_;
 };
 
-struct ShaderStageInfo
-{
-    ShaderModuleHandle shaderModuleHandle_;
-};
-
 struct VertexInputInfo
 {
     std::uint32_t binding_;
@@ -101,7 +96,7 @@ struct GraphicsPipelineDesc
     bool optimized_;
 
     std::uint32_t shaderStagesCount_;
-    ShaderStageInfo shaderStages_[Pipeline::MAX_SHADER_STAGES];
+    ShaderModule* shaderStages_[Pipeline::MAX_SHADER_STAGES];
 
     InputAssemblyInfo* inputAssemblyInfo_;
     VertexInputInfo* vertexInputInfo_;
@@ -117,7 +112,7 @@ struct GraphicsPipelineDesc
 struct ComputePipelineDesc
 {
     bool optimized_;
-    ShaderStageInfo shaderStage_;
+    ShaderModule* shaderModule_;
     PipelineLayoutDesc* layoutDesc_;
 };
 

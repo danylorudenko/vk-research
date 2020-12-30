@@ -7,7 +7,7 @@ namespace Render
 
 struct Shader
 {
-    VKW::ShaderModuleHandle vkwShaderModuleHandle_;
+    VKW::ShaderModule* shaderModule_;
 };
 
 }

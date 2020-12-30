@@ -255,16 +255,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
     renderRoot_->DefineRenderPass(passKey, passDesc);
 
-    Render::ShaderDesc vertexShaderDesc;
-    vertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
-    vertexShaderDesc.relativePath_ = "shader-src\\test-vertex.spv";
-    
-    Render::ShaderDesc fragmentShaderDesc;
-    fragmentShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
-    fragmentShaderDesc.relativePath_ = "shader-src\\test-frag-uniform.spv";
-
-    renderRoot_->DefineShader("vShader", vertexShaderDesc);
-    renderRoot_->DefineShader("fShader", fragmentShaderDesc);
+    renderRoot_->DefineShader("vShader", "shader-src\\test-vertex.spv", VKW::SHADER_MODULE_TYPE_VERTEX);
+    renderRoot_->DefineShader("fShader", "shader-src\\test-frag-uniform.spv", VKW::SHADER_MODULE_TYPE_FRAGMENT);
 
     Render::GraphicsPipelineDesc pipelineDesc;
 
@@ -378,16 +370,8 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
 
 
     // background pipeline, shaders, materials, renderworkitem
-    Render::ShaderDesc planeVertexShaderDesc;
-    planeVertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
-    planeVertexShaderDesc.relativePath_ = "shader-src\\plane.vert.spv";
-
-    Render::ShaderDesc planeFragmentShaderDesc;
-    planeFragmentShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
-    planeFragmentShaderDesc.relativePath_ = "shader-src\\plane.frag.spv";
-
-    renderRoot_->DefineShader("bvShader", planeVertexShaderDesc);
-    renderRoot_->DefineShader("bfShader", planeFragmentShaderDesc);
+    renderRoot_->DefineShader("bvShader", "shader-src\\plane.vert.spv", VKW::SHADER_MODULE_TYPE_VERTEX);
+    renderRoot_->DefineShader("bfShader", "shader-src\\plane.frag.spv", VKW::SHADER_MODULE_TYPE_FRAGMENT);
 
 
 

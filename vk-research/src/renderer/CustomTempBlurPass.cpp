@@ -64,28 +64,18 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
     mixPipelineLayoutDesc.staticMembersCount_ = 1;
     mixPipelineLayoutDesc.staticMembers_[0] = blurSetLayout_;
 
-
-    VKW::ShaderModuleDesc blurFastModuleDesc;
-    blurFastModuleDesc.type_ = VKW::SHADER_MODULE_TYPE_COMPUTE;
-    blurFastModuleDesc.shaderPath_ = "shader-src\\blur_single_pass.comp.spv";
-
-    VKW::ShaderModuleDesc blurFullModuleDesc;
-    blurFullModuleDesc.type_ = VKW::SHADER_MODULE_TYPE_COMPUTE;
-    blurFullModuleDesc.shaderPath_ = "shader-src\\blur_single_pass_heavy.comp.spv";
-
-
-    VKW::ShaderModuleHandle blurFastModuleHandle = shaderModuleFactory_->LoadModule(blurFastModuleDesc);
-    VKW::ShaderModuleHandle blurFullModuleHandle = shaderModuleFactory_->LoadModule(blurFullModuleDesc);
+    VKW::ShaderModule* blurFastModule = shaderModuleFactory_->LoadModule("shader-src\\blur_single_pass.comp.spv", VKW::SHADER_MODULE_TYPE_COMPUTE);
+    VKW::ShaderModule* blurFullModule = shaderModuleFactory_->LoadModule("shader-src\\blur_single_pass_heavy.comp.spv", VKW::SHADER_MODULE_TYPE_COMPUTE);
 
     ComputePipelineDesc blurFastPipelineDesc;
     blurFastPipelineDesc.optimized_ = true;
     blurFastPipelineDesc.layoutDesc_ = &mixPipelineLayoutDesc;
-    blurFastPipelineDesc.shaderStage_.shaderModuleHandle_ = blurFastModuleHandle;
+    blurFastPipelineDesc.shader_= blurFastModule;
 
     ComputePipelineDesc blurFullPipelineDesc;
     blurFullPipelineDesc.optimized_ = true;
     blurFullPipelineDesc.layoutDesc_ = &mixPipelineLayoutDesc;
-    blurFullPipelineDesc.shaderStage_.shaderModuleHandle_ = blurFullModuleHandle;
+    blurFullPipelineDesc.shader_ = blurFullModule;
 
     root_->DefineComputePipeline(blurFastPipeline_, blurFastPipelineDesc);
     root_->DefineComputePipeline(blurFullPipeline_, blurFullPipelineDesc);

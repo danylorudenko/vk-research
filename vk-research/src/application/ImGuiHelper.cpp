@@ -135,14 +135,6 @@ void ImGuiHelper::Init()
     passDesc.colorAttachments_[0].resourceKey_ = root_->GetDefaultSceneColorOutput();
     passDesc.colorAttachments_[0].usage_ = VKW::RENDER_PASS_ATTACHMENT_USAGE_COLOR_PRESERVE;
 
-    Render::ShaderDesc vertexShaderDesc;
-    vertexShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_VERTEX;
-    vertexShaderDesc.relativePath_ = "shader-src\\imgui.vert.spv";
-
-    Render::ShaderDesc fragmentShaderDesc;
-    fragmentShaderDesc.type_ = VKW::ShaderModuleType::SHADER_MODULE_TYPE_FRAGMENT;
-    fragmentShaderDesc.relativePath_ = "shader-src\\imgui.frag.spv";
-
     Render::GraphicsPipelineDesc pipelineDesc;
 
     pipelineDesc.renderPass_ = IMGUI_PASS_KEY;
@@ -249,8 +241,8 @@ void ImGuiHelper::Init()
 
 
     root_->DefineRenderPass(IMGUI_PASS_KEY, passDesc);
-    root_->DefineShader(IMGUI_VERT_SHADER_KEY, vertexShaderDesc);
-    root_->DefineShader(IMGUI_FRAG_SHADER_KEY, fragmentShaderDesc);
+    root_->DefineShader(IMGUI_VERT_SHADER_KEY, "shader-src\\imgui.vert.spv", VKW::SHADER_MODULE_TYPE_VERTEX);
+    root_->DefineShader(IMGUI_FRAG_SHADER_KEY, "shader-src\\imgui.frag.spv", VKW::SHADER_MODULE_TYPE_FRAGMENT);
     root_->DefineSetLayout(IMGUI_ITEM_SET_LAYOUT_KEY, itemSetLayoutDesc);
     root_->DefineSetLayout(IMGUI_MATERIAL_SET_LAYOUT_KEY, materialSetLayoutDesc);
     root_->DefineGraphicsPipeline(IMGUI_PIPELINE_KEY, pipelineDesc);

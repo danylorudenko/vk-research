@@ -18,12 +18,6 @@ struct ShaderModuleFactoryDesc
     IOManager* ioManager_;
 };
 
-struct ShaderModuleDesc
-{
-    char const* shaderPath_;
-    ShaderModuleType type_;
-};
-
 class ShaderModuleFactory
 {
 public:
@@ -33,10 +27,8 @@ public:
     ShaderModuleFactory(ShaderModuleFactory&& rhs);
     ShaderModuleFactory& operator=(ShaderModuleFactory&& rhs);
 
-    ShaderModuleHandle LoadModule(ShaderModuleDesc const& desc);
-    void UnloadModule(ShaderModuleHandle module);
-
-    ShaderModule* AccessModule(ShaderModuleHandle handle) const;
+    ShaderModule* LoadModule(char const* shaderPath, ShaderModuleType type);
+    void UnloadModule(ShaderModule* module);
 
     ~ShaderModuleFactory();
 
