@@ -51,11 +51,9 @@ public:
     ImagesProvider(ImagesProvider&& rhs);
     ImagesProvider& operator=(ImagesProvider&& rhs);
 
-    ImageViewHandle RegisterSwapchainImageView(SwapchainImageViewDesc const& desc);
-    void AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs, ImageViewHandle* results);
-    void ReleaseImageViews(std::uint32_t count, ImageViewHandle* handles);
-
-    ImageView* GetImageView(ImageViewHandle handle);
+    ImageView* RegisterSwapchainImageView(SwapchainImageViewDesc const& desc);
+    std::vector<ImageView*> AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs);
+    void ReleaseImageViews(std::uint32_t count, ImageView** handles);
 
     VkSampler DefaultSamplerHandle() const;
 

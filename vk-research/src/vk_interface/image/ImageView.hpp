@@ -17,9 +17,4 @@ struct ImageView
     ImageResource* resource_;
 };
 
-struct ImageViewHandle
-{
-    ImageView* view_;
-};
-
 }

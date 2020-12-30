@@ -101,12 +101,7 @@ VkSampler ImagesProvider::DefaultSamplerHandle() const
     return defaultSampler_;
 }
 
-ImageView* ImagesProvider::GetImageView(ImageViewHandle handle)
-{
-    return handle.view_;
-}
-
-ImageViewHandle ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDesc const& desc)
+ImageView* ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDesc const& desc)
 {
     VkImageView vkImageView = VK_NULL_HANDLE;
 
@@ -130,11 +125,14 @@ ImageViewHandle ImagesProvider::RegisterSwapchainImageView(SwapchainImageViewDes
     
     imageViewContainers_.emplace_back(ImageViewContainer{ imageView, true });
     
-    return ImageViewHandle{ imageView };
+    return imageView;
 }
 
-void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs, ImageViewHandle* results)
+std::vector<ImageView*> ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const* descs)
 {
+    std::vector<ImageView*> results;
+    results.reserve(count);
+
     for (std::uint32_t i = 0; i < count; ++i) {
         ImageDesc imageDesc;
         imageDesc.format_ = descs[i].format_;
@@ -188,18 +186,20 @@ void ImagesProvider::AcquireImageViews(std::uint32_t count, ImageViewDesc const*
 
         imageViewContainers_.emplace_back(ImageViewContainer{ imageView, false });
 
-        results[i].view_ = imageView;
+        results.emplace_back(imageView);
     }
+
+    return results;
 }
 
-void ImagesProvider::ReleaseImageViews(std::uint32_t count, ImageViewHandle* handles)
+void ImagesProvider::ReleaseImageViews(std::uint32_t count, ImageView** handles)
 {
     for (std::uint32_t i = 0; i < count; ++i) {
         auto imageViewContIt = std::find_if(
             imageViewContainers_.begin(),
             imageViewContainers_.end(),
             [handles, i](ImageViewContainer const& container) {
-            return container.view_ == handles[i].view_;
+            return container.view_ == handles[i];
         });
 
         assert(imageViewContIt != imageViewContainers_.end() && "Can't release ImageView.");

@@ -22,8 +22,8 @@ struct FramebufferDesc
 {
     RenderPassHandle renderPass_;
 
-    ImageViewHandle const* colorAttachments_;
-    ImageViewHandle const* depthStencilAttachment_;
+    ImageView** colorAttachments_;
+    ImageView* depthStencilAttachment_;
     std::uint32_t width_;
     std::uint32_t height_;
 

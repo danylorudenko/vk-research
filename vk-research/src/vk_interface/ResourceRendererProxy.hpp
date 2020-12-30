@@ -34,7 +34,7 @@ struct ProxyDescriptorWriteDesc
     {
         struct ImageDesc 
         {
-            ImageViewHandle imageViewHandle_;
+            ImageView* imageView_;
             VkSampler sampler_;
             VkImageLayout layout_;
         } 
@@ -107,7 +107,6 @@ public:
     BufferViewHandle GetBufferViewHandle(ProxyBufferHandle handle, std::uint32_t context);
 
     ProxyImageHandle CreateImage(ImageViewDesc const& desc);
-    ImageViewHandle GetImageViewHandle(ProxyImageHandle handle, std::uint32_t context);
     ImageView* GetImageView(ProxyImageHandle handle, std::uint32_t context);
 
     VkSampler GetDefaultSampler();

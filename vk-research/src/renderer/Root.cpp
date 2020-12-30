@@ -620,9 +620,7 @@ void Root::Decorate_VKWProxyDescriptorWriteDesc_Texture(VKW::ProxyDescriptorWrit
     for (std::uint32_t i = 0; i < framesCount; ++i) {
         VKW::ProxyDescriptorWriteDesc::Union::ImageDesc& imageDesc = writeDesc.frames_[i].imageDesc_;
 
-        VKW::ImageViewHandle imageViewHandle = resourceProxy_->GetImageViewHandle(proxyImageHandle, i);
-        
-        imageDesc.imageViewHandle_ = imageViewHandle;
+        imageDesc.imageView_ = resourceProxy_->GetImageView(proxyImageHandle, i);;
         imageDesc.sampler_ = resourceProxy_->GetDefaultSampler();
         imageDesc.layout_ = VK_IMAGE_LAYOUT_GENERAL;
     }

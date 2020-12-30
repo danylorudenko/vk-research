@@ -74,13 +74,13 @@ Framebuffer* FramebufferController::CreateFramebuffer(FramebufferDesc const& des
     VkImageView attachments[RenderPass::MAX_ATTACHMENTS];
 
     for (auto i = 0u; i < colorAttachmentsCount; ++i) {
-        ImageView* imageView = imagesProvider_->GetImageView(desc.colorAttachments_[i]);
+        ImageView* imageView = desc.colorAttachments_[i];
         attachments[i] = imageView->handle_;
     }
 
     if (renderPassUsesDepthStencil) {
         assert(desc.depthStencilAttachment_ != nullptr && "RenderPass uses depthstencil attachment but no image was provided for framebuffer");
-        ImageView* imageView = imagesProvider_->GetImageView(*desc.depthStencilAttachment_);
+        ImageView* imageView = desc.depthStencilAttachment_;
         attachments[colorAttachmentsCount] = imageView->handle_;
     }
 
@@ -102,7 +102,7 @@ Framebuffer* FramebufferController::CreateFramebuffer(FramebufferDesc const& des
     framebuffer->handle_ = vkFramebuffer;
     framebuffer->width_ = desc.width_;
     framebuffer->height_ = desc.height_;
-    framebuffer->depthStencilAttachment_ = renderPassUsesDepthStencil ? *desc.depthStencilAttachment_ : ImageViewHandle{};
+    framebuffer->depthStencilAttachment_ = renderPassUsesDepthStencil ? desc.depthStencilAttachment_ : nullptr;
     framebuffer->colorAttachmentsCount_ = renderPass->colorAttachmentsCount_;
     for (auto i = 0u; i < colorAttachmentsCount; ++i) {
         framebuffer->colorAttachments_[i] = desc.colorAttachments_[i];
