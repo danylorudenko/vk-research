@@ -192,12 +192,11 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
             table_->vkCmdSetViewport(commandReciever->commandBuffer_, 0, 1, &viewport);
         }
 
-        VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(pipeline.pipelineHandle_);
-        VKW::PipelineLayout const* vkwPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwPipeline->layoutHandle);
+        VKW::PipelineLayout const* vkwPipelineLayout = descriptorLayoutController_->GetPipelineLayout(pipeline.pipeline_->layoutHandle);
         VkPipelineLayout const vkPipelineLayout = vkwPipelineLayout->handle_;
 
         VkCommandBuffer const commandBuffer = commandReciever->commandBuffer_;
-        table_->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkwPipeline->vkPipeline_);
+        table_->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline_->vkPipeline_);
         
         Material& material = root_->FindMaterial(materialDelegatedData_[i].materialKey_);
         Material::PerPassData& perPassData = material.perPassData_[i];

@@ -237,8 +237,8 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
 {
     Pipeline& blurFastPipeline = root_->FindPipeline(blurFastPipeline_);
     Pipeline& blurFullPipeline = root_->FindPipeline(blurFullPipeline_);
-    VKW::Pipeline* vkwBlurFastPipeline = pipelineFactory_->GetPipeline(blurFastPipeline.pipelineHandle_);
-    VKW::Pipeline* vkwBlurFullPipeline = pipelineFactory_->GetPipeline(blurFullPipeline.pipelineHandle_);
+    VKW::Pipeline* vkwBlurFastPipeline = root_->FindPipeline(blurFastPipeline_).pipeline_;
+    VKW::Pipeline* vkwBlurFullPipeline = root_->FindPipeline(blurFullPipeline_).pipeline_;
     VKW::PipelineLayout* vkwBlurFastPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwBlurFastPipeline->layoutHandle);
 
 

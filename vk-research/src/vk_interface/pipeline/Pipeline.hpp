@@ -18,9 +18,4 @@ struct Pipeline
     PipelineLayoutHandle layoutHandle;
 };
 
-struct PipelineHandle
-{
-    Pipeline* pipeline_;
-};
-
 }

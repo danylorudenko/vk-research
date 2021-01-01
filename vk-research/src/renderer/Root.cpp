@@ -506,13 +506,12 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     vkwDesc.dynamicStatesFlags_ = desc.dynamicStateFlags_;
     vkwDesc.blendingState_ = desc.blendingState_;
     
-    VKW::PipelineHandle const vkwPipelineHandle = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
-    VKW::Pipeline const* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
+    VKW::Pipeline* vkwPipeline = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
     VKW::PipelineLayoutHandle const vkwPipelineLayoutHandle = vkwPipeline->layoutHandle;
 
 
     pipeline.layoutHandle_ = vkwPipelineLayoutHandle;
-    pipeline.pipelineHandle_ = vkwPipelineHandle;
+    pipeline.pipeline_ = vkwPipeline;
 
     pipeline.properties_.pipelineDynamicStateFlags_ = desc.dynamicStateFlags_;
 }
@@ -538,11 +537,10 @@ void Root::DefineComputePipeline(PipelineKey const& key, ComputePipelineDesc con
     vkwDesc.layoutDesc_ = &vkwLayoutDesc;
     vkwDesc.shaderModule_ = desc.shader_;
 
-    VKW::PipelineHandle vkwPipelineHandle = pipelineFactory_->CreateComputePipeline(vkwDesc);
-    VKW::Pipeline* vkwPipeline = pipelineFactory_->GetPipeline(vkwPipelineHandle);
+    VKW::Pipeline* vkwPipeline = pipelineFactory_->CreateComputePipeline(vkwDesc);
 
     pipeline.layoutHandle_ = vkwPipeline->layoutHandle;
-    pipeline.pipelineHandle_ = vkwPipelineHandle;
+    pipeline.pipeline_ = vkwPipeline;
     pipeline.properties_.pipelineDynamicStateFlags_ = 0;
 }
 

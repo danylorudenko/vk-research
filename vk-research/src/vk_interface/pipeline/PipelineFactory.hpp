@@ -126,11 +126,9 @@ public:
     PipelineFactory(PipelineFactory&& rhs);
     PipelineFactory& operator=(PipelineFactory&& rhs);
 
-    PipelineHandle CreateGraphicsPipeline(GraphicsPipelineDesc const& desc);
-    PipelineHandle CreateComputePipeline(ComputePipelineDesc const& desc);
-    void DestroyPipeline(PipelineHandle pipeline);
-    
-    Pipeline* GetPipeline(PipelineHandle handle) const;
+    Pipeline* CreateGraphicsPipeline(GraphicsPipelineDesc const& desc);
+    Pipeline* CreateComputePipeline(ComputePipelineDesc const& desc);
+    void DestroyPipeline(Pipeline* pipeline);
     
     ~PipelineFactory();
 

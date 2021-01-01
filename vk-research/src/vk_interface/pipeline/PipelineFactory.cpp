@@ -78,7 +78,7 @@ VkShaderStageFlagBits VKWShaderTypeToVkFlags(ShaderModuleType type)
     }
 }
 
-PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& desc)
+Pipeline* PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& desc)
 {
     static VkPipelineShaderStageCreateInfo shaderStagesInfo[Pipeline::MAX_SHADER_STAGES];
     static VkVertexInputBindingDescription inputBindingsInfo[Pipeline::MAX_VERTEX_ATTRIBUTES];
@@ -348,10 +348,10 @@ PipelineHandle PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc cons
 
     pipelines_.emplace_back(result);
 
-    return PipelineHandle{ result };
+    return result;
 }
 
-PipelineHandle PipelineFactory::CreateComputePipeline(ComputePipelineDesc const& desc)
+Pipeline* PipelineFactory::CreateComputePipeline(ComputePipelineDesc const& desc)
 {
     ShaderModule* shaderModule = desc.shaderModule_;
     PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
@@ -381,12 +381,19 @@ PipelineHandle PipelineFactory::CreateComputePipeline(ComputePipelineDesc const&
     result->layoutHandle = layoutHandle;
 
     pipelines_.emplace_back(result);
-    return PipelineHandle{ result };
+    return result;
 }
 
-Pipeline* PipelineFactory::GetPipeline(PipelineHandle handle) const
+void PipelineFactory::DestroyPipeline(Pipeline* pipeline)
 {
-    return handle.pipeline_;
+    auto it = std::find(pipelines_.begin(), pipelines_.end(), pipeline);
+    assert(it != pipelines_.end() && "Can't delete the pipeline in VKW.");
+
+    descriptorLayoutController_->ReleasePipelineLayout(pipeline->layoutHandle);
+    table_->vkDestroyPipeline(device_->Handle(), pipeline->vkPipeline_, nullptr);
+
+    pipelines_.erase(it);
+    delete pipeline;
 }
 
 }

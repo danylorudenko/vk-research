@@ -34,7 +34,7 @@ struct Pipeline
     SetLayoutKey instancedLayoutKeys_[VKW::PipelineLayout::MAX_PIPELINE_LAYOUT_MEMBERS];
     VKW::PipelineLayoutHandle layoutHandle_;
 
-    VKW::PipelineHandle pipelineHandle_;
+    VKW::Pipeline* pipeline_;
     PipelineProperties properties_;
 
     std::vector<RenderWorkItem> renderItems_;
