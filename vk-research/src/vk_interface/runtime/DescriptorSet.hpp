@@ -10,7 +10,7 @@ namespace VKW
 struct DescriptorSet
 {
     VkDescriptorSet handle_;
-    DescriptorSetLayoutHandle layout_;
+    DescriptorSetLayout const* layout_;
 };
 
 struct DescriptorSetHandle

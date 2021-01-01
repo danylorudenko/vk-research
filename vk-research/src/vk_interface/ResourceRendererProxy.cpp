@@ -103,18 +103,17 @@ ProxyImageHandle ResourceRendererProxy::RegisterSwapchainImageViews()
     return ProxyImageHandle{ id };
 }
 
-ProxySetHandle ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout)
+ProxySetHandle ResourceRendererProxy::CreateSet(DescriptorSetLayout const* layout)
 {
     // Here, based on the contents of the layout i should decide, 
     // wheather the descriptorset should be framed
-    
-    DescriptorSetLayout* layoutPtr = layoutController_->GetDescriptorSetLayout(layout);
-    std::uint32_t const layoutMembersCount = layoutPtr->membersCount_;
+ 
+    std::uint32_t const layoutMembersCount = layout->membersCount_;
 
     bool framedSet = false;
     for (auto i = 0u; i < layoutMembersCount; ++i) {
 
-        auto& layoutMember = layoutPtr->membersInfo_[i];
+        DescriptorSetLayoutMemberInfo const& layoutMember = layout->membersInfo_[i];
 
         switch (layoutMember.type_) {
         case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
@@ -133,22 +132,19 @@ ProxySetHandle ResourceRendererProxy::CreateSet(DescriptorSetLayoutHandle layout
 
     std::uint32_t id = framedDescriptorsHub_->descriptorSetsNextId_++;
 
-    DescriptorSetDesc setDesc;
-    setDesc.layout_ = layout;
-
     if (framedSet) {
         // create multiple sets and put in different frames
         auto const framesCount = framedDescriptorsHub_->framesCount_;
         for (auto i = 0u; i < framesCount; ++i) {
             assert(framedDescriptorsHub_->contexts_[i].descriptorSets_.size() == id && "Unsyncronized write to FramedDescriptors::descriptorSets.");
 
-            DescriptorSetHandle setHandle = descriptorSetsController_->AllocDescriptorSet(setDesc);
+            DescriptorSetHandle setHandle = descriptorSetsController_->AllocDescriptorSet(layout);
             framedDescriptorsHub_->contexts_[i].descriptorSets_.emplace_back(setHandle);
         }
     }
     else {
         // create one set and put in all frames
-        DescriptorSetHandle setHandle = descriptorSetsController_->AllocDescriptorSet(setDesc);
+        DescriptorSetHandle setHandle = descriptorSetsController_->AllocDescriptorSet(layout);
 
         auto const framesCount = framedDescriptorsHub_->framesCount_;
         for (auto i = 0u; i < framesCount; ++i) {
@@ -186,7 +182,7 @@ void ResourceRendererProxy::WriteSet(ProxySetHandle setHandle, ProxyDescriptorWr
 
     DescriptorSetHandle firstFrameSetHandle = framedDescriptorsHub_->contexts_[0].descriptorSets_[setHandle.id_];
     DescriptorSet* firstFrameSet = descriptorSetsController_->GetDescriptorSet(firstFrameSetHandle);
-    DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(firstFrameSet->layout_);
+    DescriptorSetLayout const* layout = firstFrameSet->layout_;
 
     auto const setMembersCount = layout->membersCount_;
 

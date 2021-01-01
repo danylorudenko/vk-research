@@ -192,7 +192,7 @@ void GraphicsPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandRecieve
             table_->vkCmdSetViewport(commandReciever->commandBuffer_, 0, 1, &viewport);
         }
 
-        VKW::PipelineLayout const* vkwPipelineLayout = descriptorLayoutController_->GetPipelineLayout(pipeline.pipeline_->layoutHandle);
+        VKW::PipelineLayout const* vkwPipelineLayout = pipeline.pipeline_->layout_;
         VkPipelineLayout const vkPipelineLayout = vkwPipelineLayout->handle_;
 
         VkCommandBuffer const commandBuffer = commandReciever->commandBuffer_;

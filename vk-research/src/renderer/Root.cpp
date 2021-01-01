@@ -436,12 +436,11 @@ BasePass& Root::FindPass(PassKey const& key)
 
 void Root::DefineSetLayout(SetLayoutKey const& key, VKW::DescriptorSetLayoutDesc const& desc)
 {
-    VKW::DescriptorSetLayoutHandle handle = layoutController_->CreateDescriptorSetLayout(desc);
+    VKW::DescriptorSetLayout* layout = layoutController_->CreateDescriptorSetLayout(desc);
     SetLayout& set = setLayoutMap_[key];
-    set.vkwSetLayoutHandle_ = handle;
+    set.vkwSetLayout_ = layout;
     set.membersCount_ = desc.membersCount_;
     
-    VKW::DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(handle);
     std::uint32_t const membersCount = layout->membersCount_;
     for (std::uint32_t i = 0; i < membersCount; ++i) {
         set.membersInfo_[i].type_ = desc.membersDesc_[i].type_;
@@ -480,14 +479,14 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     for (std::uint32_t i = 0; i < staticMembersCount; ++i, ++vkwMembersCounter) {
         pipeline.staticLayoutKeys_[i] = desc.layoutDesc_->staticMembers_[i];
         SetLayout const& setLayout = FindSetLayout(desc.layoutDesc_->staticMembers_[i]);
-        vkwLayoutDesc.members_[vkwMembersCounter] = setLayout.vkwSetLayoutHandle_;
+        vkwLayoutDesc.members_[vkwMembersCounter] = setLayout.vkwSetLayout_;
     }
 
     std::uint32_t const instancedMembersCount = desc.layoutDesc_->instancedMembersCount_;
     for (std::uint32_t i = 0; i < instancedMembersCount; ++i, ++vkwMembersCounter) {
         pipeline.instancedLayoutKeys_[i] = desc.layoutDesc_->instancedMembers_[i];
         SetLayout const& setLayout = FindSetLayout(desc.layoutDesc_->instancedMembers_[i]);
-        vkwLayoutDesc.members_[vkwMembersCounter] = setLayout.vkwSetLayoutHandle_;
+        vkwLayoutDesc.members_[vkwMembersCounter] = setLayout.vkwSetLayout_;
     }
     
     VKW::GraphicsPipelineDesc vkwDesc;
@@ -507,10 +506,10 @@ void Root::DefineGraphicsPipeline(PipelineKey const& key, GraphicsPipelineDesc c
     vkwDesc.blendingState_ = desc.blendingState_;
     
     VKW::Pipeline* vkwPipeline = pipelineFactory_->CreateGraphicsPipeline(vkwDesc);
-    VKW::PipelineLayoutHandle const vkwPipelineLayoutHandle = vkwPipeline->layoutHandle;
+    VKW::PipelineLayout* vkwPipelineLayout = vkwPipeline->layout_;
 
 
-    pipeline.layoutHandle_ = vkwPipelineLayoutHandle;
+    pipeline.layout_ = vkwPipelineLayout;
     pipeline.pipeline_ = vkwPipeline;
 
     pipeline.properties_.pipelineDynamicStateFlags_ = desc.dynamicStateFlags_;
@@ -529,7 +528,7 @@ void Root::DefineComputePipeline(PipelineKey const& key, ComputePipelineDesc con
     for (std::uint32_t i = 0; i < staticMembersCount; ++i) {
         pipeline.staticLayoutKeys_[i] = desc.layoutDesc_->staticMembers_[i];
         SetLayout const& setLayout = FindSetLayout(desc.layoutDesc_->staticMembers_[i]);
-        vkwLayoutDesc.members_[i] = setLayout.vkwSetLayoutHandle_;
+        vkwLayoutDesc.members_[i] = setLayout.vkwSetLayout_;
     }
 
     VKW::ComputePipelineDesc vkwDesc;
@@ -539,7 +538,7 @@ void Root::DefineComputePipeline(PipelineKey const& key, ComputePipelineDesc con
 
     VKW::Pipeline* vkwPipeline = pipelineFactory_->CreateComputePipeline(vkwDesc);
 
-    pipeline.layoutHandle_ = vkwPipeline->layoutHandle;
+    pipeline.layout_ = vkwPipeline->layout_;
     pipeline.pipeline_ = vkwPipeline;
     pipeline.properties_.pipelineDynamicStateFlags_ = 0;
 }
@@ -563,7 +562,6 @@ void Root::DefineMaterialTemplate(MaterialTemplateKey const& key, MaterialTempla
         perPassData.passKey_ = perPassDataDesc.passKey_;
         
         Pipeline& pipeline = FindPipeline(perPassDataDesc.pipelineKey_);
-        VKW::PipelineLayout* vkwPipelineLayout = layoutController_->GetPipelineLayout(pipeline.layoutHandle_);
         
         perPassData.pipelineKey_ = perPassDataDesc.pipelineKey_;
 
@@ -626,7 +624,7 @@ void Root::InitializeSetsOwner(DescriptorSetsOwner& owner, std::uint32_t setsCou
     for (std::uint32_t i = 0; i < setLayoutsCount; ++i) {
         SetLayout const& setLayout = FindSetLayout(setLayoutKeys[i]);
 
-        VKW::ProxySetHandle proxySet = resourceProxy_->CreateSet(setLayout.vkwSetLayoutHandle_);
+        VKW::ProxySetHandle proxySet = resourceProxy_->CreateSet(setLayout.vkwSetLayout_);
         owner.slots_[i].descriptorSet_.setLayoutKey_ = setLayoutKeys[i];
         owner.slots_[i].descriptorSet_.proxyDescriptorSetHandle_ = proxySet;
 

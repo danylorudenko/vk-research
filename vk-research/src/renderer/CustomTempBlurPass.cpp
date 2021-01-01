@@ -149,7 +149,7 @@ CustomTempBlurPass::CustomTempBlurPass(CustomTempBlurPassDesc const& desc)
 
 
     
-    blurDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(blurSetLayout_).vkwSetLayoutHandle_);
+    blurDescriptorSet_ = resourceProxy_->CreateSet(root_->FindSetLayout(blurSetLayout_).vkwSetLayout_);
     
     VKW::ProxyDescriptorWriteDesc blurSetDesc[5];
     for (std::uint32_t i = 0; i < framesCount; ++i) 
@@ -239,7 +239,7 @@ void CustomTempBlurPass::Apply(std::uint32_t contextId, VKW::WorkerFrameCommandR
     Pipeline& blurFullPipeline = root_->FindPipeline(blurFullPipeline_);
     VKW::Pipeline* vkwBlurFastPipeline = root_->FindPipeline(blurFastPipeline_).pipeline_;
     VKW::Pipeline* vkwBlurFullPipeline = root_->FindPipeline(blurFullPipeline_).pipeline_;
-    VKW::PipelineLayout* vkwBlurFastPipelineLayout = descriptorLayoutController_->GetPipelineLayout(vkwBlurFastPipeline->layoutHandle);
+    VKW::PipelineLayout* vkwBlurFastPipelineLayout = vkwBlurFastPipeline->layout_;
 
 
     VKW::ImageView* sceneColorBufferView = root_->FindGlobalImage(sceneColorBuffer_, contextId);

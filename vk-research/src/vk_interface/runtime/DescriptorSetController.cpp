@@ -103,9 +103,8 @@ DescriptorSetController::~DescriptorSetController()
     }
 }
 
-DescriptorSetHandle DescriptorSetController::AllocDescriptorSet(DescriptorSetDesc const& desc)
+DescriptorSetHandle DescriptorSetController::AllocDescriptorSet(DescriptorSetLayout const* layout)
 {
-    DescriptorSetLayout* layout = layoutController_->GetDescriptorSetLayout(desc.layout_);
     VkDescriptorSetLayout vkLayout = layout->handle_;
 
     VkDescriptorSetAllocateInfo allocInfo;
@@ -120,7 +119,7 @@ DescriptorSetHandle DescriptorSetController::AllocDescriptorSet(DescriptorSetDes
 
     auto* result = new DescriptorSet{};
     result->handle_ = vkSet;
-    result->layout_ = desc.layout_;
+    result->layout_ = layout;
 
     descriptorSets_.emplace_back(result);
 

@@ -19,13 +19,6 @@ class BuffersProvider;
 class DescriptorLayoutController;
 
 
-struct DescriptorSetDesc
-{
-    DescriptorSetLayoutHandle layout_;
-};
-
-
-
 struct DescriptorSetControllerDesc
 {
     ImportTable* table_;
@@ -45,7 +38,7 @@ public:
     DescriptorSetController(DescriptorSetController&& rhs);
     DescriptorSetController& operator=(DescriptorSetController&& rhs);
 
-    DescriptorSetHandle AllocDescriptorSet(DescriptorSetDesc const& desc);
+    DescriptorSetHandle AllocDescriptorSet(DescriptorSetLayout const* layout);
     void ReleaseDescriptorSet(DescriptorSetHandle handle);
 
     DescriptorSet* GetDescriptorSet(DescriptorSetHandle handle);

@@ -23,11 +23,6 @@ struct DescriptorSetLayout
 
 };
 
-struct DescriptorSetLayoutHandle
-{
-    DescriptorSetLayout* layout_ = nullptr;
-};
-
 
 struct PipelineLayout
 {
@@ -35,13 +30,8 @@ struct PipelineLayout
 
     VkPipelineLayout handle_ = VK_NULL_HANDLE;
     std::uint32_t membersCount_;
-    DescriptorSetLayoutHandle setLayoutMembers_[MAX_PIPELINE_LAYOUT_MEMBERS];
+    DescriptorSetLayout* setLayoutMembers_[MAX_PIPELINE_LAYOUT_MEMBERS];
 
-};
-
-struct PipelineLayoutHandle
-{
-    PipelineLayout* layout_ = nullptr;
 };
 
 }

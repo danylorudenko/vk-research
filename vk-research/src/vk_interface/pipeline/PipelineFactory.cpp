@@ -87,8 +87,7 @@ Pipeline* PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& de
     static VkRect2D scissorRects[Pipeline::MAX_VIEWPORTS];
     static VkPipelineColorBlendAttachmentState colorBlendAttachmentInfo[RenderPass::MAX_ATTACHMENTS];
     
-    PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
-    PipelineLayout* layout = descriptorLayoutController_->GetPipelineLayout(layoutHandle);
+    PipelineLayout* layout = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
     RenderPass* renderPass = renderPassController_->GetRenderPass(desc.renderPass_);
 
     static VkGraphicsPipelineCreateInfo graphicsPipelineInfo;
@@ -344,7 +343,7 @@ Pipeline* PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& de
 
     auto* result = new Pipeline{};
     result->vkPipeline_ = vkPipeline;
-    result->layoutHandle = layoutHandle;
+    result->layout_ = layout;
 
     pipelines_.emplace_back(result);
 
@@ -354,8 +353,7 @@ Pipeline* PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& de
 Pipeline* PipelineFactory::CreateComputePipeline(ComputePipelineDesc const& desc)
 {
     ShaderModule* shaderModule = desc.shaderModule_;
-    PipelineLayoutHandle layoutHandle = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
-    PipelineLayout* layout = descriptorLayoutController_->GetPipelineLayout(layoutHandle);
+    PipelineLayout* layout = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
 
     VkComputePipelineCreateInfo pipelineInfo;
     pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -378,7 +376,7 @@ Pipeline* PipelineFactory::CreateComputePipeline(ComputePipelineDesc const& desc
 
     Pipeline* result = new Pipeline{};
     result->vkPipeline_ = pipeline;
-    result->layoutHandle = layoutHandle;
+    result->layout_ = layout;
 
     pipelines_.emplace_back(result);
     return result;
@@ -389,7 +387,7 @@ void PipelineFactory::DestroyPipeline(Pipeline* pipeline)
     auto it = std::find(pipelines_.begin(), pipelines_.end(), pipeline);
     assert(it != pipelines_.end() && "Can't delete the pipeline in VKW.");
 
-    descriptorLayoutController_->ReleasePipelineLayout(pipeline->layoutHandle);
+    descriptorLayoutController_->ReleasePipelineLayout(pipeline->layout_);
     table_->vkDestroyPipeline(device_->Handle(), pipeline->vkPipeline_, nullptr);
 
     pipelines_.erase(it);
