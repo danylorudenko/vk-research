@@ -66,7 +66,7 @@ Device::Device(DeviceDesc const& desc)
             for (auto i = 0u; i < validPhysicalDevices.size(); ++i) {
 
                 RequestDeviceProperties(validPhysicalDevices[i], *deviceProperties);
-                auto const isGPU = deviceProperties->properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+                bool const isGPU = deviceProperties->properties2.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
                 *deviceProperties = PhysicalDeviceProperties{};
                 
                 if (isGPU) {
@@ -85,7 +85,7 @@ Device::Device(DeviceDesc const& desc)
 
         if (physicalDevice_ != VK_NULL_HANDLE) {
             RequestDeviceProperties(physicalDevice_, physicalDeviceProperties_);
-            std::cout << "CHOSEN DEVICE: " << physicalDeviceProperties_.properties.deviceName << std::endl;
+            std::cout << "CHOSEN DEVICE: " << physicalDeviceProperties_.properties2.properties.deviceName << std::endl;
         }
         else {
             std::cout << "FATAL: Error initializing VKW::Device (cannot find valid VkPhysicalDevice)" << std::endl;
@@ -182,7 +182,7 @@ Device::Device(DeviceDesc const& desc)
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = VK_FLAGS_NONE;
-        createInfo.pEnabledFeatures = &physicalDeviceProperties_.features;
+        createInfo.pEnabledFeatures = &physicalDeviceProperties_.features2.features;
         createInfo.queueCreateInfoCount = static_cast<std::uint32_t>(queueCreateInfoVec.size());
         createInfo.pQueueCreateInfos = queueCreateInfoVec.data();
         createInfo.enabledLayerCount = 0;
@@ -236,9 +236,9 @@ Device::operator bool() const
     return device_ != VK_NULL_HANDLE;
 }
 
-bool Device::IsAPI11Supported() const
+bool Device::IsAPI12Supported() const
 {
-    return IsAPI11SupportedByPhysicalDevice(physicalDeviceProperties_.properties);
+    return IsAPI12SupportedByPhysicalDevice(physicalDeviceProperties_.properties2.properties);
 }
 
 void Device::PrintPhysicalDeviceFormatProperties(VkFormat format)
@@ -299,6 +299,7 @@ bool Device::IsPhysicalDeviceValid(
     bool supportsGraphics = false;
     bool supportsExtensions = true;
     bool supportsSurface = false;
+    bool supports12 = IsAPI12SupportedByPhysicalDevice(deviceProperties.properties2.properties);
 
     auto const& queueFamilyProperties = deviceProperties.queueFamilyProperties;
     for (auto i = 0u; i < queueFamilyProperties.size(); ++i) {
@@ -325,46 +326,63 @@ bool Device::IsPhysicalDeviceValid(
         supportsSurface = true;
     }
 
-    return supportsGraphics && supportsExtensions && supportsSurface;
+    return supportsGraphics && supportsExtensions && supportsSurface && supports12;
 }
 
 void Device::RequestDeviceProperties(
     VkPhysicalDevice targetDevice,
     VKW::Device::PhysicalDeviceProperties& deviceProperties)
 {
-    ToolSetMemZero(deviceProperties.properties);
+    ToolSetMemZero(deviceProperties.properties2);
     ToolSetMemZero(deviceProperties.memoryProperties2);
     ToolSetMemZero(deviceProperties.memoryBudgetProperties);
-    ToolSetMemZero(deviceProperties.features);
+    ToolSetMemZero(deviceProperties.vulkan12Properties);
+    ToolSetMemZero(deviceProperties.descriptorIndexingProperties);
+    ToolSetMemZero(deviceProperties.features2);
+    ToolSetMemZero(deviceProperties.vulkan12Features);
+    ToolSetMemZero(deviceProperties.descriptorIndexingFeatures);
     deviceProperties.queueFamilyProperties.clear();
     deviceProperties.extensionProperties.clear();
 
-    table_->vkGetPhysicalDeviceProperties(targetDevice, &deviceProperties.properties);
-    if (IsAPI11SupportedByPhysicalDevice(deviceProperties.properties))
-    {
-        deviceProperties.memoryBudgetProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
-        deviceProperties.memoryBudgetProperties.pNext = nullptr;
 
-        deviceProperties.memoryProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
-        deviceProperties.memoryProperties2.pNext = &deviceProperties.memoryBudgetProperties;
-        
-        table_->vkGetPhysicalDeviceMemoryProperties2(targetDevice, &deviceProperties.memoryProperties2);
-    }
-    else
-    {
-        table_->vkGetPhysicalDeviceMemoryProperties(targetDevice, &deviceProperties.memoryProperties2.memoryProperties);
-    }
+    deviceProperties.properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+    deviceProperties.properties2.pNext = &deviceProperties.vulkan12Properties;
 
-    table_->vkGetPhysicalDeviceFeatures(targetDevice, &deviceProperties.features);
+    deviceProperties.vulkan12Properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES;
+    deviceProperties.vulkan12Properties.pNext = &deviceProperties.descriptorIndexingProperties;
 
-    auto queuePropsCount = 0u;
+    deviceProperties.descriptorIndexingProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES;
+    deviceProperties.descriptorIndexingProperties.pNext = nullptr;
+
+    table_->vkGetPhysicalDeviceProperties2(targetDevice, &deviceProperties.properties2);
+
+
+    deviceProperties.memoryProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
+    deviceProperties.memoryProperties2.pNext = &deviceProperties.memoryBudgetProperties;
+
+    deviceProperties.memoryBudgetProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
+    deviceProperties.memoryBudgetProperties.pNext = nullptr;
+
+    table_->vkGetPhysicalDeviceMemoryProperties2(targetDevice, &deviceProperties.memoryProperties2);
+
+
+    deviceProperties.features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    deviceProperties.features2.pNext = &deviceProperties.vulkan12Features;
+
+    deviceProperties.vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+    deviceProperties.vulkan12Features.pNext = &deviceProperties.descriptorIndexingFeatures;
+
+    table_->vkGetPhysicalDeviceFeatures2(targetDevice, &deviceProperties.features2);
+
+
+    std::uint32_t queuePropsCount = 0u;
     table_->vkGetPhysicalDeviceQueueFamilyProperties(targetDevice, &queuePropsCount, nullptr);
     deviceProperties.queueFamilyProperties.resize(queuePropsCount);
     table_->vkGetPhysicalDeviceQueueFamilyProperties(targetDevice, &queuePropsCount, deviceProperties.queueFamilyProperties.data());
 
 #ifdef _WIN32
     deviceProperties.presentationFamilies.clear();
-    for (auto i = 0u; i < queuePropsCount; ++i) {
+    for (std::uint32_t i = 0u; i < queuePropsCount; ++i) {
         VkBool32 presentationSupport = table_->vkGetPhysicalDeviceWin32PresentationSupportKHR(targetDevice, i);
         if (presentationSupport == VK_TRUE) {
             deviceProperties.presentationFamilies.push_back(i);
@@ -372,18 +390,18 @@ void Device::RequestDeviceProperties(
     }
 #endif
 
-    auto extensionPropsCount = 0u;
+    std::uint32_t extensionPropsCount = 0u;
     VK_ASSERT(table_->vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, nullptr));
     deviceProperties.extensionProperties.resize(extensionPropsCount);
     VK_ASSERT(table_->vkEnumerateDeviceExtensionProperties(targetDevice, nullptr, &extensionPropsCount, deviceProperties.extensionProperties.data()));
 }
 
-bool Device::IsAPI11SupportedByPhysicalDevice(VkPhysicalDeviceProperties const& physicalDeviceProperties)
+bool Device::IsAPI12SupportedByPhysicalDevice(VkPhysicalDeviceProperties const& physicalDeviceProperties)
 {
     std::uint32_t const physicalDeviceApiVersion_MAJOR = VK_VERSION_MAJOR(physicalDeviceProperties.apiVersion);
     std::uint32_t const physicalDeviceApiVersion_MINOR = VK_VERSION_MINOR(physicalDeviceProperties.apiVersion);
 
-    if (physicalDeviceApiVersion_MAJOR >= 1 && physicalDeviceApiVersion_MINOR >= 1)
+    if (physicalDeviceApiVersion_MAJOR >= 1 && physicalDeviceApiVersion_MINOR >= 2)
         return true;
     else
         return false;
@@ -391,7 +409,7 @@ bool Device::IsAPI11SupportedByPhysicalDevice(VkPhysicalDeviceProperties const& 
 
 void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const& deviceProperties)
 {
-    auto const& properties = deviceProperties.properties;
+    auto const& properties = deviceProperties.properties2.properties;
     char const* deviceTypeStr = nullptr;
 
     switch (properties.deviceType)
@@ -547,7 +565,7 @@ void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const
     for (auto i = 0u; i < memoryProperties.memoryHeapCount; ++i) {
         std::cout << "\t\t\tHeap " << i << ": " << std::endl;
         std::cout << "\t\t\t\tsize: " << memoryProperties.memoryHeaps[i].size << std::endl;
-        if (IsAPI11SupportedByPhysicalDevice(properties))
+        if (IsAPI12SupportedByPhysicalDevice(properties))
         {
             std::cout << "\t\t\t\tbudget_EXT: " << memoryBudgetPropertiesEXT.heapBudget[i] << std::endl;
             std::cout << "\t\t\t\tusage_EXT: " << memoryBudgetPropertiesEXT.heapUsage[i] << std::endl;
@@ -599,7 +617,7 @@ void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const
     }
 
 
-    auto const& features = deviceProperties.features;
+    auto const& features = deviceProperties.features2.features;
 
     std::cout << "\tDevice Features:" << std::endl;
     std::cout << "\t\t" << "robustBufferAccess: " << features.robustBufferAccess << std::endl;
@@ -657,6 +675,59 @@ void Device::PrintPhysicalDeviceData(VKW::Device::PhysicalDeviceProperties const
     std::cout << "\t\t" << "sparseResidencyAliased: " << features.sparseResidencyAliased << std::endl;
     std::cout << "\t\t" << "variableMultisampleRate: " << features.variableMultisampleRate << std::endl;
     std::cout << "\t\t" << "inheritedQueries: " << features.inheritedQueries << std::endl << std::endl;
+
+    VkPhysicalDeviceVulkan12Features const& vulkan12Features = *((VkPhysicalDeviceVulkan12Features const*)deviceProperties.features2.pNext);
+    VkPhysicalDeviceDescriptorIndexingFeatures const& descriptorIndexingFeatures = *((VkPhysicalDeviceDescriptorIndexingFeatures const*)vulkan12Features.pNext);
+    std::cout << "\tDescriptor Indexing Feataures:" << std::endl;
+    std::cout << "\t\t" << "shaderInputAttachmentArrayDynamicIndexing: "        << descriptorIndexingFeatures.shaderInputAttachmentArrayDynamicIndexing << std::endl;
+    std::cout << "\t\t" << "shaderUniformTexelBufferArrayDynamicIndexing: "     << descriptorIndexingFeatures.shaderUniformTexelBufferArrayDynamicIndexing << std::endl;
+    std::cout << "\t\t" << "shaderStorageTexelBufferArrayDynamicIndexing: "     << descriptorIndexingFeatures.shaderStorageTexelBufferArrayDynamicIndexing << std::endl;
+    std::cout << "\t\t" << "shaderUniformBufferArrayNonUniformIndexing: "       << descriptorIndexingFeatures.shaderUniformBufferArrayNonUniformIndexing << std::endl;
+    std::cout << "\t\t" << "shaderSampledImageArrayNonUniformIndexing: "        << descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing << std::endl;
+    std::cout << "\t\t" << "shaderStorageBufferArrayNonUniformIndexing: "       << descriptorIndexingFeatures.shaderStorageBufferArrayNonUniformIndexing << std::endl;
+    std::cout << "\t\t" << "shaderStorageImageArrayNonUniformIndexing: "        << descriptorIndexingFeatures.shaderStorageImageArrayNonUniformIndexing << std::endl;
+    std::cout << "\t\t" << "shaderInputAttachmentArrayNonUniformIndexing: "     << descriptorIndexingFeatures.shaderInputAttachmentArrayNonUniformIndexing << std::endl;
+    std::cout << "\t\t" << "shaderUniformTexelBufferArrayNonUniformIndexing: "  << descriptorIndexingFeatures.shaderUniformTexelBufferArrayNonUniformIndexing << std::endl;
+    std::cout << "\t\t" << "shaderStorageTexelBufferArrayNonUniformIndexing: "  << descriptorIndexingFeatures.shaderStorageTexelBufferArrayNonUniformIndexing << std::endl;
+    std::cout << "\t\t" << "descriptorBindingUniformBufferUpdateAfterBind: "    << descriptorIndexingFeatures.descriptorBindingUniformBufferUpdateAfterBind << std::endl;
+    std::cout << "\t\t" << "descriptorBindingSampledImageUpdateAfterBind: "     << descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind << std::endl;
+    std::cout << "\t\t" << "descriptorBindingStorageImageUpdateAfterBind: "     << descriptorIndexingFeatures.descriptorBindingStorageImageUpdateAfterBind << std::endl;
+    std::cout << "\t\t" << "descriptorBindingStorageBufferUpdateAfterBind: "    << descriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind << std::endl;
+    std::cout << "\t\t" << "descriptorBindingUniformTexelBufferUpdateAfterBind: " << descriptorIndexingFeatures.descriptorBindingUniformTexelBufferUpdateAfterBind << std::endl;
+    std::cout << "\t\t" << "descriptorBindingStorageTexelBufferUpdateAfterBind: " << descriptorIndexingFeatures.descriptorBindingStorageTexelBufferUpdateAfterBind << std::endl;
+    std::cout << "\t\t" << "descriptorBindingUpdateUnusedWhilePending: "        << descriptorIndexingFeatures.descriptorBindingUpdateUnusedWhilePending << std::endl;
+    std::cout << "\t\t" << "descriptorBindingPartiallyBound: "                  << descriptorIndexingFeatures.descriptorBindingPartiallyBound << std::endl;
+    std::cout << "\t\t" << "descriptorBindingVariableDescriptorCount: "         << descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount << std::endl;
+    std::cout << "\t\t" << "runtimeDescriptorArray: "                           << descriptorIndexingFeatures.runtimeDescriptorArray << std::endl << std::endl;
+
+
+
+    VkPhysicalDeviceVulkan12Properties const& vulkan12Properties = *((VkPhysicalDeviceVulkan12Properties*)deviceProperties.properties2.pNext);
+    VkPhysicalDeviceDescriptorIndexingProperties const& descriptorIndexingProperties = *((VkPhysicalDeviceDescriptorIndexingProperties const*)vulkan12Properties.pNext);
+    std::cout << "\tDescriptor Indexing Properties:" << std::endl;
+    std::cout << "\t\t" << "maxUpdateAfterBindDescriptorsInAllPools: "              << descriptorIndexingProperties.maxUpdateAfterBindDescriptorsInAllPools << std::endl;
+    std::cout << "\t\t" << "shaderUniformBufferArrayNonUniformIndexingNative: "     << descriptorIndexingProperties.shaderUniformBufferArrayNonUniformIndexingNative << std::endl;
+    std::cout << "\t\t" << "shaderSampledImageArrayNonUniformIndexingNative: "      << descriptorIndexingProperties.shaderSampledImageArrayNonUniformIndexingNative << std::endl;
+    std::cout << "\t\t" << "shaderStorageBufferArrayNonUniformIndexingNative: "     << descriptorIndexingProperties.shaderStorageBufferArrayNonUniformIndexingNative << std::endl;
+    std::cout << "\t\t" << "shaderStorageImageArrayNonUniformIndexingNative: "      << descriptorIndexingProperties.shaderStorageImageArrayNonUniformIndexingNative << std::endl;
+    std::cout << "\t\t" << "shaderInputAttachmentArrayNonUniformIndexingNative: "   << descriptorIndexingProperties.shaderInputAttachmentArrayNonUniformIndexingNative << std::endl;
+    std::cout << "\t\t" << "robustBufferAccessUpdateAfterBind: "                    << descriptorIndexingProperties.robustBufferAccessUpdateAfterBind << std::endl;
+    std::cout << "\t\t" << "quadDivergentImplicitLod: "                             << descriptorIndexingProperties.quadDivergentImplicitLod << std::endl;
+    std::cout << "\t\t" << "maxPerStageDescriptorUpdateAfterBindSamplers: "         << descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindSamplers << std::endl;
+    std::cout << "\t\t" << "maxPerStageDescriptorUpdateAfterBindUniformBuffers: "   << descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindUniformBuffers << std::endl;
+    std::cout << "\t\t" << "maxPerStageDescriptorUpdateAfterBindStorageBuffers: "   << descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindStorageBuffers << std::endl;
+    std::cout << "\t\t" << "maxPerStageDescriptorUpdateAfterBindSampledImages: "    << descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindSampledImages << std::endl;
+    std::cout << "\t\t" << "maxPerStageDescriptorUpdateAfterBindStorageImages: "    << descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindStorageImages << std::endl;
+    std::cout << "\t\t" << "maxPerStageDescriptorUpdateAfterBindInputAttachments: " << descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindInputAttachments << std::endl;
+    std::cout << "\t\t" << "maxPerStageUpdateAfterBindResources: "                  << descriptorIndexingProperties.maxPerStageUpdateAfterBindResources << std::endl;
+    std::cout << "\t\t" << "maxDescriptorSetUpdateAfterBindSamplers: "              << descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindSamplers << std::endl;
+    std::cout << "\t\t" << "maxDescriptorSetUpdateAfterBindUniformBuffers: "        << descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindUniformBuffers << std::endl;
+    std::cout << "\t\t" << "maxDescriptorSetUpdateAfterBindUniformBuffersDynamic: " << descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindUniformBuffersDynamic << std::endl;
+    std::cout << "\t\t" << "maxDescriptorSetUpdateAfterBindStorageBuffers: "        << descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageBuffers << std::endl;
+    std::cout << "\t\t" << "maxDescriptorSetUpdateAfterBindStorageBuffersDynamic: " << descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageBuffersDynamic << std::endl;
+    std::cout << "\t\t" << "maxDescriptorSetUpdateAfterBindSampledImages: "         << descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindSampledImages << std::endl;
+    std::cout << "\t\t" << "maxDescriptorSetUpdateAfterBindStorageImages: "         << descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageImages << std::endl;
+    std::cout << "\t\t" << "maxDescriptorSetUpdateAfterBindInputAttachments: "      << descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindInputAttachments << std::endl << std::endl;
 }
 
 }

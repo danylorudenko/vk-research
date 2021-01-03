@@ -72,7 +72,7 @@ VkDeviceSize GetMemoryTypeBudget(Device const& device ,std::uint32_t memoryType)
 
     std::uint32_t const heapIndex = memoryProperties.memoryTypes[memoryType].heapIndex;
 
-    VkDeviceSize const typeHeapSize = device.IsAPI11Supported()
+    VkDeviceSize const typeHeapSize = device.IsAPI12Supported()
         ? budgetProperties->heapBudget[heapIndex] - budgetProperties->heapUsage[heapIndex]
         : memoryProperties.memoryHeaps[heapIndex].size;
 

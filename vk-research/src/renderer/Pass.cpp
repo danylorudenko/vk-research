@@ -375,7 +375,7 @@ void ComputePass::Begin(std::uint32_t contextId, VKW::WorkerFrameCommandReciever
             VKW::BufferView* view = root_->FindGlobalBuffer(usageData.resourceKey_, contextId);
             VKW::BufferResource* resource = view->providedBuffer_->bufferResource_;
 
-            auto& barrier = bufferBarriers[bufferBarriersCount++];
+            VkBufferMemoryBarrier& barrier = bufferBarriers[bufferBarriersCount++];
             barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
             barrier.pNext = nullptr;
             barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;

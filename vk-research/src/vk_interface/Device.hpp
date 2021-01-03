@@ -49,13 +49,17 @@ public:
 public:
     struct PhysicalDeviceProperties
     {
-        VkPhysicalDeviceProperties properties;
+        VkPhysicalDeviceProperties2 properties2;
         VkPhysicalDeviceMemoryProperties2 memoryProperties2;
         VkPhysicalDeviceMemoryBudgetPropertiesEXT memoryBudgetProperties;
+        VkPhysicalDeviceVulkan12Properties vulkan12Properties;
+        VkPhysicalDeviceDescriptorIndexingProperties descriptorIndexingProperties;
         std::vector<VkQueueFamilyProperties> queueFamilyProperties;
         std::vector<VkExtensionProperties> extensionProperties;
         std::vector<std::uint32_t> presentationFamilies;
-        VkPhysicalDeviceFeatures features;
+        VkPhysicalDeviceFeatures2 features2;
+        VkPhysicalDeviceVulkan12Features vulkan12Features;
+        VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures;
     };
 
 public:
@@ -76,11 +80,11 @@ public:
     VkPhysicalDevice PhysicalDeviceHandle() const;
     operator bool() const;
 
-    bool IsAPI11Supported() const;
+    bool IsAPI12Supported() const;
     void PrintPhysicalDeviceFormatProperties(VkFormat format);
 
 private:
-    static bool IsAPI11SupportedByPhysicalDevice(VkPhysicalDeviceProperties const& physicalDeviceProperties);
+    static bool IsAPI12SupportedByPhysicalDevice(VkPhysicalDeviceProperties const& physicalDeviceProperties);
 
     static void PrintPhysicalDeviceData(
         VKW::Device::PhysicalDeviceProperties const& deviceProperties);

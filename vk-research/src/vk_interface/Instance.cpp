@@ -69,7 +69,7 @@ Instance::Instance(InstanceDesc const& desc)
     applicationInfo.pNext = nullptr;
     applicationInfo.pApplicationName = "VulkanResearch";
     applicationInfo.pEngineName = "VulkanEngine";
-    applicationInfo.apiVersion = VK_MAKE_VERSION(1, 1, 0);
+    applicationInfo.apiVersion = VK_MAKE_VERSION(1, 2, 0);
     applicationInfo.applicationVersion = 0;
     applicationInfo.engineVersion = 0;
 
