@@ -14,6 +14,16 @@
     }                                               \
 }
 
+#if defined(DEBUG) || defined(_DEBUG)   
+#define DEBUG_ONLY(exp) exp
+#define RELEASE_ONLY(exp)
+#define DEBUG_OR_RELEASE(deb, rel) deb
+#else                                   
+#define DEBUG_ONLY(exp)
+#define RELEASE_ONLY(exp) exp
+#define DEBUG_OR_RELEASE(deb, rel) rel
+#endif
+
 #define STRING_LITERAL(value) #value
 
 template<typename T>

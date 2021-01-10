@@ -178,17 +178,20 @@ Device::Device(DeviceDesc const& desc)
             std::back_inserter(requiredExtensionsC_str), 
             [](auto const& string){ return string.c_str(); });
 
+        DisableHeavyPhysicalDeviceFeatures();
+
         VkDeviceCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        createInfo.pNext = nullptr;
+        createInfo.pNext = &physicalDeviceProperties_.features2;
         createInfo.flags = VK_FLAGS_NONE;
-        createInfo.pEnabledFeatures = &physicalDeviceProperties_.features2.features;
+        createInfo.pEnabledFeatures = nullptr;
         createInfo.queueCreateInfoCount = static_cast<std::uint32_t>(queueCreateInfoVec.size());
         createInfo.pQueueCreateInfos = queueCreateInfoVec.data();
         createInfo.enabledLayerCount = 0;
         createInfo.ppEnabledLayerNames = nullptr;
         createInfo.enabledExtensionCount = static_cast<std::uint32_t>(requiredExtensionsC_str.size());
         createInfo.ppEnabledExtensionNames = requiredExtensionsC_str.data();
+
 
         VK_ASSERT(table_->vkCreateDevice(physicalDevice_, &createInfo, nullptr, &device_));
 
@@ -295,11 +298,14 @@ Device::~Device()
 bool Device::IsPhysicalDeviceValid(
     VKW::Device::PhysicalDeviceProperties const& deviceProperties,
     std::vector<std::string> const& requiredExtensions)
-{    
+{
+    VkPhysicalDeviceVulkan12Features const& vulkan12Features = *((VkPhysicalDeviceVulkan12Features const*)deviceProperties.features2.pNext);
+
     bool supportsGraphics = false;
     bool supportsExtensions = true;
     bool supportsSurface = false;
     bool supports12 = IsAPI12SupportedByPhysicalDevice(deviceProperties.properties2.properties);
+    bool supportsDescriptorIndexing = vulkan12Features.descriptorIndexing;
 
     auto const& queueFamilyProperties = deviceProperties.queueFamilyProperties;
     for (auto i = 0u; i < queueFamilyProperties.size(); ++i) {
@@ -327,6 +333,30 @@ bool Device::IsPhysicalDeviceValid(
     }
 
     return supportsGraphics && supportsExtensions && supportsSurface && supports12;
+}
+
+void Device::DisableHeavyPhysicalDeviceFeatures()
+{
+    VkPhysicalDeviceVulkan12Features& vulkan12Features = *((VkPhysicalDeviceVulkan12Features*)physicalDeviceProperties_.features2.pNext);
+    VkPhysicalDeviceFeatures& features = physicalDeviceProperties_.features2.features;
+    
+    RELEASE_ONLY(features.robustBufferAccess        = VK_FALSE);
+
+    features.geometryShader                         = VK_FALSE;
+    features.tessellationShader                     = VK_FALSE;
+    features.textureCompressionETC2                 = VK_FALSE;
+    features.textureCompressionASTC_LDR             = VK_FALSE;
+    features.shaderTessellationAndGeometryPointSize = VK_FALSE;
+    features.sparseBinding                          = VK_FALSE;
+    features.sparseResidencyBuffer                  = VK_FALSE;
+    features.sparseResidencyImage2D                 = VK_FALSE;
+    features.sparseResidencyImage3D                 = VK_FALSE;
+    features.sparseResidency2Samples                = VK_FALSE;
+    features.sparseResidency4Samples                = VK_FALSE;
+    features.sparseResidency8Samples                = VK_FALSE;
+    features.sparseResidency16Samples               = VK_FALSE;
+    features.sparseResidencyAliased                 = VK_FALSE;
+
 }
 
 void Device::RequestDeviceProperties(
@@ -371,6 +401,9 @@ void Device::RequestDeviceProperties(
 
     deviceProperties.vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
     deviceProperties.vulkan12Features.pNext = &deviceProperties.descriptorIndexingFeatures;
+
+    deviceProperties.descriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+    deviceProperties.descriptorIndexingFeatures.pNext = nullptr;
 
     table_->vkGetPhysicalDeviceFeatures2(targetDevice, &deviceProperties.features2);
 

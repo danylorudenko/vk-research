@@ -94,6 +94,8 @@ private:
         std::vector<std::string> const& requiredExtensions
     );
 
+    void DisableHeavyPhysicalDeviceFeatures();
+
     void RequestDeviceProperties(
         VkPhysicalDevice targetDevice,
         VKW::Device::PhysicalDeviceProperties& deviceProperties
