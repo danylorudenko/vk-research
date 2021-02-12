@@ -1,23 +1,16 @@
 #pragma once
 
 #include <class_features\NonCopyable.hpp>
-#include <renderer\RenderWorkItem.hpp>
-#include <renderer\UniformBufferWriterProxy.hpp>
 #include <vk_interface\worker\WorkerFrame.hpp>
 #include <imgui\imgui.h>
 
 class Window;
 class InputSystem;
-namespace Render
-{
-class Root;
-}
 
 struct ImGuiHelperDesc
 {
     Window* window_;
     InputSystem* inputSystem_;
-    Render::Root* root_;
 };
 
 class ImGuiHelper
@@ -58,8 +51,8 @@ private:
 
     Window* window_;
     InputSystem* inputSystem_;
-    Render::Root* root_;
-    Render::RenderWorkItemHandle mainRenderWorkItem_;
-    Render::UniformBufferWriterProxy transformUniformBufferProxy_;
+    //Render::Root* root_;
+    //Render::RenderWorkItemHandle mainRenderWorkItem_;
+    //Render::UniformBufferWriterProxy transformUniformBufferProxy_;
     
 };

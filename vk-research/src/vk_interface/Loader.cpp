@@ -155,22 +155,6 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
-    VKW::ResourceRendererProxyDesc resourceRendererProxyDesc;
-    resourceRendererProxyDesc.table_ = table_.get();
-    resourceRendererProxyDesc.device_ = device_.get();
-    resourceRendererProxyDesc.memoryController_ = memoryController_.get();
-    resourceRendererProxyDesc.resourcesController_ = resourcesController_.get();
-    resourceRendererProxyDesc.buffersProvider_ = buffersProvider_.get();
-    resourceRendererProxyDesc.imagesProvider_ = imagesProvider_.get();
-    resourceRendererProxyDesc.layoutController_ = descriptorLayoutController_.get();
-    resourceRendererProxyDesc.descriptorSetsController_ = descriptorSetController_.get();
-    resourceRendererProxyDesc.renderPassController_ = renderPassController_.get();
-    resourceRendererProxyDesc.framebufferController_ = framebufferController_.get();
-    resourceRendererProxyDesc.framedDescriptorsHub_ = framedDescriptorsHub_.get();
-
-    resourceRendererProxy_ = std::make_unique<VKW::ResourceRendererProxy>(resourceRendererProxyDesc);
-
-
 
     VKW::ShaderModuleFactoryDesc shaderModuleFactoryDesc;
     shaderModuleFactoryDesc.table_ = table_.get();

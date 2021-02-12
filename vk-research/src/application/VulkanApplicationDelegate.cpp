@@ -1,12 +1,8 @@
 #include "VulkanApplicationDelegate.hpp"
 
 #include <vk_interface\Tools.hpp>
-#include <renderer\Root.hpp>
 
-#include <renderer\Material.hpp>
 #include <transform\TansformComponent.hpp>
-
-#include <renderer\CustomTempBlurPass.hpp>
 
 #include <utility>
 #include <cstdio>
@@ -39,24 +35,24 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
 
 
 
-    Render::RootDesc rootDesc;
-    rootDesc.loader_ = vulkanLoader_.get();
-    rootDesc.resourceProxy_ = vulkanLoader_->resourceRendererProxy_.get();
-    rootDesc.renderPassController_ = vulkanLoader_->renderPassController_.get();
-    rootDesc.imagesProvider_ = vulkanLoader_->imagesProvider_.get();
-    rootDesc.framedDescriptorsHub_ = vulkanLoader_->framedDescriptorsHub_.get();
-    rootDesc.layoutController_ = vulkanLoader_->descriptorLayoutController_.get();
-    rootDesc.shaderModuleFactory_ = vulkanLoader_->shaderModuleFactory_.get();
-    rootDesc.pipelineFactory_ = vulkanLoader_->pipelineFactory_.get();
-    rootDesc.presentationController_ = vulkanLoader_->presentationController_.get();
-    rootDesc.mainWorkerTemp_ = vulkanLoader_->workersProvider_->GetWorker(VKW::WorkerType::GRAPHICS_PRESENT, 0);
-
-    renderRoot_ = std::make_unique<Render::Root>(rootDesc);
+    //Render::RootDesc rootDesc;
+    //rootDesc.loader_ = vulkanLoader_.get();
+    //rootDesc.resourceProxy_ = vulkanLoader_->resourceRendererProxy_.get();
+    //rootDesc.renderPassController_ = vulkanLoader_->renderPassController_.get();
+    //rootDesc.imagesProvider_ = vulkanLoader_->imagesProvider_.get();
+    //rootDesc.framedDescriptorsHub_ = vulkanLoader_->framedDescriptorsHub_.get();
+    //rootDesc.layoutController_ = vulkanLoader_->descriptorLayoutController_.get();
+    //rootDesc.shaderModuleFactory_ = vulkanLoader_->shaderModuleFactory_.get();
+    //rootDesc.pipelineFactory_ = vulkanLoader_->pipelineFactory_.get();
+    //rootDesc.presentationController_ = vulkanLoader_->presentationController_.get();
+    //rootDesc.mainWorkerTemp_ = vulkanLoader_->workersProvider_->GetWorker(VKW::WorkerType::GRAPHICS_PRESENT, 0);
+    //
+    //renderRoot_ = std::make_unique<Render::Root>(rootDesc);
 
     ImGuiHelperDesc imguiHelperDesc;
     imguiHelperDesc.window_ = &mainWindow_;
     imguiHelperDesc.inputSystem_ = &inputSystem_;
-    imguiHelperDesc.root_ = renderRoot_.get();
+    //imguiHelperDesc.root_ = renderRoot_.get();
     imguiHelper_ = std::make_unique<ImGuiHelper>(imguiHelperDesc);
 }
 
@@ -119,8 +115,9 @@ void VulkanApplicationDelegate::update()
 
     inputSystem_.Update();
 
-    VKW::PresentationContext presentationContext = renderRoot_->AcquireNextPresentationContext();
-    std::uint32_t context = presentationContext.contextId_;
+    //VKW::PresentationContext presentationContext = renderRoot_->AcquireNextPresentationContext();
+    //std::uint32_t context = presentationContext.contextId_;
+    std::uint32_t context = 0;
     ////////////////////////////////////////////////////
     //
     if (imguiEnabled_)
@@ -151,25 +148,20 @@ void VulkanApplicationDelegate::update()
     cameraData.cameraEuler = glm::vec3(IMGUI_USER_CAMERA_ROT[0], IMGUI_USER_CAMERA_ROT[1], IMGUI_USER_CAMERA_ROT[2]);
     cameraData.cameraFowDegrees = 60.0f;
 
-    VKW::ImageView* colorBufferView = renderRoot_->FindGlobalImage(renderRoot_->GetDefaultSceneColorOutput(), 0);
-    VKW::ImageResource* colorBufferResource = colorBufferView->resource_;
-    cameraData.width = (float)colorBufferResource->width_;
-    cameraData.height = (float)colorBufferResource->height_;
-
     transformationSystem_.Update(context, cameraData);
 
-    VKW::WorkerFrameCommandReciever commandReciever = renderRoot_->BeginRenderGraph(presentationContext);
-    renderRoot_->IterateRenderGraph(presentationContext, commandReciever);
+    //VKW::WorkerFrameCommandReciever commandReciever = renderRoot_->BeginRenderGraph(presentationContext);
+    //renderRoot_->IterateRenderGraph(presentationContext, commandReciever);
 
     ImGuiUser(context);
 
 
     if (imguiEnabled_) {
         imguiHelper_->EndFrame(context);
-        imguiHelper_->Render(context, commandReciever);
+        //imguiHelper_->Render(context, commandReciever);
     }
 
-    renderRoot_->EndRenderGraph(presentationContext, commandReciever);
+    //renderRoot_->EndRenderGraph(presentationContext, commandReciever);
 }
 
 void VulkanApplicationDelegate::shutdown()
@@ -177,8 +169,63 @@ void VulkanApplicationDelegate::shutdown()
     
 }
 
+void VulkanApplicationDelegate::UnitInitRenderGraph()
+{
+    //glm::vec2 resolution{ swapchainResolutionX, swapchainResolutionY };
+    
+
+    // each pass should inherit from base pass class
+    // passes communicate with each other through bindings map
+    // the map is structure that stores graph resources by enumIDs
+    // this way each pass can request and output any resources through global system
+    //ForwardRenderPass* forwardPass = new ForwardRenderPass(resolution);
+
+
+    //RenderPass* blurPass    = renderer->CreateComputePass(resolution, { forwardResult }, { swapchain });
+
+
+}
+
+void VulkanApplicationDelegate::UnitInitMaterialLibrary()
+{
+
+}
+
+void VulkanApplicationDelegate::UnitParseRendererResources()
+{
+    // Data::Model dragonModel = ioManager_.ReadModel("LFS\\dragon.model");
+    // 
+    // Material* whiteDiffuseMaterial = materialLibrary->GetMaterial(Material::WhiteDiffuse);
+    // 
+    // RenderItem* dragonRenderItem = renderer->CreateForwardRenderItem(dragonModel, whiteDiffuseMaterial);
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+}
+
 void VulkanApplicationDelegate::FakeParseRendererResources()
 {
+    /*
     char constexpr uploadBufferKey[] = "uppl0";
     char constexpr vertexBufferKey[] = "vert0";
     char constexpr indexBufferKey[] = "ind0";
@@ -305,12 +352,12 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     dsInfo.backStencilState_ = {};
     dsInfo.frontStencilState_ = {};
 
-    VKW::DescriptorSetLayoutDesc setLayoutDesc;
-    setLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
-    setLayoutDesc.membersCount_ = 1;
-    setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    setLayoutDesc.membersDesc_[0].binding_ = 0;
-    renderRoot_->DefineSetLayout(setLayoutKey, setLayoutDesc);
+    //VKW::DescriptorSetLayoutDesc setLayoutDesc;
+    //setLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
+    //setLayoutDesc.membersCount_ = 1;
+    //setLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    //setLayoutDesc.membersDesc_[0].binding_ = 0;
+    //renderRoot_->DefineSetLayout(setLayoutKey, setLayoutDesc);
 
     Render::PipelineLayoutDesc layoutDesc;
     layoutDesc.staticMembersCount_ = 0;
@@ -383,16 +430,16 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     pipelinePlaneDesc.shaderStages_[1] = "bfShader";
 
 
-    VKW::DescriptorSetLayoutDesc planeSetLayoutDesc;
-    planeSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
-    planeSetLayoutDesc.membersCount_ = 3;
-    planeSetLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
-    planeSetLayoutDesc.membersDesc_[0].binding_ = 0;
-    planeSetLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
-    planeSetLayoutDesc.membersDesc_[1].binding_ = 1;
-    planeSetLayoutDesc.membersDesc_[2].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
-    planeSetLayoutDesc.membersDesc_[2].binding_ = 2;
-    renderRoot_->DefineSetLayout(planeSetLayoutKey, planeSetLayoutDesc);
+    //VKW::DescriptorSetLayoutDesc planeSetLayoutDesc;
+    //planeSetLayoutDesc.stage_ = VKW::DescriptorStage::RENDERING;
+    //planeSetLayoutDesc.membersCount_ = 3;
+    //planeSetLayoutDesc.membersDesc_[0].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
+    //planeSetLayoutDesc.membersDesc_[0].binding_ = 0;
+    //planeSetLayoutDesc.membersDesc_[1].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
+    //planeSetLayoutDesc.membersDesc_[1].binding_ = 1;
+    //planeSetLayoutDesc.membersDesc_[2].type_ = VKW::DESCRIPTOR_TYPE_TEXTURE;
+    //planeSetLayoutDesc.membersDesc_[2].binding_ = 2;
+    //renderRoot_->DefineSetLayout(planeSetLayoutKey, planeSetLayoutDesc);
 
     struct PlaneVertex
     {
@@ -583,6 +630,7 @@ void VulkanApplicationDelegate::FakeParseRendererResources()
     Render::RenderWorkItem* item = renderRoot_->FindRenderWorkItem(planePipeKey, planeRenderItemHandle);
     customData_.uniformProxies[CustomData::DRAGONS_COUNT] = Render::UniformBufferWriterProxy(renderRoot_.get(), item, 1, 0);
     customData_.transformComponents_[CustomData::DRAGONS_COUNT] = transformationSystem_.CreateTransformComponent(nullptr, &customData_.uniformProxies[CustomData::DRAGONS_COUNT]);
+    */
 
 }
 
@@ -596,6 +644,7 @@ void VulkanApplicationDelegate::InitImGui()
 
 void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
 {
+    /*
     if (imguiEnabled_) {
         IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
         
@@ -735,5 +784,6 @@ void VulkanApplicationDelegate::ImGuiUser(std::uint32_t context)
         //static bool p_open = true;
         //ImGui::ShowDemoWindow(&p_open);
     }
+    */
     
 }

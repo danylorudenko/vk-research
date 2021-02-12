@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glm\glm.hpp>
-#include <renderer\UniformBufferWriterProxy.hpp>
 
 namespace Transform
 {
@@ -14,7 +13,7 @@ struct TransformComponent
     glm::vec3 orientation_;
     glm::vec3 scale_;
 
-    Render::UniformBufferWriterProxy uniformProxy_;
+    //Render::UniformBufferWriterProxy uniformProxy_;
 };
 
 }

@@ -2,7 +2,6 @@
 
 #include <input\InputSystem.hpp>
 #include <system\Window.hpp>
-#include <renderer\Root.hpp>
 
 #include <glm\vec2.hpp>
 #include <glm\gtc\type_ptr.hpp>
@@ -29,19 +28,19 @@ char const* ImGuiHelper::IMGUI_VERTEX_BUFFER_KEY = "imvt";
 char const* ImGuiHelper::IMGUI_INDEX_BUFFER_KEY = "imin";
 
 ImGuiHelper::ImGuiHelper()
-    : root_{ nullptr }
+    //: root_{ nullptr }
 {
 }
 
 ImGuiHelper::ImGuiHelper(ImGuiHelperDesc const& desc)
     : window_{ desc.window_ }
     , inputSystem_{ desc.inputSystem_ }
-    , root_{ desc.root_ }
+    //, root_{ desc.root_ }
 {
 }
 
 ImGuiHelper::ImGuiHelper(ImGuiHelper&& rhs)
-    : root_{ nullptr }
+    //: root_{ nullptr }
 {
     operator=(std::move(rhs));
 }
@@ -50,8 +49,8 @@ ImGuiHelper& ImGuiHelper::operator=(ImGuiHelper&& rhs)
 {
     std::swap(window_, rhs.window_);
     std::swap(inputSystem_, rhs.inputSystem_);
-    std::swap(root_, rhs.root_);
-    std::swap(mainRenderWorkItem_, rhs.mainRenderWorkItem_);
+    //std::swap(root_, rhs.root_);
+    //std::swap(mainRenderWorkItem_, rhs.mainRenderWorkItem_);
 
     return *this;
 }
@@ -62,7 +61,7 @@ ImGuiHelper::~ImGuiHelper()
 }
 
 void ImGuiHelper::Init()
-{
+{/*
     VKW::ImageView* colorBufferView = root_->FindGlobalImage(root_->GetDefaultSceneColorOutput(), 0);
     VKW::ImageResource* colorBufferResource = colorBufferView->resource_;
 
@@ -259,10 +258,12 @@ void ImGuiHelper::Init()
 
 
     mainRenderWorkItem_ = root_->ConstructRenderWorkItem(IMGUI_PIPELINE_KEY, renderWorkItemDesc);
+    */
 }
 
 void ImGuiHelper::BeginFrame(std::uint32_t context)
 {
+    /*
     ImGuiIO& io = ImGui::GetIO();
     io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
 
@@ -297,15 +298,17 @@ void ImGuiHelper::BeginFrame(std::uint32_t context)
     }
 
     ImGui::NewFrame();
+    */
 }
 
 void ImGuiHelper::EndFrame(std::uint32_t context)
 {
-    ImGui::EndFrame();
+    //ImGui::EndFrame();
 }
 
 void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever commandReciever)
 {
+    /*
     ImGui::Render();
     ImDrawData* data = ImGui::GetDrawData();
 
@@ -377,5 +380,6 @@ void ImGuiHelper::Render(std::uint32_t context, VKW::WorkerFrameCommandReciever 
 
     root_->FlushBuffer(IMGUI_VERTEX_BUFFER_KEY, context);
     root_->FlushBuffer(IMGUI_INDEX_BUFFER_KEY, context);
+    */
 }
 

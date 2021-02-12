@@ -18,7 +18,6 @@
 #include <vk_interface\runtime\DescriptorSetController.hpp>
 #include <vk_interface\worker\WorkersProvider.hpp>
 #include <vk_interface\runtime\FramedDescriptorsHub.hpp>
-#include <vk_interface\ResourceRendererProxy.hpp>
 #include <vk_interface\runtime\ResourceBindingService.hpp>
 #include <vk_interface\pipeline\RenderPassController.hpp>
 #include <vk_interface\resources\FramebufferController.hpp>
@@ -74,8 +73,6 @@ public:
 
     std::unique_ptr<VKW::RenderPassController> renderPassController_;
     std::unique_ptr<VKW::FramebufferController> framebufferController_;
-
-    std::unique_ptr<VKW::ResourceRendererProxy> resourceRendererProxy_;
 
     std::unique_ptr<VKW::ShaderModuleFactory> shaderModuleFactory_;
     std::unique_ptr<VKW::PipelineFactory> pipelineFactory_;

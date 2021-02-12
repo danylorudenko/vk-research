@@ -105,7 +105,7 @@ struct GraphicsPipelineDesc
     std::uint32_t dynamicStatesFlags_; // PipelineDynamicStateFlags
     std::uint32_t blendingState_; // PipelineBlendingState
     
-    PipelineLayoutDesc* layoutDesc_;
+    PipelineLayout* layout_;
     RenderPassHandle renderPass_;
 };
 
@@ -113,7 +113,7 @@ struct ComputePipelineDesc
 {
     bool optimized_;
     ShaderModule* shaderModule_;
-    PipelineLayoutDesc* layoutDesc_;
+    PipelineLayout* layout_;
 };
 
 class PipelineFactory

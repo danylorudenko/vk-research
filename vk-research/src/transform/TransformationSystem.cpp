@@ -49,7 +49,8 @@ void TransformationSystem::Update(std::uint32_t context, TransformSystemCameraDa
 
         glm::mat4 mvp_mat = perspective_mat * view_mat * model_mat;
 
-        std::uint8_t* dst = reinterpret_cast<std::uint8_t*>(component->uniformProxy_.MappedPtr(context));
+        //std::uint8_t* dst = reinterpret_cast<std::uint8_t*>(component->uniformProxy_.MappedPtr(context));
+        std::uint8_t* dst = nullptr;
         std::memcpy(dst, glm::value_ptr(mvp_mat), sizeof(mvp_mat));
         dst += sizeof(mvp_mat);
 
@@ -63,7 +64,7 @@ void TransformationSystem::Update(std::uint32_t context, TransformSystemCameraDa
         std::memcpy(dst, glm::value_ptr(cameraData.cameraPos), sizeof(cameraPos));
         dst += sizeof(cameraPos);
 
-        component->uniformProxy_.Flush(context);
+        //component->uniformProxy_.Flush(context);
     }
 }
 
@@ -75,7 +76,7 @@ TransformComponent* TransformationSystem::CreateTransformComponent(TransformComp
     component->orientation_ = glm::vec3(0.0f, 0.0f, 0.0f);
     component->scale_ = glm::vec3(1.0f, 1.0f, 1.0f);
     if (uniformProxy != nullptr) {
-        component->uniformProxy_ = *uniformProxy;
+        //component->uniformProxy_ = *uniformProxy;
     }
 
     components_.emplace_back(component);

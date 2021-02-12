@@ -87,7 +87,6 @@ Pipeline* PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& de
     static VkRect2D scissorRects[Pipeline::MAX_VIEWPORTS];
     static VkPipelineColorBlendAttachmentState colorBlendAttachmentInfo[RenderPass::MAX_ATTACHMENTS];
     
-    PipelineLayout* layout = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
     RenderPass* renderPass = renderPassController_->GetRenderPass(desc.renderPass_);
 
     static VkGraphicsPipelineCreateInfo graphicsPipelineInfo;
@@ -96,7 +95,7 @@ Pipeline* PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& de
     graphicsPipelineInfo.flags = desc.optimized_ ? VK_FLAGS_NONE : VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT;
     graphicsPipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     graphicsPipelineInfo.basePipelineIndex = -1;
-    graphicsPipelineInfo.layout = layout->handle_;
+    graphicsPipelineInfo.layout = desc.layout_->handle_;
     graphicsPipelineInfo.renderPass = renderPass->handle_;
     graphicsPipelineInfo.subpass = 0;
 
@@ -343,7 +342,7 @@ Pipeline* PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& de
 
     auto* result = new Pipeline{};
     result->vkPipeline_ = vkPipeline;
-    result->layout_ = layout;
+    result->layout_ = desc.layout_;
 
     pipelines_.emplace_back(result);
 
@@ -353,7 +352,6 @@ Pipeline* PipelineFactory::CreateGraphicsPipeline(GraphicsPipelineDesc const& de
 Pipeline* PipelineFactory::CreateComputePipeline(ComputePipelineDesc const& desc)
 {
     ShaderModule* shaderModule = desc.shaderModule_;
-    PipelineLayout* layout = descriptorLayoutController_->CreatePipelineLayout(*desc.layoutDesc_);
 
     VkComputePipelineCreateInfo pipelineInfo;
     pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -366,7 +364,7 @@ Pipeline* PipelineFactory::CreateComputePipeline(ComputePipelineDesc const& desc
     pipelineInfo.stage.module = shaderModule->handle_;
     pipelineInfo.stage.pName = shaderModule->entryPoint_.c_str();
     pipelineInfo.stage.pSpecializationInfo = nullptr;
-    pipelineInfo.layout = layout->handle_;
+    pipelineInfo.layout = desc.layout_->handle_;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineInfo.basePipelineIndex = -1;
 
@@ -376,7 +374,7 @@ Pipeline* PipelineFactory::CreateComputePipeline(ComputePipelineDesc const& desc
 
     Pipeline* result = new Pipeline{};
     result->vkPipeline_ = pipeline;
-    result->layout_ = layout;
+    result->layout_ = desc.layout_;
 
     pipelines_.emplace_back(result);
     return result;
@@ -387,7 +385,6 @@ void PipelineFactory::DestroyPipeline(Pipeline* pipeline)
     auto it = std::find(pipelines_.begin(), pipelines_.end(), pipeline);
     assert(it != pipelines_.end() && "Can't delete the pipeline in VKW.");
 
-    descriptorLayoutController_->ReleasePipelineLayout(pipeline->layout_);
     table_->vkDestroyPipeline(device_->Handle(), pipeline->vkPipeline_, nullptr);
 
     pipelines_.erase(it);

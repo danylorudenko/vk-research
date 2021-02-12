@@ -12,34 +12,6 @@ namespace VKW
 class Device;
 class ImportTable;
 
-enum DescriptorStageBits : std::uint32_t
-{
-    COMPUTE         = 1,
-    VERTEX          = 1 << 1,
-    FRAGMENT        = 1 << 2,
-    RENDERING       = VERTEX | FRAGMENT,
-    ALL             = COMPUTE | RENDERING
-};
-
-using DescriptorStage = std::uint32_t;
-
-enum DescriptorType
-{
-    DESCRIPTOR_TYPE_TEXTURE,
-    DESCRIPTOR_TYPE_SAMPLER,
-    DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-    DESCRIPTOR_TYPE_STORAGE_IMAGE,
-    DESCRIPTOR_TYPE_STORAGE_BUFFER
-};
-
-struct LayoutDescriptorDesc
-{
-    DescriptorType  type_;
-    std::uint32_t   binding_;
-    std::uint32_t   count_    : 16;
-    std::uint32_t   unbound_  : 1;
-};
-
 struct DescriptorLayoutControllerDesc
 {
     ImportTable* table_;
@@ -50,6 +22,10 @@ class DescriptorLayoutController
     : public NonCopyable
 {
 public:
+
+    friend DescriptorLayoutDecorator;
+    friend PipelineLayoutDecorator;
+
     DescriptorLayoutController();
     DescriptorLayoutController(DescriptorLayoutControllerDesc const& desc);
 
@@ -59,38 +35,18 @@ public:
     ~DescriptorLayoutController();
 
 public:
-    class Decorator
-    {
-        friend DescriptorLayoutController;
+    DescriptorLayoutDecorator*  BeginLayout(DescriptorStage stages);
+    DescriptorSetLayout*        EndLayout(DescriptorLayoutDecorator* decorator);
 
-    public:
-        void Add(DescriptorType type, std::uint16_t count = 1);
-        void AddUnbound(DescriptorType type);
-        void End();
+    PipelineLayoutDecorator*    BeginPipelineLayout();
+    PipelineLayout*             EndPipelineLayout(PipelineLayoutDecorator* decorator);
 
-        void CopyFrom(Decorator const& other);
-
-
-        DescriptorStage stagesMask_;
-        std::uint16_t count_;
-        DescriptorSetLayoutMemberInfo info_[DescriptorSetLayout::MAX_SET_LAYOUT_MEMBERS];
-
-    };
-
-    Decorator*  BeginLayout(DescriptorStage stages);
-
-    DescriptorSetLayout* EndLayout(Decorator* decorator);
-    void ReleaseDescriptorSetLayout(DescriptorSetLayout* handle);
-
-    PipelineLayout* EndPendingPipelineLayout();
-    void ReleasePipelineLayout(PipelineLayout* handle);
+    void                        ReleaseLayout(DescriptorSetLayout* handle);
+    void                        ReleaseLayout(PipelineLayout* handle);
 
 private:
     ImportTable* table_;
     Device* device_;
-
-    bool isLayoutPending_;
-    std::queue<Decorator> pendingLayouts_;
 
     std::vector<DescriptorSetLayout*> setLayouts_;
     std::vector<PipelineLayout*> pipelineLayouts_;

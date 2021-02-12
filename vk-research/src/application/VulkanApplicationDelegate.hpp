@@ -12,18 +12,16 @@
 #include <system\DynamicLibrary.hpp>
 #include <input\InputSystem.hpp>
 
+#include <transform\TransformationSystem.hpp>
+
 #include <io\IOManager.hpp>
 #include <vk_interface\Loader.hpp>
-#include <renderer\Root.hpp>
-#include <renderer\RootDef.hpp>
-#include <renderer\UniformBufferWriterProxy.hpp>
-#include <transform\TransformationSystem.hpp>
 
 struct CustomData
 {
     static constexpr std::uint32_t DRAGONS_COUNT = 9;
 
-    Render::UniformBufferWriterProxy uniformProxies[DRAGONS_COUNT + 1];
+    //Render::UniformBufferWriterProxy uniformProxies[DRAGONS_COUNT + 1];
     Transform::TransformComponent* transformComponents_[DRAGONS_COUNT + 1];
 };
 
@@ -57,7 +55,7 @@ private:
     IOManager ioManager_;
 
     std::unique_ptr<VKW::Loader> vulkanLoader_;
-    std::unique_ptr<Render::Root> renderRoot_;
+    //std::unique_ptr<Render::Root> renderRoot_;
     std::unique_ptr<ImGuiHelper> imguiHelper_;
     bool imguiEnabled_;
 
@@ -69,4 +67,8 @@ private:
 
     // TODO
     void FakeParseRendererResources();
+
+    void UnitInitRenderGraph();
+    void UnitInitMaterialLibrary();
+    void UnitParseRendererResources();
 };
