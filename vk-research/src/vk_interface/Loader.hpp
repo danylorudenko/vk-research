@@ -18,7 +18,6 @@
 #include <vk_interface\runtime\DescriptorSetController.hpp>
 #include <vk_interface\worker\WorkersProvider.hpp>
 #include <vk_interface\runtime\FramedDescriptorsHub.hpp>
-#include <vk_interface\runtime\ResourceBindingService.hpp>
 #include <vk_interface\pipeline\RenderPassController.hpp>
 #include <vk_interface\resources\FramebufferController.hpp>
 #include <vk_interface\pipeline\PipelineFactory.hpp>

@@ -195,15 +195,6 @@ Loader::Loader(LoaderDesc const& desc)
     presentationControllerDesc.presentationWorker_ = workersProvider_->PresentWorker();
 
     presentationController_ = std::make_unique<VKW::PresentationController>(presentationControllerDesc);
-
-
-
-    VKW::ResourceBindingServiceDesc resourceBindingServiceDesc;
-    resourceBindingServiceDesc.table_ = table_.get();
-    resourceBindingServiceDesc.device_ = device_.get();
-    resourceBindingServiceDesc.framesCount_ = swapchain_->ImageCount();
-
-    //resourceBindingService_ = std::make_unique<VKW::ResourceBindingService>(resourceBindingServiceDesc);
 }
 
 Loader::~Loader()
