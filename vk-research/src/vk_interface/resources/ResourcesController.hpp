@@ -70,6 +70,8 @@ public:
     ImageResource* CreateImage(ImageDesc const& desc);
     void FreeImage(ImageResource* handle);
 
+    ImageResourceView* ViewImageAs(ImageResource* resource, );
+
     ~ResourcesController();
 
 private:
@@ -80,6 +82,7 @@ private:
 
     std::unordered_set<BufferResource*> buffers_;
     std::unordered_set<ImageResource*> images_;
+    std::unordered_set<ImageResourceView*> imageViews_;
 
 
 };
