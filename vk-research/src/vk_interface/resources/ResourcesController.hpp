@@ -5,6 +5,7 @@
 
 #include <vulkan\vulkan.h>
 #include <unordered_set>
+#include <unordered_map>
 
 namespace VKW
 {
@@ -70,9 +71,22 @@ public:
     ImageResource* CreateImage(ImageDesc const& desc);
     void FreeImage(ImageResource* handle);
 
-    ImageResourceView* ViewImageAs(ImageResource* resource, );
+    ImageResourceView* ViewImageAs(
+        ImageResource* resource, 
+        VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT, 
+        VkImageSubresourceRange const* subresource = nullptr, 
+        VkFormat const* format = nullptr, 
+        VkImageViewType const* type = nullptr, 
+        VkComponentMapping const* mapping = nullptr
+    );
+    void FreeImageView(ImageResourceView* view);
 
     ~ResourcesController();
+
+public:
+    VkImageViewType         ImageTypeToViewType(VkImageType type, std::uint32_t arrayLayers);
+    VkComponentMapping      DefaultComponentMapping();
+    VkImageSubresourceRange DefaultSubresourceRange(ImageResource const* resource, VkImageAspectFlags aspectFlags);
 
 private:
     ImportTable* table_;
@@ -82,10 +96,13 @@ private:
 
     std::unordered_set<BufferResource*> buffers_;
     std::unordered_set<ImageResource*> images_;
-    std::unordered_set<ImageResourceView*> imageViews_;
+    std::unordered_multimap<ImageResource*, ImageResourceView*> imageViewMap_;
 
 
 };
 
+VkImageViewType ImageTypeToViewType(VkImageType type, std::uint32_t arrayLayers);
+VkComponentMapping DefaultComponentMapping();
+VkImageSubresourceRange DefaultSubresourceRange(ImageResource const* resource, VkImageAspectFlags aspectFlags);
 
 }

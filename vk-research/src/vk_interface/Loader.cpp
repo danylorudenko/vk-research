@@ -111,12 +111,6 @@ Loader::Loader(LoaderDesc const& desc)
 
 
 
-    framedDescriptorsHub_ = std::make_unique<VKW::FramedDescriptorsHub>();
-    assert(swapchain_->ImageCount() <= CONSTANTS::MAX_FRAMES_BUFFERING);
-    framedDescriptorsHub_->framesCount_ = swapchain_->ImageCount();
-
-
-
     VKW::RenderPassControllerDesc renderPassControllerDesc;
     renderPassControllerDesc.table_ = table_.get();
     renderPassControllerDesc.device_ = device_.get();
@@ -153,6 +147,9 @@ Loader::Loader(LoaderDesc const& desc)
 
     descriptorSetController_ = std::make_unique<VKW::DescriptorSetController>(descriptorSetControllerDesc);
 
+
+
+    descriptorAllocator_ = std::make_unique<VKW::DescriptorAllocator>(table_.get(), device_.get());
 
 
 

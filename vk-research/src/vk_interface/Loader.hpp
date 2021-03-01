@@ -16,8 +16,8 @@
 #include <vk_interface\buffer\BuffersProvider.hpp>
 #include <vk_interface\pipeline\DescriptorLayoutController.hpp>
 #include <vk_interface\runtime\DescriptorSetController.hpp>
+#include <vk_interface\runtime\DescriptorAllocator.hpp>
 #include <vk_interface\worker\WorkersProvider.hpp>
-#include <vk_interface\runtime\FramedDescriptorsHub.hpp>
 #include <vk_interface\pipeline\RenderPassController.hpp>
 #include <vk_interface\resources\FramebufferController.hpp>
 #include <vk_interface\pipeline\PipelineFactory.hpp>
@@ -68,7 +68,8 @@ public:
     std::unique_ptr<VKW::DescriptorLayoutController> descriptorLayoutController_;
     std::unique_ptr<VKW::DescriptorSetController> descriptorSetController_;
 
-    std::unique_ptr<VKW::FramedDescriptorsHub> framedDescriptorsHub_;
+    std::unique_ptr<VKW::DescriptorAllocator> descriptorAllocator_;
+
 
     std::unique_ptr<VKW::RenderPassController> renderPassController_;
     std::unique_ptr<VKW::FramebufferController> framebufferController_;
@@ -79,10 +80,6 @@ public:
     std::unique_ptr<VKW::WorkersProvider> workersProvider_;
 
     std::unique_ptr<VKW::PresentationController> presentationController_;
-
-
-    //std::unique_ptr<VKW::ResourceBindingService> resourceBindingService_;
-
 };
 
 }

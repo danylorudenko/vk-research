@@ -37,6 +37,7 @@ ResourcesController& ResourcesController::operator=(ResourcesController&& rhs)
 
     std::swap(buffers_, rhs.buffers_);
     std::swap(images_, rhs.images_);
+    std::swap(imageViewMap_, rhs.imageViewMap_);
     
     return *this;
 }
@@ -191,7 +192,7 @@ ImageResource* ResourcesController::CreateImage(ImageDesc const& desc)
     MemoryRegion memoryRegion = memoryController_->AllocateMemoryRegion(memoryDesc);
     VK_ASSERT(table_->vkBindImageMemory(device_->Handle(), vkImage, memoryRegion.page_->deviceMemory_, memoryRegion.offset_));
 
-    ImageResource* imageResource = new ImageResource{ vkImage, desc.format_, desc.width_, desc.height_, memoryRegion };
+    ImageResource* imageResource = new ImageResource{ vkImage, desc.format_, desc.width_, desc.height_, memoryRegion, info };
     images_.emplace(imageResource);
 
     return imageResource;
@@ -213,10 +214,110 @@ void ResourcesController::FreeImage(ImageResource* image)
     auto imageIt = images_.find(image);
     assert(imageIt != images_.end() && "Can't free ImageResource");
 
+    auto views = imageViewMap_.equal_range(image);
+    for (auto i = views.first; i != views.second; ++i)
+    {
+        table_->vkDestroyImageView(device_->Handle(), i->second->handle_, nullptr);
+        delete i->second;
+    }
+    imageViewMap_.erase(views.first, views.second);
+
     table_->vkDestroyImage(device_->Handle(), image->handle_, nullptr);
     delete image;
 
     images_.erase(imageIt);
+}
+
+VkImageViewType ResourcesController::ImageTypeToViewType(VkImageType type, std::uint32_t arrayLayers)
+{
+    assert(arrayLayers > 0);
+    
+    if (arrayLayers > 1)
+    {
+        switch (type)
+        {
+        case VK_IMAGE_TYPE_1D:
+            return VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+        case VK_IMAGE_TYPE_2D:
+            return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+        case VK_IMAGE_TYPE_3D: 
+        default:
+            return VK_IMAGE_VIEW_TYPE_MAX_ENUM;
+        }
+    }
+    else
+    {
+        switch (type)
+        {
+        case VK_IMAGE_TYPE_1D:
+            return VK_IMAGE_VIEW_TYPE_1D;
+        case VK_IMAGE_TYPE_2D:
+            return VK_IMAGE_VIEW_TYPE_2D;
+        case VK_IMAGE_TYPE_3D:
+            return VK_IMAGE_VIEW_TYPE_3D;
+        default:
+            return VK_IMAGE_VIEW_TYPE_MAX_ENUM;
+        }
+    }
+}
+
+VkComponentMapping ResourcesController::DefaultComponentMapping()
+{
+    return VkComponentMapping{ VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+}
+
+VkImageSubresourceRange ResourcesController::DefaultSubresourceRange(ImageResource const* resource, VkImageAspectFlags aspectFlags)
+{
+    VkImageSubresourceRange range;
+
+    range.aspectMask = aspectFlags;
+    range.baseArrayLayer = 0;
+    range.baseMipLevel = 0;
+    range.layerCount = resource->createInfo_.arrayLayers;
+    range.levelCount = resource->createInfo_.mipLevels;
+
+    return range;
+}
+
+ImageResourceView* ResourcesController::ViewImageAs(ImageResource* resource, VkImageAspectFlags aspectFlags, VkImageSubresourceRange const* subresource, VkFormat const* format, VkImageViewType const* type, VkComponentMapping const* mapping)
+{
+    VkImageViewCreateInfo viewCreateInfo;
+    viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewCreateInfo.pNext = nullptr;
+    viewCreateInfo.image = resource->handle_;
+    viewCreateInfo.format = format ? *format : resource->createInfo_.format;
+    viewCreateInfo.viewType = type ? *type : ImageTypeToViewType(resource->createInfo_.imageType, resource->createInfo_.arrayLayers);
+    viewCreateInfo.components = mapping ? *mapping : DefaultComponentMapping();
+    viewCreateInfo.flags = VK_FLAGS_NONE;
+    viewCreateInfo.subresourceRange = subresource ? *subresource : DefaultSubresourceRange(resource, aspectFlags);
+
+    VkImageView handle = VK_NULL_HANDLE;
+    VK_ASSERT(table_->vkCreateImageView(device_->Handle(), &viewCreateInfo, nullptr, &handle));
+
+    ImageResourceView* view = new ImageResourceView{ handle , viewCreateInfo, resource };
+
+    imageViewMap_.emplace(resource, view);
+
+    return view;
+}
+
+void ResourcesController::FreeImageView(ImageResourceView* view)
+{
+    auto parentViews = imageViewMap_.equal_range(view->parentResource_);
+    assert(parentViews.first != imageViewMap_.end() && "Image view has no parent resource.");
+    
+    auto viewPair = parentViews.first;
+    while (viewPair != parentViews.second)
+    {
+        if(viewPair->second == view)
+            break;
+
+        ++viewPair;
+    }
+
+    table_->vkDestroyImageView(device_->Handle(), view->handle_, nullptr);
+    delete view;
+    imageViewMap_.erase(viewPair);
 }
 
 }

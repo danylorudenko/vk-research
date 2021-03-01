@@ -32,34 +32,37 @@ struct SubbufferResource
 
 struct ImageResource
 {
-    ImageResource(VkImage handle, VkFormat format, std::uint32_t width, std::uint32_t height, MemoryRegion const& memory);
+    ImageResource(VkImage handle, VkFormat format, std::uint32_t width, std::uint32_t height, MemoryRegion const& memory, VkImageCreateInfo const& createInfo);
 
-    VkImage         handle_ = VK_NULL_HANDLE;
-    VkFormat        format_ = VK_FORMAT_UNDEFINED;
-    std::uint32_t   width_  = 0;
-    std::uint32_t   height_ = 0;
-    MemoryRegion    memory_;
+    VkImage             handle_ = VK_NULL_HANDLE;
+    VkFormat            format_ = VK_FORMAT_UNDEFINED;
+    std::uint32_t       width_  = 0;
+    std::uint32_t       height_ = 0;
+    MemoryRegion        memory_;
+    VkImageCreateInfo   createInfo_;
 
     MemoryPage* GetMemoryPage() const;
 };
 
 struct ImageResourceView
 {
-    ImageResourceView(VkImageView handle, VkImageViewType type, VkFormat format, VkComponentMapping const& componentMapping, VkImageSubresourceRange const& subresourceRange, ImageResource* parentResource);
+    ImageResourceView(VkImageView handle, VkImageViewCreateInfo const& createInfo, ImageResource* parentResource);
 
     VkImageView             handle_         = VK_NULL_HANDLE;
-    VkImageViewType         type_           = VK_IMAGE_VIEW_TYPE_MAX_ENUM;
-    VkFormat                format_         = VK_FORMAT_UNDEFINED;
-    VkComponentMapping      componentMapping_;
-    VkImageSubresourceRange subresourceRange_;
+    VkImageViewCreateInfo   createInfo_;
     ImageResource*          parentResource_ = nullptr;
 
-    MemoryRegion*   GetMemoryRegion() const;
-    MemoryPage*     GetMemoryPage() const;
-    VkImage         GetImageHandle() const;
-    VkFormat        GetImageFormat() const;
-    std::uint32_t   GetImageWidth() const;
-    std::uint32_t   GetImageHeight() const;
+    inline VkFormat        GetFormat() const        { return createInfo_.format; }
+    inline VkImageViewType GetType() const          { return createInfo_.viewType; };
+    inline std::uint32_t   GetMipCount() const      { return createInfo_.subresourceRange.levelCount; }
+    inline std::uint32_t   GetLayerCount() const    { return createInfo_.subresourceRange.layerCount; }
+    
+    inline MemoryRegion*   GetMemoryRegion() const  { return &parentResource_->memory_; }
+    inline MemoryPage*     GetMemoryPage() const    { return parentResource_->GetMemoryPage(); }
+    inline VkImage         GetImageHandle() const   { return parentResource_->handle_; }
+    inline VkFormat        GetImageFormat() const   { return parentResource_->format_; }
+    inline std::uint32_t   GetImageWidth() const    { return parentResource_->width_; }
+    inline std::uint32_t   GetImageHeight() const   { return parentResource_->height_; }
 };
 
 }

@@ -33,21 +33,7 @@ VulkanApplicationDelegate::VulkanApplicationDelegate(HINSTANCE instance, char co
 
     vulkanLoader_ = std::make_unique<VKW::Loader>(loaderDesc);
 
-
-
-    //Render::RootDesc rootDesc;
-    //rootDesc.loader_ = vulkanLoader_.get();
-    //rootDesc.resourceProxy_ = vulkanLoader_->resourceRendererProxy_.get();
-    //rootDesc.renderPassController_ = vulkanLoader_->renderPassController_.get();
-    //rootDesc.imagesProvider_ = vulkanLoader_->imagesProvider_.get();
-    //rootDesc.framedDescriptorsHub_ = vulkanLoader_->framedDescriptorsHub_.get();
-    //rootDesc.layoutController_ = vulkanLoader_->descriptorLayoutController_.get();
-    //rootDesc.shaderModuleFactory_ = vulkanLoader_->shaderModuleFactory_.get();
-    //rootDesc.pipelineFactory_ = vulkanLoader_->pipelineFactory_.get();
-    //rootDesc.presentationController_ = vulkanLoader_->presentationController_.get();
-    //rootDesc.mainWorkerTemp_ = vulkanLoader_->workersProvider_->GetWorker(VKW::WorkerType::GRAPHICS_PRESENT, 0);
-    //
-    //renderRoot_ = std::make_unique<Render::Root>(rootDesc);
+    renderer_ = std::make_unique<GFX::Renderer>();
 
     ImGuiHelperDesc imguiHelperDesc;
     imguiHelperDesc.window_ = &mainWindow_;

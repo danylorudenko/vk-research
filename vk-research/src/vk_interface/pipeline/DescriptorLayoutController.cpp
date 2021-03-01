@@ -119,37 +119,6 @@ DescriptorLayoutController::DescriptorLayoutController(DescriptorLayoutControlle
     : table_{ desc.table_ }
     , device_{ desc.device_ }
 {
-      VkDescriptorSetLayoutBinding binding;
-      binding.binding = 0;
-      binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-      binding.descriptorCount = 10 * 1000;
-      binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-      binding.pImmutableSamplers = nullptr;
-
-      VkDescriptorBindingFlags flag = 
-          VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT |         // can write descriptor after bound
-          VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT | // unknown size, must be last in set
-          VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |           // not all descriptors must be valid on the whole set (unless they're used)
-          VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT;// can update descriptors in set that is in execution (unless that particular descriptor is used right now)
-
-      VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlags;
-      bindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
-      bindingFlags.pNext = nullptr;
-      bindingFlags.bindingCount = 1;
-      bindingFlags.pBindingFlags = &flag;
-
-      VkDescriptorSetLayoutCreateInfo createInfo;
-      createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-      createInfo.pNext = &bindingFlags;
-      createInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
-      createInfo.bindingCount = 1;
-      createInfo.pBindings = &binding;
-
-      VkDescriptorSetLayout layoutHandle = VK_NULL_HANDLE;
-      VK_ASSERT(table_->vkCreateDescriptorSetLayout(device_->Handle(), &createInfo, nullptr, &layoutHandle));
-      
-      std::cout << "hello" << std::endl;
-
 }
 
 DescriptorLayoutController::DescriptorLayoutController(DescriptorLayoutController&& rhs)

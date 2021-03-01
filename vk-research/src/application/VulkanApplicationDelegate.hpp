@@ -8,6 +8,8 @@
 #include <application\Application.hpp>
 #include <application\ImGuiHelper.hpp>
 
+#include <gfx\Renderer.hpp>
+
 #include <system\Window.hpp>
 #include <system\DynamicLibrary.hpp>
 #include <input\InputSystem.hpp>
@@ -55,7 +57,7 @@ private:
     IOManager ioManager_;
 
     std::unique_ptr<VKW::Loader> vulkanLoader_;
-    //std::unique_ptr<Render::Root> renderRoot_;
+    std::unique_ptr<GFX::Renderer> renderer_;
     std::unique_ptr<ImGuiHelper> imguiHelper_;
     bool imguiEnabled_;
 
